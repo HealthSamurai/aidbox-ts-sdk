@@ -116,14 +116,21 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<"div"> & {
-    hideLabel?: boolean
-    hideIndicator?: boolean
-    indicator?: "line" | "dot" | "dashed"
-    nameKey?: string
-    labelKey?: string
-  }) {
+  ...props
+}: {
+  active?: boolean
+  payload?: any[]
+  label?: string
+  labelFormatter?: (value: any, payload: any[]) => React.ReactNode
+  labelClassName?: string
+  formatter?: (value: any, name: any, item: any, index: any, payload: any) => React.ReactNode
+  color?: string
+  hideLabel?: boolean
+  hideIndicator?: boolean
+  indicator?: "line" | "dot" | "dashed"
+  nameKey?: string
+  labelKey?: string
+} & React.ComponentProps<"div">) {
   const { config } = useChart()
 
   const tooltipLabel = React.useMemo(() => {
@@ -174,6 +181,7 @@ function ChartTooltipContent({
         "border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
         className
       )}
+      {...props}
     >
       {!nestLabel ? tooltipLabel : null}
       <div className="grid gap-1.5">
