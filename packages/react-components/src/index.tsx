@@ -1,2 +1,2 @@
 import './index.css'
-import './components/ui/button.tsx'
+export { Button, buttonVariants } from './components/ui/button'

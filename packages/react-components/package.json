@@ -1,11 +1,34 @@
 {
-  "name": "react-components",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@panthevm_original/react-components",
+  "private": false,
+  "version": "1.0.8",
+  "description": "React components library",
+  "main": "dist/react-components.umd.js",
+  "module": "./dist/react-components.js",
+  "types": "./dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "exports": {
+    ".": { 
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/react-components.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts", 
+        "default": "./dist/react-components.umd.js"
+      }
+    },
+    "./styles.css": {
+      "types": "./dist/types/styles.d.ts",
+      "default": "./dist/react-components.css"
+    }
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p tsconfig.build.json && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
