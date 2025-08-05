@@ -1,0 +1,9 @@
+@layer base {
+    :root {
+        {{lightThemeVars}};
+    }
+
+    .dark {
+        {{darkThemeVars}};
+    }
+}

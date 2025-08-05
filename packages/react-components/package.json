@@ -32,7 +32,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "sync-design-tokens": "node scripts/sync-design-tokens.js"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
