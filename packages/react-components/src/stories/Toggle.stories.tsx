@@ -69,7 +69,7 @@ export const Variants: Story = {
       <Toggle variant="default" aria-label="Bold">
         <Bold className="h-4 w-4" />
       </Toggle>
-      <Toggle variant="outline" aria-label="Italic">
+      <Toggle variant="secondary" aria-label="Italic">
         <Italic className="h-4 w-4" />
       </Toggle>
     </div>
@@ -202,7 +202,7 @@ export const MediaControls: Story = {
             <Toggle 
               pressed={isShuffled} 
               onPressedChange={setIsShuffled}
-              variant="outline"
+              variant="secondary"
               size="sm"
               aria-label="Shuffle"
             >
@@ -212,7 +212,7 @@ export const MediaControls: Story = {
             <Toggle 
               pressed={isPlaying} 
               onPressedChange={setIsPlaying}
-              variant="outline"
+              variant="secondary"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -221,7 +221,7 @@ export const MediaControls: Story = {
             <Toggle 
               pressed={isRepeating} 
               onPressedChange={setIsRepeating}
-              variant="outline"
+              variant="secondary"
               size="sm"
               aria-label="Repeat"
             >
@@ -233,7 +233,7 @@ export const MediaControls: Story = {
             <Toggle 
               pressed={isMuted} 
               onPressedChange={setIsMuted}
-              variant="outline"
+              variant="secondary"
               aria-label={isMuted ? "Unmute" : "Mute"}
             >
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -268,7 +268,7 @@ export const ViewModes: Story = {
             <Toggle 
               pressed={viewMode === 'grid'} 
               onPressedChange={() => setViewMode('grid')}
-              variant="outline"
+              variant="secondary"
               aria-label="Grid view"
             >
               <Grid className="h-4 w-4 mr-2" />
@@ -277,7 +277,7 @@ export const ViewModes: Story = {
             <Toggle 
               pressed={viewMode === 'list'} 
               onPressedChange={() => setViewMode('list')}
-              variant="outline"
+              variant="secondary"
               aria-label="List view"
             >
               <List className="h-4 w-4 mr-2" />
@@ -331,7 +331,7 @@ export const SocialActions: Story = {
             <Toggle 
               pressed={liked} 
               onPressedChange={setLiked}
-              variant="outline"
+              variant="secondary"
               aria-label="Like"
             >
               <Heart className={`h-4 w-4 mr-2 ${liked ? 'fill-current text-red-500' : ''}`} />
@@ -341,7 +341,7 @@ export const SocialActions: Story = {
             <Toggle 
               pressed={starred} 
               onPressedChange={setStarred}
-              variant="outline"
+              variant="secondary"
               aria-label="Star"
             >
               <Star className={`h-4 w-4 mr-2 ${starred ? 'fill-current text-yellow-500' : ''}`} />
@@ -353,7 +353,7 @@ export const SocialActions: Story = {
             <Toggle 
               pressed={bookmarked} 
               onPressedChange={setBookmarked}
-              variant="outline"
+              variant="secondary"
               aria-label="Bookmark"
             >
               <Bookmark className={`h-4 w-4 mr-2 ${bookmarked ? 'fill-current text-blue-500' : ''}`} />
@@ -363,7 +363,7 @@ export const SocialActions: Story = {
             <Toggle 
               pressed={upvoted} 
               onPressedChange={setUpvoted}
-              variant="outline"
+              variant="secondary"
               aria-label="Upvote"
             >
               <ThumbsUp className={`h-4 w-4 mr-2 ${upvoted ? 'fill-current text-green-500' : ''}`} />
@@ -407,7 +407,7 @@ export const SettingsToggles: Story = {
               <Toggle 
                 pressed={notifications} 
                 onPressedChange={setNotifications}
-                variant="outline"
+                variant="secondary"
                 aria-label="Toggle notifications"
               >
                 {notifications ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
@@ -421,7 +421,7 @@ export const SettingsToggles: Story = {
               <Toggle 
                 pressed={visible} 
                 onPressedChange={setVisible}
-                variant="outline"
+                variant="secondary"
                 aria-label="Toggle visibility"
               >
                 {visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -435,7 +435,7 @@ export const SettingsToggles: Story = {
               <Toggle 
                 pressed={locked} 
                 onPressedChange={setLocked}
-                variant="outline"
+                variant="secondary"
                 aria-label="Toggle lock"
               >
                 {locked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
@@ -449,7 +449,7 @@ export const SettingsToggles: Story = {
               <Toggle 
                 pressed={wifi} 
                 onPressedChange={setWifi}
-                variant="outline"
+                variant="secondary"
                 aria-label="Toggle WiFi"
               >
                 {wifi ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}

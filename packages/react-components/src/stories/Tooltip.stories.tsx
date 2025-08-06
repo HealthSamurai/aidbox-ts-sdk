@@ -55,7 +55,7 @@ export const Default: Story = {
   render: () => (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="outline">Hover</Button>
+        <Button variant="secondary">Hover</Button>
       </TooltipTrigger>
       <TooltipContent>
         <p>Add to library</p>
@@ -68,7 +68,7 @@ export const WithIcon: Story = {
   render: () => (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button size="icon" variant="outline">
+        <Button size="icon" variant="secondary">
           <Plus className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
@@ -85,7 +85,7 @@ export const Positions: Story = {
       <div></div>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline">Top</Button>
+          <Button variant="secondary">Top</Button>
         </TooltipTrigger>
         <TooltipContent side="top">
           <p>Tooltip on top</p>
@@ -95,7 +95,7 @@ export const Positions: Story = {
       
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline">Left</Button>
+          <Button variant="secondary">Left</Button>
         </TooltipTrigger>
         <TooltipContent side="left">
           <p>Tooltip on left</p>
@@ -104,7 +104,7 @@ export const Positions: Story = {
       <div></div>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline">Right</Button>
+          <Button variant="secondary">Right</Button>
         </TooltipTrigger>
         <TooltipContent side="right">
           <p>Tooltip on right</p>
@@ -114,7 +114,7 @@ export const Positions: Story = {
       <div></div>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline">Bottom</Button>
+          <Button variant="secondary">Bottom</Button>
         </TooltipTrigger>
         <TooltipContent side="bottom">
           <p>Tooltip on bottom</p>
@@ -130,7 +130,7 @@ export const ActionButtons: Story = {
     <div className="flex gap-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Edit className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -141,7 +141,7 @@ export const ActionButtons: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Copy className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -152,7 +152,7 @@ export const ActionButtons: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Download className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -163,7 +163,7 @@ export const ActionButtons: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Share className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -174,7 +174,7 @@ export const ActionButtons: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Trash className="h-4 w-4 text-destructive" />
           </Button>
         </TooltipTrigger>
@@ -191,7 +191,7 @@ export const WithKeyboardShortcuts: Story = {
     <div className="flex gap-2">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Copy className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -205,7 +205,7 @@ export const WithKeyboardShortcuts: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Edit className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
@@ -219,7 +219,7 @@ export const WithKeyboardShortcuts: Story = {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="icon" variant="outline">
+          <Button size="icon" variant="secondary">
             <Settings className="h-4 w-4" />
           </Button>
         </TooltipTrigger>

@@ -267,7 +267,7 @@ export const ContactCard: Story = {
                       <Mail className="mr-2 h-4 w-4" />
                       Email
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button size="sm" variant="secondary" className="flex-1">
                       <Phone className="mr-2 h-4 w-4" />
                       Call
                     </Button>

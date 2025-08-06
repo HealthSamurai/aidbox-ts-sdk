@@ -34,7 +34,7 @@ function PaginationContent({
 }
 
 function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="pagination-item" {...props} />
+  return <li class="hover:bg-accent rounded-md" data-slot="pagination-item" {...props} />
 }
 
 type PaginationLinkProps = {

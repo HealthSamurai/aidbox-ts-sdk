@@ -57,7 +57,7 @@ export const Default: Story = {
   render: () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">Open Sheet</Button>
+        <Button variant="secondary">Open Sheet</Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
@@ -94,7 +94,7 @@ export const Left: Story = {
   render: () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Menu className="h-4 w-4 mr-2" />
           Open Menu
         </Button>
@@ -135,7 +135,7 @@ export const Top: Story = {
   render: () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Search className="h-4 w-4 mr-2" />
           Search
         </Button>
@@ -162,7 +162,7 @@ export const Bottom: Story = {
   render: () => (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Filter className="h-4 w-4 mr-2" />
           Filters
         </Button>
@@ -185,7 +185,7 @@ export const Bottom: Story = {
           </div>
         </div>
         <SheetFooter>
-          <Button variant="outline" className="flex-1">Clear</Button>
+          <Button variant="secondary" className="flex-1">Clear</Button>
           <Button className="flex-1">Apply Filters</Button>
         </SheetFooter>
       </SheetContent>
@@ -206,7 +206,7 @@ export const ShoppingCart: Story = {
     return (
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" className="relative">
+          <Button variant="secondary" className="relative">
             <ShoppingCartIcon className="h-4 w-4 mr-2" />
             Cart
             <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
@@ -335,7 +335,7 @@ export const UserProfile: Story = {
           </div>
         </div>
         <SheetFooter>
-          <Button variant="outline" className="w-full">Sign Out</Button>
+          <Button variant="secondary" className="w-full">Sign Out</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
@@ -425,7 +425,7 @@ export const ContactForm: Story = {
             </div>
           </ScrollArea>
           <SheetFooter>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="secondary">Cancel</Button>
             <Button>Send Message</Button>
           </SheetFooter>
         </SheetContent>
@@ -447,7 +447,7 @@ export const ActivityFeed: Story = {
     return (
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" className="relative">
+          <Button variant="secondary" className="relative">
             <Bell className="h-4 w-4 mr-2" />
             Activity
             <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs">
@@ -482,7 +482,7 @@ export const ActivityFeed: Story = {
             </div>
           </ScrollArea>
           <SheetFooter>
-            <Button variant="outline" className="w-full">Mark All as Read</Button>
+            <Button variant="secondary" className="w-full">Mark All as Read</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>

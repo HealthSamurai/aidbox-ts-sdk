@@ -49,7 +49,7 @@ export const Default: Story = {
   render: () => (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline">Open popover</Button>
+        <Button variant="secondary">Open popover</Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
         <div className="grid gap-4">
@@ -147,7 +147,7 @@ export const UserProfile: Story = {
         <Separator className="my-4" />
         <div className="flex gap-2">
           <Button size="sm" className="flex-1">Follow</Button>
-          <Button size="sm" variant="outline">Message</Button>
+          <Button size="sm" variant="secondary">Message</Button>
         </div>
       </PopoverContent>
     </Popover>
@@ -163,7 +163,7 @@ export const NotificationSettings: Story = {
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="secondary" size="icon">
             <Bell className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
@@ -228,7 +228,7 @@ export const QuickActions: Story = {
   render: () => (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="secondary" size="icon">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
@@ -312,7 +312,7 @@ export const EventDetails: Story = {
     <div className="flex gap-4">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline">Team Meeting</Button>
+          <Button variant="secondary">Team Meeting</Button>
         </PopoverTrigger>
         <PopoverContent className="w-80">
           <div className="space-y-4">
@@ -347,7 +347,7 @@ export const EventDetails: Story = {
             </div>
             <div className="flex gap-2">
               <Button size="sm" className="flex-1">Join Meeting</Button>
-              <Button size="sm" variant="outline">Edit</Button>
+              <Button size="sm" variant="secondary">Edit</Button>
             </div>
           </div>
         </PopoverContent>

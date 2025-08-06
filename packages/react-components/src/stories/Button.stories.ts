@@ -9,6 +9,9 @@ const meta = {
   },
   tags: ['autodocs'],
   argTypes: {
+    disabled: {
+      control: 'boolean'
+    }
   },
   args: {
     children: 'Button'
@@ -21,41 +24,40 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
   args: {
     variant: "default",
-    children: "Button"
-  },
-};
-
-export const Secondary: Story = {
-  args: {
-    variant: "secondary",
-    children: "Button"
-  },
-};
-
-export const Link: Story = {
-  args: {
-    variant: "link",
-    children: "Button"
+    children: "Button",
+    disabled: false
   },
 };
 
 export const Destructive: Story = {
   args: {
     variant: "destructive",
-    children: "Button"
+    children: "Button",
+    disabled: false
   },
 };
 
-export const Outline: Story = {
+
+export const Secondary: Story = {
   args: {
-    variant: "outline",
-    children: "Button"
+    variant: "secondary",
+    children: "Button",
+    disabled: false
   },
 };
 
-export const Ghost: Story = {
+export const Tertiary: Story = {
   args: {
-    variant: "ghost",
-    children: "Button"
+    variant: "tertiary",
+    children: "Button",
+    disabled: false
+  },
+};
+
+export const Link: Story = {
+  args: {
+    variant: "link",
+    children: "Button",
+    disabled: false
   },
 };

@@ -33,7 +33,7 @@ export const Default: Story = {
   render: () => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Open Dialog</Button>
+        <Button variant="secondary">Open Dialog</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -50,7 +50,7 @@ export const Default: Story = {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="secondary">Cancel</Button>
           </DialogClose>
           <Button>Confirm</Button>
         </DialogFooter>
@@ -121,7 +121,7 @@ export const WithForm: Story = {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="secondary">Cancel</Button>
             </DialogClose>
             <DialogClose asChild>
               <Button onClick={handleSubmit}>Send Message</Button>
@@ -174,7 +174,7 @@ export const Confirmation: Story = {
             </div>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="secondary">Cancel</Button>
               </DialogClose>
               <DialogClose asChild>
                 <Button variant="destructive" onClick={handleDelete}>
@@ -200,7 +200,7 @@ export const Settings: Story = {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline">
+          <Button variant="secondary">
             <SettingsIcon className="mr-2 h-4 w-4" />
             Settings
           </Button>
@@ -268,7 +268,7 @@ export const Settings: Story = {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="secondary">Cancel</Button>
             </DialogClose>
             <DialogClose asChild>
               <Button>Save Changes</Button>
@@ -284,7 +284,7 @@ export const Information: Story = {
   render: () => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="secondary">
           <Info className="mr-2 h-4 w-4" />
           Show Info
         </Button>
@@ -332,7 +332,7 @@ export const WithoutCloseButton: Story = {
   render: () => (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Open Dialog (No Close Button)</Button>
+        <Button variant="secondary">Open Dialog (No Close Button)</Button>
       </DialogTrigger>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
@@ -350,7 +350,7 @@ export const WithoutCloseButton: Story = {
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Dismiss</Button>
+            <Button variant="secondary">Dismiss</Button>
           </DialogClose>
           <DialogClose asChild>
             <Button>Acknowledge</Button>

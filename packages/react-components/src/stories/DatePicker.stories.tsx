@@ -29,7 +29,7 @@ export const Default: Story = {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="secondary"
               className={cn(
                 'w-full justify-start text-left font-normal',
                 !date && 'text-muted-foreground'
@@ -81,7 +81,7 @@ export const WithPresets: Story = {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="secondary"
               className={cn(
                 'w-full justify-start text-left font-normal',
                 !date && 'text-muted-foreground'
@@ -139,7 +139,7 @@ export const DateRange: Story = {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="secondary"
               className={cn(
                 'w-full justify-start text-left font-normal',
                 !dateRange.from && 'text-muted-foreground'
@@ -185,7 +185,7 @@ export const WithClearButton: Story = {
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant="outline"
+              variant="secondary"
               className={cn(
                 'w-full justify-start text-left font-normal',
                 !date && 'text-muted-foreground'
@@ -249,7 +249,7 @@ export const FormExample: Story = {
                 <PopoverTrigger asChild>
                   <Button
                     id="start-date"
-                    variant="outline"
+                    variant="secondary"
                     className={cn(
                       'w-full justify-start text-left font-normal',
                       !startDate && 'text-muted-foreground'
@@ -277,7 +277,7 @@ export const FormExample: Story = {
                 <PopoverTrigger asChild>
                   <Button
                     id="end-date"
-                    variant="outline"
+                    variant="secondary"
                     className={cn(
                       'w-full justify-start text-left font-normal',
                       !endDate && 'text-muted-foreground'

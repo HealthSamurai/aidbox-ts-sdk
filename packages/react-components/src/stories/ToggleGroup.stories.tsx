@@ -81,7 +81,7 @@ export const Single: Story = {
 
 export const Outline: Story = {
   render: () => (
-    <ToggleGroup type="single" variant="outline" defaultValue="list">
+    <ToggleGroup type="single" variant="secondary" defaultValue="list">
       <ToggleGroupItem value="list" aria-label="List view">
         <List className="h-4 w-4" />
       </ToggleGroupItem>
@@ -100,7 +100,7 @@ export const Sizes: Story = {
     <div className="space-y-4">
       <div>
         <h4 className="mb-2 text-sm font-medium">Small</h4>
-        <ToggleGroup type="single" size="sm" variant="outline">
+        <ToggleGroup type="single" size="sm" variant="secondary">
           <ToggleGroupItem value="bold">
             <Bold className="h-4 w-4" />
           </ToggleGroupItem>
@@ -115,7 +115,7 @@ export const Sizes: Story = {
       
       <div>
         <h4 className="mb-2 text-sm font-medium">Default</h4>
-        <ToggleGroup type="single" variant="outline">
+        <ToggleGroup type="single" variant="secondary">
           <ToggleGroupItem value="bold">
             <Bold className="h-4 w-4" />
           </ToggleGroupItem>
@@ -130,7 +130,7 @@ export const Sizes: Story = {
       
       <div>
         <h4 className="mb-2 text-sm font-medium">Large</h4>
-        <ToggleGroup type="single" size="lg" variant="outline">
+        <ToggleGroup type="single" size="lg" variant="secondary">
           <ToggleGroupItem value="bold">
             <Bold className="h-4 w-4" />
           </ToggleGroupItem>
@@ -162,7 +162,7 @@ export const TextEditor: Story = {
             <label className="text-sm font-medium">Formatting</label>
             <ToggleGroup 
               type="multiple" 
-              variant="outline" 
+              variant="secondary" 
               value={formatting} 
               onValueChange={setFormatting}
             >
@@ -182,7 +182,7 @@ export const TextEditor: Story = {
             <label className="text-sm font-medium">Alignment</label>
             <ToggleGroup 
               type="single" 
-              variant="outline" 
+              variant="secondary" 
               value={alignment} 
               onValueChange={(value) => value && setAlignment(value)}
             >
@@ -239,7 +239,7 @@ export const MediaPlayer: Story = {
             <label className="text-sm font-medium">Playback Controls</label>
             <ToggleGroup 
               type="single" 
-              variant="outline" 
+              variant="secondary" 
               value={playbackState} 
               onValueChange={(value) => value && setPlaybackState(value)}
             >
@@ -262,7 +262,7 @@ export const MediaPlayer: Story = {
             <label className="text-sm font-medium">Volume</label>
             <ToggleGroup 
               type="single" 
-              variant="outline" 
+              variant="secondary" 
               value={volume} 
               onValueChange={(value) => value && setVolume(value)}
             >
@@ -303,7 +303,7 @@ export const ThemeSelector: Story = {
         <CardContent className="space-y-4">
           <ToggleGroup 
             type="single" 
-            variant="outline" 
+            variant="secondary" 
             value={theme} 
             onValueChange={(value) => value && setTheme(value)}
           >
@@ -345,7 +345,7 @@ export const DeviceSelector: Story = {
         <CardContent className="space-y-4">
           <ToggleGroup 
             type="multiple" 
-            variant="outline" 
+            variant="secondary" 
             value={devices} 
             onValueChange={setDevices}
           >
@@ -393,7 +393,7 @@ export const ContentTypes: Story = {
         <CardContent className="space-y-4">
           <ToggleGroup 
             type="multiple" 
-            variant="outline" 
+            variant="secondary" 
             value={contentTypes} 
             onValueChange={setContentTypes}
           >
@@ -442,7 +442,7 @@ export const Navigation: Story = {
         <CardContent className="space-y-4">
           <ToggleGroup 
             type="single" 
-            variant="outline" 
+            variant="secondary" 
             value={currentPage} 
             onValueChange={(value) => value && setCurrentPage(value)}
           >
@@ -476,7 +476,7 @@ export const Navigation: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <ToggleGroup type="multiple" variant="outline" disabled>
+    <ToggleGroup type="multiple" variant="secondary" disabled>
       <ToggleGroupItem value="bold" aria-label="Bold">
         <Bold className="h-4 w-4" />
       </ToggleGroupItem>

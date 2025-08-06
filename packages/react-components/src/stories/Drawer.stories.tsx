@@ -33,7 +33,7 @@ export const Default: Story = {
   render: () => (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="outline">Open Drawer</Button>
+        <Button variant="secondary">Open Drawer</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
@@ -51,7 +51,7 @@ export const Default: Story = {
         <DrawerFooter>
           <Button>Submit</Button>
           <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="secondary">Cancel</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -63,7 +63,7 @@ export const MobileNavigation: Story = {
   render: () => (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="secondary" size="icon">
           <Menu className="h-4 w-4" />
         </Button>
       </DrawerTrigger>
@@ -105,7 +105,7 @@ export const MobileNavigation: Story = {
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="secondary">Close</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -155,7 +155,7 @@ export const ShoppingCart: Story = {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     size="icon" 
                     className="h-8 w-8"
                     onClick={() => updateQuantity(item.id, -1)}
@@ -164,7 +164,7 @@ export const ShoppingCart: Story = {
                   </Button>
                   <span className="w-8 text-center">{item.quantity}</span>
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     size="icon" 
                     className="h-8 w-8"
                     onClick={() => updateQuantity(item.id, 1)}
@@ -186,7 +186,7 @@ export const ShoppingCart: Story = {
           <DrawerFooter>
             <Button className="w-full">Proceed to Checkout</Button>
             <DrawerClose asChild>
-              <Button variant="outline">Continue Shopping</Button>
+              <Button variant="secondary">Continue Shopping</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
@@ -206,7 +206,7 @@ export const UserProfile: Story = {
     return (
       <Drawer>
         <DrawerTrigger asChild>
-          <Button variant="outline">
+          <Button variant="secondary">
             <User className="mr-2 h-4 w-4" />
             Edit Profile
           </Button>
@@ -258,7 +258,7 @@ export const UserProfile: Story = {
           <DrawerFooter>
             <Button>Save Changes</Button>
             <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="secondary">Cancel</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
@@ -271,7 +271,7 @@ export const FromRight: Story = {
   render: () => (
     <Drawer direction="right">
       <DrawerTrigger asChild>
-        <Button variant="outline">Open from Right</Button>
+        <Button variant="secondary">Open from Right</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
@@ -309,7 +309,7 @@ export const FromRight: Story = {
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="secondary">Close</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -321,7 +321,7 @@ export const FromTop: Story = {
   render: () => (
     <Drawer direction="top">
       <DrawerTrigger asChild>
-        <Button variant="outline">Open from Top</Button>
+        <Button variant="secondary">Open from Top</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
@@ -341,7 +341,7 @@ export const FromTop: Story = {
                 </p>
                 <div className="flex space-x-2 mt-3">
                   <Button size="sm">Update Now</Button>
-                  <Button variant="outline" size="sm">Learn More</Button>
+                  <Button variant="secondary" size="sm">Learn More</Button>
                 </div>
               </div>
             </div>
@@ -349,7 +349,7 @@ export const FromTop: Story = {
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button variant="outline">Dismiss</Button>
+            <Button variant="secondary">Dismiss</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

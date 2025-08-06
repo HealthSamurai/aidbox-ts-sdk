@@ -1,8 +1,8 @@
 {
-	"name": "aidbox-ts-sdk",
-	"private": true,
-	"workspaces": [
-		"packages/*"
-	],
-	"packageManager": "pnpm@10.14.0"
+  "name": "aidbox-ts-sdk",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "packageManager": "pnpm@10.14.0"
 }

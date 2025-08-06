@@ -134,7 +134,7 @@ export const WithHelperText: Story = {
       <div className="space-y-2">
         <Label htmlFor="password">
           Password
-          <Badge variant="outline" className="text-xs">Min 8 characters</Badge>
+          <Badge variant="secondary" className="text-xs">Min 8 characters</Badge>
         </Label>
         <Input id="password" type="password" placeholder="Enter password" />
         <p className="text-xs text-muted-foreground">
@@ -280,7 +280,7 @@ export const ComplexForm: Story = {
         </div>
         
         <div className="flex justify-end space-x-2">
-          <Button variant="outline">Cancel</Button>
+          <Button variant="secondary">Cancel</Button>
           <Button>Save Changes</Button>
         </div>
       </CardContent>

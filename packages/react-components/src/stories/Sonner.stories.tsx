@@ -67,25 +67,25 @@ export const Types: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => toast.success('Successfully saved!')}
       >
         Success
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => toast.error('Something went wrong!')}
       >
         Error
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => toast.warning('Please check your input')}
       >
         Warning
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => toast.info('New update available')}
       >
         Info
@@ -98,7 +98,7 @@ export const WithDescription: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast.success('Profile updated', {
             description: 'Your profile has been successfully updated.',
@@ -108,7 +108,7 @@ export const WithDescription: Story = {
         Success with Description
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast.error('Failed to upload', {
             description: 'The file size exceeds the maximum limit of 10MB.',
@@ -125,7 +125,7 @@ export const WithActions: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast('File deleted', {
             description: 'Your file has been moved to trash.',
@@ -139,7 +139,7 @@ export const WithActions: Story = {
         With Action
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast('New message received', {
             description: 'You have a new message from John Doe.',
@@ -160,7 +160,7 @@ export const WithIcons: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast.success('Download completed', {
             description: 'Your file has been downloaded successfully.',
@@ -171,7 +171,7 @@ export const WithIcons: Story = {
         Custom Success Icon
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast.error('Upload failed', {
             description: 'Failed to upload file. Please try again.',
@@ -182,7 +182,7 @@ export const WithIcons: Story = {
         Custom Error Icon
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast('New notification', {
             description: 'You have 3 unread notifications.',
@@ -200,7 +200,7 @@ export const Duration: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast('Short message', {
             duration: 1000,
@@ -210,7 +210,7 @@ export const Duration: Story = {
         1 Second
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast('Medium message', {
             duration: 5000,
@@ -220,7 +220,7 @@ export const Duration: Story = {
         5 Seconds
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast('Persistent message', {
             duration: Infinity,
@@ -241,7 +241,7 @@ export const Loading: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => {
           const id = toast.loading('Uploading file...');
           
@@ -253,7 +253,7 @@ export const Loading: Story = {
         Loading → Success
       </Button>
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => {
           const id = toast.loading('Processing payment...');
           
@@ -280,7 +280,7 @@ export const Promise: Story = {
 
     return (
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() =>
           toast.promise(saveData, {
             loading: 'Saving data...',
@@ -305,7 +305,7 @@ export const ApplicationExamples: Story = {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast.success('Settings saved', {
@@ -319,7 +319,7 @@ export const ApplicationExamples: Story = {
           </Button>
           
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast('Profile updated', {
@@ -337,7 +337,7 @@ export const ApplicationExamples: Story = {
           </Button>
           
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast.success('Email sent', {
@@ -351,7 +351,7 @@ export const ApplicationExamples: Story = {
           </Button>
           
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast('Item deleted', {
@@ -373,7 +373,7 @@ export const ApplicationExamples: Story = {
         
         <div className="grid grid-cols-2 gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast('Added to favorites', {
@@ -386,7 +386,7 @@ export const ApplicationExamples: Story = {
           </Button>
           
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast('Added to bookmarks', {
@@ -399,7 +399,7 @@ export const ApplicationExamples: Story = {
           </Button>
           
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() =>
               toast('Message sent', {
@@ -413,7 +413,7 @@ export const ApplicationExamples: Story = {
           </Button>
           
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => {
               const id = toast.loading('Processing...');
@@ -500,7 +500,7 @@ export const MultipleToasts: Story = {
   render: () => (
     <div className="flex flex-wrap gap-2">
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => {
           toast.success('First notification');
           setTimeout(() => toast.info('Second notification'), 500);
@@ -511,7 +511,7 @@ export const MultipleToasts: Story = {
       </Button>
       
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => {
           toast.success('Success message');
           toast.error('Error message');
@@ -523,7 +523,7 @@ export const MultipleToasts: Story = {
       </Button>
       
       <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => toast.dismiss()}
       >
         Dismiss All

@@ -75,15 +75,15 @@ export const WithCard: Story = {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Email notifications</span>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="secondary" size="sm">Edit</Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Privacy settings</span>
-                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="secondary" size="sm">Edit</Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Two-factor authentication</span>
-                  <Button variant="outline" size="sm">Setup</Button>
+                  <Button variant="secondary" size="sm">Setup</Button>
                 </div>
               </div>
             </CardContent>

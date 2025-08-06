@@ -366,7 +366,7 @@ export const ComponentDocumentation: Story = {
           <div className="flex flex-wrap gap-2">
             <Button variant="default">Default</Button>
             <Button variant="secondary">Secondary</Button>
-            <Button variant="outline">Outline</Button>
+            <Button variant="secondary">Outline</Button>
             <Button variant="ghost">Ghost</Button>
           </div>
         </div>

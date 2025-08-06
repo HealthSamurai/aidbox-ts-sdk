@@ -52,7 +52,7 @@ export const AllVariants: Story = {
       <Badge>Default</Badge>
       <Badge variant="secondary">Secondary</Badge>
       <Badge variant="destructive">Destructive</Badge>
-      <Badge variant="outline">Outline</Badge>
+      <Badge variant="secondary">Outline</Badge>
     </div>
   ),
 };

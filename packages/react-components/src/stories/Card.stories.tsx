@@ -43,7 +43,7 @@ export const WithButton: Story = {
         <p>Get started by creating a new project.</p>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline">Cancel</Button>
+        <Button variant="secondary">Cancel</Button>
         <Button>Deploy</Button>
       </CardFooter>
     </Card>
