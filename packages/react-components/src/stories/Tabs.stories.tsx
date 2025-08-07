@@ -12,15 +12,24 @@ const meta: Meta<typeof Tabs> = {
     layout: 'centered',
   },
   tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      options: ['button', 'dashed'],
+      control: { type: 'select' },
+    },
+  },
 };
 
 export default meta;
 type Story = StoryObj<typeof Tabs>;
 
 export const Default: Story = {
-  render: () => (
-    <Tabs defaultValue="account" className="w-[400px]">
-      <TabsList className="grid w-full grid-cols-2">
+  args: {
+    variant: 'button',
+  },
+  render: (args) => (
+    <Tabs defaultValue="account">
+      <TabsList variant={args.variant}>
         <TabsTrigger value="account">Account</TabsTrigger>
         <TabsTrigger value="password">Password</TabsTrigger>
       </TabsList>
