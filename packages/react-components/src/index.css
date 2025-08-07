@@ -5,6 +5,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-text-primary: var(--color-neutral-900); 
+  --color-text-tertiary: var(--color-neutral-400);
+}
+
+
 @theme inline {
   --font-family-sans: "Inter", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);

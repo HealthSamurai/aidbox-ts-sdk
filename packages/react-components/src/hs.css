@@ -1,8 +1,7 @@
+
 @layer base {
   :root {
-    --color-primaryy: red;
-    /* --color-text-primary: var(--color-neutral-900); */
-    --color-text-tertiary: var(--color-neutral-400);
+
     --color-neutral-50: #fafafa;
     --color-neutral-100: #f5f5f6;
     --color-neutral-200: #ebecee;
@@ -14,6 +13,8 @@
     --color-neutral-800: #1e2938;
     --color-neutral-900: #111827;
     --color-neutral-950: #030712;
+
+
     --color-blue-5: #f8fbfe;
     --color-blue-10: #f4f8fd;
     --color-blue-20: #e9f2fc;
