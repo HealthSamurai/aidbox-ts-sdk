@@ -1,21 +1,28 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import type { Meta, StoryObj } from "@storybook/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const meta: Meta<typeof Tabs> = {
-  title: 'Components/Tabs',
+  title: "Components/Tabs",
   component: Tabs,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      options: ['button', 'dashed'],
-      control: { type: 'select' },
+      options: ["button", "dashed"],
+      control: { type: "select" },
     },
   },
 };
@@ -25,7 +32,7 @@ type Story = StoryObj<typeof Tabs>;
 
 export const Default: Story = {
   args: {
-    variant: 'button',
+    variant: "dashed",
   },
   render: (args) => (
     <Tabs defaultValue="account">
