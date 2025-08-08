@@ -2,11 +2,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./tokens.css";
+@import "./typography.css";
 
 @custom-variant dark (&:is(.dark *));
 
 /* Aliases here, light/dark theme specific */
+
 @theme {
+
   --color-text-primary: var(--color-neutral-900); 
     --color-text-primary-on-brand: var(--color-neutral-50); 
 
