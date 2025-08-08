@@ -30,6 +30,9 @@
   --color-text-success-primary: var(--color-green-500);
 
   --color-text-warning-primary: var(--color-yellow-500);
+  
+  --color-border-brand: var(--color-brand-500);
+
 
 }
 

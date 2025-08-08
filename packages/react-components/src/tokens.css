@@ -105,15 +105,15 @@
   --font-style-italic: italic;
   --font-style-not-italic: normal;
 
-  --font-weight-thin: 100px;
-  --font-weight-extralight: 200px;
-  --font-weight-light: 300px;
-  --font-weight-normal: 400px;
-  --font-weight-medium: 500px;
-  --font-weight-semibold: 600px;
-  --font-weight-bold: 700px;
-  --font-weight-extrabold: 800px;
-  --font-weight-black: 900px;
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
 
   --font-tracking-tighter: -0.800000011920929px;
   --font-tracking-tight: -0.4000000059604645px;
