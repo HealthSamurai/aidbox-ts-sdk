@@ -5,9 +5,32 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Aliases here, light/dark theme specific */
 @theme {
   --color-text-primary: var(--color-neutral-900); 
+    --color-text-primary-on-brand: var(--color-neutral-50); 
+
+  --color-text-secondary: var(--color-neutral-700);
+    --color-text-secondary-hover: var(--color-neutral-800);
+    --color-text-secondary-on-brand: var(--color-neutral-100);
+
   --color-text-tertiary: var(--color-neutral-400);
+    --color-text-tertiary-hover: var(--color-neutral-500);
+    --color-text-tertiary-on-brand: var(--color-neutral-200);
+
+  --color-text-disabled: var(--color-neutral-300);
+
+  --color-text-brand-primary: var(--color-brand-500);
+  
+  --color-text-brand-secondary: var(--color-brand-300);
+    --color-text-brand-secondary-hover: var(--color-brand-400);
+
+  --color-text-error-primary: var(--color-red-500);
+
+  --color-text-success-primary: var(--color-green-500);
+
+  --color-text-warning-primary: var(--color-yellow-500);
+
 }
 
 
@@ -51,7 +74,6 @@
 }
 
 :root {
-  --radius: var(--corner-corner-l);
   --background: var(--color-surface-0);
   --foreground: var(--color-elements-readable);
   --card: var(--color-surface-0);
