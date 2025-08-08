@@ -1,0 +1,34 @@
+{
+	"name": "@health-samurai/react-components",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"files": [
+		"dist",
+		"src"
+	],
+	"exports": {
+		".": "./dist/src/index.js"
+	},
+	"scripts": {
+		"build": "rm -rf dist && mkdir -p dist && copyfiles -e '**/*.ts' -e '**/*.tsx' 'src/**' dist && tsc -b --force && echo success",
+		"format": "biome format",
+		"format:check": "biome format",
+		"format:fix": "biome format --write",
+		"lint": "biome check",
+		"lint:check": "biome check",
+		"lint:fix": "biome check --write"
+	},
+	"dependencies": {
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0"
+	},
+	"devDependencies": {
+		"@types/node": "^24.2.0",
+		"@types/react": "^19.1.8",
+		"@types/react-dom": "^19.1.6",
+		"@vitejs/plugin-react-swc": "^3.10.2",
+		"typescript": "~5.8.3",
+		"vite": "^7.0.4"
+	}
+}
