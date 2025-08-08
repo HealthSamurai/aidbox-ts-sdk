@@ -2,8 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Calendar } from '@/components/ui/calendar';
 import * as React from 'react';
 
-// Import CSS for design tokens
-import '../hs.css';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<

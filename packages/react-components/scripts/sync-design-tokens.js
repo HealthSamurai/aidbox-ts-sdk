@@ -4,8 +4,8 @@ import fs from 'fs';
 import path from 'path';
 
 const DESIGN_TOKENS_DIR = './AidboxDesignTokens';
-const CSS_TEMPLATE_FILE = './hs.template.css';
-const RESULTING_CSS_FILE = './src/hs.css';
+const CSS_TEMPLATE_FILE = './src/template.css';
+const RESULTING_CSS_FILE = './src/tokens.css';
 
 const ALL_DESIGN_TOKENS = [
   {
