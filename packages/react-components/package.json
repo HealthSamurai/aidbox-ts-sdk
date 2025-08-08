@@ -8,10 +8,14 @@
 		"src"
 	],
 	"exports": {
-		".": "./dist/src/index.js"
+		".": "./dist/src/index.js",
+		"./bundle.css": "./dist/bundle.css",
+		"./css": "./dist/src/index.css",
+		"./deps.css": "./dist/src/deps.css",
+		"./full.css": "./dist/src/full.css"
 	},
 	"scripts": {
-		"build": "rm -rf dist && mkdir -p dist && copyfiles -e '**/*.ts' -e '**/*.tsx' 'src/**' dist && tsc -b --force && echo success",
+		"build": "rm -rf dist && mkdir -p dist && copyfiles -e '**/*.ts' -e '**/*.tsx' 'src/**' dist && tsc -b --force && tailwindcss --cwd ./src -i ./full.css -o ../dist/bundle.css && echo success",
 		"format": "biome format",
 		"format:check": "biome format",
 		"format:fix": "biome format --write",
@@ -24,10 +28,14 @@
 		"react-dom": "^19.1.0"
 	},
 	"devDependencies": {
+		"@tailwindcss/cli": "^4.1.11",
+		"@tailwindcss/vite": "^4.1.11",
 		"@types/node": "^24.2.0",
 		"@types/react": "^19.1.8",
 		"@types/react-dom": "^19.1.6",
 		"@vitejs/plugin-react-swc": "^3.10.2",
+		"copyfiles": "^2.4.1",
+		"tailwindcss": "^4.1.11",
 		"typescript": "~5.8.3",
 		"vite": "^7.0.4"
 	}

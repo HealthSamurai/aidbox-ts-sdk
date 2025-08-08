@@ -2,5 +2,7 @@ packages:
   - packages/*
 
 onlyBuiltDependencies:
+  - '@parcel/watcher'
   - '@swc/core'
+  - '@tailwindcss/oxide'
   - esbuild
