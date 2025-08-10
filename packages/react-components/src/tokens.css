@@ -1,6 +1,8 @@
 /* Base Figma variables */
 @theme {
 
+  --radius: 6px;
+
   --color-neutral-50: #fafafa;
   --color-neutral-100: #f5f5f6;
   --color-neutral-200: #ebecee;
@@ -25,17 +27,17 @@
   --color-brand-900: #4A0F08;
   --color-brand-950: #2E0A05;
 
-  --color-gray-50:  #FAFAFA;
-  --color-gray-100: #F5F5F5;
-  --color-gray-200: #E5E5E5;
-  --color-gray-300: #D4D4D4;
-  --color-gray-400: #A4A4A4;
-  --color-gray-500: #767676;
-  --color-gray-600: #575757;
-  --color-gray-700: #434343;
-  --color-gray-800: #292929;
-  --color-gray-900: #1A1A1A;
-  --color-gray-950: #0A0A0A;
+  --color-grey-50:  #FAFAFA;
+  --color-grey-100: #F5F5F5;
+  --color-grey-200: #E5E5E5;
+  --color-grey-300: #D4D4D4;
+  --color-grey-400: #A4A4A4;
+  --color-grey-500: #767676;
+  --color-grey-600: #575757;
+  --color-grey-700: #434343;
+  --color-grey-800: #292929;
+  --color-grey-900: #1A1A1A;
+  --color-grey-950: #0A0A0A;
 
   --color-red-50:  #FEF9F9;
   --color-red-100: #FFF6F5;
@@ -132,4 +134,109 @@
   --font-leading-10: 40px;
 
 
+
+  /* Shadcn style */
+  /* ------------------------------------------------------------------- */
+  --color-blue-5: #f8fbfe;
+  --color-blue-10: #f4f8fd;
+  --color-blue-20: #e9f2fc;
+  --color-blue-30: #d0e2f8;
+  --color-blue-40: #a7c9f3;
+  --color-blue-50: #86b5ef;
+  --color-blue-70: #045ac3;
+  --color-blue-80: #024391;
+  --color-blue-90: #053775;
+  --color-blue-100: #052040;
+  --color-blue-110: #05101e;
+  --color-blue-115: #040c13;
+  --color-blue-60-brand: #2278e1;
+  --color-red-5: #fef9f9;
+  --color-red-10: #fef6f5;
+  --color-red-20: #fdedeb;
+  --color-red-30: #f9d1cc;
+  --color-red-40: #f4a499;
+  --color-red-50: #ef7768;
+  --color-red-65: #d72710;
+  --color-red-70: #c31a03;
+  --color-red-80: #9b0b00;
+  --color-red-90: #7a0d00;
+  --color-red-100: #410800;
+  --color-red-110: #1f0000;
+  --color-red-115: #0e0909;
+  --color-red-60-brand: #ea4a35;
+  --color-yellow-5: #fffdf2;
+  --color-yellow-10: #fffbe6;
+  --color-yellow-20: #fff9d9;
+  --color-yellow-30: #fff4bf;
+  --color-yellow-40: #ffe97f;
+  --color-yellow-50: #ffdf40;
+  --color-yellow-70: #8f4e00;
+  --color-yellow-80: #773f00;
+  --color-yellow-90: #512600;
+  --color-yellow-100: #391700;
+  --color-yellow-110: #2c1300;
+  --color-yellow-115: #1f0800;
+  --color-yellow-60-brand: #ffd400;
+  --color-grey-0: #ffffff;
+  --color-grey-5: #f9f9f9;
+  --color-grey-10: #f5f5f6;
+  --color-grey-20: #ebecee;
+  --color-grey-30: #ccced3;
+  --color-grey-40: #b9bbc2;
+  --color-grey-50: #90959f;
+  --color-grey-55: #717684;
+  --color-grey-60: #4a5162;
+  --color-grey-70: #353d50;
+  --color-grey-80: #28303f;
+  --color-grey-90: #1d2331;
+  --color-grey-95: #161d28;
+  --color-grey-100: #121822;
+  --color-grey-110: #0c121b;
+  --color-green-60: #78b506;
+  --spacing-x1: 8px;
+  --spacing-x1point5: 12px;
+  --spacing-x2: 16px;
+  --spacing-x4: 32px;
+  --spacing-x6: 48px;
+  --spacing-x8: 64px;
+  --spacing-quarter: 2px;
+  --spacing-half: 4px;
+  --spacing-x12: 96px;
+  --spacing-x3: 24px;
+  --corner-corner-max: 999px;
+  --corner-corner-s: 4px;
+  --corner-corner-m: 6px;
+  --corner-corner-l: 8px;
+  --corner-corner-xs: 2px;
+  --color-elements-readable: var(--color-grey-90);
+  --color-cta: var(--color-blue-60-brand);
+  --color-critical-default: var(--color-red-65);
+  --color-elements-disabled: var(--color-grey-30);
+  --color-elements-assistive: var(--color-grey-55);
+  --color-surface-0: var(--color-grey-0);
+  --color-border-default: var(--color-grey-30);
+  --color-surface-selected: var(--color-grey-20);
+  --color-cta-hover: var(--color-blue-70);
+  --color-critical-hover: var(--color-red-70);
+  --color-surface-1: var(--color-grey-5);
+  --color-border-XS-critical: var(--color-red-50);
+  --color-border-XS-critical-hover: var(--color-red-40);
+  --color-elements-green: #6d9f0f;
+  --color-elements-yellow: #ff971c;
+  --color-border-XS-regular: var(--color-blue-30);
+  --color-border-XS-regular-hover: var(--color-blue-50);
+  --color-separator: var(--color-grey-20);
+  --color-surface-info: var(--color-blue-10);
+  --color-surface-warning: var(--color-yellow-10);
+  --color-surface-alert: var(--color-red-10);
+  --color-elements-warning: var(--color-yellow-70);
+  --color-code-red: #cd6153;
+  --color-code-blue: #358fea;
+  --color-elements-readable-inv: var(--color-grey-0);
+  --color-logo-readable: #1d2331;
+  --color-elements-links: var(--color-blue-60-brand);
+  --color-elements-info: var(--color-blue-60-brand);
+  --color-elements-alert: var(--color-red-65);
+  --color-illustrations-solid: var(--color-red-60-brand);
+  /* ------------------------------------------------------------------- */
 }
