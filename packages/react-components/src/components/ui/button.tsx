@@ -18,6 +18,8 @@ const buttonVariants = cva(
         tertiary:
           "bg-background text-(--color-elements-assistive) hover:text-(--color-elements-readable) disabled:text-(--color-elements-disabled)",
         link: "text-primary underline-offset-4 hover:underline",
+        ghost: "",
+        outline: ""
       },
       size: {
         default: "h-9 px-6 py-2 has-[>svg]:px-3",

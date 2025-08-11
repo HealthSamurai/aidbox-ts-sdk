@@ -1,7 +1,7 @@
 {
   "name": "@panthevm_original/react-components",
   "private": false,
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "React components library",
   "main": "dist/react-components.umd.js",
   "module": "./dist/react-components.js",
