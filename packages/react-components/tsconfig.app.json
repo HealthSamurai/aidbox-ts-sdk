@@ -26,7 +26,12 @@
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true,
 		"outDir": "dist",
-		"declarationMap": true
+		"declarationMap": true,
+
+		"baseUrl": ".",
+		"paths": {
+			"#shadcn/*": ["./src/shadcn/*"]
+		}
 	},
 	"include": ["src"]
 }
