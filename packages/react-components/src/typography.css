@@ -1,3 +1,4 @@
+/* Custom typography */
 .typo-body {
   font-size: var(--font-size-sm);
   font-family: var(--font-family-sans);
@@ -19,4 +20,66 @@
   font-weight: var(--font-weight-medium);
   line-height: var(--font-leading-7);
   letter-spacing: var(--font-tracking-tight);
+}
+
+/* Classic typography */
+.h1 {
+  font-size: var(--font-size-4xl);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-extrabold);
+  line-height: var(--font-leading-none);
+  letter-spacing: var(--font-tracking-tight);
+  @apply scroll-mt-20;
+}
+
+@media (min-width: 1024px) {
+  .h1 {
+    font-size: var(--font-size-5xl);
+  }
+}
+
+.h2 {
+  font-size: var(--font-size-3xl);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-leading-none);
+  letter-spacing: var(--font-tracking-tight);
+  @apply scroll-mt-20 pb-2;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.h3 {
+  font-size: var(--font-size-2xl);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-leading-none);
+  letter-spacing: var(--font-tracking-tight);
+  @apply scroll-mt-20;
+}
+
+.h4 {
+  font-size: var(--font-size-xl);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-leading-none);
+  letter-spacing: var(--font-tracking-tight);
+  @apply scroll-mt-20;
+}
+
+.h5 {
+  font-size: var(--font-size-lg);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-leading-none);
+  letter-spacing: var(--font-tracking-tight);
+  @apply scroll-mt-20;
+}
+
+.h6 {
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--font-leading-none);
+  letter-spacing: var(--font-tracking-tight);
+  @apply scroll-mt-20;
 }
