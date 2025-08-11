@@ -18,7 +18,7 @@ const buttonVariants = cva(
         tertiary:
           "bg-background text-(--color-elements-assistive) hover:text-(--color-elements-readable) disabled:text-(--color-elements-disabled)",
         link: "text-primary underline-offset-4 hover:underline",
-        ghost: "",
+        ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         outline: ""
       },
       size: {
