@@ -16,7 +16,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
         // Текстовые токены и типографика из @theme/typography
         // break-words - перенос длинных слов
 
-        "text-text-tertiary body flex flex-wrap items-center break-words gap-2",
+        "text-text-tertiary typo-body flex flex-wrap items-center break-words gap-2",
         className
       )}
       {...props}
@@ -31,8 +31,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
       className={cn(
         // inline-flex - display: inline-flex
         // items-center - align-items: center (вертикальное выравнивание по центру)
-        // gap-1.5 - gap: 0.375rem (отступы между элементами)
-        "inline-flex items-center gap-1.5",
+        "inline-flex items-center",
         className
       )}
       {...props}
@@ -54,7 +53,7 @@ function BreadcrumbLink({
       data-slot="breadcrumb-link"
       className={cn(
         // chip-like appearance. Цвета только из @theme и пресет типографики
-        "body bg-bg-tertiary text-text-tertiary rounded-md px-2 py-1 transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "typo-body bg-bg-tertiary text-text-tertiary rounded-md px-2 py-1 transition-colors hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className
       )}
       {...props}
@@ -72,7 +71,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
       className={cn(
         // Типографика из Figma: 20/28 Medium, tracking tight — используем готовый пресет
         // Цвет 1:1 с Figma: text-primary → text-text-primary
-        "page-header text-text-primary px-0 py-0.5",
+        "typo-page-header text-text-primary px-0 py-0.5",
         className
       )}
       {...props}

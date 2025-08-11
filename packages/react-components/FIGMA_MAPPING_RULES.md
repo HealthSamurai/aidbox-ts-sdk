@@ -10,6 +10,7 @@
 - **Примеры корректных ссылок**:
   - Текст: `text-text-primary`, `text-text-tertiary`, `text-text-link`.
   - Фон: `bg-bg-primary`, `bg-bg-tertiary`.
+  - Элеенты на фоне (кроме текстов и бордеров): `fg-fg-primary`, `fg-fg-tertiary`.
   - Бордер: `border-border-primary`.
   - Фокус/кольцо: `focus-visible:ring-ring` (если такой токен есть и используется в проекте).
 
@@ -19,9 +20,9 @@
 - Не собираем типографику из utility‑классов (`text-xl`, `leading-7`, `font-medium`, ...).
 - Если пресета нет — добавляем новый, используя **только** токены из `@theme`/`tokens.css`.
 - Примеры существующих пресетов:
-  - `.body` — Inter 14/20 Regular.
-  - `.label` — Inter 14/20 Medium.
-  - `.page-header` — Inter 20/28 Medium + `letter-spacing: var(--font-tracking-tight)`.
+  - `.typo-body` — Inter 14/20 Regular.
+  - `.typo-label` — Inter 14/20 Medium.
+  - `.typo-page-header` — Inter 20/28 Medium + `letter-spacing: var(--font-tracking-tight)`.
 
 ## 3) Letter‑spacing из Figma → `--font-tracking-*` в `src/tokens.css`
 
@@ -33,7 +34,7 @@
 
 1. Получили ссылку/узел → вытягиваем переменные/типографику.
 2. Сопоставляем цвета/фоны/бордеры строго с токенами из `@theme` `src/index.css` и используем соответствующие классы (`text-…`, `bg-…`, `border-…`).
-3. Типографику сопоставляем с пресетами из `typography.css`. Если нет — добавляем новый пресет с токенами из `@theme`/`tokens.css`.
+3. Типографику сопоставляем с пресетами из `typography.css` с префиксом `typo-`. Если нет — добавляем новый пресет с токенами из `@theme`/`tokens.css`.
 4. Вносим правки **только в стили**, не меняя логику/структуру компонентов.
 5. Если нет 1:1 соответствия или есть сомнения — останавливаемся и запрашиваем уточнение.
 
@@ -50,8 +51,8 @@
   - Список/чипы (рядовых крошек): `text-text-tertiary` (серый из Figma) и фон `bg-bg-tertiary`.
   - Разделитель: `text-text-quternary`, размер `text-xs`.
 - Типографика:
-  - Список/линки: используем `.body`.
-  - Активная страница: `.page-header`.
+  - Список/линки: используем `.typo-body`.
+  - Активная страница: `.typo-page-header`.
 - Вёрстка:
   - Только классы (layout/spacing), логика/DOM‑структура без изменений.
   - Разделитель по умолчанию — символ `/`.
