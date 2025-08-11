@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
-import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -13,15 +13,10 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        // text-muted-foreground - цвет текста (обычно серый)
-        // flex - display: flex
-        // flex-wrap - flex-wrap: wrap (перенос элементов на новую строку)
-        // items-center - align-items: center (вертикальное выравнивание по центру)
-        // gap-1.5 - gap: 0.375rem (отступы между элементами)
-        // text-sm - font-size: 0.875rem (размер шрифта)
-        // break-words - word-break: break-word (перенос длинных слов)
-        // sm:gap-2.5 - на экранах sm и больше: gap: 0.625rem
-        "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
+        // Текстовые токены и типографика из @theme/typography
+        // break-words - перенос длинных слов
+
+        "text-text-tertiary body flex flex-wrap items-center break-words gap-2",
         className
       )}
       {...props}
@@ -58,9 +53,8 @@ function BreadcrumbLink({
     <Comp
       data-slot="breadcrumb-link"
       className={cn(
-        // hover:text-foreground - при наведении: цвет текста (обычно черный)
-        // transition-colors - transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1) (плавная анимация цвета)
-        "hover:text-foreground transition-colors",
+        // chip-like appearance. Цвета только из @theme и пресет типографики
+        "body bg-bg-tertiary text-text-tertiary rounded-md px-2 py-1 transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className
       )}
       {...props}
@@ -76,9 +70,9 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
       aria-disabled="true"
       aria-current="page"
       className={cn(
-        // text-foreground - цвет текста (обычно черный)
-        // font-normal - font-weight: 400 (обычный вес шрифта)
-        "text-foreground font-normal",
+        // Типографика из Figma: 20/28 Medium, tracking tight — используем готовый пресет
+        // Цвет 1:1 с Figma: text-primary → text-text-primary
+        "page-header text-text-primary px-0 py-0.5",
         className
       )}
       {...props}
@@ -98,12 +92,13 @@ function BreadcrumbSeparator({
       aria-hidden="true"
       className={cn(
         // [&>svg]:size-3.5 - для всех svg внутри: width: 0.875rem, height: 0.875rem
-        "[&>svg]:size-3.5",
+        // облегчённый вид: размер 12px, цвет из @theme
+        "[&>svg]:size-3.5 text-text-quternary text-xs",
         className
       )}
       {...props}
     >
-      {children ?? <ChevronRight />}
+      {children ?? "/"}
     </li>
   );
 }

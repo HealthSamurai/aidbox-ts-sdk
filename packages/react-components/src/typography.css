@@ -1,6 +1,22 @@
+.body {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--font-leading-5);
+}
+
 .label {
-    font-size: var(--font-size-sm);
-    font-family: var(--font-family-sans);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--font-leading-5);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-leading-5);
+}
+
+/* Page header: Inter 20/28 Medium with tight tracking */
+.page-header {
+  font-size: var(--font-size-xl);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-leading-7);
+  letter-spacing: var(--font-tracking-tight);
 }

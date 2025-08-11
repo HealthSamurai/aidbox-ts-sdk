@@ -116,12 +116,12 @@
   --font-weight-extrabold: 800;
   --font-weight-black: 900;
 
-  --font-tracking-tighter: -0.800000011920929px;
-  --font-tracking-tight: -0.4000000059604645px;
+  --font-tracking-tighter: -0.8;
+  --font-tracking-tight: -0.4;
   --font-tracking-normal: 0px;
-  --font-tracking-wide: 0.4000000059604645px;
-  --font-tracking-wider: 0.800000011920929px;
-  --font-tracking-widest: 1.600000023841858px;
+  --font-tracking-wide: 0.4;
+  --font-tracking-wider: 0.8;
+  --font-tracking-widest: 1.6;
 
   --font-leading-3: 12px;
   --font-leading-4: 16px;
