@@ -166,8 +166,5 @@ export const Default: Story = {
       <Button {...args}>Save</Button>
       <Button {...args}><Trash2 />Save</Button>
     </div>
-  ),
-  parameters: {
-    layout: "centered",
-  },
+  )
 };

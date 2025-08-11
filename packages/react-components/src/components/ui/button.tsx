@@ -21,6 +21,7 @@ const buttonVariants = cva(
           "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled",
         tertiary:
           "bg-bg-primary text-text-tertiary hover:text-text-secondary disabled:text-fg-disabled",
+<<<<<<< HEAD
         ghost: 
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         // toolbar:
@@ -29,6 +30,8 @@ const buttonVariants = cva(
         //   "bg-bg-toolbar-critical border border-border-error text-fg-error-primary hover:bg-bg-error-secondary disabled:text-fg-disabled disabled:border-border-disabled typo-button-label-xs py-0.5 px-2",
         // toolbarCriticalSolid:
         //   "bg-bg-toolbar-critical-solid text-fg-primary_inverse hover:opacity-90 disabled:bg-bg-disabled typo-button-label-xs h-2 px-2 py-1",
+=======
+>>>>>>> b1e23ec (Buttons)
       },
     },
     defaultVariants: {
