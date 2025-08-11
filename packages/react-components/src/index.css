@@ -9,36 +9,79 @@
 /* Aliases here, light/dark theme specific */
 
 @theme {
-
-  --color-text-primary: var(--color-neutral-900); 
-    --color-text-primary-on-brand: var(--color-neutral-50); 
-
+  /* Новые переменные */
+  --color-text-primary: var(--color-neutral-900);
   --color-text-secondary: var(--color-neutral-700);
-    --color-text-secondary-hover: var(--color-neutral-800);
-    --color-text-secondary-on-brand: var(--color-neutral-100);
-
-  --color-text-tertiary: var(--color-neutral-400);
-    --color-text-tertiary-hover: var(--color-neutral-500);
-    --color-text-tertiary-on-brand: var(--color-neutral-200);
-
+  --color-text-secondary_hover: var(--color-neutral-800);
+  --color-text-secondary_on-brand: var(--color-neutral-100);
+  --color-text-primary_on-brand: var(--color-neutral-50);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-quternary: var(--color-neutral-400);
+  --color-text-quternary_hover: var(--color-neutral-500);
+  --color-text-quternary_on-brand: var(--color-neutral-200);
   --color-text-disabled: var(--color-neutral-300);
-
+  --color-text-link: var(--color-blue-500);
+  --color-text-link_hover: var(--color-blue-600);
+  --color-text-link_disabled: var(--color-blue-400);
   --color-text-brand-primary: var(--color-brand-500);
-  
   --color-text-brand-secondary: var(--color-brand-300);
-    --color-text-brand-secondary-hover: var(--color-brand-400);
-
+  --color-text-brand-secondary_hover: var(--color-brand-400);
   --color-text-error-primary: var(--color-red-500);
-
   --color-text-success-primary: var(--color-green-500);
-
   --color-text-warning-primary: var(--color-yellow-500);
-  
-  --color-border-brand: var(--color-brand-500);
-
-
+  --color-white: #ffffffff;
+  --color-border-primary: var(--color-neutral-300);
+  --color-border-primary-hover: var(--color-neutral-400);
+  --color-border-secondary: var(--color-neutral-200);
+  --color-border-disabled: var(--color-neutral-100);
+  --color-border-error: var(--color-red-500);
+  --color-border-success: var(--color-green-500);
+  --color-bg-primary: var(--color-white);
+  --color-bg-primary-inverse: var(--color-neutral-900);
+  --color-bg-secondary: var(--color-neutral-50);
+  --color-bg-tertiary: var(--color-neutral-100);
+  --color-bg-quaternary: var(--color-neutral-200);
+  --color-bg-overlay: var(--color-neutral-900);
+  --color-bg-error-primary: var(--color-red-50);
+  --color-bg-error-primary-inverse: var(--color-red-500);
+  --color-bg-error-primary-inverse-hover: var(--color-red-700);
+  --color-bg-error-secondary: var(--color-red-100);
+  --color-bg-error-tertiary: var(--color-red-200);
+  --color-bg-success-primary: var(--color-green-50);
+  --color-bg-success-primary-inverse: var(--color-green-500);
+  --color-bg-success-secondary: var(--color-green-100);
+  --color-bg-warning-primary: var(--color-yellow-50);
+  --color-bg-warning-primary-inverse: var(--color-yellow-500);
+  --color-bg-warning-secondary: var(--color-yellow-100);
+  /* Brand-specific backgrounds */
+  --color-bg-brand-primary: var(--color-cta);
+  --color-bg-brand-primary-hover: var(--color-cta-hover);
+  /* Link backgrounds from Figma */
+  --color-bg-link: var(--color-blue-500);
+  --color-bg-link-hover: var(--color-blue-600);
+  --color-bg-disabled: #ccced3;
+  /* Toolbar variants */
+  --color-bg-toolbar-critical: transparent;
+  --color-bg-toolbar-critical-solid: var(--color-bg-error-primary-inverse);
+  --color-fg-primary: var(--color-neutral-900);
+  --color-fg-primary_inverse: var(--color-white);
+  --color-fg-primary-on-brand: var(--color-neutral-50);
+  --color-fg-secondary: var(--color-neutral-700);
+  --color-fg-secondary-hover: var(--color-neutral-800);
+  --color-fg-secondary-on-brand: var(--color-neutral-100);
+  --color-fg-tertiary: var(--color-neutral-400);
+  --color-fg-tertiary-hover: var(--color-neutral-500);
+  --color-fg-tertiary-on-brand: var(--color-neutral-200);
+  --color-fg-disabled: var(--color-neutral-300);
+  --color-fg-brand-primary: var(--color-brand-500);
+  --color-fg-brand-secondary: var(--color-brand-300);
+  --color-fg-error-primary: var(--color-red-500);
+  --color-fg-error-secondary: var(--color-red-400);
+  --color-fg-success-primary: var(--color-green-500);
+  --color-fg-success-secondary: var(--color-green-400);
+  --color-fg-warning-primary: var(--color-yellow-500);
+  --color-fg-warning-secondary: var(--color-yellow-400);
 }
-
 
 @theme inline {
   --font-family-sans: "Inter", system-ui, sans-serif;
@@ -78,7 +121,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-
+/* Styles for shadcn/ui supporting. Will be revoved when all HS components will be ready c */
 :root {
   --background: var(--color-surface-0);
   --foreground: var(--color-elements-readable);

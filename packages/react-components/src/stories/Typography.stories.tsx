@@ -1,22 +1,31 @@
-import * as React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import * as React from "react";
+import type { Meta, StoryObj } from "@storybook/react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 // Typography component for demonstration
-const Typography = ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+const Typography = ({
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return <div {...props}>{children}</div>;
 };
 
 const meta: Meta<typeof Typography> = {
-  title: 'Components/Typography',
+  title: "Components/Typography",
   component: Typography,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -53,15 +62,15 @@ export const Paragraph: Story = {
       <p className="leading-7 [&:not(:first-child)]:mt-6">
         The king, seeing how much happier his subjects were, realized the
         importance of their happiness and resolved to be a more thoughtful
-        leader. From that day forward, he made sure to consider the needs of
-        his people in every decision he made.
+        leader. From that day forward, he made sure to consider the needs of his
+        people in every decision he made.
       </p>
       <p className="leading-7 [&:not(:first-child)]:mt-6">
-        This is another paragraph with some <strong>bold text</strong> and{' '}
-        <em>italic text</em>. You can also have{' '}
+        This is another paragraph with some <strong>bold text</strong> and{" "}
+        <em>italic text</em>. You can also have{" "}
         <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
           inline code
-        </code>{' '}
+        </code>{" "}
         within paragraphs.
       </p>
     </div>
@@ -99,7 +108,7 @@ export const Lists: Story = {
           </li>
         </ul>
       </div>
-      
+
       <div>
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-4">
           Ordered List
@@ -125,28 +134,29 @@ export const InlineText: Story = {
   render: () => (
     <div className="space-y-4 w-full max-w-2xl">
       <p className="leading-7">
-        You can style text with <strong>bold</strong>, <em>italic</em>,{' '}
+        You can style text with <strong>bold</strong>, <em>italic</em>,{" "}
         <u>underline</u>, and <s>strikethrough</s> formatting.
       </p>
-      
+
       <p className="leading-7">
-        Here's some{' '}
+        Here's some{" "}
         <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
           inline code
-        </code>{' '}
-        and a{' '}
-        <a href="#" className="font-medium text-primary underline underline-offset-4">
+        </code>{" "}
+        and a{" "}
+        <a
+          href="#"
+          className="font-medium text-primary underline underline-offset-4"
+        >
           link
-        </a>{' '}
+        </a>{" "}
         in the text.
       </p>
-      
+
       <p className="leading-7">
-        Small text can be shown with{' '}
-        <small className="text-sm font-medium leading-none">
-          small tags
-        </small>{' '}
-        and large text with{' '}
+        Small text can be shown with{" "}
+        <small className="text-sm font-medium leading-none">small tags</small>{" "}
+        and large text with{" "}
         <span className="text-lg font-semibold">larger spans</span>.
       </p>
     </div>
@@ -162,7 +172,7 @@ export const CodeBlocks: Story = {
         </h3>
         <pre className="overflow-x-auto rounded-lg bg-muted p-4">
           <code className="text-sm">
-{`function greet(name: string) {
+            {`function greet(name: string) {
   return \`Hello, \${name}!\`;
 }
 
@@ -171,16 +181,16 @@ console.log(message);`}
           </code>
         </pre>
       </div>
-      
+
       <div>
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-4">
           Inline Code
         </h3>
         <p className="leading-7">
-          Use the{' '}
+          Use the{" "}
           <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
             useState
-          </code>{' '}
+          </code>{" "}
           hook to manage component state in React.
         </p>
       </div>
@@ -207,7 +217,9 @@ export const TextWeights: Story = {
   render: () => (
     <div className="space-y-4 w-full max-w-2xl">
       <div className="font-thin">Thin weight (font-thin)</div>
-      <div className="font-extralight">Extra light weight (font-extralight)</div>
+      <div className="font-extralight">
+        Extra light weight (font-extralight)
+      </div>
       <div className="font-light">Light weight (font-light)</div>
       <div className="font-normal">Normal weight (font-normal)</div>
       <div className="font-medium">Medium weight (font-medium)</div>
@@ -242,18 +254,18 @@ export const ArticleExample: Story = {
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
         The Art of Typography
       </h1>
-      
+
       <p className="text-xl text-muted-foreground">
         Typography is the art and technique of arranging type to make written
         language legible, readable, and appealing when displayed.
       </p>
-      
+
       <Separator className="my-6" />
-      
+
       <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Introduction
       </h2>
-      
+
       <p className="leading-7 [&:not(:first-child)]:mt-6">
         Typography involves selecting typefaces, point size, line length, line
         spacing, and letter spacing, and adjusting the space between pairs of
@@ -261,39 +273,39 @@ export const ArticleExample: Story = {
         and appearance of the letters, numbers, and symbols created by the
         process.
       </p>
-      
+
       <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
         Key Principles
       </h3>
-      
+
       <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
         <li>Hierarchy and contrast</li>
         <li>Consistency and repetition</li>
         <li>Alignment and proximity</li>
         <li>White space and balance</li>
       </ul>
-      
+
       <blockquote className="mt-6 border-l-2 pl-6 italic">
         "Typography is a beautiful group of letters, not a group of beautiful
         letters." — Matthew Carter
       </blockquote>
-      
+
       <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
         Best Practices
       </h3>
-      
+
       <p className="leading-7 [&:not(:first-child)]:mt-6">
         When working with typography in digital interfaces, consider these
         important factors:
       </p>
-      
+
       <ol className="my-6 ml-6 list-decimal [&>li]:mt-2">
         <li>Choose fonts that support your brand identity</li>
         <li>Establish a clear typographic hierarchy</li>
         <li>Ensure adequate contrast for accessibility</li>
         <li>Optimize for different screen sizes</li>
       </ol>
-      
+
       <p className="leading-7 [&:not(:first-child)]:mt-6">
         Remember that good typography is often invisible — it serves the content
         without drawing attention to itself. The goal is to create a comfortable
@@ -322,7 +334,7 @@ export const ComponentDocumentation: Story = {
           </h3>
           <pre className="overflow-x-auto rounded-lg bg-muted p-4">
             <code className="text-sm">
-{`import { Button } from '@/components/ui/button';
+              {`import { Button } from '@/components/ui/button';
 
 <Button variant="default" size="md">
   Click me
@@ -330,9 +342,9 @@ export const ComponentDocumentation: Story = {
             </code>
           </pre>
         </div>
-        
+
         <Separator />
-        
+
         <div>
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
             Props
@@ -341,24 +353,25 @@ export const ComponentDocumentation: Story = {
             <li>
               <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
                 variant
-              </code>{' '}
-              - Button style variant (default, destructive, outline, secondary, ghost, link)
+              </code>{" "}
+              - Button style variant (default, destructive, outline, secondary,
+              ghost, link)
             </li>
             <li>
               <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
                 size
-              </code>{' '}
+              </code>{" "}
               - Button size (default, sm, lg, icon)
             </li>
             <li>
               <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
                 disabled
-              </code>{' '}
+              </code>{" "}
               - Whether the button is disabled
             </li>
           </ul>
         </div>
-        
+
         <div>
           <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mb-3">
             Examples
