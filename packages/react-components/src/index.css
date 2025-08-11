@@ -53,6 +53,7 @@
   --color-bg-warning-primary-inverse: var(--color-yellow-500);
   --color-bg-warning-secondary: var(--color-yellow-100);
   --color-fg-primary: var(--color-neutral-900);
+  --color-fg-primary_inverse: var(--color-white);
   --color-fg-primary-on-brand: var(--color-neutral-50);
   --color-fg-secondary: var(--color-neutral-700);
   --color-fg-secondary-hover: var(--color-neutral-800);

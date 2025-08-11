@@ -22,6 +22,15 @@
   letter-spacing: var(--font-tracking-tight);
 }
 
+.typo-button-label-xs {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-leading-4);
+  text-transform: uppercase;
+  letter-spacing: var(--font-tracking-tight);
+}
+
 /* Classic typography */
 .h1 {
   font-size: var(--font-size-4xl);
@@ -29,7 +38,6 @@
   font-weight: var(--font-weight-extrabold);
   line-height: var(--font-leading-none);
   letter-spacing: var(--font-tracking-tight);
-  @apply scroll-mt-20;
 }
 
 @media (min-width: 1024px) {
@@ -44,8 +52,6 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--font-leading-none);
   letter-spacing: var(--font-tracking-tight);
-  @apply scroll-mt-20 pb-2;
-  border-bottom: 1px solid var(--border-default);
 }
 
 .h3 {
@@ -54,7 +60,6 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--font-leading-none);
   letter-spacing: var(--font-tracking-tight);
-  @apply scroll-mt-20;
 }
 
 .h4 {
@@ -63,7 +68,6 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--font-leading-none);
   letter-spacing: var(--font-tracking-tight);
-  @apply scroll-mt-20;
 }
 
 .h5 {
@@ -72,7 +76,6 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--font-leading-none);
   letter-spacing: var(--font-tracking-tight);
-  @apply scroll-mt-20;
 }
 
 .h6 {
@@ -81,5 +84,4 @@
   font-weight: var(--font-weight-semibold);
   line-height: var(--font-leading-none);
   letter-spacing: var(--font-tracking-tight);
-  @apply scroll-mt-20;
 }
