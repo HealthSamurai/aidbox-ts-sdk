@@ -20,7 +20,7 @@ const meta = {
         "primary",
         "critical",
         "outline",
-        "tertiary",
+        "ghost",
       ],
     },
 
@@ -41,20 +41,18 @@ type Story = StoryObj<typeof meta>;
 function ButtonRow({
   label,
   variant,
+  size,
   normalText,
   iconElement,
   criticalText,
 }: {
   label: string;
   variant:
-    | "primaryNormal"
-    | "primaryCritical"
-    | "secondaryNormal"
-    | "tertiaryNormal"
-    | "link"
-    | "toolbar"
-    | "toolbarCritical"
-    | "toolbarCriticalSolid";
+    | "primary"
+    | "critical"
+    | "outline"
+    | "ghost";
+  size: "small" | "regular";
   normalText: string;
   iconElement: React.ReactNode;
   criticalText?: string;
@@ -65,24 +63,14 @@ function ButtonRow({
 
       {/* Without icon column */}
       <div className="flex gap-3 items-center min-w-80">
-        <Button variant={variant}>{normalText}</Button>
-        <Button variant={variant} className="hover:opacity-80">
-          {normalText}
-        </Button>
-        <Button variant={variant} className="active:scale-95">
-          {normalText}
-        </Button>
-        <Button variant={variant} disabled>
-          {normalText}
-        </Button>
+        <Button variant={variant} size={size}>{normalText}</Button>
+        <Button variant={variant} size={size} disabled> {normalText} </Button>
       </div>
 
       {/* With icon column */}
       <div className="flex gap-3 items-center">
-        <Button variant={variant}>
-          {iconElement}
-          {criticalText || normalText}
-        </Button>
+        <Button variant={variant} size={size}> {iconElement} {criticalText || normalText} </Button>
+        <Button variant={variant} size={size} disabled> {iconElement} {criticalText || normalText} </Button>
       </div>
     </div>
   );
@@ -92,61 +80,36 @@ export const AllVariants: Story = {
   render: () => (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-6 text-gray-900">Buttons</h2>
 
         {/* Header */}
-        <div className="flex items-center gap-6 py-3 border-b border-gray-200 mb-4">
-          <div className="w-40"></div>
-          <div className="min-w-80 text-sm font-medium text-gray-600">
-            ...without icon
-          </div>
-          <div className="text-sm font-medium text-gray-600">...with icon</div>
+        <div className="flex items-center gap-3 py-3 border-b border-gray-200 mb-4">
+          <div className="w-30">Variant</div>
+          <div className="min-w-100 text-sm font-medium text-gray-600"> Without icon </div>
+          <div className="min-w-100 text-sm font-medium text-gray-600">With icon</div>
         </div>
 
-        {/* Button rows */}
-        <ButtonRow
-          label="Primary / normal"
-          variant="primaryNormal"
-          normalText="Save"
-          iconElement={<ChevronRight className="w-4 h-4" />}
-        />
+        {["primary", "critical", "outline", "ghost"].map((variant) => (
+          <div className="flex gap-3 items-center py-3 ">
+            <div className="w-30"> {variant} </div>
+            <div key={variant} className="flex gap-3 items-center w-100">
+              <Button variant={variant}> Button </Button>
+              <Button variant={variant} disabled> Button </Button>
+              <Button variant={variant} size="small" > Button </Button>
+              <Button variant={variant} size="small" disabled> Button </Button>
+            </div>
 
-        <ButtonRow
-          label="Primary / critical"
-          variant="primaryCritical"
-          normalText="Delete"
-          iconElement={<Trash className="w-4 h-4" />}
-        />
+            <div key={variant} className="flex gap-3 items-center w-100">
+              <Button variant={variant}> <Trash2 /> Button </Button>
+              <Button variant={variant} disabled> <Trash2 /> Button </Button>
+              <Button variant={variant} size="small" > <Trash2 /> Button </Button>
+              <Button variant={variant} size="small" disabled> <Trash2 /> Button </Button>
+            </div>
+          </div>
+        ))}
 
-        <ButtonRow
-          label="Secondary / normal"
-          variant="secondaryNormal"
-          normalText="Discard"
-          iconElement={<ChevronRight className="w-4 h-4" />}
-        />
 
-        <ButtonRow
-          label="Tertiary / normal"
-          variant="tertiaryNormal"
-          normalText="Cancel"
-          iconElement={<Trash className="w-4 h-4" />}
-        />
 
-        <ButtonRow
-          label="Toolbar / normal"
-          variant="toolbar"
-          normalText="Label"
-          iconElement={<ChevronRight className="w-3 h-3" />}
-        />
 
-        <ButtonRow
-          label="Toolbar / normal"
-          variant="toolbarCritical"
-          normalText="Label"
-          iconElement={<ChevronRight className="w-3 h-3" />}
-        />
-
-        {/* Toolbar critical row - custom layout for multiple states */}
       </div>
     </div>
   ),
