@@ -44,6 +44,7 @@
   --color-bg-overlay: var(--color-neutral-900);
   --color-bg-error-primary: var(--color-red-50);
   --color-bg-error-primary-inverse: var(--color-red-500);
+  --color-bg-error-primary-inverse-hover: var(--color-red-700);
   --color-bg-error-secondary: var(--color-red-100);
   --color-bg-error-tertiary: var(--color-red-200);
   --color-bg-success-primary: var(--color-green-50);
@@ -52,6 +53,16 @@
   --color-bg-warning-primary: var(--color-yellow-50);
   --color-bg-warning-primary-inverse: var(--color-yellow-500);
   --color-bg-warning-secondary: var(--color-yellow-100);
+  /* Brand-specific backgrounds */
+  --color-bg-brand-primary: var(--color-cta);
+  --color-bg-brand-primary-hover: var(--color-cta-hover);
+  /* Link backgrounds from Figma */
+  --color-bg-link: var(--color-blue-500);
+  --color-bg-link-hover: var(--color-blue-600);
+  --color-bg-disabled: #ccced3;
+  /* Toolbar variants */
+  --color-bg-toolbar-critical: transparent;
+  --color-bg-toolbar-critical-solid: var(--color-bg-error-primary-inverse);
   --color-fg-primary: var(--color-neutral-900);
   --color-fg-primary_inverse: var(--color-white);
   --color-fg-primary-on-brand: var(--color-neutral-50);

@@ -1,57 +1,57 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all  disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all  disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 cursor-pointer",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-(--color-cta-hover) disabled:bg-(--color-elements-disabled)",
-        destructive:
-          "bg-destructive text-white shadow-xs hover:bg-(--color-critical-hover) focus-visible:ring-destructive/20 disabled:bg-(--color-elements-disabled)",
-        secondary:
-          "border bg-background shadow-xs hover:bg-(--color-surface-1) disabled:text-(--color-elements-disabled)",
-        tertiary:
-          "bg-background text-(--color-elements-assistive) hover:text-(--color-elements-readable) disabled:text-(--color-elements-disabled)",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-9 px-6 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
+        primaryNormal:
+          "bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link-hover active:bg-bg-link disabled:bg-bg-disabled typo-label py-2 px-6",
+        primaryCritical:
+          "bg-bg-error-primary-inverse text-fg-primary_inverse shadow-xs hover:bg-bg-error-primary-inverse-hover active:bg-bg-error-primary-inverse focus-visible:ring-destructive/20 disabled:bg-bg-disabled py-2 px-6",
+        secondaryNormal:
+          "border border-border-primary bg-bg-primary text-fg-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled py-2 px-6",
+        tertiaryNormal:
+          "bg-bg-primary text-fg-tertiary hover:text-fg-secondary disabled:text-fg-disabled py-2 px-6",
+
+        toolbar:
+          "bg-transparent text-fg-tertiary hover:text-fg-secondary disabled:text-fg-disabled typo-label-xs px-2",
+        toolbarCritical:
+          "bg-bg-toolbar-critical border border-border-error text-fg-error-primary hover:bg-bg-error-secondary disabled:text-fg-disabled disabled:border-border-disabled typo-button-label-xs py-0.5 px-2",
+        toolbarCriticalSolid:
+          "bg-bg-toolbar-critical-solid text-fg-primary_inverse hover:opacity-90 disabled:bg-bg-disabled typo-button-label-xs h-2 px-2 py-1",
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: "primaryNormal",
     },
   }
-)
+);
 
 function Button({
   className,
   variant,
-  size,
+
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
+    asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot : "button";
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, className }))}
       {...props}
     />
-  )
+  );
 }
 
-export { Button, buttonVariants }
+// eslint-disable-next-line react-refresh/only-export-components
+export { Button, buttonVariants };
