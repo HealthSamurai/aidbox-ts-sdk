@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Trash } from "lucide-react";
+import { ChevronRight, Trash, Trash2 } from "lucide-react";
 import * as React from "react";
 
 const meta = {
@@ -17,17 +17,23 @@ const meta = {
     variant: {
       control: "select",
       options: [
-        "primaryNormal",
-        "primaryCritical",
-        "secondaryNormal",
-        "tertiaryNormal",
-        "toolbar",
-        "toolbarCritical",
-        "toolbarCriticalSolid",
+        "primary",
+        "critical",
+        "outline",
+        "tertiary",
+      ],
+    },
+
+    size: {
+      control: "select",
+      options: [
+        "small",
+        "regular",
       ],
     },
   },
 } satisfies Meta<typeof Button>;
+
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -151,22 +157,17 @@ export const AllVariants: Story = {
 
 export const Default: Story = {
   args: {
-    variant: "primaryNormal",
+    variant: "primary",
+    size: "regular",
     disabled: false,
   },
   render: (args) => (
-    <div className="p-6 bg-gray-50 flex justify-center items-center">
-      <div className="bg-white rounded-lg p-26 shadow-sm">
-        {/* Button rows */}
-        <Button {...args}>Save</Button>
-        <Button {...args}>
-          <Trash size={16} />
-          Save
-        </Button>
-      </div>
+    <div className="p-6 bg-gray-50 flex justify-center items-center bg-white rounded-lg p-10 shadow-sm gap-4">
+      <Button {...args}>Save</Button>
+      <Button {...args}><Trash2 />Save</Button>
     </div>
   ),
   parameters: {
-    layout: "fullscreen",
+    layout: "centered",
   },
 };
