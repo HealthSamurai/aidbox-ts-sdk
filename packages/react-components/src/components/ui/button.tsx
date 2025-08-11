@@ -10,24 +10,21 @@ const buttonVariants = cva(
     variants: {
       size: {
         regular: "py-2 px-6 typo-label",
-        small: "py-1 px-2 text-xs uppercase gap-1",
+        small: "py-1 px-2 gap-1",
       },
       variant: {
         primary:
           "bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link-hover active:bg-bg-link disabled:bg-bg-disabled",
         critical:
-          "bg-bg-error-primary-inverse text-fg-primary_inverse shadow-xs hover:bg-bg-error-primary-inverse-hover active:bg-bg-error-primary-inverse  disabled:bg-bg-disabled",
+          "bg-bg-error-primary-inverse text-text-primary_inverse shadow-xs hover:bg-bg-error-primary-inverse-hover active:bg-bg-error-primary-inverse  disabled:bg-bg-disabled",
         outline:
-          "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled",
+          "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled disabled:hover:bg-bg-primary",
         tertiary:
           "bg-bg-primary text-text-tertiary hover:text-text-secondary disabled:text-fg-disabled",
-
-        // toolbar:
-        //   "bg-transparent text-fg-tertiary hover:text-fg-secondary disabled:text-fg-disabled typo-label-xs px-2",
-        // toolbarCritical:
-        //   "bg-bg-toolbar-critical border border-border-error text-fg-error-primary hover:bg-bg-error-secondary disabled:text-fg-disabled disabled:border-border-disabled typo-button-label-xs py-0.5 px-2",
-        // toolbarCriticalSolid:
-        //   "bg-bg-toolbar-critical-solid text-fg-primary_inverse hover:opacity-90 disabled:bg-bg-disabled typo-button-label-xs h-2 px-2 py-1",
+        toolbar:
+          "typo-label text-text-tertiary shadow-xs active:text-text-tertiary  disabled:text-text-disabled hover:text-text-primary py-0 px-2 gap-1",
+        toolbarCritical:
+          "typo-label-xs text-text-primary_inverse shadow-xs border border-border-error_inverse py-1 px-2 gap-1 active:bg-bg-error-primary-inverse  disabled:text-text-error-secondary hover:border-border-error_inverse_hover",
       },
     },
     defaultVariants: {

@@ -11,6 +11,7 @@
 @theme {
   /* Новые переменные */
   --color-text-primary: var(--color-neutral-900);
+  --color-text-primary_inverse: var(--color-white);
   --color-text-secondary: var(--color-neutral-700);
   --color-text-secondary_hover: var(--color-neutral-800);
   --color-text-secondary_on-brand: var(--color-neutral-100);
@@ -27,14 +28,18 @@
   --color-text-brand-secondary: var(--color-brand-300);
   --color-text-brand-secondary_hover: var(--color-brand-400);
   --color-text-error-primary: var(--color-red-500);
+  --color-text-error-secondary: var(--color-red-400);
   --color-text-success-primary: var(--color-green-500);
   --color-text-warning-primary: var(--color-yellow-500);
   --color-white: #ffffffff;
   --color-border-primary: var(--color-neutral-300);
+  --color-border-brand: var(--color-brand-500);
   --color-border-primary-hover: var(--color-neutral-400);
   --color-border-secondary: var(--color-neutral-200);
   --color-border-disabled: var(--color-neutral-100);
   --color-border-error: var(--color-red-500);
+  --color-border-error_inverse: var(--color-red-400);
+  --color-border-error_inverse_hover: var(--color-red-300);
   --color-border-success: var(--color-green-500);
   --color-bg-primary: var(--color-white);
   --color-bg-primary-inverse: var(--color-neutral-900);
@@ -54,8 +59,8 @@
   --color-bg-warning-primary-inverse: var(--color-yellow-500);
   --color-bg-warning-secondary: var(--color-yellow-100);
   /* Brand-specific backgrounds */
-  --color-bg-brand-primary: var(--color-cta);
-  --color-bg-brand-primary-hover: var(--color-cta-hover);
+  --color-bg-brand-primary: var(--color-brand-500);
+  --color-bg-brand-primary-hover: var(--color-brand-600);
   /* Link backgrounds from Figma */
   --color-bg-link: var(--color-blue-500);
   --color-bg-link-hover: var(--color-blue-600);

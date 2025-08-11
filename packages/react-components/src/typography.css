@@ -13,6 +13,14 @@
   line-height: var(--font-leading-5);
 }
 
+.typo-label-xs {
+  font-size: var(--font-size-xs);
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--font-leading-4);
+  text-transform: uppercase;
+}
+
 /* Page header: Inter 20/28 Medium with tight tracking */
 .typo-page-header {
   font-size: var(--font-size-xl);
