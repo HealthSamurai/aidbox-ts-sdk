@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       size: {
         regular: "py-2 px-6 typo-label",
-        small: "py-1 px-2 text-xs uppercase gap-1",
+        small: "py-1 px-2 text-xs gap-1",
       },
       variant: {
         primary:
