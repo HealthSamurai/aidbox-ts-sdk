@@ -156,7 +156,7 @@
   --color-elements-disabled: var(--color-neutral-300);
   --color-elements-assistive: var(--color-neutral-500);
   --color-surface-0: var(--color-neutral-50);
-  --color-border-default: var(--color-neutral-300);
+  --color-border-default: var(--color-neutral-200);
   --color-surface-selected: var(--color-neutral-200);
   --color-cta-hover: var(--color-brand-700);
   --color-critical-hover: var(--color-red-700);

@@ -25,9 +25,9 @@ import {
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
+const SIDEBAR_WIDTH = "13.75rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
-const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH_ICON = "3.125rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
@@ -346,7 +346,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn("flex flex-col gap-2 p-2 pb-3", className)}
       {...props}
     />
   );
@@ -372,7 +372,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-1 p-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-1 p-2 pt-3 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
       {...props}
@@ -454,7 +454,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
     <ul
       data-slot="sidebar-menu"
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col ", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-0.5", className)}
       {...props}
     />
   );
@@ -472,7 +472,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  " typo-body text-text-secondary flex items-center gap-2 overflow-hidden rounded-lg p-2 outline-hidden ring-sidebar-ring transition-all focus-visible:ring-2 active:bg-bg-quaternary disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-bg-brand-secondary data-[active=true]:text-text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-bg-secondary hover:text-text-primary data-[active=true]:[&>svg]:text-text-brand-primary mt-0.5 w-full",
+  " typo-body text-text-secondary flex items-center gap-2 overflow-hidden rounded-lg py-2 px-[0.44rem] outline-hidden ring-sidebar-ring transition-all focus-visible:ring-2 active:bg-bg-quaternary disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-bg-brand-secondary data-[active=true]:text-text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground  group-data-[collapsible=icon]:py-2! group-data-[collapsible=icon]:px-[0.44rem]! [&>span:last-child]:truncate [&>svg]:size-5 [&>svg]:shrink-0 hover:bg-bg-secondary hover:text-text-primary data-[active=true]:[&>svg]:text-text-brand-primary w-full",
   {
     variants: {
       variant: {
