@@ -472,7 +472,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "typo-body text-text-secondary flex items-center gap-2 overflow-hidden rounded-lg p-2 outline-hidden ring-sidebar-ring transition-all focus-visible:ring-2 active:bg-bg-quaternary disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-bg-brand-secondary data-[active=true]:text-text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-5 [&>svg]:shrink-0 hover:bg-bg-secondary hover:text-text-primary data-[active=true]:[&>svg]:text-text-brand-primary ",
+  " typo-body text-text-secondary flex items-center gap-2 overflow-hidden rounded-lg p-2 outline-hidden ring-sidebar-ring transition-all focus-visible:ring-2 active:bg-bg-quaternary disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-bg-brand-secondary data-[active=true]:text-text-primary data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 hover:bg-bg-secondary hover:text-text-primary data-[active=true]:[&>svg]:text-text-brand-primary mt-0.5 w-full",
   {
     variants: {
       variant: {
