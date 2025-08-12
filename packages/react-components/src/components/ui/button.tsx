@@ -15,13 +15,14 @@ const buttonVariants = cva(
       variant: {
         primary:
           "bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link-hover active:bg-bg-link disabled:bg-bg-disabled",
-        critical:
-          "bg-bg-error-primary-inverse text-fg-primary_inverse shadow-xs hover:bg-bg-error-primary-inverse-hover active:bg-bg-error-primary-inverse  disabled:bg-bg-disabled",
         outline:
           "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled",
-        tertiary:
-          "bg-bg-primary text-text-tertiary hover:text-text-secondary disabled:text-fg-disabled",
-        ghost: 
+        critical:
+          "bg-bg-error-primary_inverse text-text-primary_on-brand shadow-xs hover:bg-bg-error-primary_inverse_hover active:bg-bg-error-primary_inverse disabled:bg-bg-disabled",
+        criticalInverse:
+          "border typo-button-label-xs bg-transparent border-border-error_inverse text-text-primary_on-brand hover:border-border-error_inverse_hover disabled:text-text-error-secondary active:border-border-error_inverse disabled:bg-bg-error-primary_inverse",
+        link: "text-text-tertiary hover:text-text-primary active:text-text-tertiary dark:hover:bg-accent/50",
+        ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
       },
     },
