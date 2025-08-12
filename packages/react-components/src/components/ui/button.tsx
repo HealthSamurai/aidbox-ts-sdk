@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "bg-bg-error-primary_inverse text-text-primary_on-brand shadow-xs hover:bg-bg-error-primary_inverse_hover active:bg-bg-error-primary_inverse disabled:bg-bg-disabled",
         criticalInverse:
           "border typo-button-label-xs bg-transparent border-border-error_inverse text-text-primary_on-brand hover:border-border-error_inverse_hover disabled:text-text-error-secondary active:border-border-error_inverse disabled:bg-bg-error-primary_inverse",
-        link: "text-text-tertiary hover:text-text-primary active:text-text-tertiary dark:hover:bg-accent/50",
+        link: "text-text-tertiary hover:text-text-primary active:text-text-tertiary ",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
       },

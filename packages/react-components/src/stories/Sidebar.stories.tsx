@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { 
-  Sidebar, 
-  SidebarProvider, 
-  SidebarTrigger, 
-  SidebarContent, 
-  SidebarHeader, 
+import type { Meta, StoryObj } from "@storybook/react";
+import {
+  Sidebar,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarContent,
+  SidebarHeader,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
@@ -19,17 +19,17 @@ import {
   SidebarMenuSkeleton,
   SidebarMenuSub,
   SidebarMenuSubItem,
-  SidebarMenuSubButton
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { 
-  Home, 
-  Inbox, 
-  Calendar, 
-  Search, 
-  Settings, 
-  User, 
-  Mail, 
+  SidebarMenuSubButton,
+} from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import {
+  Home,
+  Inbox,
+  Calendar,
+  Search,
+  Settings,
+  User,
+  Mail,
   Bell,
   FileText,
   Users,
@@ -39,43 +39,122 @@ import {
   MoreHorizontal,
   ChevronDown,
   Archive,
-  Trash2
-} from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+  Trash2,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const meta: Meta<typeof Sidebar> = {
-  title: 'Components/Sidebar',
+  title: "Components/Sidebar",
   component: Sidebar,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
 type Story = StoryObj<typeof Sidebar>;
 
 // Sample data for the stories
-const mainMenuItems = [
-  { title: "Home", url: "#", icon: Home },
-  { title: "Inbox", url: "#", icon: Inbox, badge: "12" },
-  { title: "Calendar", url: "#", icon: Calendar },
-  { title: "Search", url: "#", icon: Search },
-  { title: "Settings", url: "#", icon: Settings },
-];
+const mainMenuItems = [{ title: "Home", url: "#", icon: Home }];
 
 const projectItems = [
-  { title: "Design System", url: "#", icon: FileText },
-  { title: "Marketing Site", url: "#", icon: Users },
-  { title: "Analytics", url: "#", icon: BarChart3 },
+  { title: "Resources", url: "#", icon: Inbox },
+  { title: "REST Console", url: "#", icon: Calendar },
+  { title: "DB Console", url: "#", icon: Search },
+  { title: "Notebooks", url: "#", icon: Settings },
 ];
 
 const teamItems = [
-  { title: "Engineering", url: "#", icon: Users },
-  { title: "Marketing", url: "#", icon: Mail },
-  { title: "Sales", url: "#", icon: Bell },
+  { title: "API", url: "#", icon: Users },
+  { title: "Database", url: "#", icon: Mail },
+  { title: "IAM", url: "#", icon: Bell },
+  { title: "FHIR Artefact Registry", url: "#", icon: Users },
+  { title: "Plugins", url: "#", icon: Mail },
+  { title: "Settings", url: "#", icon: Bell },
 ];
+
+export const AidboxSidebar: Story = {
+  render: () => (
+    <SidebarProvider>
+      <div className="flex h-screen w-full">
+        <Sidebar>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {mainMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={item.title === "Home"}
+                      >
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {projectItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                      {item.badge && (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {teamItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <a href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                      {item.badge && (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+      </div>
+    </SidebarProvider>
+  ),
+};
 
 // Basic Sidebar Story
 export const Default: Story = {
@@ -99,7 +178,9 @@ export const Default: Story = {
                           <span>{item.title}</span>
                         </a>
                       </SidebarMenuButton>
-                      {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
+                      {item.badge && (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      )}
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
@@ -123,16 +204,21 @@ export const Default: Story = {
               <div className="aspect-video rounded-xl bg-muted/50 p-4">
                 <h3 className="font-medium">Content Area</h3>
                 <p className="text-sm text-muted-foreground mt-2">
-                  This is the main content area. The sidebar can be toggled using the button in the header.
+                  This is the main content area. The sidebar can be toggled
+                  using the button in the header.
                 </p>
               </div>
               <div className="aspect-video rounded-xl bg-muted/50 p-4">
                 <h3 className="font-medium">Card 2</h3>
-                <p className="text-sm text-muted-foreground mt-2">Another content card</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Another content card
+                </p>
               </div>
               <div className="aspect-video rounded-xl bg-muted/50 p-4">
                 <h3 className="font-medium">Card 3</h3>
-                <p className="text-sm text-muted-foreground mt-2">Yet another content card</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Yet another content card
+                </p>
               </div>
             </div>
           </main>
@@ -180,7 +266,8 @@ export const CollapsibleIcon: Story = {
             <div className="rounded-xl bg-muted/50 p-6">
               <h3 className="font-medium mb-2">Collapsible Icon Sidebar</h3>
               <p className="text-sm text-muted-foreground">
-                This sidebar collapses to show only icons. Hover over the icons to see tooltips with the full labels.
+                This sidebar collapses to show only icons. Hover over the icons
+                to see tooltips with the full labels.
               </p>
             </div>
           </main>
@@ -206,7 +293,10 @@ export const FloatingVariant: Story = {
                 <SidebarMenu>
                   {mainMenuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={item.title === "Home"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={item.title === "Home"}
+                      >
                         <a href={item.url}>
                           <item.icon />
                           <span>{item.title}</span>
@@ -228,7 +318,8 @@ export const FloatingVariant: Story = {
             <div className="rounded-xl bg-muted/50 p-6">
               <h3 className="font-medium mb-2">Floating Style</h3>
               <p className="text-sm text-muted-foreground">
-                This sidebar has a floating style with rounded corners and shadow.
+                This sidebar has a floating style with rounded corners and
+                shadow.
               </p>
             </div>
           </main>
@@ -252,7 +343,7 @@ export const ComplexSidebar: Story = {
               <h2 className="text-lg font-semibold">Dashboard</h2>
             </div>
           </SidebarHeader>
-          
+
           <SidebarContent>
             {/* Main Navigation */}
             <SidebarGroup>
@@ -261,13 +352,18 @@ export const ComplexSidebar: Story = {
                 <SidebarMenu>
                   {mainMenuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={item.title === "Home"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={item.title === "Home"}
+                      >
                         <a href={item.url}>
                           <item.icon />
                           <span>{item.title}</span>
                         </a>
                       </SidebarMenuButton>
-                      {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
+                      {item.badge && (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <SidebarMenuAction showOnHover>
@@ -349,7 +445,10 @@ export const ComplexSidebar: Story = {
                       <ChevronDown className="ml-auto" />
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+                  <DropdownMenuContent
+                    side="top"
+                    className="w-[--radix-popper-anchor-width]"
+                  >
                     <DropdownMenuItem>
                       <span>Account</span>
                     </DropdownMenuItem>
@@ -421,7 +520,7 @@ export const WithSubmenus: Story = {
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  
+
                   <Collapsible defaultOpen className="group/collapsible">
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
@@ -516,7 +615,8 @@ export const WithSubmenus: Story = {
             <div className="rounded-xl bg-muted/50 p-6">
               <h3 className="font-medium mb-2">Collapsible Navigation</h3>
               <p className="text-sm text-muted-foreground">
-                Some menu items have expandable submenus with additional navigation options.
+                Some menu items have expandable submenus with additional
+                navigation options.
               </p>
             </div>
           </main>
@@ -548,9 +648,9 @@ export const LoadingState: Story = {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-            
+
             <SidebarSeparator />
-            
+
             <SidebarGroup>
               <SidebarGroupLabel>Projects</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -574,7 +674,8 @@ export const LoadingState: Story = {
             <div className="rounded-xl bg-muted/50 p-6">
               <h3 className="font-medium mb-2">Loading Skeletons</h3>
               <p className="text-sm text-muted-foreground">
-                This shows how the sidebar looks while content is loading using skeleton components.
+                This shows how the sidebar looks while content is loading using
+                skeleton components.
               </p>
             </div>
           </main>

@@ -23,12 +23,10 @@
 }
 
 .typo-button-label-xs {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-normal);
   line-height: var(--font-leading-4);
-  text-transform: uppercase;
-  letter-spacing: var(--font-tracking-tight);
 }
 
 /* Classic typography */

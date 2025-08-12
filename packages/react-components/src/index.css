@@ -11,8 +11,8 @@
 @theme {
   /* Новые переменные */
   --color-text-primary: var(--color-neutral-900);
-  --color-text-secondary: var(--color-neutral-700);
-  --color-text-secondary_hover: var(--color-neutral-800);
+  --color-text-secondary: var(--color-neutral-500);
+  --color-text-secondary_hover: var(--color-neutral-600);
   --color-text-primary_on-brand: var(--color-neutral-50);
   --color-text-secondary_on-brand: var(--color-neutral-100);
   --color-text-tertiary: var(--color-neutral-500);
@@ -27,10 +27,10 @@
   --color-text-brand-secondary: var(--color-brand-300);
   --color-text-brand-secondary_hover: var(--color-brand-400);
   --color-text-error-primary: var(--color-red-500);
-  --color-text-error-secondary: var(--color-brand-400);
+  --color-text-error-secondary: var(--color-red-400);
   --color-text-success-primary: var(--color-green-500);
   --color-text-warning-primary: var(--color-yellow-500);
-  --color-white: #ffffffff;
+  --color-white: #ffffff;
   --color-border-primary: var(--color-neutral-300);
   --color-border-primary_hover: var(--color-neutral-400);
   --color-border-secondary: var(--color-neutral-200);
@@ -40,13 +40,19 @@
   --color-border-error_inverse: var(--color-red-400);
   --color-border-error_inverse_hover: var(--color-red-300);
   --color-border-success: var(--color-green-500);
-  --color-bg-primary: var(--white);
+  --color-bg-primary: #ffffff;
   --color-bg-primary_inverse: var(--color-neutral-900);
   --color-bg-secondary: var(--color-neutral-50);
   --color-bg-tertiary: var(--color-neutral-100);
   --color-bg-quaternary: var(--color-neutral-200);
   --color-bg-overlay: var(--color-neutral-900);
   --color-bg-disabled: var(--color-neutral-300);
+
+  --color-bg-brand-primary: var(--color-brand-50);
+  --color-bg-brand-primary_inverse: var(--color-brand-500);
+  --color-bg-brand-secondary: var(--color-brand-100);
+  --color-bg-brand-tertiary: var(--color-brand-200);
+
   --color-bg-link: var(--color-blue-500);
   --color-bg-link_hover: var(--color-blue-600);
   --color-bg-error-primary: var(--color-red-50);
@@ -64,10 +70,11 @@
   --color-fg-primary_inverse: var(--white);
   --color-fg-primary_on-brand: var(--color-neutral-50);
   --color-fg-secondary: var(--color-neutral-700);
+  --color-fg-secondary_inverse: var(--color-neutral-400);
   --color-fg-secondary_hover: var(--color-neutral-800);
   --color-fg-secondary_on-brand: var(--color-neutral-100);
-  --color-fg-tertiary: var(--color-neutral-400);
-  --color-fg-tertiary_hover: var(--color-neutral-500);
+  --color-fg-tertiary: var(--color-neutral-500);
+  --color-fg-tertiary_hover: var(--color-neutral-600);
   --color-fg-tertiary_on-brand: var(--color-neutral-200);
   --color-fg-disabled: var(--color-neutral-300);
   --color-fg-brand-primary: var(--color-brand-500);
