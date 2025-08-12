@@ -127,7 +127,8 @@
 }
 /* Styles for shadcn/ui supporting. Will be revoved when all HS components will be ready c */
 :root {
-  --background: var(--color-surface-0);
+  /* --background: var(--color-surface-0); */
+  --background: white;
   --foreground: var(--color-elements-readable);
   --card: var(--color-surface-0);
   --card-foreground: var(--color-elements-readable);
