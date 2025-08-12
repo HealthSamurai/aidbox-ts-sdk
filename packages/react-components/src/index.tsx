@@ -1,7 +1,3 @@
-import type React from "react";
+import { Button } from "./shadcn/components/ui/button";
 
-export function Button({
-	children,
-}: React.PropsWithChildren<Record<string, never>>) {
-	return <button type="button">{children}</button>;
-}
+export { Button };
