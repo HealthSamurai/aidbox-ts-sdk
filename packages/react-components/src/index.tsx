@@ -12,12 +12,6 @@ if (typeof window !== "undefined" && document.getElementById("root")) {
 }
 
 // UI Components
-export {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./components/ui/accordion";
 export { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 export {
   AlertDialog,
@@ -52,13 +46,7 @@ export {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
-export {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "./components/ui/carousel";
+
 export { Checkbox } from "./components/ui/checkbox";
 export {
   Collapsible,
