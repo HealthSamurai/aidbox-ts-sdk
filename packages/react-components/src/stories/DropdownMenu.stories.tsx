@@ -142,7 +142,7 @@ export const WithCheckboxes: Story = {
           <Button variant="secondary">View Options</Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="w-56">
+        <DropdownMenuContent className="w-[176px]">
           <DropdownMenuLabel>Sidebar control</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuCheckboxItem
