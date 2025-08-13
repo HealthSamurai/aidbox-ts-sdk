@@ -1,5 +1,5 @@
 import { Slot } from "@radix-ui/react-slot";
-import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
@@ -13,7 +13,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
 		<ol
 			data-slot="breadcrumb-list"
 			className={cn(
-				"text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-2.5",
+				"text-text-tertiary typo-body flex flex-wrap items-center break-words gap-2",
 				className,
 			)}
 			{...props}
@@ -25,7 +25,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 	return (
 		<li
 			data-slot="breadcrumb-item"
-			className={cn("inline-flex items-center gap-1.5", className)}
+			className={cn("inline-flex items-center", className)}
 			{...props}
 		/>
 	);
@@ -43,7 +43,12 @@ function BreadcrumbLink({
 	return (
 		<Comp
 			data-slot="breadcrumb-link"
-			className={cn("hover:text-foreground transition-colors", className)}
+			className={cn(
+				"typo-body bg-bg-tertiary text-text-tertiary rounded-md px-2 py-1 transition-colors",
+				"hover:text-text-secondary",
+				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -58,7 +63,10 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
 			role="link"
 			aria-disabled="true"
 			aria-current="page"
-			className={cn("text-foreground font-normal", className)}
+			className={cn(
+				"typo-page-header text-text-primary px-0 py-0.5",
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -74,10 +82,10 @@ function BreadcrumbSeparator({
 			data-slot="breadcrumb-separator"
 			role="presentation"
 			aria-hidden="true"
-			className={cn("[&>svg]:size-3.5", className)}
+			className={cn("[&>svg]:size-3.5 text-text-quternary text-xs", className)}
 			{...props}
 		>
-			{children ?? <ChevronRight />}
+			{children ?? "/"}
 		</li>
 	);
 }

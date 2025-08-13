@@ -1,6 +1,16 @@
 // biome-ignore-all lint/a11y/useValidAnchor: Useless in stories
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { GalleryVerticalEnd } from "lucide-react";
+import {
+	Bell,
+	Calendar,
+	GalleryVerticalEnd,
+	Home,
+	Inbox,
+	Mail,
+	Search,
+	Settings,
+	Users,
+} from "lucide-react";
 import type * as React from "react";
 import {
 	Breadcrumb,
@@ -15,9 +25,11 @@ import {
 	Sidebar,
 	SidebarContent,
 	SidebarGroup,
+	SidebarGroupContent,
 	SidebarHeader,
 	SidebarInset,
 	SidebarMenu,
+	SidebarMenuBadge,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarMenuSub,
@@ -25,6 +37,7 @@ import {
 	SidebarMenuSubItem,
 	SidebarProvider,
 	SidebarRail,
+	SidebarSeparator,
 	SidebarTrigger,
 } from "#shadcn/components/ui/sidebar";
 
@@ -268,3 +281,104 @@ export const Demo = {
 		</SidebarProvider>
 	),
 } satisfies Story;
+
+// Aidbox
+
+type AidboxSidebarItem = {
+	title: string;
+	url: string;
+	icon: React.FC;
+	badge?: React.ReactNode;
+};
+
+const mainMenuItems: AidboxSidebarItem[] = [
+	{ title: "Home", url: "#", icon: Home },
+];
+
+const projectItems: AidboxSidebarItem[] = [
+	{ title: "Resources", url: "#", icon: Inbox },
+	{ title: "REST Console", url: "#", icon: Calendar },
+	{ title: "DB Console", url: "#", icon: Search },
+	{ title: "Notebooks", url: "#", icon: Settings },
+];
+
+const teamItems: AidboxSidebarItem[] = [
+	{ title: "API", url: "#", icon: Users },
+	{ title: "Database", url: "#", icon: Mail },
+	{ title: "IAM", url: "#", icon: Bell },
+	{ title: "FHIR Artefact Registry", url: "#", icon: Users },
+	{ title: "Plugins", url: "#", icon: Mail },
+	{ title: "Settings", url: "#", icon: Bell },
+];
+
+export const AidboxSidebar: Story = {
+	render: () => (
+		<SidebarProvider>
+			<div className="flex h-screen w-full">
+				<Sidebar>
+					<SidebarContent>
+						<SidebarGroup>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{mainMenuItems.map((item) => (
+										<SidebarMenuItem key={item.title}>
+											<SidebarMenuButton
+												asChild
+												isActive={item.title === "Home"}
+											>
+												<a href={item.url}>
+													<item.icon />
+													<span>{item.title}</span>
+												</a>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									))}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+						<SidebarSeparator />
+						<SidebarGroup>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{projectItems.map((item) => (
+										<SidebarMenuItem key={item.title}>
+											<SidebarMenuButton asChild>
+												<a href={item.url}>
+													<item.icon />
+													<span>{item.title}</span>
+												</a>
+											</SidebarMenuButton>
+											{item.badge && (
+												<SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+											)}
+										</SidebarMenuItem>
+									))}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+						<SidebarSeparator />
+						<SidebarGroup>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{teamItems.map((item) => (
+										<SidebarMenuItem key={item.title}>
+											<SidebarMenuButton asChild>
+												<a href={item.url}>
+													<item.icon />
+													<span>{item.title}</span>
+												</a>
+											</SidebarMenuButton>
+											{item.badge && (
+												<SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+											)}
+										</SidebarMenuItem>
+									))}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+					</SidebarContent>
+				</Sidebar>
+			</div>
+		</SidebarProvider>
+	),
+};
