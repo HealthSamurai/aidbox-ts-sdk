@@ -12,7 +12,7 @@ type Story = StoryObj<typeof meta>;
 export const Demo = {
 	render: () => (
 		<Button
-			variant="outline"
+			variant="secondary"
 			onClick={() =>
 				toast("Event has been created", {
 					description: "Sunday, December 03, 2023 at 9:00 AM",

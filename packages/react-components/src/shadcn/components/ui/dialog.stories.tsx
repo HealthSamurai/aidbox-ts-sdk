@@ -25,7 +25,7 @@ export const Demo = {
 		<Dialog>
 			<form>
 				<DialogTrigger asChild>
-					<Button variant="outline">Open Dialog</Button>
+					<Button variant="secondary">Open Dialog</Button>
 				</DialogTrigger>
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader>
@@ -47,7 +47,7 @@ export const Demo = {
 					</div>
 					<DialogFooter>
 						<DialogClose asChild>
-							<Button variant="outline">Cancel</Button>
+							<Button variant="secondary">Cancel</Button>
 						</DialogClose>
 						<Button type="submit">Save changes</Button>
 					</DialogFooter>

@@ -35,7 +35,13 @@ function PaginationContent({
 }
 
 function PaginationItem({ ...props }: React.ComponentProps<"li">) {
-	return <li data-slot="pagination-item" {...props} />;
+	return (
+		<li
+			className="hover:bg-accent rounded-md"
+			data-slot="pagination-item"
+			{...props}
+		/>
+	);
 }
 
 type PaginationLinkProps = {
@@ -46,7 +52,7 @@ type PaginationLinkProps = {
 function PaginationLink({
 	className,
 	isActive,
-	size = "icon",
+	size = "small",
 	...props
 }: PaginationLinkProps) {
 	return (
@@ -56,7 +62,7 @@ function PaginationLink({
 			data-active={isActive}
 			className={cn(
 				buttonVariants({
-					variant: isActive ? "outline" : "ghost",
+					variant: isActive ? "secondary" : "ghost",
 					size,
 				}),
 				className,
@@ -73,7 +79,7 @@ function PaginationPrevious({
 	return (
 		<PaginationLink
 			aria-label="Go to previous page"
-			size="default"
+			size="small"
 			className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
 			{...props}
 		>
@@ -90,7 +96,7 @@ function PaginationNext({
 	return (
 		<PaginationLink
 			aria-label="Go to next page"
-			size="default"
+			size="regular"
 			className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
 			{...props}
 		>

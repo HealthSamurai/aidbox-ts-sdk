@@ -1,0 +1,91 @@
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-rendering: optimizeLegibility;
+	font-feature-settings:
+		"kern" 1,
+		"liga" 1;
+}
+
+.typo-body {
+	font-size: var(--font-size-sm);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-5);
+}
+
+.typo-label {
+	font-size: var(--font-size-sm);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--font-leading-5);
+}
+
+.typo-page-header {
+	font-size: var(--font-size-xl);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-medium);
+	line-height: var(--font-leading-7);
+	letter-spacing: var(--font-tracking-tight);
+}
+
+.typo-button-label-xs {
+	font-size: var(--font-size-sm);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-4);
+}
+
+.h1 {
+	font-size: var(--font-size-4xl);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-extrabold);
+	line-height: var(--font-leading-none);
+	letter-spacing: var(--font-tracking-tight);
+}
+
+@media (min-width: 1024px) {
+	.h1 {
+		font-size: var(--font-size-5xl);
+	}
+}
+
+.h2 {
+	font-size: var(--font-size-3xl);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--font-leading-none);
+	letter-spacing: var(--font-tracking-tight);
+}
+
+.h3 {
+	font-size: var(--font-size-2xl);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--font-leading-none);
+	letter-spacing: var(--font-tracking-tight);
+}
+
+.h4 {
+	font-size: var(--font-size-xl);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--font-leading-none);
+	letter-spacing: var(--font-tracking-tight);
+}
+
+.h5 {
+	font-size: var(--font-size-lg);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--font-leading-none);
+	letter-spacing: var(--font-tracking-tight);
+}
+
+.h6 {
+	font-size: var(--font-size-base);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-semibold);
+	line-height: var(--font-leading-none);
+	letter-spacing: var(--font-tracking-tight);
+}

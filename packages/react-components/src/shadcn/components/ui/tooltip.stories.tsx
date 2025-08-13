@@ -17,7 +17,7 @@ export const Demo = {
 	render: () => (
 		<Tooltip>
 			<TooltipTrigger asChild>
-				<Button variant="outline">Hover</Button>
+				<Button variant="secondary">Hover</Button>
 			</TooltipTrigger>
 			<TooltipContent>
 				<p>Add to library</p>

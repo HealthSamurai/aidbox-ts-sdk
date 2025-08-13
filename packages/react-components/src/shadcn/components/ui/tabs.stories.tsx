@@ -19,15 +19,21 @@ import {
 
 const meta = {
 	title: "Component/Tabs",
+	argTypes: {
+		variant: {
+			options: ["button", "dashed"],
+			control: { type: "select" },
+		},
+	},
 } satisfies Meta;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Demo = {
-	render: () => (
+	render: (props) => (
 		<div className="flex w-full max-w-sm flex-col gap-6">
-			<Tabs defaultValue="account">
+			<Tabs defaultValue="account" {...props}>
 				<TabsList>
 					<TabsTrigger value="account">Account</TabsTrigger>
 					<TabsTrigger value="password">Password</TabsTrigger>

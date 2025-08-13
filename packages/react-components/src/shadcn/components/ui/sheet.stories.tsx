@@ -24,7 +24,7 @@ export const Demo = {
 	render: () => (
 		<Sheet>
 			<SheetTrigger asChild>
-				<Button variant="outline">Open</Button>
+				<Button variant="secondary">Open</Button>
 			</SheetTrigger>
 			<SheetContent>
 				<SheetHeader>
@@ -46,7 +46,7 @@ export const Demo = {
 				<SheetFooter>
 					<Button type="submit">Save changes</Button>
 					<SheetClose asChild>
-						<Button variant="outline">Close</Button>
+						<Button variant="secondary">Close</Button>
 					</SheetClose>
 				</SheetFooter>
 			</SheetContent>
