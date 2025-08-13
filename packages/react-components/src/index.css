@@ -80,6 +80,7 @@
   --color-fg-disabled: var(--color-neutral-300);
   --color-fg-brand-primary: var(--color-brand-500);
   --color-fg-brand-secondary: var(--color-brand-300);
+  --color-fg-link: var(--color-blue-500);
   --color-fg-error-primary: var(--color-red-500);
   --color-fg-error-secondary: var(--color-red-400);
   --color-fg-success-primary: var(--color-green-500);

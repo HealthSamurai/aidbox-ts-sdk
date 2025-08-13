@@ -1,23 +1,23 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
-import { 
-  MoreHorizontal, 
-  User, 
-  SettingsIcon, 
-  LogOut, 
-  Edit, 
-  Copy, 
-  Trash, 
-  Eye, 
-  EyeOff, 
+import type { Meta, StoryObj } from "@storybook/react";
+import { useState } from "react";
+import {
+  MoreHorizontal,
+  User,
+  SettingsIcon,
+  LogOut,
+  Edit,
+  Copy,
+  Trash,
+  Eye,
+  EyeOff,
   Download,
   Share,
   Archive,
   Star,
   Mail,
   Phone,
-  MapPin
-} from 'lucide-react';
+  MapPin,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,17 +33,17 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuGroup,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const meta: Meta<typeof DropdownMenu> = {
-  title: 'Components/DropdownMenu',
+  title: "Components/DropdownMenu",
   component: DropdownMenu,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -148,21 +148,18 @@ export const WithCheckboxes: Story = {
             checked={showPanel}
             onCheckedChange={setShowPanel}
           >
-            <Eye className="mr-2 h-4 w-4" />
             Show Panel
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={showSidebar}
             onCheckedChange={setShowSidebar}
           >
-            <Eye className="mr-2 h-4 w-4" />
             Show Sidebar
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={showToolbar}
             onCheckedChange={setShowToolbar}
           >
-            <Eye className="mr-2 h-4 w-4" />
             Show Toolbar
           </DropdownMenuCheckboxItem>
           <DropdownMenuSeparator />
@@ -178,7 +175,7 @@ export const WithCheckboxes: Story = {
 
 export const WithRadioGroup: Story = {
   render: () => {
-    const [theme, setTheme] = useState('light');
+    const [theme, setTheme] = useState("light");
 
     return (
       <DropdownMenu>
@@ -189,15 +186,9 @@ export const WithRadioGroup: Story = {
           <DropdownMenuLabel>Theme</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-            <DropdownMenuRadioItem value="light">
-              Light
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="dark">
-              Dark
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="system">
-              System
-            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -207,7 +198,7 @@ export const WithRadioGroup: Story = {
 
 export const UserProfile: Story = {
   render: () => {
-    const [selectedAction, setSelectedAction] = useState<string>('');
+    const [selectedAction, setSelectedAction] = useState<string>("");
 
     return (
       <div className="space-y-4">
@@ -236,19 +227,22 @@ export const UserProfile: Story = {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => setSelectedAction('Profile')}>
+              <DropdownMenuItem onClick={() => setSelectedAction("Profile")}>
                 <User className="mr-2 h-4 w-4" />
                 Profile
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedAction('Settings')}>
+              <DropdownMenuItem onClick={() => setSelectedAction("Settings")}>
                 <SettingsIcon className="mr-2 h-4 w-4" />
                 Settings
                 <DropdownMenuShortcut>⌘,</DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setSelectedAction('Log out')} variant="destructive">
+            <DropdownMenuItem
+              onClick={() => setSelectedAction("Log out")}
+              variant="destructive"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Log out
               <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
@@ -262,34 +256,35 @@ export const UserProfile: Story = {
 
 export const ContextualActions: Story = {
   render: () => {
-    const [favorites, setFavorites] = useState<string[]>(['item-1']);
+    const [favorites, setFavorites] = useState<string[]>(["item-1"]);
     const [visibility, setVisibility] = useState<Record<string, boolean>>({
-      'item-1': true,
-      'item-2': false,
-      'item-3': true,
+      "item-1": true,
+      "item-2": false,
+      "item-3": true,
     });
 
     const toggleFavorite = (id: string) => {
-      setFavorites(prev => 
-        prev.includes(id) 
-          ? prev.filter(item => item !== id)
-          : [...prev, id]
+      setFavorites((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
       );
     };
 
     const toggleVisibility = (id: string) => {
-      setVisibility(prev => ({ ...prev, [id]: !prev[id] }));
+      setVisibility((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
     return (
       <div className="space-y-4">
-        {['item-1', 'item-2', 'item-3'].map((itemId) => (
-          <div key={itemId} className="flex items-center justify-between p-4 border rounded-lg">
+        {["item-1", "item-2", "item-3"].map((itemId) => (
+          <div
+            key={itemId}
+            className="flex items-center justify-between p-4 border rounded-lg"
+          >
             <div>
-              <h4 className="font-medium">Document {itemId.split('-')[1]}</h4>
+              <h4 className="font-medium">Document {itemId.split("-")[1]}</h4>
               <p className="text-sm text-muted-foreground">
-                {visibility[itemId] ? 'Visible' : 'Hidden'} • 
-                {favorites.includes(itemId) ? ' Favorited' : ' Not favorited'}
+                {visibility[itemId] ? "Visible" : "Hidden"} •
+                {favorites.includes(itemId) ? " Favorited" : " Not favorited"}
               </p>
             </div>
             <DropdownMenu>
@@ -324,7 +319,7 @@ export const ContextualActions: Story = {
                   ) : (
                     <EyeOff className="mr-2 h-4 w-4" />
                   )}
-                  {visibility[itemId] ? 'Hide' : 'Show'}
+                  {visibility[itemId] ? "Hide" : "Show"}
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
