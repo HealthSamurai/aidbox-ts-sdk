@@ -141,6 +141,7 @@ export const WithCheckboxes: Story = {
         <DropdownMenuTrigger asChild>
           <Button variant="secondary">View Options</Button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent className="w-56">
           <DropdownMenuLabel>Sidebar control</DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -162,7 +163,6 @@ export const WithCheckboxes: Story = {
           >
             Expand on hover
           </DropdownMenuCheckboxItem>
-          <DropdownMenuSeparator />
         </DropdownMenuContent>
       </DropdownMenu>
     );
