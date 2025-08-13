@@ -26,7 +26,7 @@ export const Demo = {
 	render: () => (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline">Open</Button>
+				<Button variant="secondary">Open</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56" align="start">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>

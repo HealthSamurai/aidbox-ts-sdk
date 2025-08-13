@@ -48,7 +48,7 @@ export const Demo = {
 		return (
 			<Drawer>
 				<DrawerTrigger asChild>
-					<Button variant="outline">Open Drawer</Button>
+					<Button variant="secondary">Open Drawer</Button>
 				</DrawerTrigger>
 				<DrawerContent>
 					<div className="mx-auto w-full max-w-sm">
@@ -61,8 +61,8 @@ export const Demo = {
 						<div className="p-4 pb-0">
 							<div className="flex items-center justify-center space-x-2">
 								<Button
-									variant="outline"
-									size="icon"
+									variant="secondary"
+									size="small"
 									className="h-8 w-8 shrink-0 rounded-full"
 									onClick={() => onClick(-10)}
 									disabled={goal <= 200}
@@ -79,8 +79,8 @@ export const Demo = {
 									</div>
 								</div>
 								<Button
-									variant="outline"
-									size="icon"
+									variant="secondary"
+									size="small"
 									className="h-8 w-8 shrink-0 rounded-full"
 									onClick={() => onClick(10)}
 									disabled={goal >= 400}
@@ -108,7 +108,7 @@ export const Demo = {
 						<DrawerFooter>
 							<Button>Submit</Button>
 							<DrawerClose asChild>
-								<Button variant="outline">Cancel</Button>
+								<Button variant="secondary">Cancel</Button>
 							</DrawerClose>
 						</DrawerFooter>
 					</div>

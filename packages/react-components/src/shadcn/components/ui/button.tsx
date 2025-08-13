@@ -5,32 +5,63 @@ import type * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+	cn(
+		"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg transition-all ",
+		"outline-none cursor-pointer",
+		"disabled:cursor-not-allowed",
+		"[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
+		"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+		"aria-invalid:ring-destructive/20",
+	),
 	{
 		variants: {
 			variant: {
-				default:
-					"bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-				destructive:
-					"bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-				outline:
-					"border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+				primary:
+					"bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link_hover active:bg-bg-link disabled:bg-bg-disabled",
 				secondary:
-					"bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
+					"border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled hover:bg-bg-secondary active:bg-bg-primary active:text-text-tertiary disabled:hover:bg-bg-primary",
+				link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
 				ghost:
-					"hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-				link: "text-primary underline-offset-4 hover:underline",
+					"text-text-secondary hover:text-text-primary disabled:text-text-disabled hover:bg-bg-secondary active:bg-bg-tertiary disabled:hover:bg-bg-primary",
 			},
 			size: {
-				default: "h-9 px-4 py-2 has-[>svg]:px-3",
-				sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-				lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-				icon: "size-9",
+				regular: "h-9 px-4 typo-label",
+				small: "h-6 px-2 typo-button-label-xs gap-1 rounded-md",
+			},
+			danger: {
+				true: "",
+				false: "",
 			},
 		},
+		compoundVariants: [
+			{
+				variant: "primary",
+				danger: true,
+				class:
+					"bg-bg-error-primary_inverse text-text-primary_on-brand hover:bg-bg-error-primary_inverse_hover active:bg-bg-error-primary_inverse disabled:bg-bg-disabled",
+			},
+			{
+				variant: "secondary",
+				danger: true,
+				class:
+					"border-border-error text-text-error-primary hover:text-text-error-primary_hover hover:bg-bg-error-secondary active:bg-bg-primary active:text-text-error-primary_on-brand",
+			},
+			{
+				variant: "link",
+				danger: true,
+				class: "text-text-error-secondary hover:text-text-error-primary",
+			},
+			{
+				variant: "ghost",
+				danger: true,
+				class:
+					"text-text-error-secondary hover:text-text-error-primary hover:bg-bg-error-secondary active:bg-bg-error-tertiary",
+			},
+		],
 		defaultVariants: {
-			variant: "default",
-			size: "default",
+			variant: "primary",
+			size: "regular",
+			danger: false,
 		},
 	},
 );
@@ -39,18 +70,20 @@ function Button({
 	className,
 	variant,
 	size,
+	danger = false,
 	asChild = false,
 	...props
 }: React.ComponentProps<"button"> &
 	VariantProps<typeof buttonVariants> & {
 		asChild?: boolean;
+		danger?: boolean;
 	}) {
 	const Comp = asChild ? Slot : "button";
 
 	return (
 		<Comp
 			data-slot="button"
-			className={cn(buttonVariants({ variant, size, className }))}
+			className={cn(buttonVariants({ variant, size, danger, className }))}
 			{...props}
 		/>
 	);

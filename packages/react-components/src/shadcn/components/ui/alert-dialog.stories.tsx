@@ -23,7 +23,7 @@ export const Demo = {
 	render: () => (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant="outline">Show Dialog</Button>
+				<Button variant="secondary">Show Dialog</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>

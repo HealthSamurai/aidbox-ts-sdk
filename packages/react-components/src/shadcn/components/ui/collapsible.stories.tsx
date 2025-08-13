@@ -30,7 +30,7 @@ export const Demo = {
 						@peduarte starred 3 repositories
 					</h4>
 					<CollapsibleTrigger asChild>
-						<Button variant="ghost" size="icon" className="size-8">
+						<Button variant="ghost" size="small" className="size-8">
 							<ChevronsUpDown />
 							<span className="sr-only">Toggle</span>
 						</Button>
