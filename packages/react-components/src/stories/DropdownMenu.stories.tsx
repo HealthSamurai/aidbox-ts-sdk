@@ -142,31 +142,27 @@ export const WithCheckboxes: Story = {
           <Button variant="secondary">View Options</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>View Settings</DropdownMenuLabel>
+          <DropdownMenuLabel>Sidebar control</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuCheckboxItem
             checked={showPanel}
             onCheckedChange={setShowPanel}
           >
-            Show Panel
+            Expanded
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={showSidebar}
             onCheckedChange={setShowSidebar}
           >
-            Show Sidebar
+            Collapsed
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem
             checked={showToolbar}
             onCheckedChange={setShowToolbar}
           >
-            Show Toolbar
+            Expand on hover
           </DropdownMenuCheckboxItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <SettingsIcon className="mr-2 h-4 w-4" />
-            More Settings
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
