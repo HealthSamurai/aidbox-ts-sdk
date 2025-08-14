@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const meta = {
   title: "Components/Button",
@@ -18,7 +19,7 @@ const meta = {
     },
     variant: {
       control: "select",
-      options: ["primary", "outline", "link"],
+      options: ["primary", "outline", "link", "ghost"],
     },
 
     size: {
@@ -53,115 +54,50 @@ export const Default: Story = {
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="p-6  min-h-screen">
-      <div className=" rounded-lg p-6 shadow-sm">
+    <div className="p-6  min-h-screen flex justify-center items-center">
+      <div className=" rounded-lg p-6 shadow-sm w-280">
         {/* Header */}
-        <div className="flex items-center gap-3 py-3 border-b border-gray-200 mb-4">
-          <div className="w-30">Variant</div>
-          <div className="min-w-100 text-sm font-medium text-gray-600">
-            {" "}
-            Without icon{" "}
-          </div>
-          <div className="min-w-100 text-sm font-medium text-gray-600">
-            With icon
-          </div>
+
+        <div className="flex items-center mb-4 justify-between">
+          <div className="w-40 text-center" >Variants</div>
+          <div className="w-70 text-center text-sm text-text-secondary" >Danger: <Badge variant="outline" className="text-xs">false</Badge></div>
+          <div className="w-70 text-center text-sm text-text-secondary" >Danger: <Badge variant="outline" className="text-xs">true</Badge></div>
+          <div className="w-70 text-center text-sm text-text-secondary" >Disabled: <Badge variant="outline" className="text-xs">true</Badge></div>
         </div>
 
-        {/* normal variants */}
-        {(["primary", "outline", "link"] as const).map((variant) => (
-          <div className="flex gap-3 items-center py-3 ">
-            <div className="w-30"> {variant} </div>
-            <div key={variant} className="flex gap-3 items-center w-100">
-              <Button variant={variant}> Button </Button>
-              <Button variant={variant} disabled>
-                {" "}
-                Button{" "}
-              </Button>
-              <Button variant={variant} size="small">
-                {" "}
-                Button{" "}
-              </Button>
-              <Button variant={variant} size="small" disabled>
-                {" "}
-                Button{" "}
-              </Button>
-            </div>
-
-            <div key={variant} className="flex gap-3 items-center w-100">
-              <Button variant={variant}>
-                {" "}
-                <Trash2 /> Button{" "}
-              </Button>
-              <Button variant={variant} disabled>
-                {" "}
-                <Trash2 /> Button{" "}
-              </Button>
-              <Button variant={variant} size="small">
-                {" "}
-                <Trash2 /> Button{" "}
-              </Button>
-              <Button variant={variant} size="small" disabled>
-                {" "}
-                <Trash2 /> Button{" "}
-              </Button>
-            </div>
+        {(["regular", "small"] as const).map((size) => (
+          <div className=" items-center gap-3 py-3 border-gray-l00 border-t border-border-separator" key={size}>
+            {(["primary", "outline", "ghost", "link"] as const).map((variant) => (
+              <div key={variant} className="flex gap-3 items-center py-2 justify-between">
+                <div className="w-40 text-sm text-text-secondary" >
+                  <div className="flex mb-1"> <div className="w-15">Variant:</div> <Badge variant="outline" className="text-xs">{variant}</Badge> </div>
+                  <div className="flex"> <div className="w-15">Size:</div> <Badge variant="outline" className="text-xs">{size}</Badge> </div>
+                </div>
+                <div className="w-70 flex gap-3 justify-center">
+                  <Button size={size} variant={variant}> Button </Button>
+                  <Button size={size} variant={variant}> <Play /> Button </Button>
+                  <Button size={size} variant={variant}> <Play /> </Button>
+                </div>
+                <div className="w-70 flex gap-3 justify-center">
+                  <Button size={size} variant={variant} danger> Button </Button>
+                  <Button size={size} variant={variant} danger> <Play /> Button </Button>
+                  <Button size={size} variant={variant} danger> <Play /> </Button>
+                </div>
+                <div className="w-70 flex gap-3 justify-center">
+                  <Button size={size} variant={variant} disabled> Button </Button>
+                  <Button size={size} variant={variant} disabled> <Play /> Button </Button>
+                  <Button size={size} variant={variant} disabled> <Play /> </Button>
+                </div>
+              </div>
+            ))}
           </div>
         ))}
 
-        {/* danger variants */}
-        <div className="flex items-center gap-3 py-3 border-b border-gray-200 mt-8 mb-4">
-          <div className="w-30">Variant (danger)</div>
-          <div className="min-w-100 text-sm font-medium text-gray-600">
-            Without icon
-          </div>
-          <div className="min-w-100 text-sm font-medium text-gray-600">
-            With icon
-          </div>
-        </div>
-        {(["primary", "outline", "link"] as const).map((variant) => (
-          <div className="flex gap-3 items-center py-3 ">
-            <div className="w-30"> {variant} </div>
-            <div
-              key={`danger-${variant}`}
-              className="flex gap-3 items-center w-100"
-            >
-              <Button variant={variant} danger>
-                Button
-              </Button>
-              <Button variant={variant} danger disabled>
-                Button
-              </Button>
-              <Button variant={variant} size="small" danger>
-                Button
-              </Button>
-              <Button variant={variant} size="small" danger disabled>
-                Button
-              </Button>
-            </div>
 
-            <div
-              key={`danger-icons-${variant}`}
-              className="flex gap-3 items-center w-100"
-            >
-              <Button variant={variant} danger>
-                <Trash2 /> Button
-              </Button>
-              <Button variant={variant} danger disabled>
-                <Trash2 /> Button
-              </Button>
-              <Button variant={variant} danger size="small">
-                <Trash2 /> Button
-              </Button>
-              <Button variant={variant} danger size="small" disabled>
-                <Trash2 /> Button
-              </Button>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   ),
   parameters: {
-    layout: "fullscreen",
+    layout: "centered",
   },
 };
