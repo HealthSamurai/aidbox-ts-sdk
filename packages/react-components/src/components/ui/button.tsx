@@ -9,17 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       size: {
-        regular: "py-2 px-4 typo-label",
-        small: "px-2 py-1 typo-button-label-xs gap-1",
+        regular: "h-9 px-4 typo-label",
+        small: "h-6 px-2 typo-button-label-xs gap-1",
       },
       variant: {
         primary:
           "bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link_hover active:bg-bg-link disabled:bg-bg-disabled",
         outline:
-          "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled",
+          "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled hover:bg-bg-secondary active:bg-bg-primary active:text-text-tertiary disabled:hover:bg-bg-primary",
         link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
         ghost:
-          "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
+          "text-text-secondary hover:text-text-primary disabled:text-text-disabled hover:bg-bg-secondary active:bg-bg-tertiary disabled:hover:bg-bg-primary",
       },
       danger: {
         true: "",
@@ -36,12 +36,17 @@ const buttonVariants = cva(
       {
         variant: "outline",
         danger: true,
-        class: "border-border-error text-text-error-primary",
+        class: "border-border-error text-text-error-primary hover:text-text-error-primary_hover hover:bg-bg-error-secondary active:bg-bg-primary active:text-text-error-primary_on-brand",
       },
       {
         variant: "link",
         danger: true,
         class: "text-text-error-secondary hover:text-text-error-primary",
+      },
+      {
+        variant: "ghost",
+        danger: true,
+        class: "text-text-error-secondary hover:text-text-error-primary hover:bg-bg-error-secondary active:bg-bg-error-tertiary",
       },
     ],
     defaultVariants: {
