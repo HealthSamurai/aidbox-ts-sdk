@@ -12,6 +12,7 @@ export default defineConfig({
     },
   },
   build: {
+    emptyOutDir: false,
     lib: {
       name: "@panthevm_original/react-components",
       entry: path.resolve(__dirname, "./src/index.tsx"),
@@ -23,7 +24,8 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM'
-        }
+        },
+        assetFileNames: 'react-components.[ext]'
       }
     }
   }
