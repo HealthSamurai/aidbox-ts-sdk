@@ -15,7 +15,7 @@ const buttonVariants = cva(
       variant: {
         primary:
           "bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link_hover active:bg-bg-link disabled:bg-bg-disabled",
-        outline:
+        secondary:
           "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled hover:bg-bg-secondary active:bg-bg-primary active:text-text-tertiary disabled:hover:bg-bg-primary",
         link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
         ghost:
@@ -34,7 +34,7 @@ const buttonVariants = cva(
           "bg-bg-error-primary_inverse text-text-primary_on-brand hover:bg-bg-error-primary_inverse_hover active:bg-bg-error-primary_inverse disabled:bg-bg-disabled",
       },
       {
-        variant: "outline",
+        variant: "secondary",
         danger: true,
         class: "border-border-error text-text-error-primary hover:text-text-error-primary_hover hover:bg-bg-error-secondary active:bg-bg-primary active:text-text-error-primary_on-brand",
       },

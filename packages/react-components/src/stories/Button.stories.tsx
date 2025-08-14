@@ -67,7 +67,7 @@ export const AllVariants: Story = {
 
         {(["regular", "small"] as const).map((size) => (
           <div className=" items-center gap-3 py-3 border-gray-l00 border-t border-border-separator" key={size}>
-            {(["primary", "outline", "ghost", "link"] as const).map((variant) => (
+            {(["primary", "secondary", "ghost", "link"] as const).map((variant) => (
               <div key={variant} className="flex gap-3 items-center py-2 justify-between">
                 <div className="w-40 text-sm text-text-secondary" >
                   <div className="flex mb-1"> <div className="w-15">Variant:</div> <Badge variant="outline" className="text-xs">{variant}</Badge> </div>
