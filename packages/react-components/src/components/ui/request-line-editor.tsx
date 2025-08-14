@@ -79,3 +79,5 @@ function ReuqestLineEditor() {
 			</div>
 	);
 }
+
+export { ReuqestLineEditor }
