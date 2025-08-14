@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       size: {
         regular: "h-9 px-4 typo-label",
-        small: "h-6 px-2 typo-button-label-xs gap-1",
+        small: "h-6 px-2 typo-button-label-xs gap-1 rounded-md",
       },
       variant: {
         primary:
