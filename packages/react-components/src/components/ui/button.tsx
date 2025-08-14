@@ -18,6 +18,8 @@ const buttonVariants = cva(
         outline:
           "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled",
         link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
+        ghost:
+          "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
       },
       danger: {
         true: "",
