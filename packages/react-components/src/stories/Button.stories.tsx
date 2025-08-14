@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Trash, Trash2 } from "lucide-react";
-import * as React from "react";
+import { Trash2 } from "lucide-react";
 
 const meta = {
   title: "Components/Button",
@@ -14,16 +13,12 @@ const meta = {
     disabled: {
       control: "boolean",
     },
+    danger: {
+      control: "boolean",
+    },
     variant: {
       control: "select",
-      options: [
-        "primary",
-        "critical",
-        "outline",
-        "ghost",
-        "link",
-        "criticalInverse",
-      ],
+      options: ["primary", "outline", "link"],
     },
 
     size: {
@@ -41,10 +36,11 @@ export const Default: Story = {
     variant: "primary",
     size: "regular",
     disabled: false,
+    danger: false,
   },
   render: (args) => (
     <div
-      className={`p-6 ${args.variant === "criticalInverse" ? "bg-red-700" : "bg-white"} flex justify-center items-center rounded-lg p-10 shadow-sm gap-4`}
+      className={`bg-white flex justify-center items-center rounded-lg p-10 shadow-sm gap-4`}
     >
       <Button {...args}>Save</Button>
       <Button {...args}>
@@ -71,7 +67,8 @@ export const AllVariants: Story = {
           </div>
         </div>
 
-        {["primary", "critical", "outline", "ghost"].map((variant) => (
+        {/* normal variants */}
+        {(["primary", "outline", "link"] as const).map((variant) => (
           <div className="flex gap-3 items-center py-3 ">
             <div className="w-30"> {variant} </div>
             <div key={variant} className="flex gap-3 items-center w-100">
@@ -106,6 +103,57 @@ export const AllVariants: Story = {
               <Button variant={variant} size="small" disabled>
                 {" "}
                 <Trash2 /> Button{" "}
+              </Button>
+            </div>
+          </div>
+        ))}
+
+        {/* danger variants */}
+        <div className="flex items-center gap-3 py-3 border-b border-gray-200 mt-8 mb-4">
+          <div className="w-30">Variant (danger)</div>
+          <div className="min-w-100 text-sm font-medium text-gray-600">
+            Without icon
+          </div>
+          <div className="min-w-100 text-sm font-medium text-gray-600">
+            With icon
+          </div>
+        </div>
+        {(["primary", "outline", "link"] as const).map((variant) => (
+          <div className="flex gap-3 items-center py-3 ">
+            <div className="w-30"> {variant} </div>
+            <div
+              key={`danger-${variant}`}
+              className="flex gap-3 items-center w-100"
+            >
+              <Button variant={variant} danger>
+                Button
+              </Button>
+              <Button variant={variant} danger disabled>
+                Button
+              </Button>
+              <Button variant={variant} size="small" danger>
+                Button
+              </Button>
+              <Button variant={variant} size="small" danger disabled>
+                Button
+              </Button>
+            </div>
+
+            <div
+              key={`danger-icons-${variant}`}
+              className="flex gap-3 items-center w-100"
+            >
+              <Button variant={variant} danger>
+                <Trash2 /> Button
+              </Button>
+              <Button variant={variant} danger disabled>
+                <Trash2 /> Button
+              </Button>
+              <Button variant={variant} danger size="small">
+                <Trash2 /> Button
+              </Button>
+              <Button variant={variant} danger size="small" disabled>
+                <Trash2 /> Button
               </Button>
             </div>
           </div>

@@ -9,26 +9,43 @@ const buttonVariants = cva(
   {
     variants: {
       size: {
-        regular: "py-2 px-6 typo-label",
-        small: "py-1 px-2 text-xs gap-1",
+        regular: "py-2 px-4 typo-label",
+        small: "px-2 py-1 typo-button-label-xs gap-1",
       },
       variant: {
         primary:
           "bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link_hover active:bg-bg-link disabled:bg-bg-disabled",
         outline:
           "border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:bg-bg-tertiary hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled",
-        critical:
-          "bg-bg-error-primary_inverse text-text-primary_on-brand shadow-xs hover:bg-bg-error-primary_inverse_hover active:bg-bg-error-primary_inverse disabled:bg-bg-disabled",
-        criticalInverse:
-          "border typo-button-label-xs bg-transparent border-border-error_inverse text-text-primary_on-brand hover:border-border-error_inverse_hover disabled:text-text-error-secondary active:border-border-error_inverse disabled:bg-bg-error-primary_inverse",
-        link: "text-text-tertiary hover:text-text-primary active:text-text-tertiary ",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
+      },
+      danger: {
+        true: "",
+        false: "",
       },
     },
+    compoundVariants: [
+      {
+        variant: "primary",
+        danger: true,
+        class:
+          "bg-bg-error-primary_inverse text-text-primary_on-brand hover:bg-bg-error-primary_inverse_hover active:bg-bg-error-primary_inverse disabled:bg-bg-disabled",
+      },
+      {
+        variant: "outline",
+        danger: true,
+        class: "border-border-error text-text-error-primary",
+      },
+      {
+        variant: "link",
+        danger: true,
+        class: "text-text-error-secondary hover:text-text-error-primary",
+      },
+    ],
     defaultVariants: {
       variant: "primary",
       size: "regular",
+      danger: false,
     },
   }
 );
@@ -37,19 +54,20 @@ function Button({
   className,
   variant,
   size,
-
+  danger = false,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    danger?: boolean;
   }) {
   const Comp = asChild ? Slot : "button";
 
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, danger, className }))}
       {...props}
     />
   );
