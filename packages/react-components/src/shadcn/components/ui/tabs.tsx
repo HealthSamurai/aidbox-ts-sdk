@@ -55,7 +55,7 @@ function TabsTrigger({
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				"typo-label px-3 py-2 cursor-pointer text-text-tertiary data-[state=active]:text-text-primary border-b-2",
+				"h-10 typo-label px-3 py-2 cursor-pointer text-text-tertiary data-[state=active]:text-text-primary border-b-2",
 				"data-[state=active]:border-border-brand border-transparent hover:text-text-tertiary-hover focus-visible:border-ring",
 				"focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:text-muted-foreground",
 				"inline-flex flex-1 items-center justify-center whitespace-nowrap transition-[color,box-shadow,border]",
