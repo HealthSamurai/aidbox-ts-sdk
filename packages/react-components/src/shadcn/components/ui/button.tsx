@@ -20,7 +20,7 @@ const buttonVariants = cva(
 					"bg-bg-link text-text-primary_on-brand shadow-xs hover:bg-bg-link_hover active:bg-bg-link disabled:bg-bg-disabled",
 				secondary:
 					"border border-border-primary bg-bg-primary text-text-tertiary shadow-xs hover:text-fg-primary disabled:text-fg-disabled disabled:border-border-disabled hover:bg-bg-secondary active:bg-bg-primary active:text-text-tertiary disabled:hover:bg-bg-primary",
-				link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled",
+				link: "text-text-secondary hover:text-text-primary disabled:text-text-disabled rounded-none",
 				ghost:
 					"text-text-secondary hover:text-text-primary disabled:text-text-disabled hover:bg-bg-secondary active:bg-bg-tertiary disabled:hover:bg-bg-primary",
 			},
