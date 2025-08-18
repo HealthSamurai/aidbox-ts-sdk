@@ -4,12 +4,21 @@
 @import "./typography.css";
 
 @theme {
+	--color-selection: var(--color-blue-300);
+	--color-ring-red: var(--color-red-200);
+	--color-ring-green: var(--color-green-200);
+	--color-ring-yellow: var(--color-yellow-200);
+	--color-ring-purple: var(--color-purple-200);
+	--color-ring-orange: var(--color-orange-200);
+	--color-ring-pink: var(--color-pink-200);
+	--color-ring-blue: var(--color-blue-300);
+	--color-ring-red: var(--color-red-200);
 	--color-text-primary: var(--color-neutral-900);
 	--color-text-secondary: var(--color-neutral-500);
 	--color-text-secondary_hover: var(--color-neutral-600);
 	--color-text-primary_on-brand: var(--color-neutral-50);
 	--color-text-secondary_on-brand: var(--color-neutral-100);
-	--color-text-tertiary: var(--color-neutral-500);
+	--color-text-tertiary: var(--color-neutral-400);
 	--color-text-quternary: var(--color-neutral-400);
 	--color-text-quternary_hover: var(--color-neutral-500);
 	--color-text-quternary_on-brand: var(--color-neutral-200);
@@ -68,7 +77,7 @@
 	--color-fg-secondary_inverse: var(--color-neutral-400);
 	--color-fg-secondary_hover: var(--color-neutral-800);
 	--color-fg-secondary_on-brand: var(--color-neutral-100);
-	--color-fg-tertiary: var(--color-neutral-500);
+	--color-fg-tertiary: var(--color-neutral-400);
 	--color-fg-tertiary_hover: var(--color-neutral-600);
 	--color-fg-tertiary_on-brand: var(--color-neutral-200);
 	--color-fg-disabled: var(--color-neutral-300);

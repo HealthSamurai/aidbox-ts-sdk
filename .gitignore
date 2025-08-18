@@ -1,1 +1,5 @@
 /node_modules
+
+# Design system rules
+packages/react-components/FIGMA_MAPPING_RULES.md
+packages/react-components/src/shadcn/components/ui/input+desc.tsx
