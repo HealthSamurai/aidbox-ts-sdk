@@ -39,7 +39,7 @@ function TabsList({
 			data-slot="tabs-list"
 			className={cn(
 				tabListVariants({ variant }),
-				"inline-flex w-fit items-center justify-center",
+				"inline-flex w-fit items-center",
 				className,
 			)}
 			{...props}
