@@ -1,5 +1,8 @@
 {
 	"name": "aidbox-ts-sdk",
+	"scripts": {
+		"hooks": "cp .hooks/* .git/hooks/"
+	},
 	"private": true,
 	"workspaces": [
 		"packages/*"
