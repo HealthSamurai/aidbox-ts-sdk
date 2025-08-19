@@ -8,7 +8,9 @@ import {
 	SelectValue,
 } from "#shadcn/components/ui/select";
 
-interface RequestLineEditorProps {
+import { cn } from "#shadcn/lib/utils";
+
+interface RequestLineEditorProps extends React.ComponentProps<"div"> {
 	selectedMethod: string;
 	setMethod: (value: string) => void;
 	methods: string[];
@@ -74,6 +76,7 @@ function RequestMethodSelector({
 }
 
 function RequestLineEditor({
+	className,
 	selectedMethod,
 	setMethod,
 	methods,
@@ -81,7 +84,7 @@ function RequestLineEditor({
 	onInputChange,
 }: RequestLineEditorProps) {
 	return (
-		<div className="flex">
+		<div className={cn("flex", className)}>
 			<RequestMethodSelector
 				selectedMethod={selectedMethod}
 				setMethod={setMethod}
@@ -96,4 +99,4 @@ function RequestLineEditor({
 	);
 }
 
-export { RequestLineEditor, type RequestLineEditorProps };
+export { RequestLineEditor, type RequestLineEditorProps, METHOD_COLORS };
