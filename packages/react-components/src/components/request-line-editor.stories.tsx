@@ -1,92 +1,90 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { RequestLineEditor } from "./request-line-editor";
+import * as React from "react";
+import { action } from "storybook/actions";
+import {
+	RequestLineEditor,
+	type RequestLineEditorProps,
+} from "./request-line-editor";
 
 const meta: Meta<typeof RequestLineEditor> = {
-	title: "Components/Request line editor",
+	title: "Component/Request line editor",
 	component: RequestLineEditor,
 	parameters: {
 		layout: "centered",
 	},
 	tags: ["autodocs"],
-	argTypes: {
-		variant: {
-			control: { type: "select" },
-			options: ["default", "compound"],
-			defaultValue: "default",
-		},
-		size: {
-			control: { type: "select" },
-			options: ["regular", "small"],
-			defaultValue: "regular",
-		},
-		disabled: {
-			control: { type: "boolean" },
-			defaultValue: false,
-		},
-	},
 };
 
 export default meta;
 type Story = StoryObj<typeof RequestLineEditor>;
 
 function RequestLineEditorWrapper({
-	variant = "compound" as const,
-	size = "regular" as const,
-	disabled = false,
-}: {
-	variant?: "default" | "compound";
-	size?: "regular" | "small";
-	disabled?: boolean;
-}) {
+	selectedMethod,
+	methods,
+	inputValue,
+}: RequestLineEditorProps) {
+	const [currentSelectedMethod, setMethod] = React.useState(selectedMethod);
+	const [currentInputValue, setInputValue] = React.useState(inputValue);
+	const actionSetMethod = (method: string) => {
+		action("setMethod")(method);
+		setMethod(method);
+	};
+	const actionSetInputValue = (event: React.ChangeEvent<HTMLInputElement>) => {
+		action("setMethod")(event);
+		setInputValue(event.target.value);
+	};
 	return (
-		<div className="w-full max-w-md">
-			<RequestLineEditor variant={variant} size={size} disabled={disabled} />
-		</div>
+		<RequestLineEditor
+			methods={methods}
+			selectedMethod={currentSelectedMethod}
+			setMethod={actionSetMethod}
+			inputValue={currentInputValue}
+			onInputChange={actionSetInputValue}
+		/>
 	);
 }
 
-export const Default: Story = {
+export const GET: Story = {
 	args: {
-		variant: "compound",
-		size: "regular",
-		disabled: false,
+		selectedMethod: "GET",
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		inputValue: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
-export const DefaultVariant: Story = {
+export const POST: Story = {
 	args: {
-		variant: "default",
-		size: "regular",
-		disabled: false,
+		selectedMethod: "POST",
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		inputValue: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
-export const SmallSize: Story = {
+export const PUT: Story = {
 	args: {
-		variant: "compound",
-		size: "small",
-		disabled: false,
+		selectedMethod: "PUT",
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		inputValue: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
-export const Disabled: Story = {
+export const PATCH: Story = {
 	args: {
-		variant: "compound",
-		size: "regular",
-		disabled: true,
+		selectedMethod: "PATCH",
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		inputValue: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
-// Interactive playground
-export const Playground: Story = {
+export const DELETE: Story = {
 	args: {
-		variant: "compound",
-		size: "regular",
-		disabled: false,
+		selectedMethod: "DELETE",
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+		inputValue: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
