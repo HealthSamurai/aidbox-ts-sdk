@@ -19,6 +19,7 @@
 	},
 	"scripts": {
 		"build": "rm -rf dist && mkdir -p dist && copyfiles -e '**/*.ts' -e '**/*.tsx' 'src/**' dist && tsc -b --force && tailwindcss --cwd ./src -i ./full.css -o ../dist/bundle.css && echo success",
+		"build:watch": "rm -rf dist && mkdir -p dist && copyfiles -e '**/*.ts' -e '**/*.tsx' 'src/**' dist && tsc -b --force --watch & tailwindcss --watch --cwd ./src -i ./full.css -o ../dist/bundle.css ; wait",
 		"build-storybook": "storybook build",
 		"format": "biome format",
 		"format:check": "biome format",
