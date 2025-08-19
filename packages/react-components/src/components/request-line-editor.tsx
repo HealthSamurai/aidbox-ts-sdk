@@ -7,8 +7,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#shadcn/components/ui/select";
-
 import { cn } from "#shadcn/lib/utils";
+import { CopyIcon } from "./copy-icon";
 
 interface RequestLineEditorProps extends React.ComponentProps<"div"> {
 	selectedMethod: string;
@@ -91,8 +91,9 @@ function RequestLineEditor({
 				methods={methods}
 			/>
 			<Input
-				className={`rounded-l-none hover:${METHOD_COLORS[selectedMethod as keyof typeof METHOD_COLORS].border} ${METHOD_COLORS[selectedMethod as keyof typeof METHOD_COLORS].border}`}
+				className={`rounded-l-none ${METHOD_COLORS[selectedMethod as keyof typeof METHOD_COLORS].border}`}
 				value={inputValue}
+				rightSlot={<CopyIcon text={`${selectedMethod} ${inputValue}`} />}
 				{...(onInputChange !== undefined ? { onChange: onInputChange } : {})}
 			/>
 		</div>
