@@ -27,7 +27,8 @@
 		"lint": "biome check",
 		"lint:check": "biome check",
 		"lint:fix": "biome check --write",
-		"storybook": "storybook dev -p 6006"
+		"storybook": "storybook dev -p 6006",
+		"tsc:check": "tsc -b --noEmit"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.1",
