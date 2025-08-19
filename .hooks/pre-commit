@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+pnpm --filter @health-samurai/react-components run lint:check
+pnpm --filter @health-samurai/react-components run tsc:check
