@@ -94,4 +94,5 @@
 
 @theme inline {
 	--font-family-sans: "Inter", system-ui, sans-serif;
+	--font-family-mono: "JetBrains Mono", monospace;
 }
