@@ -3,6 +3,14 @@
 @import "./tokens.css";
 @import "./typography.css";
 
+.lucide {
+  /* Change this! */
+  stroke-width: 1.5px;
+}
+
+.lucide * {
+  /* vector-effect: non-scaling-stroke; */
+}
 @theme {
   --color-selection: var(--color-blue-300);
   --color-ring-red: var(--color-red-200);
