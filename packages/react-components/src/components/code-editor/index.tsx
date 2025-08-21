@@ -37,12 +37,19 @@ const baseTheme = EditorView.baseTheme({
 		backgroundColor: "var(--color-bg-primary)",
 		height: "100%",
 		width: "100%",
+		fontSize: "14px",
+		paddingTop: "8px",
+		paddingBottom: "8px",
 	},
 	".cm-scroller": {
 		overflow: "auto",
 	},
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
+		padding: "0",
+	},
+	"&.cm-focused": {
+		outline: "none",
 	},
 	".cm-gutter": {
 		fontFamily: "var(--font-family-mono)",
@@ -50,6 +57,9 @@ const baseTheme = EditorView.baseTheme({
 	".cm-gutters": {
 		backgroundColor: "var(--color-bg-primary)",
 		border: "none",
+	},
+	".cm-lineNumbers": {
+		paddingLeft: "16px",
 	},
 	".cm-activeLineGutter": {
 		backgroundColor: "var(--color-bg-primary)",
@@ -68,7 +78,13 @@ const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.null, color: "#569cd6" },
 ]);
 
-export function CodeEditor() {
+export function CodeEditor({
+	defaultValue,
+	onChange,
+}: {
+	defaultValue?: string;
+	onChange?: (value: string) => void;
+}) {
 	const editorRef = React.useRef(null);
 
 	React.useEffect(() => {
@@ -78,46 +94,48 @@ export function CodeEditor() {
 
 		const view = new EditorView({
 			parent: editorRef.current,
-
-			extensions: [
-				lineNumbers(),
-				foldGutter(),
-				highlightSpecialChars(),
-				history(),
-				drawSelection(),
-				dropCursor(),
-				EditorState.allowMultipleSelections.of(true),
-				indentOnInput(),
-				syntaxHighlighting(customHighlightStyle),
-				bracketMatching(),
-				closeBrackets(),
-				autocompletion(),
-				rectangularSelection(),
-				crosshairCursor(),
-				highlightActiveLine(),
-				highlightActiveLineGutter(),
-				highlightSelectionMatches(),
-				baseTheme,
-				keymap.of([
-					// Closed-brackets aware backspace
-					...closeBracketsKeymap,
-					// A large set of basic bindings
-					...defaultKeymap,
-					// Search-related keys
-					...searchKeymap,
-					// Redo/undo keys
-					...historyKeymap,
-					// Code folding bindings
-					...foldKeymap,
-					// Autocompletion keys
-					...completionKeymap,
-					// Keys related to the linter system
-					...lintKeymap,
-				]),
-				json(),
-				linter(jsonParseLinter(), { delay: 300 }),
-				lintGutter(),
-			],
+			state: EditorState.create({
+				doc: defaultValue ?? "",
+				extensions: [
+					// Все расширения должны быть здесь
+					lineNumbers(),
+					foldGutter(),
+					highlightSpecialChars(),
+					history(),
+					drawSelection(),
+					dropCursor(),
+					EditorState.allowMultipleSelections.of(true),
+					indentOnInput(),
+					json(), // JSON должен быть перед syntaxHighlighting
+					syntaxHighlighting(customHighlightStyle),
+					bracketMatching(),
+					closeBrackets(),
+					autocompletion(),
+					rectangularSelection(),
+					crosshairCursor(),
+					highlightActiveLine(),
+					highlightActiveLineGutter(),
+					highlightSelectionMatches(),
+					baseTheme,
+					keymap.of([
+						...closeBracketsKeymap,
+						...defaultKeymap,
+						...searchKeymap,
+						...historyKeymap,
+						...foldKeymap,
+						...completionKeymap,
+						...lintKeymap,
+					]),
+					linter(jsonParseLinter(), { delay: 300 }),
+					lintGutter(),
+					// Listener для onChange
+					EditorView.updateListener.of(update => {
+						if (update.docChanged && onChange) {
+							onChange(update.view.state.doc.toString());
+						}
+					})
+				]
+			}),
 		});
 
 		return () => view.destroy();
