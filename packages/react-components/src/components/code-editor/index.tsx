@@ -97,7 +97,6 @@ export function CodeEditor({
 			state: EditorState.create({
 				doc: defaultValue ?? "",
 				extensions: [
-					// Все расширения должны быть здесь
 					lineNumbers(),
 					foldGutter(),
 					highlightSpecialChars(),
@@ -106,7 +105,7 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
-					json(), // JSON должен быть перед syntaxHighlighting
+					json(),
 					syntaxHighlighting(customHighlightStyle),
 					bracketMatching(),
 					closeBrackets(),
@@ -128,7 +127,6 @@ export function CodeEditor({
 					]),
 					linter(jsonParseLinter(), { delay: 300 }),
 					lintGutter(),
-					// Listener для onChange
 					EditorView.updateListener.of((update) => {
 						if (update.docChanged && onChange) {
 							onChange(update.view.state.doc.toString());
