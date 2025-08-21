@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { cn } from "#shadcn/lib/utils";
-import { Button } from "#shadcn/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -15,7 +14,6 @@ import {
 import {
   Select,
   SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "#shadcn/components/ui/select";
