@@ -16,7 +16,8 @@
 			"tsconfig.app.json",
 			"tsconfig.json",
 			"tsconfig.node.json",
-			"vite.config.ts"
+			"vite.config.ts",
+			"scripts/**"
 		],
 		"ignoreUnknown": false
 	},
