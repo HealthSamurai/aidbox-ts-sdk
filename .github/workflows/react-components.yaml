@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
-        run: pnpm --filter @health-samurai/react-components run check
+        run: pnpm --filter @health-samurai/react-components run lint:check
   typecheck:
     needs: prepare
     runs-on: ubuntu-24.04
