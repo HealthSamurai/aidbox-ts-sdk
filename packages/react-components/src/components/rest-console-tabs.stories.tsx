@@ -22,7 +22,8 @@ function RestConsoleTabsWrapper({
 	tabs: Tab[];
 	selectedTabId: string;
 }) {
-	const [currentSelectedTabId, setSelectedTabId] = React.useState(selectedTabId);
+	const [currentSelectedTabId, setSelectedTabId] =
+		React.useState(selectedTabId);
 	const [currentTabs, setTabs] = React.useState(tabs);
 
 	const handleSelectTab = (tabId: string) => {
@@ -32,7 +33,7 @@ function RestConsoleTabsWrapper({
 
 	const handleCloseTab = (tabId: string) => {
 		action("onCloseTab")(tabId);
-		const updatedTabs = currentTabs.filter(tab => tab.id !== tabId);
+		const updatedTabs = currentTabs.filter((tab) => tab.id !== tabId);
 		setTabs(updatedTabs);
 	};
 
@@ -78,7 +79,6 @@ const manyTabs: Tab[] = [
 		path: "/fhir/Organization",
 	},
 ];
-
 
 export const Default: Story = {
 	args: {
