@@ -1,8 +1,8 @@
 // Shadcn Components
 
+export * from "./components/code-editor";
 export * from "./components/copy-icon";
 export * from "./components/request-line-editor";
-export * from "./components/code-editor";
 export * from "./shadcn/components/ui/accordion";
 export * from "./shadcn/components/ui/alert";
 export * from "./shadcn/components/ui/alert-dialog";
