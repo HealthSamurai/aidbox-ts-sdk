@@ -129,17 +129,17 @@ export function CodeEditor({
 					linter(jsonParseLinter(), { delay: 300 }),
 					lintGutter(),
 					// Listener для onChange
-					EditorView.updateListener.of(update => {
+					EditorView.updateListener.of((update) => {
 						if (update.docChanged && onChange) {
 							onChange(update.view.state.doc.toString());
 						}
-					})
-				]
+					}),
+				],
 			}),
 		});
 
 		return () => view.destroy();
-	}, []);
+	}, [defaultValue, onChange]);
 
 	return <div className="h-full w-full" ref={editorRef} />;
 }
