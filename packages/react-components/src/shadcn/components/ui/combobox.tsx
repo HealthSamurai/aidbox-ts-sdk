@@ -77,13 +77,13 @@ export function Combobox({
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger className={cn("w-full", className)}>
+      <SelectTrigger className={className}>
         <SelectValue placeholder={placeholder}>
           {selectedOption?.label}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
-        <Command>
+      <SelectContent className="p-0 [&_[data-radix-select-viewport]]:p-0">
+        <Command className="w-full">
           <CommandInput
             ref={inputRef}
             placeholder={searchPlaceholder}
@@ -97,6 +97,7 @@ export function Combobox({
                 <CommandItem
                   key={option.value}
                   value={option.value}
+                  data-state={value === option.value ? "checked" : undefined}
                   onSelect={(currentValue) => {
                     onValueChange?.(currentValue);
                     setOpen(false);
