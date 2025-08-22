@@ -31,6 +31,8 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm -r run build
       - name: Publish
         run: |
           pnpm -r publish --tag ${{ github.event.inputs.dist_tag }} --publish-branch master
