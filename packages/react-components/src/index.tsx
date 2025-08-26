@@ -1,3 +1,5 @@
+import "./full.css";
+
 // Shadcn Components
 
 export * from "./components/code-editor";
