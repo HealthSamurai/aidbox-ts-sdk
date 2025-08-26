@@ -81,12 +81,15 @@ const customHighlightStyle = HighlightStyle.define([
 export function CodeEditor({
 	defaultValue,
 	onChange,
+	id,
 }: {
 	defaultValue?: string;
 	onChange?: (value: string) => void;
+	id?: string;
 }) {
 	const editorRef = React.useRef(null);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: we don't want to re-render the editor when the defaultValue or onChange changes
 	React.useEffect(() => {
 		if (!editorRef.current) {
 			return;
@@ -137,7 +140,7 @@ export function CodeEditor({
 		});
 
 		return () => view.destroy();
-	}, [defaultValue, onChange]);
+	}, []);
 
-	return <div className="h-full w-full" ref={editorRef} />;
+	return <div className="h-full w-full" ref={editorRef} id={id} />;
 }
