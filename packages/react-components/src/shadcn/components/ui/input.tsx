@@ -4,25 +4,22 @@ import type * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 
 const iconBaseClasses =
-	"absolute top-1/2 -translate-y-1/2 cursor-pointer z-10 flex items-center justify-center [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0";
+	"absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center cursor-default [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0";
 
-const iconLeftPosition =
-	"left-3 hover:text-text-tertiary hover:cursor-default transition-colors duration-300";
+const iconLeftPosition = "left-3  transition-colors duration-300";
 
 const iconRightContainer =
 	"absolute right-3 top-1/2 -translate-y-1/2 flex gap-2 z-10";
 
-const iconNormalColor =
-	"text-text-tertiary hover:text-fg-secondary transition-colors duration-300";
-const iconInvalidColor =
-	"text-fg-tertiary hover:text-fg-secondary transition-colors duration-300";
+const iconNormalColor = "text-text-tertiary  transition-colors duration-300";
+const iconInvalidColor = "text-fg-tertiary  transition-colors duration-300";
 const iconDisabledColor =
 	"text-text-disabled hover:cursor-not-allowed transition-colors duration-300";
 
 const iconWrapperClasses = "[&>svg]:w-full [&>svg]:h-full [&>svg]:stroke-[1.5]";
 
 const iconRightItemClasses =
-	"cursor-pointer flex items-center justify-center transition-colors duration-300";
+	"flex items-center justify-center transition-colors duration-300";
 
 const suffixClasses =
 	"border-border-primary bg-bg-tertiary text-text-tertiary flex items-center rounded-r-md border px-3 py-1 typo-body cursor-default transition-colors duration-300";
