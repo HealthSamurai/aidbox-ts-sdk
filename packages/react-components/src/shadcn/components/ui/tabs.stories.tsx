@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { action } from "storybook/internal/actions";
 import { Button } from "#shadcn/components/ui/button";
 import {
 	Card,
@@ -12,6 +13,7 @@ import { Input } from "#shadcn/components/ui/input";
 import { Label } from "#shadcn/components/ui/label";
 import {
 	Tabs,
+	TabsAddButton,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
@@ -88,5 +90,60 @@ export const Demo = {
 				</TabsContent>
 			</Tabs>
 		</div>
+	),
+} satisfies Story;
+
+function BrowserTabOnClose(value: string) {
+	action("onClose")(value);
+}
+
+function BrowserTabOnClick() {
+	action("onClick")();
+}
+
+function BrowserTabOnAdd() {
+	action("onAdd")();
+}
+
+export const Browser = {
+	parameters: {
+		layout: "fullscreen",
+	},
+	render: () => (
+		<Tabs defaultValue="first" variant="browser">
+			<TabsList>
+				<TabsTrigger
+					value="first"
+					onClick={BrowserTabOnClick}
+					onClose={BrowserTabOnClose}
+				>
+					<span className="flex items-center gap-1">
+						<span className="text-utility-green">GET</span>
+						<span>/fhir/Patient</span>
+					</span>
+				</TabsTrigger>
+				<TabsTrigger
+					value="second"
+					onClick={BrowserTabOnClick}
+					onClose={BrowserTabOnClose}
+				>
+					<span className="flex items-center gap-1">
+						<span className="text-utility-yellow">POST</span>
+						<span>/fhir</span>
+					</span>
+				</TabsTrigger>
+				<TabsTrigger
+					value="third"
+					onClick={BrowserTabOnClick}
+					onClose={BrowserTabOnClose}
+				>
+					<span className="flex items-center gap-1">
+						<span className="text-utility-yellow">POST</span>
+						<span>/$graphql</span>
+					</span>
+				</TabsTrigger>
+			</TabsList>
+			<TabsAddButton onClick={BrowserTabOnAdd} />
+		</Tabs>
 	),
 } satisfies Story;

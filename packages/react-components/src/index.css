@@ -90,6 +90,12 @@
 	--color-fg-success-secondary: var(--color-green-400);
 	--color-fg-warning-primary: var(--color-yellow-500);
 	--color-fg-warning-secondary: var(--color-yellow-400);
+
+	--color-utility-green: var(--color-green-500);
+	--color-utility-yellow: var(--color-yellow-600);
+	--color-utility-blue: var(--color-blue-500);
+	--color-utility-violet: var(--color-violet-500);
+	--color-utility-red: var(--color-red-500);
 }
 
 @theme inline {
