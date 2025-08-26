@@ -57,12 +57,12 @@ export function Combobox({
 
 	const selectedOption = options.find((option) => option.value === value);
 
-	// Сброс поиска при закрытии и автофокус при открытии
+	// Reset search when closing and auto-focus when opening
 	React.useEffect(() => {
 		if (!open) {
 			setSearchValue("");
 		} else {
-			// Автофокус на поисковую строку при открытии
+			// Auto-focus on search input when opening
 			setTimeout(() => {
 				inputRef.current?.focus();
 			}, 0);
@@ -120,7 +120,7 @@ export function Combobox({
 	);
 }
 
-// Demo компонент для Storybook
+// Demo component for Storybook
 const demoOptions = [
 	{ value: "next.js", label: "Next.js" },
 	{ value: "sveltekit", label: "SvelteKit" },
