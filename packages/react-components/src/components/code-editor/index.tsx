@@ -81,16 +81,19 @@ const customHighlightStyle = HighlightStyle.define([
 
 export function CodeEditor({
 	defaultValue,
+	currentValue,
 	onChange,
 	id,
 	mode = "json",
 }: {
 	defaultValue?: string;
+	currentValue?: string;
 	onChange?: (value: string) => void;
 	id?: string;
 	mode?: "json" | "http";
 }) {
 	const editorRef = React.useRef(null);
+	const viewRef = React.useRef<EditorView | null>(null);
 
 	const getLanguageExtensions = (mode: "json" | "http") => {
 		if (mode === "http") {
@@ -114,10 +117,11 @@ export function CodeEditor({
 			return;
 		}
 
+		const initialValue = currentValue ?? defaultValue ?? "";
 		const view = new EditorView({
 			parent: editorRef.current,
 			state: EditorState.create({
-				doc: defaultValue ?? "",
+				doc: initialValue,
 				extensions: [
 					lineNumbers(),
 					foldGutter(),
@@ -157,8 +161,31 @@ export function CodeEditor({
 			}),
 		});
 
-		return () => view.destroy();
+		viewRef.current = view;
+
+		return () => {
+			view.destroy();
+			viewRef.current = null;
+		};
 	}, []);
+
+	// Handle currentValue updates
+	React.useEffect(() => {
+		if (!viewRef.current || currentValue === undefined) {
+			return;
+		}
+
+		const currentDoc = viewRef.current.state.doc.toString();
+		if (currentDoc !== currentValue) {
+			viewRef.current.dispatch({
+				changes: {
+					from: 0,
+					to: currentDoc.length,
+					insert: currentValue,
+				},
+			});
+		}
+	}, [currentValue]);
 
 	return <div className="h-full w-full" ref={editorRef} id={id} />;
 }
