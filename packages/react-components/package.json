@@ -17,7 +17,7 @@
 		"#shadcn/*": "./src/shadcn/*"
 	},
 	"scripts": {
-		"build": "rm -rf dist && mkdir -p dist && copyfiles -e '**/*.ts' -e '**/*.tsx' 'src/**' dist && tsc -b --force && tailwindcss --cwd ./src -i ./full.css -o ../dist/bundle.css && echo success",
+		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && tailwindcss --cwd ./src -i ./full.css -o ../dist/bundle.css && echo success",
 		"build:watch": "tsx scripts/watch.node.ts",
 		"build-storybook": "storybook build",
 		"format": "biome format",
@@ -88,13 +88,14 @@
 	"devDependencies": {
 		"@storybook/addon-docs": "^9.1.1",
 		"@storybook/react-vite": "^9.1.1",
+		"@swc/cli": "^0.7.8",
+		"@swc/core": "^1.13.5",
 		"@tailwindcss/cli": "^4.1.11",
 		"@tailwindcss/vite": "^4.1.11",
 		"@types/node": "^24.2.0",
 		"@types/react": "^19.1.8",
 		"@types/react-dom": "^19.1.6",
 		"@vitejs/plugin-react-swc": "^3.10.2",
-		"copyfiles": "^2.4.1",
 		"storybook": "^9.1.1",
 		"tailwindcss": "^4.1.11",
 		"tsx": "^4.20.4",
