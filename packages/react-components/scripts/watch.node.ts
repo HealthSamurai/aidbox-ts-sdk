@@ -23,6 +23,13 @@ function spawnWithDecorations(
 }
 
 spawnWithDecorations(
+	"swc",
+	["src", "-d", "dist", "-D", "-w"],
+	"     swc> ",
+	"     swc! ",
+);
+
+spawnWithDecorations(
 	"tsc",
 	["-b", "--force", "--watch", "--preserveWatchOutput", "--pretty", "false"],
 	"     tsc> ",
@@ -34,11 +41,4 @@ spawnWithDecorations(
 	["--watch", "--cwd", "./src", "-i", "./full.css", "-o", "../dist/bundle.css"],
 	"tailwind> ",
 	"tailwind! ",
-);
-
-spawnWithDecorations(
-	"tsx",
-	["--watch-path=./src", "./scripts/copy.node.ts"],
-	"    copy> ",
-	"    copy! ",
 );
