@@ -31,6 +31,7 @@ import {
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
 import * as React from "react";
+import { httpHighlightStyle, httpLanguage } from "./http-mode";
 
 const baseTheme = EditorView.baseTheme({
 	"&": {
@@ -82,12 +83,30 @@ export function CodeEditor({
 	defaultValue,
 	onChange,
 	id,
+	mode = "json",
 }: {
 	defaultValue?: string;
 	onChange?: (value: string) => void;
 	id?: string;
+	mode?: "json" | "http";
 }) {
 	const editorRef = React.useRef(null);
+
+	const getLanguageExtensions = (mode: "json" | "http") => {
+		if (mode === "http") {
+			return [httpLanguage];
+		} else {
+			return [json(), linter(jsonParseLinter(), { delay: 300 })];
+		}
+	};
+
+	const getSyntaxHighlighting = (mode: "json" | "http") => {
+		if (mode === "http") {
+			return syntaxHighlighting(HighlightStyle.define(httpHighlightStyle));
+		} else {
+			return syntaxHighlighting(customHighlightStyle);
+		}
+	};
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: we don't want to re-render the editor when the defaultValue or onChange changes
 	React.useEffect(() => {
@@ -108,8 +127,8 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
-					json(),
-					syntaxHighlighting(customHighlightStyle),
+					...getLanguageExtensions(mode),
+					getSyntaxHighlighting(mode),
 					bracketMatching(),
 					closeBrackets(),
 					autocompletion(),
@@ -128,7 +147,6 @@ export function CodeEditor({
 						...completionKeymap,
 						...lintKeymap,
 					]),
-					linter(jsonParseLinter(), { delay: 300 }),
 					lintGutter(),
 					EditorView.updateListener.of((update) => {
 						if (update.docChanged && onChange) {
