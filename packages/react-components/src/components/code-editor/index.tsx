@@ -31,6 +31,7 @@ import {
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
 import * as React from "react";
+import { httpHighlightStyle, httpLanguage } from "./http-mode";
 
 const baseTheme = EditorView.baseTheme({
 	"&": {
@@ -80,22 +81,47 @@ const customHighlightStyle = HighlightStyle.define([
 
 export function CodeEditor({
 	defaultValue,
+	currentValue,
 	onChange,
+	id,
+	mode = "json",
 }: {
 	defaultValue?: string;
+	currentValue?: string;
 	onChange?: (value: string) => void;
+	id?: string;
+	mode?: "json" | "http";
 }) {
 	const editorRef = React.useRef(null);
+	const viewRef = React.useRef<EditorView | null>(null);
 
+	const getLanguageExtensions = (mode: "json" | "http") => {
+		if (mode === "http") {
+			return [httpLanguage];
+		} else {
+			return [json(), linter(jsonParseLinter(), { delay: 300 })];
+		}
+	};
+
+	const getSyntaxHighlighting = (mode: "json" | "http") => {
+		if (mode === "http") {
+			return syntaxHighlighting(HighlightStyle.define(httpHighlightStyle));
+		} else {
+			return syntaxHighlighting(customHighlightStyle);
+		}
+	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: we don't want to re-render the editor when the defaultValue or onChange changes
 	React.useEffect(() => {
 		if (!editorRef.current) {
 			return;
 		}
 
+		const initialValue = currentValue ?? defaultValue ?? "";
 		const view = new EditorView({
 			parent: editorRef.current,
 			state: EditorState.create({
-				doc: defaultValue ?? "",
+				doc: initialValue,
 				extensions: [
 					lineNumbers(),
 					foldGutter(),
@@ -105,8 +131,8 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
-					json(),
-					syntaxHighlighting(customHighlightStyle),
+					...getLanguageExtensions(mode),
+					getSyntaxHighlighting(mode),
 					bracketMatching(),
 					closeBrackets(),
 					autocompletion(),
@@ -125,7 +151,6 @@ export function CodeEditor({
 						...completionKeymap,
 						...lintKeymap,
 					]),
-					linter(jsonParseLinter(), { delay: 300 }),
 					lintGutter(),
 					EditorView.updateListener.of((update) => {
 						if (update.docChanged && onChange) {
@@ -136,8 +161,31 @@ export function CodeEditor({
 			}),
 		});
 
-		return () => view.destroy();
-	}, [defaultValue, onChange]);
+		viewRef.current = view;
 
-	return <div className="h-full w-full" ref={editorRef} />;
+		return () => {
+			view.destroy();
+			viewRef.current = null;
+		};
+	}, []);
+
+	// Handle currentValue updates
+	React.useEffect(() => {
+		if (!viewRef.current || currentValue === undefined) {
+			return;
+		}
+
+		const currentDoc = viewRef.current.state.doc.toString();
+		if (currentDoc !== currentValue) {
+			viewRef.current.dispatch({
+				changes: {
+					from: 0,
+					to: currentDoc.length,
+					insert: currentValue,
+				},
+			});
+		}
+	}, [currentValue]);
+
+	return <div className="h-full w-full" ref={editorRef} id={id} />;
 }

@@ -3,6 +3,11 @@
 @import "./tokens.css";
 @import "./typography.css";
 
+.lucide {
+	/* Change this! */
+	stroke-width: 1.5px;
+}
+
 @theme {
 	--color-selection: var(--color-blue-300);
 	--color-ring-red: var(--color-red-200);
@@ -11,7 +16,7 @@
 	--color-ring-purple: var(--color-purple-200);
 	--color-ring-orange: var(--color-orange-200);
 	--color-ring-pink: var(--color-pink-200);
-	--color-ring-blue: var(--color-blue-300);
+	--color-ring-blue: var(--color-blue-200);
 	--color-ring-red: var(--color-red-200);
 	--color-text-primary: var(--color-neutral-900);
 	--color-text-secondary: var(--color-neutral-500);
@@ -90,7 +95,6 @@
 	--color-fg-success-secondary: var(--color-green-400);
 	--color-fg-warning-primary: var(--color-yellow-500);
 	--color-fg-warning-secondary: var(--color-yellow-400);
-
 	--color-utility-green: var(--color-green-500);
 	--color-utility-yellow: var(--color-yellow-600);
 	--color-utility-blue: var(--color-blue-500);

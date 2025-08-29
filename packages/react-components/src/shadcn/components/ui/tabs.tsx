@@ -20,6 +20,7 @@ const tabsVariants = cva("", {
 				 **:data-[slot=tabs-list]:divide-x`,
 				// TabsTrigger
 				`**:data-[slot=tabs-trigger]:max-w-80 
+				 **:data-[slot=tabs-trigger]:w-60
 				 **:data-[slot=tabs-trigger]:min-w-40
 				 **:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-1
 				 **:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-border-secondary
