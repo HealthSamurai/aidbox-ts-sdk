@@ -84,15 +84,62 @@ function TabsTrigger({
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				"group/tabs-trigger",
-				"box-border h-10 typo-body px-3 pb-2 pt-2.5 cursor-pointer text-text-tertiary data-[state=active]:text-text-primary",
-				"data-[state=active]:border-b-border-brand border-b-2 border-b-transparent hover:text-text-tertiary-hover focus-visible:border-ring",
-				"focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:text-muted-foreground",
-				"inline-flex flex-1 items-center justify-center whitespace-nowrap transition-[color,box-shadow]",
-				"focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50",
-				"[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+				// Layout & Sizing
+				"box-border",
+				"flex-1",
+				"h-10",
+				"inline-flex",
+				"items-center",
+				"justify-center",
+				"px-3",
+				"whitespace-nowrap",
+
+				// Spacing & Padding
+				"pb-2",
+				"pt-2.5",
+
+				// Typography
+				"typo-body",
+
+				// Colors & States
+				"cursor-pointer",
+				"data-[state=active]:border-b-border-brand",
+				"data-[state=active]:text-text-primary",
+				"disabled:opacity-50",
+				"disabled:pointer-events-none",
 				"hover:bg-bg-secondary/60",
+				"hover:text-text-tertiary-hover",
+				"text-text-tertiary",
+
+				// Borders
+				"border-b-2",
+				"border-b-transparent",
+
+				// Focus & Accessibility
+				"focus-visible:border-ring",
+				"focus-visible:outline-1",
+				"focus-visible:outline-ring",
+				"focus-visible:ring-[3px]",
+				"focus-visible:ring-ring/50",
+
+				// Transitions
+				"transition-[color,box-shadow]",
+
+				// Dark mode
+				"dark:data-[state=active]:border-input",
+				"dark:text-muted-foreground",
+
+				// Icons
+				"[&_svg]:pointer-events-none",
+				"[&_svg]:shrink-0",
+				"[&_svg:not([class*='size-'])]:size-4",
+
+				// Groups
+				"group/tabs-trigger",
+
+				// Conditional
 				onClose ? "justify-between" : "",
+
 				className,
 			)}
 			{...props}
