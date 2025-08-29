@@ -12,7 +12,7 @@ import { cn } from "#shadcn/lib/utils";
 import { CopyIcon } from "./copy-icon";
 
 const requestMethodVariants = cva(
-	"border-r-0 rounded-r-none shadow-none typo-label text-left items-start",
+	"border-r-0 rounded-r-none shadow-none typo-label text-left items-center",
 	{
 		variants: {
 			method: {

@@ -86,6 +86,8 @@ const iconDisabledColor = cn(
 // Icon wrapper styles
 const iconWrapperClasses = cn(
 	// Sizing
+	"flex",
+	"items-center",
 	"[&>svg]:w-full",
 	"[&>svg]:h-full",
 	"[&>svg]:stroke-[1.5]",
