@@ -102,6 +102,7 @@ export const Aidbox = {
 					{
 						label: "Match",
 						onClick: (id) => console.log("Match patient:", id),
+						variant: "secondary",
 					},
 				],
 			},
