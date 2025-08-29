@@ -30,6 +30,27 @@ import {
 import { Input } from "#shadcn/components/ui/input";
 import { cn } from "#shadcn/lib/utils";
 
+// Unstyled table components to preserve custom styling
+const Table = ({ className, ...props }: React.ComponentProps<"table">) => (
+	<table className={className} {...props} />
+);
+const TableHeader = ({
+	className,
+	...props
+}: React.ComponentProps<"thead">) => <thead className={className} {...props} />;
+const TableBody = ({ className, ...props }: React.ComponentProps<"tbody">) => (
+	<tbody className={className} {...props} />
+);
+const TableRow = ({ className, ...props }: React.ComponentProps<"tr">) => (
+	<tr className={className} {...props} />
+);
+const TableHead = ({ className, ...props }: React.ComponentProps<"th">) => (
+	<th className={className} {...props} />
+);
+const TableCell = ({ className, ...props }: React.ComponentProps<"td">) => (
+	<td className={className} {...props} />
+);
+
 // Helper function to compute pinning styles for columns - как в TanStack Table примере
 const getPinningStyles = <T,>(column: Column<T>): CSSProperties => {
 	const isPinned = column.getIsPinned();
@@ -469,7 +490,7 @@ function FilterRow({
 	dropTarget?: string | null;
 }) {
 	return (
-		<tr className={styles.filterRow}>
+		<TableRow className={styles.filterRow}>
 			{headers.map((header) => {
 				const tableColumn = header.column;
 				const columnKey = header.id;
@@ -483,7 +504,7 @@ function FilterRow({
 					isPinned === "right" && tableColumn.getIsFirstColumn("right");
 
 				return (
-					<td
+					<TableCell
 						key={`filter-${columnKey}`}
 						className={cn(
 							isPinned ? styles.filterCellPinned : styles.filterCell,
@@ -516,10 +537,10 @@ function FilterRow({
 								className={styles.filterInput}
 							/>
 						)}
-					</td>
+					</TableCell>
 				);
 			})}
-		</tr>
+		</TableRow>
 	);
 }
 
@@ -617,9 +638,9 @@ function DataTable<T>({
 
 	return (
 		<div className={styles.tableContainer}>
-			<table className={styles.table}>
-				<thead className={styles.thead}>
-					<tr className={enableColumnResizing ? "group" : ""}>
+			<Table className={styles.table}>
+				<TableHeader className={styles.thead}>
+					<TableRow className={enableColumnResizing ? "group" : ""}>
 						{table.getHeaderGroups()[0]?.headers.map((header) => {
 							const columnKey = header.id;
 							const isSortable = columnKey !== "actions";
@@ -641,7 +662,7 @@ function DataTable<T>({
 							const isRightAlign = columnConfig?.rightAlign || false;
 
 							return (
-								<th
+								<TableHead
 									key={`header-${columnKey}`}
 									className={cn(
 										styles.cellPadding,
@@ -773,12 +794,12 @@ function DataTable<T>({
 											}}
 										/>
 									)}
-								</th>
+								</TableHead>
 							);
 						})}
-					</tr>
-				</thead>
-				<tbody>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
 					{/* Filter row */}
 					{showFilters && (
 						<FilterRow
@@ -790,7 +811,7 @@ function DataTable<T>({
 
 					{/* Data rows */}
 					{table.getRowModel().rows.map((row, rowIndex) => (
-						<tr
+						<TableRow
 							key={`row-${row.id}`}
 							className={cn(
 								styles.dataRow,
@@ -811,7 +832,7 @@ function DataTable<T>({
 									isPinned === "right" && cell.column.getIsFirstColumn("right");
 
 								return (
-									<td
+									<TableCell
 										key={cell.id}
 										className={cn(
 											styles.cellPadding,
@@ -839,13 +860,13 @@ function DataTable<T>({
 										}
 									>
 										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</td>
+									</TableCell>
 								);
 							})}
-						</tr>
+						</TableRow>
 					))}
-				</tbody>
-			</table>
+				</TableBody>
+			</Table>
 		</div>
 	);
 }
