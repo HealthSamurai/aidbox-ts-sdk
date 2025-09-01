@@ -12,7 +12,15 @@ import { cn } from "#shadcn/lib/utils";
 import { CopyIcon } from "./copy-icon";
 
 const requestMethodVariants = cva(
-	"border-r-0 rounded-r-none shadow-none typo-label text-left items-center",
+	cn(
+		"border-r-0",
+		"rounded-r-none",
+		"shadow-none",
+		"typo-label",
+		"text-left",
+		"items-center",
+		"w-26",
+	),
 	{
 		variants: {
 			method: {
@@ -48,7 +56,6 @@ function RequestMethodSelector({
 		<Select value={selectedMethod} onValueChange={setMethod}>
 			<SelectTrigger
 				className={cn(
-					"w-30",
 					requestMethodVariants({ method: selectedMethod as RequestMethod }),
 				)}
 			>
