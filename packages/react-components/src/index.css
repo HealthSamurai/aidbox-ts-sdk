@@ -100,6 +100,10 @@
 	--color-utility-blue: var(--color-blue-500);
 	--color-utility-violet: var(--color-violet-500);
 	--color-utility-red: var(--color-red-500);
+
+	/* Checkbox tokens */
+	--color-border-dark: var(--color-neutral-500);
+	--color-fg-primary_inverse: var(--color-white);
 }
 
 @theme inline {
