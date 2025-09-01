@@ -3,6 +3,7 @@
 export * from "./components/code-editor";
 export * from "./components/copy-icon";
 export * from "./components/request-line-editor";
+export * from "./icons";
 export * from "./shadcn/components/ui/accordion";
 export * from "./shadcn/components/ui/alert";
 export * from "./shadcn/components/ui/alert-dialog";
