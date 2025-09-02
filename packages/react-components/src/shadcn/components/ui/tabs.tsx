@@ -1,9 +1,23 @@
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Plus, X } from "lucide-react";
-import type * as React from "react";
+import {
+	ChevronDownIcon,
+	ChevronLeft,
+	ChevronRight,
+	Plus,
+	X,
+} from "lucide-react";
+import * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 import { Button } from "./button";
+import {
+	Command,
+	CommandEmpty,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "./command";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 // Base tabs styles
 const baseTabsStyles = cn("flex", "flex-col");
@@ -18,7 +32,12 @@ const tabsAddButtonContainerStyles = cn(
 );
 
 // Tabs list styles
-const tabsListStyles = cn("inline-flex", "w-fit", "items-center");
+const tabsListStyles = cn(
+	"inline-flex",
+	"w-fit",
+	"items-center",
+	"no-scrollbar",
+);
 
 // Base tabs trigger styles
 const baseTabsTriggerStyles = cn(
@@ -120,16 +139,201 @@ export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
 	);
 }
 
+const horizontalScroll = (
+	event: React.WheelEvent,
+	setCanScrollLeft: (canScrollLeft: boolean) => void,
+	setCanScrollRight: (canScrollRight: boolean) => void,
+) => {
+	const delta = Math.max(-1, Math.min(1, -event.nativeEvent.deltaY));
+	const scrollAmount = delta * 150;
+	const newScrollLeft = event.currentTarget.scrollLeft - scrollAmount;
+	event.currentTarget.scrollTo({
+		left: newScrollLeft,
+		behavior: "smooth",
+	});
+	setCanScrollLeft(newScrollLeft > 1);
+	setCanScrollRight(
+		newScrollLeft <
+			event.currentTarget.scrollWidth - event.currentTarget.clientWidth - 2,
+	);
+};
+
+const performHorizontalScroll = (
+	tabsListRef: React.RefObject<HTMLDivElement | null>,
+	setCanScrollLeft: (canScrollLeft: boolean) => void,
+	setCanScrollRight: (canScrollRight: boolean) => void,
+	direction: "left" | "right",
+) => {
+	if (!tabsListRef.current) return;
+	const scrollAmount = 160;
+	const newScrollLeft =
+		direction === "left"
+			? tabsListRef.current.scrollLeft - scrollAmount
+			: tabsListRef.current.scrollLeft + scrollAmount;
+
+	setCanScrollLeft(newScrollLeft > 0);
+	setCanScrollRight(
+		newScrollLeft <
+			tabsListRef.current.scrollWidth - tabsListRef.current.clientWidth - 1,
+	);
+	tabsListRef.current.scrollTo({
+		left: newScrollLeft,
+		behavior: "smooth",
+	});
+};
+
+function checkScrollButtons(
+	tabsListRef: React.RefObject<HTMLDivElement | null>,
+	setCanScrollLeft: (canScrollLeft: boolean) => void,
+	setCanScrollRight: (canScrollRight: boolean) => void,
+	setShowScrollButtons: (showScrollButtons: boolean) => void,
+) {
+	if (!tabsListRef.current) return;
+	const { scrollLeft, scrollWidth, clientWidth } = tabsListRef.current;
+	setCanScrollLeft(scrollLeft > 1);
+	setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+	if (scrollLeft > 1 || scrollLeft < scrollWidth - clientWidth - 1) {
+		setShowScrollButtons(true);
+	} else {
+		setShowScrollButtons(false);
+	}
+}
+
+// TODO: Maybe it's worth creating a separate component for the tab list with a scrollable menu.
 function TabsList({
 	className,
+	children,
 	...props
 }: React.ComponentProps<typeof TabsPrimitive.List>) {
+	const tabsListRef = React.useRef<HTMLDivElement | null>(null);
+	const observerRef = React.useRef<ResizeObserver | null>(null);
+	const [showScrollButtons, setShowScrollButtons] = React.useState(false);
+	const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+	const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+	React.useEffect(() => {
+		if (!tabsListRef.current) return;
+		observerRef.current = new ResizeObserver(() => {
+			console.log("resize");
+			checkScrollButtons(
+				tabsListRef,
+				setCanScrollLeft,
+				setCanScrollRight,
+				setShowScrollButtons,
+			);
+		});
+		observerRef.current.observe(tabsListRef.current);
+		return () => {
+			observerRef.current?.disconnect();
+		};
+	}, []);
+
 	return (
-		<TabsPrimitive.List
-			data-slot="tabs-list"
-			className={cn(tabsListStyles, className)}
-			{...props}
-		/>
+		<React.Fragment>
+			{showScrollButtons && (
+				<Button
+					variant="link"
+					size="small"
+					disabled={!canScrollLeft}
+					className="h-full border-r border-b bg-bg-secondary"
+					onClick={() =>
+						performHorizontalScroll(
+							tabsListRef,
+							setCanScrollLeft,
+							setCanScrollRight,
+							"left",
+						)
+					}
+				>
+					<ChevronLeft />
+				</Button>
+			)}
+
+			<TabsPrimitive.List
+				data-slot="tabs-list"
+				className={cn(tabsListStyles, className)}
+				onWheel={(event) =>
+					horizontalScroll(event, setCanScrollLeft, setCanScrollRight)
+				}
+				ref={tabsListRef}
+				{...props}
+			>
+				{children}
+			</TabsPrimitive.List>
+
+			{showScrollButtons && (
+				<Button
+					variant="link"
+					size="small"
+					disabled={!canScrollRight}
+					className="h-full border-l border-b bg-bg-secondary"
+					onClick={() =>
+						performHorizontalScroll(
+							tabsListRef,
+							setCanScrollLeft,
+							setCanScrollRight,
+							"right",
+						)
+					}
+				>
+					<ChevronRight />
+				</Button>
+			)}
+		</React.Fragment>
+	);
+}
+
+export function TabsListDropdown({
+	tabs,
+	handleTabSelect,
+	handleCloseTab,
+}: {
+	tabs: { id: string; content: React.ReactNode }[];
+	handleTabSelect?: (tabId: string) => void;
+	handleCloseTab?: (tabId: string) => void;
+}) {
+	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+	return (
+		<Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+			<PopoverTrigger asChild>
+				<Button variant="link" className="bg-bg-secondary h-full border-b">
+					<ChevronDownIcon className="size-4" />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className="w-80 p-0" align="end">
+				<Command>
+					<CommandInput placeholder="Search tabs..." />
+					<CommandList>
+						<CommandEmpty>Not tabs found.</CommandEmpty>
+						{tabs.map((tab) => (
+							<CommandItem
+								key={tab.id}
+								onSelect={() => {
+									handleTabSelect?.(tab.id);
+									setIsMenuOpen(false);
+								}}
+								className="group flex items-center justify-between"
+							>
+								{tab.content}
+								{tabs.length > 1 && (
+									<Button
+										variant="ghost"
+										size="small"
+										className="opacity-0 group-hover:opacity-100 transition-opacity p-1 ml-2"
+										onClick={(e) => {
+											e.stopPropagation();
+											handleCloseTab?.(tab.id);
+										}}
+									>
+										<X className="size-3" />
+									</Button>
+								)}
+							</CommandItem>
+						))}
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
 	);
 }
 

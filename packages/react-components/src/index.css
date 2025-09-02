@@ -108,3 +108,12 @@
 	--font-family-sans: "Inter", system-ui, sans-serif;
 	--font-family-mono: "JetBrains Mono", monospace;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
