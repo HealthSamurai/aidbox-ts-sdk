@@ -1,10 +1,13 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, type ToasterProps } from "sonner";
-import { Button, buttonVariants } from "./button";
-import { type VariantProps } from "class-variance-authority";
-import { toast as sonnerToast } from "sonner";
+import {
+	Toaster as Sonner,
+	toast as sonnerToast,
+	type ToasterProps,
+} from "sonner";
+import { Button, type buttonVariants } from "./button";
 
 const Toaster = ({ ...props }: ToasterProps) => {
 	const { theme = "system" } = useTheme();
