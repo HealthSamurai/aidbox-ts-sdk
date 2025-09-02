@@ -214,7 +214,6 @@ function TabsList({
 	React.useEffect(() => {
 		if (!tabsListRef.current) return;
 		observerRef.current = new ResizeObserver(() => {
-			console.log("resize");
 			checkScrollButtons(
 				tabsListRef,
 				setCanScrollLeft,
@@ -300,7 +299,7 @@ export function TabsListDropdown({
 					<ChevronDownIcon className="size-4" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-80 p-0" align="end">
+			<PopoverContent className="w-80 p-0 mr-3" align="end">
 				<Command>
 					<CommandInput placeholder="Search tabs..." />
 					<CommandList>
