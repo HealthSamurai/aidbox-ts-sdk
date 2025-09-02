@@ -5,6 +5,67 @@ import type * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 import { Button } from "./button";
 
+// Base tabs styles
+const baseTabsStyles = cn("flex", "flex-col");
+
+// Tabs add button container styles
+const tabsAddButtonContainerStyles = cn(
+	"grow",
+	"h-full",
+	"bg-bg-secondary",
+	"border-l",
+	"border-b",
+	"border-border-primary",
+);
+
+// Tabs list styles
+const tabsListStyles = cn("inline-flex", "w-fit", "items-center");
+
+// Base tabs trigger styles
+const baseTabsTriggerStyles = cn(
+	// Layout & Sizing
+	"box-border",
+	"flex-1",
+	"h-10",
+	"inline-flex",
+	"items-center",
+	"justify-center",
+	"px-3",
+	"whitespace-nowrap",
+	// Spacing & Padding
+	"pb-2",
+	"pt-2.5",
+	// Typography
+	"typo-body",
+	// Colors & States
+	"cursor-pointer",
+	"text-text-tertiary",
+	"hover:bg-bg-secondary/60",
+	"hover:text-text-tertiary_hover",
+	"data-[state=active]:text-text-primary",
+	"data-[state=active]:border-b-border-brand",
+	"disabled:opacity-50",
+	"disabled:pointer-events-none",
+	// Borders
+	"border-b-2",
+	"border-b-transparent",
+	// Focus & Accessibility
+	"focus-visible:ring-2",
+	"focus-visible:ring-utility-blue/70",
+	"focus-visible:outline-1",
+	// Transitions
+	"transition-[color,box-shadow]",
+	// Icons
+	"[&_svg]:pointer-events-none",
+	"[&_svg]:shrink-0",
+	"[&_svg:not([class*='size-'])]:size-4",
+	// Groups
+	"group/tabs-trigger",
+);
+
+// Tabs content styles
+const tabsContentStyles = cn("flex-1", "outline-none");
+
 const tabsVariants = cva("", {
 	variants: {
 		variant: {
@@ -39,7 +100,7 @@ function Tabs({
 	return (
 		<TabsPrimitive.Root
 			data-slot="tabs"
-			className={cn("flex flex-col", tabsVariants({ variant }), className)}
+			className={cn(baseTabsStyles, tabsVariants({ variant }), className)}
 			{...props}
 		/>
 	);
@@ -47,7 +108,7 @@ function Tabs({
 
 export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
 	return (
-		<div className="grow h-full bg-bg-secondary border-l border-b">
+		<div className={tabsAddButtonContainerStyles}>
 			<Button
 				data-slot="tabs-add-button"
 				variant="link"
@@ -67,7 +128,7 @@ function TabsList({
 	return (
 		<TabsPrimitive.List
 			data-slot="tabs-list"
-			className={cn("inline-flex w-fit items-center", className)}
+			className={cn(tabsListStyles, className)}
 			{...props}
 		/>
 	);
@@ -84,62 +145,8 @@ function TabsTrigger({
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				// Layout & Sizing
-				"box-border",
-				"flex-1",
-				"h-10",
-				"inline-flex",
-				"items-center",
-				"justify-center",
-				"px-3",
-				"whitespace-nowrap",
-
-				// Spacing & Padding
-				"pb-2",
-				"pt-2.5",
-
-				// Typography
-				"typo-body",
-
-				// Colors & States
-				"cursor-pointer",
-				"data-[state=active]:border-b-border-brand",
-				"data-[state=active]:text-text-primary",
-				"disabled:opacity-50",
-				"disabled:pointer-events-none",
-				"hover:bg-bg-secondary/60",
-				"hover:text-text-tertiary-hover",
-				"text-text-tertiary",
-
-				// Borders
-				"border-b-2",
-				"border-b-transparent",
-
-				// Focus & Accessibility
-				"focus-visible:border-ring",
-				"focus-visible:outline-1",
-				"focus-visible:outline-ring",
-				"focus-visible:ring-[3px]",
-				"focus-visible:ring-ring/50",
-
-				// Transitions
-				"transition-[color,box-shadow]",
-
-				// Dark mode
-				"dark:data-[state=active]:border-input",
-				"dark:text-muted-foreground",
-
-				// Icons
-				"[&_svg]:pointer-events-none",
-				"[&_svg]:shrink-0",
-				"[&_svg:not([class*='size-'])]:size-4",
-
-				// Groups
-				"group/tabs-trigger",
-
-				// Conditional
+				baseTabsTriggerStyles,
 				onClose ? "justify-between" : "",
-
 				className,
 			)}
 			{...props}
@@ -173,7 +180,7 @@ function TabsContent({
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
-			className={cn("flex-1 outline-none", className)}
+			className={cn(tabsContentStyles, className)}
 			{...props}
 		/>
 	);

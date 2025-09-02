@@ -64,7 +64,7 @@ const iconNormalColor = cn(
 
 const iconInvalidColor = cn(
 	// Colors
-	"text-fg-tertiary",
+	"text-text-tertiary",
 
 	// Transitions
 	"transition-colors",

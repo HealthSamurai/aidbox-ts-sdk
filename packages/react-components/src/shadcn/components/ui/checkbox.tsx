@@ -13,29 +13,49 @@ function Checkbox({
 			data-slot="checkbox"
 			className={cn(
 				// Base styles
-				"peer size-5 shrink-0 rounded-md border-[1.5px] transition-all duration-200 outline-none cursor-pointer",
+				"peer",
+				"size-5",
+				"shrink-0",
+				"rounded-md",
+				"border-[1.5px]",
+				"transition-all",
+				"duration-200",
+				"outline-none",
+				"cursor-pointer",
 				// Click animation
-				"active:scale-90 active:duration-75",
+				"active:scale-90",
+				"active:duration-75",
 				// Default state
-				"border-fg-secondary bg-transparent hover:bg-bg-tertiary",
+				"border-border-primary",
+				"bg-transparent",
+				"hover:bg-bg-tertiary",
 				// Checked state
-				"data-[state=checked]:bg-bg-link data-[state=checked]:border-border-link data-[state=checked]:text-fg-primary_inverse",
+				"data-[state=checked]:bg-bg-link",
+				"data-[state=checked]:border-border-link",
+				"data-[state=checked]:text-text-primary_on-brand",
 				// Indeterminate state
-				"data-[state=indeterminate]:bg-fg-link data-[state=indeterminate]:border-fg-link data-[state=indeterminate]:text-fg-primary_inverse",
+				"data-[state=indeterminate]:bg-fg-link",
+				"data-[state=indeterminate]:border-fg-link",
+				"data-[state=indeterminate]:text-text-primary_on-brand",
 				// Disabled states
-				"disabled:cursor-not-allowed disabled:active:scale-100",
-				"disabled:border-border-primary disabled:bg-transparent",
-				"disabled:data-[state=checked]:bg-border-dark disabled:data-[state=checked]:border-border-dark",
-				"disabled:data-[state=indeterminate]:bg-border-dark disabled:data-[state=indeterminate]:border-border-dark",
+				"disabled:cursor-not-allowed",
+				"disabled:active:scale-100",
+				"disabled:border-border-secondary",
+				"disabled:bg-transparent",
+				"disabled:data-[state=checked]:bg-fg-tertiary",
+				"disabled:data-[state=checked]:border-fg-tertiary",
+				"disabled:data-[state=indeterminate]:bg-fg-tertiary",
+				"disabled:data-[state=indeterminate]:border-fg-tertiary",
 				// Focus state
-				"focus-visible:ring-2 focus-visible:ring-utility-blue/70",
+				"focus-visible:ring-2",
+				"focus-visible:ring-utility-blue/70",
 				className,
 			)}
 			{...props}
 		>
 			<CheckboxPrimitive.Indicator
 				data-slot="checkbox-indicator"
-				className="flex items-center justify-center text-current"
+				className="flex items-center justify-center"
 			>
 				{props.checked === "indeterminate" ? (
 					<MinusIcon className="size-3.5" style={{ strokeWidth: 3 }} />

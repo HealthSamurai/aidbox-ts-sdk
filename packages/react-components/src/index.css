@@ -24,6 +24,7 @@
 	--color-text-primary_on-brand: var(--color-neutral-50);
 	--color-text-secondary_on-brand: var(--color-neutral-100);
 	--color-text-tertiary: var(--color-neutral-400);
+	--color-text-tertiary_hover: var(--color-neutral-500);
 	--color-text-quternary: var(--color-neutral-400);
 	--color-text-quternary_hover: var(--color-neutral-500);
 	--color-text-quternary_on-brand: var(--color-neutral-200);
@@ -44,6 +45,7 @@
 	--color-border-secondary: var(--color-neutral-200);
 	--color-border-separator: var(--color-neutral-200);
 	--color-border-disabled: var(--color-neutral-100);
+	--color-border-dark: var(--color-neutral-500);
 	--color-border-brand: var(--color-brand-500);
 	--color-border-link: var(--color-blue-500);
 	--color-border-error: var(--color-red-500);
@@ -100,10 +102,6 @@
 	--color-utility-blue: var(--color-blue-500);
 	--color-utility-violet: var(--color-violet-500);
 	--color-utility-red: var(--color-red-500);
-
-	/* Checkbox tokens */
-	--color-border-dark: var(--color-neutral-500);
-	--color-fg-primary_inverse: var(--color-white);
 }
 
 @theme inline {

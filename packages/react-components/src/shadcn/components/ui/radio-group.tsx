@@ -10,7 +10,7 @@ function RadioGroup({
 	return (
 		<RadioGroupPrimitive.Root
 			data-slot="radio-group"
-			className={cn("grid gap-3", className)}
+			className={cn("grid", "gap-3", className)}
 			{...props}
 		/>
 	);
@@ -24,30 +24,54 @@ function RadioGroupItem({
 		<RadioGroupPrimitive.Item
 			data-slot="radio-group-item"
 			className={cn(
-				// Base styles - размер и форма
-				"aspect-square size-4 shrink-0 rounded-full overflow-hidden relative outline-none cursor-pointer",
+				// Base styles
+				"aspect-square",
+				"size-4",
+				"shrink-0",
+				"rounded-full",
+				"overflow-hidden",
+				"relative",
+				"outline-none",
+				"cursor-pointer",
 				// Animations
-				"transition-all duration-200",
-				"active:scale-90 active:duration-75",
-				// Default state: белый фон с серой границей
-				"bg-white border-[1.6px] border-solid border-border-dark",
-				// Checked state: синий фон без границы
-				"data-[state=checked]:bg-bg-link data-[state=checked]:border-bg-link",
+				"transition-all",
+				"duration-200",
+				"active:scale-90",
+				"active:duration-75",
+				// Default state:
+				"bg-white",
+				"border-[1.6px]",
+				"border-solid",
+				"border-border-primary",
+				// Checked state:
+				"data-[state=checked]:bg-bg-link",
+				"data-[state=checked]:border-bg-link",
 				// Disabled states
-				"disabled:cursor-not-allowed disabled:active:scale-100",
-				"disabled:bg-white disabled:border-border-primary", // disabled unchecked
-				"disabled:data-[state=checked]:bg-border-primary disabled:data-[state=checked]:border-border-primary", // disabled checked
+				"disabled:cursor-not-allowed",
+				"disabled:active:scale-100",
+				"disabled:bg-white",
+				"disabled:border-border-secondary",
+				"disabled:data-[state=checked]:bg-border-secondary",
+				"disabled:data-[state=checked]:border-border-secondary",
 				// Focus styles
-				"focus-visible:ring-2 focus-visible:ring-bg-link focus-visible:ring-offset-2",
+				"focus-visible:ring-2",
+				"focus-visible:ring-bg-link",
+				"focus-visible:ring-offset-2",
 				className,
 			)}
 			{...props}
 		>
 			<RadioGroupPrimitive.Indicator
 				data-slot="radio-group-indicator"
-				className="absolute inset-0 flex items-center justify-center"
+				className={cn(
+					"absolute",
+					"inset-0",
+					"flex",
+					"items-center",
+					"justify-center",
+				)}
 			>
-				<div className="size-1.5 rounded-full bg-white" />
+				<div className={cn("size-1.5", "rounded-full", "bg-white")} />
 			</RadioGroupPrimitive.Indicator>
 		</RadioGroupPrimitive.Item>
 	);

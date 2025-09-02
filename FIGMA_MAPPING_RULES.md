@@ -8,11 +8,26 @@ These rules are mandatory for any work on synchronizing Figma layouts with the `
 - **1:1 name correspondence**: Figma variables are mapped to semantically similar tokens from `@theme` (do not use arbitrary/alternative tokens).
 - **No raw values**: do not insert direct HEX/RGB/px etc., only classes/variables tied to `@theme`.
 - **Examples of correct references**:
-  - Text: `text-text-primary`, `text-text-tertiary`, `text-text-link`.
-  - Background: `bg-bg-primary`, `bg-bg-tertiary`.
-  - Elements on background (except text and borders): `fg-fg-primary`, `fg-fg-tertiary`.
-  - Border: `border-border-primary`.
-  - Focus/ring: `focus-visible:ring-ring` (if such token exists and is used in the project).
+  - Text: `text-text-primary`, `text-text-secondary`, `text-text-tertiary`, `text-text-link`.
+  - Background: `bg-bg-primary`, `bg-bg-secondary`, `bg-bg-tertiary`.
+  - Border: `border-border-primary`, `border-border-secondary`.
+  - Focus/ring: `ring-utility-blue/70`, `focus-visible:ring-utility-blue/70`.
+
+## 1.1) CRITICAL: Text vs Foreground Tokens
+
+**NEVER confuse these two token types:**
+
+- **`--color-text-*`** tokens → use as `text-text-*` classes (for actual text content only)
+- **`--color-fg-*`** tokens → use as `text-fg-*` classes (for all foreground elements that lay on top: icons, decorative elements, symbols, etc.)
+
+**Key principle:** `fg` is for everything that lies **on top** of the background (foreground layer).
+
+**Examples:**
+
+- ✅ Correct: `text-text-primary` (for paragraph text, headings, labels, actual readable text)
+- ✅ Correct: `text-fg-primary` (for icon colors, symbols, decorative elements, anything visual on top)
+- ❌ Wrong: `text-fg-primary` for readable text content (paragraphs, headings, labels)
+- ❌ Wrong: `text-text-primary` for icons and visual elements
 
 ## 2) Typography: Only Presets from `src/typography.css`
 
@@ -86,9 +101,11 @@ These rules are mandatory for any work on synchronizing Figma layouts with the `
 
 ## 8) Class Naming Referencing `@theme` Tokens
 
-- `text-…` → `var(--color-text-…)`
+- `text-text-…` → `var(--color-text-…)` (for actual text content)
+- `text-fg-…` → `var(--color-fg-…)` (for icons, decorative elements)
 - `bg-…` → `var(--color-bg-…)`
 - `border-…` → `var(--color-border-…)`
+- `ring-utility-…` → `var(--color-utility-…)`
 - Hovers/states use corresponding tokens `…_hover`, `…_on-brand`, etc., if they exist in `@theme`.
 
 ## 9) Quality Check
@@ -99,7 +116,76 @@ These rules are mandatory for any work on synchronizing Figma layouts with the `
 - All tokens exist in the `@theme` section of `index.css`.
 - Correct token format is used (without `--color-` prefix).
 
-## 10) Algorithm for Actions When Token is Missing
+## 10) Code Refactoring Rules
+
+### 10.1) Style Organization
+
+- **Always** extract all styles to constants at the top of the file
+- **Each CSS class** must be on its own separate line within `cn()` calls
+- **Group styles** with descriptive comments (Layout, Typography, Colors, States, etc.)
+- **Use meaningful names** for style constants (e.g., `baseButtonStyles`, `formItemStyles`)
+- **CRITICAL: Typography** - NEVER use utility classes (`text-sm`, `font-medium`, `leading-6`), ALWAYS use presets from `typography.css` (`typo-body`, `typo-label`, `typo-page-header`)
+
+### 10.2) Style Extraction Examples
+
+```typescript
+// ✅ Correct: Styles extracted and organized
+const baseButtonStyles = cn(
+  // Layout
+  "inline-flex",
+  "items-center",
+  "justify-center",
+  // Typography
+  "typo-body", // Use preset from typography.css
+  // Shape
+  "rounded-lg",
+  // Interaction
+  "transition-colors"
+);
+
+// ❌ Wrong: Inline styles and utility typography
+className = "inline-flex items-center text-sm font-medium rounded-lg";
+
+// ❌ Wrong: Using utility typography classes
+"text-sm",
+"font-medium",
+"leading-6",
+
+// ✅ Correct: Using typography presets
+"typo-body",
+"typo-label",
+"typo-page-header",
+```
+
+### 10.3) Token Replacement
+
+- **Always** replace shadcn tokens with project tokens:
+
+  - `text-muted-foreground` → `text-text-secondary`
+  - `text-destructive` → `text-text-error-primary`
+  - `bg-primary` → `bg-bg-link`
+  - `border-input` → `border-border-primary`
+  - `focus-visible:ring-ring` → `focus-visible:ring-utility-blue/70`
+
+- **Always** replace utility typography with presets:
+  - `text-sm font-medium` → `typo-label`
+  - `text-base` → `typo-body`
+  - `text-xl font-medium` → `typo-page-header`
+  - Any combination of `text-*`, `font-*`, `leading-*` → appropriate `typo-*` preset
+
+### 10.4) cn() Usage
+
+- **Always** use `cn()` for combining styles
+- **First parameter**: base styles constant
+- **Second parameter**: conditional/variant styles
+- **Last parameter**: `className` prop for overrides
+
+```typescript
+// ✅ Correct usage
+className={cn(baseStyles, variantStyles, className)}
+```
+
+## 11) Algorithm for Actions When Token is Missing
 
 1. **Check** existing tokens in the `@theme` section of `index.css`
 2. **Show** the user a list of missing tokens
