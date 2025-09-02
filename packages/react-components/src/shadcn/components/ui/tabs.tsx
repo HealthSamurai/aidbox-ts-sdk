@@ -15,7 +15,6 @@ const tabsAddButtonContainerStyles = cn(
 	"bg-bg-secondary",
 	"border-l",
 	"border-b",
-	"border-border-primary",
 );
 
 // Tabs list styles
