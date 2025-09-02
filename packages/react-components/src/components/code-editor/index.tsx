@@ -16,7 +16,7 @@ import {
 } from "@codemirror/language";
 import { linter, lintGutter, lintKeymap } from "@codemirror/lint";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { EditorState } from "@codemirror/state";
+import { Compartment, EditorState } from "@codemirror/state";
 import {
 	crosshairCursor,
 	drawSelection,
@@ -79,49 +79,59 @@ const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.null, color: "#569cd6" },
 ]);
 
-export function CodeEditor({
-	defaultValue,
-	currentValue,
-	onChange,
-	id,
-	mode = "json",
-}: {
+type LanguageMode = "json" | "http";
+
+function languageExtensions(mode: LanguageMode) {
+	if (mode === "http") {
+		return [
+			httpLanguage,
+			syntaxHighlighting(HighlightStyle.define(httpHighlightStyle)),
+		];
+	} else {
+		return [
+			json(),
+			linter(jsonParseLinter(), { delay: 300 }),
+			syntaxHighlighting(customHighlightStyle),
+		];
+	}
+}
+
+type CodeEditorProps = {
 	defaultValue?: string;
 	currentValue?: string;
 	onChange?: (value: string) => void;
 	id?: string;
-	mode?: "json" | "http";
-}) {
-	const editorRef = React.useRef(null);
-	const viewRef = React.useRef<EditorView | null>(null);
+	mode?: LanguageMode;
+	viewCallback?: (view: EditorView) => void;
+};
 
-	const getLanguageExtensions = (mode: "json" | "http") => {
-		if (mode === "http") {
-			return [httpLanguage];
-		} else {
-			return [json(), linter(jsonParseLinter(), { delay: 300 })];
-		}
-	};
+export type CodeEditorView = EditorView;
 
-	const getSyntaxHighlighting = (mode: "json" | "http") => {
-		if (mode === "http") {
-			return syntaxHighlighting(HighlightStyle.define(httpHighlightStyle));
-		} else {
-			return syntaxHighlighting(customHighlightStyle);
-		}
-	};
+export function CodeEditor({
+	defaultValue,
+	currentValue,
+	onChange,
+	viewCallback,
+	id,
+	mode = "json",
+}: CodeEditorProps) {
+	const domRef = React.useRef(null);
+	const [view, setView] = React.useState<EditorView | null>(null);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: we don't want to re-render the editor when the defaultValue or onChange changes
+	const initialValue = React.useRef(defaultValue ?? "");
+
+	const onChangeComparment = React.useRef(new Compartment());
+	const languageCompartment = React.useRef(new Compartment());
+
 	React.useEffect(() => {
-		if (!editorRef.current) {
+		if (!domRef.current) {
 			return;
 		}
 
-		const initialValue = currentValue ?? defaultValue ?? "";
 		const view = new EditorView({
-			parent: editorRef.current,
+			parent: domRef.current,
 			state: EditorState.create({
-				doc: initialValue,
+				doc: initialValue.current,
 				extensions: [
 					lineNumbers(),
 					foldGutter(),
@@ -131,8 +141,7 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
-					...getLanguageExtensions(mode),
-					getSyntaxHighlighting(mode),
+					languageCompartment.current.of([]),
 					bracketMatching(),
 					closeBrackets(),
 					autocompletion(),
@@ -152,32 +161,47 @@ export function CodeEditor({
 						...lintKeymap,
 					]),
 					lintGutter(),
-					EditorView.updateListener.of((update) => {
-						if (update.docChanged && onChange) {
-							onChange(update.view.state.doc.toString());
-						}
-					}),
+					onChangeComparment.current.of([]),
 				],
 			}),
 		});
 
-		viewRef.current = view;
+		setView(() => view);
 
 		return () => {
 			view.destroy();
-			viewRef.current = null;
+			setView(() => null);
 		};
 	}, []);
 
-	// Handle currentValue updates
 	React.useEffect(() => {
-		if (!viewRef.current || currentValue === undefined) {
+		if (viewCallback && view) {
+			viewCallback(view);
+		}
+	}, [view, viewCallback]);
+
+	React.useEffect(() => {
+		console.log("Update");
+		view?.dispatch({
+			effects: onChangeComparment.current.reconfigure([
+				EditorView.updateListener.of((update) => {
+					if (update.docChanged && onChange) {
+						onChange(update.view.state.doc.toString());
+					}
+				}),
+			]),
+		});
+	}, [view, onChange]);
+
+	// FIXME: it is probably better to have CM manage its state.
+	React.useEffect(() => {
+		if (!view || currentValue === undefined) {
 			return;
 		}
 
-		const currentDoc = viewRef.current.state.doc.toString();
+		const currentDoc = view.state.doc.toString();
 		if (currentDoc !== currentValue) {
-			viewRef.current.dispatch({
+			view.dispatch({
 				changes: {
 					from: 0,
 					to: currentDoc.length,
@@ -185,7 +209,18 @@ export function CodeEditor({
 				},
 			});
 		}
-	}, [currentValue]);
+	}, [currentValue, view]);
 
-	return <div className="h-full w-full" ref={editorRef} id={id} />;
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: languageCompartment.current.reconfigure(
+				languageExtensions(mode),
+			),
+		});
+	}, [mode, view]);
+
+	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
