@@ -240,8 +240,7 @@ const inputVariants = cva(
 		"hover:border-border-primary_hover",
 
 		// Focus states
-		"focus-visible:ring-4",
-		"focus-visible:ring-ring-blue",
+
 		"focus-visible:border-border-link",
 
 		// Invalid states
@@ -253,6 +252,7 @@ const inputVariants = cva(
 		"disabled:bg-bg-secondary",
 		"disabled:cursor-not-allowed",
 		"disabled:border-border-primary",
+		"disabled:text-text-disabled",
 		"disabled:placeholder:text-text-disabled",
 
 		// Transitions

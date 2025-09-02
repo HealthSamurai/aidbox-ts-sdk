@@ -1,12 +1,19 @@
+"use client";
+
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { Button, buttonVariants } from "./button";
+import { type VariantProps } from "class-variance-authority";
+import { toast as sonnerToast } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
 	const { theme = "system" } = useTheme();
 
 	return (
 		<Sonner
-			theme={theme as ToasterProps["theme"] & {}}
+			theme={
+				theme === "system" ? "system" : theme === "dark" ? "dark" : "light"
+			}
 			className="toaster group"
 			style={
 				{
@@ -20,4 +27,44 @@ const Toaster = ({ ...props }: ToasterProps) => {
 	);
 };
 
-export { Toaster };
+// Custom toast wrapper with our buttons
+const toast = (
+	message: string,
+	options?: {
+		description?: string;
+		action?: {
+			label: string;
+			onClick: () => void;
+			variant?: VariantProps<typeof buttonVariants>["variant"];
+		};
+		cancel?: {
+			label: string;
+			onClick: () => void;
+			variant?: VariantProps<typeof buttonVariants>["variant"];
+		};
+	},
+) => {
+	return sonnerToast(message, {
+		...options,
+		action: options?.action ? (
+			<Button
+				variant={options.action.variant || "secondary"}
+				size="small"
+				onClick={options.action.onClick}
+			>
+				{options.action.label}
+			</Button>
+		) : undefined,
+		cancel: options?.cancel ? (
+			<Button
+				variant={options.cancel.variant || "ghost"}
+				size="small"
+				onClick={options.cancel.onClick}
+			>
+				{options.cancel.label}
+			</Button>
+		) : undefined,
+	});
+};
+
+export { Toaster, toast };

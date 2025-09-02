@@ -161,7 +161,7 @@ function TabsTrigger({
 					}}
 					variant="link"
 					size="small"
-					className="p-0 ml-2"
+					className="p-0 ml-2 opacity-0 group-hover/tabs-trigger:opacity-100 transition-opacity"
 					asChild
 				>
 					<span>
