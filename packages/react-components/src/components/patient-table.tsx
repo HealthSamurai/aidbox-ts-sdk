@@ -2,8 +2,10 @@ import type {
 	Column,
 	ColumnDef,
 	ColumnPinningState,
+	Header,
 } from "@tanstack/react-table";
 import {
+	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
 	useReactTable,
@@ -51,7 +53,6 @@ const TableCell = ({ className, ...props }: React.ComponentProps<"td">) => (
 	<td className={className} {...props} />
 );
 
-// Helper function to compute pinning styles for columns - как в TanStack Table примере
 const getPinningStyles = <T,>(column: Column<T>): CSSProperties => {
 	const isPinned = column.getIsPinned();
 	return {
@@ -113,7 +114,6 @@ const styles = {
 	// Global cell padding
 	cellPadding: cn("px-4"),
 
-	// Pinned column styles - используем data-атрибуты для CSS
 	pinnedColumn: cn(
 		"data-pinned:bg-background/90",
 		"data-pinned:backdrop-blur-xs",
@@ -152,7 +152,7 @@ const styles = {
 		"relative",
 		"w-full",
 	),
-	headerText: cn("truncate", "pr-3"), // Отступ справа для иконок сортировки
+	headerText: cn("truncate", "pr-3"),
 	headerIcons: cn("flex", "flex-col", "items-center", "justify-center"),
 	headerIcon: cn("w-3", "h-3"),
 	headerIconInactive: cn("w-3", "h-3", "opacity-30"),
@@ -172,7 +172,6 @@ const styles = {
 	filterInput: cn("border-0", "h-8"),
 	filterIcon: cn("w-4", "h-4", "text-text-tertiary"),
 
-	// Data rows - без анимации для мгновенного hover
 	dataRow: cn("hover:bg-bg-link/10"),
 	dataRowZebra: cn("bg-bg-secondary", "hover:bg-bg-link/10"),
 	dataCell: cn("h-8"),
@@ -209,7 +208,6 @@ const styles = {
 		"active:opacity-100",
 		"transition-opacity",
 		"duration-150",
-		// Увеличиваем область взаимодействия
 		"before:absolute",
 		"before:right-[-4px]",
 		"before:top-0",
@@ -232,19 +230,12 @@ const styles = {
 		"after:opacity-0",
 		"after:transition-opacity",
 		"after:duration-150",
-		// Добавляем подсказку о возможности ресайза
 		"hover:after:opacity-50",
-		// Убираем width для последней колонки
 		"last:after:w-0",
 	),
 
 	// Draggable header styles
-	draggableHeader: cn(
-		"transition-all",
-		"duration-150",
-		"group/header", // Добавляем группу для hover эффекта
-	),
-	// Drag zone - только левая часть заголовка
+	draggableHeader: cn("transition-all", "duration-150", "group/header"),
 	dragZone: cn(
 		"absolute",
 		"left-0",
@@ -255,19 +246,18 @@ const styles = {
 		"flex",
 		"items-center",
 		"justify-start",
-		"pl-0", // Отступ слева
+		"pl-0",
 		"opacity-0",
 		"hover:opacity-100",
-		"group-hover/header:opacity-60", // Показываем при наведении на заголовок
-		"hover:!opacity-100", // Полная непрозрачность при прямом наведении
+		"group-hover/header:opacity-60",
+		"hover:!opacity-100",
 		"transition-opacity",
 		"duration-150",
 		"bg-transparent",
 		"border-none",
 		"text-text-tertiary",
 		"hover:text-text-secondary",
-		// Исключаем правые 20px для ресайза
-		"right-5", // 20px справа остается для ресайза
+		"right-5",
 	),
 	draggingHeader: cn(
 		"bg-bg-primary_inverse/10",
@@ -480,12 +470,12 @@ function TableCellContent({
 }
 
 // Filter row component
-function FilterRow({
+function FilterRow<TData, TValue>({
 	headers,
 	draggedColumn,
 	dropTarget,
 }: {
-	headers: any[]; // TanStack Table headers
+	headers: Header<TData, TValue>[]; // TanStack Table headers
 	draggedColumn?: string | null;
 	dropTarget?: string | null;
 }) {
@@ -508,13 +498,13 @@ function FilterRow({
 						key={`filter-${columnKey}`}
 						className={cn(
 							isPinned ? styles.filterCellPinned : styles.filterCell,
-							styles.pinnedColumn, // Используем новый unified стиль
+							styles.pinnedColumn,
 							isBeingDragged && styles.draggingColumn,
 							isDropTarget && styles.dropZone,
 							isDropTarget && styles.dropZoneActive,
 						)}
 						style={{
-							...getPinningStyles(tableColumn), // Используем helper функцию
+							...getPinningStyles(tableColumn),
 						}}
 						data-pinned={isPinned || undefined}
 						data-last-col={
@@ -581,18 +571,15 @@ function DataTable<T>({
 	onColumnPinningChange,
 	columnConfigs,
 }: DataTableProps<T> & { columnConfigs?: ColumnConfig[] }) {
-	// Состояние для drag & drop
 	const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
 	const [dropTarget, setDropTarget] = useState<string | null>(null);
 
-	// Создаем начальные размеры колонок из конфигурации
 	const initialColumnSizing = useMemo(() => {
 		if (!enableColumnResizing || !columnConfigs) return {};
 
 		const sizing: Record<string, number> = {};
 		columnConfigs.forEach((config) => {
 			if (config.width) {
-				// Преобразуем "160px" в 160
 				const width = parseInt(config.width.replace("px", ""), 10);
 				if (!Number.isNaN(width)) {
 					sizing[config.key] = width;
@@ -602,7 +589,6 @@ function DataTable<T>({
 		return sizing;
 	}, [enableColumnResizing, columnConfigs]);
 
-	// TanStack Table instance для ресайза и reordering
 	const table = useReactTable({
 		data,
 		columns,
@@ -634,8 +620,6 @@ function DataTable<T>({
 		},
 	});
 
-	// Фильтры теперь используют напрямую headers из TanStack Table
-
 	return (
 		<div className={styles.tableContainer}>
 			<Table className={styles.table}>
@@ -655,7 +639,6 @@ function DataTable<T>({
 							const isFirstRightPinned =
 								isPinned === "right" && header.column.getIsFirstColumn("right");
 
-							// Найти конфигурацию колонки для rightAlign
 							const columnConfig = columnConfigs?.find(
 								(config) => config.key === columnKey,
 							);
@@ -668,7 +651,7 @@ function DataTable<T>({
 										styles.cellPadding,
 										styles.th,
 										isSortable && showSorting && styles.thSortable,
-										styles.pinnedHeader, // Используем новый unified стиль
+										styles.pinnedHeader,
 										isSorted && styles.thSorted,
 										isRightAlign && styles.thRightAlign,
 										"relative",
@@ -682,8 +665,7 @@ function DataTable<T>({
 										isDropTarget && styles.dropZoneActive,
 									)}
 									style={{
-										...getPinningStyles(header.column), // Используем helper функцию
-										// Переопределяем width если нужно
+										...getPinningStyles(header.column),
 										...(enableColumnResizing
 											? {}
 											: { width: columnWidths[columnKey] || "200px" }),
@@ -697,8 +679,7 @@ function DataTable<T>({
 												: undefined
 									}
 									onClick={(e) => {
-										// Предотвращаем сортировку если кликнули по ресайз-хэндлу или drag-зоне
-										const target = e.target as HTMLElement;
+										const target = e.currentTarget;
 										if (
 											target.closest("[data-resize-handle]") ||
 											target.closest("[data-drag-zone]")
@@ -720,7 +701,6 @@ function DataTable<T>({
 										setDropTarget(columnKey);
 									}}
 									onDragLeave={(e) => {
-										// Проверяем, что мышь действительно покинула элемент
 										const rect = e.currentTarget.getBoundingClientRect();
 										const x = e.clientX;
 										const y = e.clientY;
@@ -755,7 +735,6 @@ function DataTable<T>({
 										setDropTarget(null);
 									}}
 								>
-									{/* Drag zone - только левая часть заголовка */}
 									{isDraggable && (
 										<button
 											type="button"
@@ -837,15 +816,14 @@ function DataTable<T>({
 										className={cn(
 											styles.cellPadding,
 											styles.dataCell,
-											styles.pinnedColumn, // Используем новый unified стиль
+											styles.pinnedColumn,
 											isSorted && styles.cellSorted,
 											isBeingDragged && styles.draggingColumn,
 											isDropTarget && styles.dropZone,
 											isDropTarget && styles.dropZoneActive,
 										)}
 										style={{
-											...getPinningStyles(cell.column), // Используем helper функцию
-											// Переопределяем width если нужно
+											...getPinningStyles(cell.column),
 											...(enableColumnResizing
 												? {}
 												: { width: columnWidths[columnKey] || "200px" }),
@@ -871,102 +849,69 @@ function DataTable<T>({
 	);
 }
 
-const columns: ColumnDef<PatientRow>[] = [
-	{
-		accessorKey: "firstName",
-		header: () => <TableHeaderContent content={"First name"} />,
-		cell: ({ cell }: { cell: { getValue: () => unknown } }) => (
-			<TableCellContent content={cell.getValue() as string} />
+const columnHelper = createColumnHelper<PatientRow>();
+
+const columns = [
+	columnHelper.accessor("firstName", {
+		header: () => <TableHeaderContent content="First name" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("lastName", {
+		header: () => <TableHeaderContent content="Last name" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("id", {
+		header: () => <TableHeaderContent content="ID" />,
+		cell: (props) => (
+			<TableCellContent content={props.getValue()} type="code" />
 		),
-	},
-	{
-		accessorKey: "lastName",
-		header: () => <TableHeaderContent content={"Last name"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
+	}),
+	columnHelper.accessor("birthDate", {
+		header: () => <TableHeaderContent content="Birth" />,
+		cell: (props) => (
+			<TableCellContent content={props.getValue()} type="code" />
 		),
-	},
-	{
-		accessorKey: "id",
-		header: () => <TableHeaderContent content={"ID"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} type="code" />
-		),
-	},
-	{
-		accessorKey: "birthDate",
-		header: () => <TableHeaderContent content={"Birth"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "phoneNumber",
-		header: () => <TableHeaderContent content={"Phone number"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "email",
-		header: () => <TableHeaderContent content={"Email"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "gender",
-		header: () => <TableHeaderContent content={"Gender"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "street",
-		header: () => <TableHeaderContent content={"Street"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "city",
-		header: () => <TableHeaderContent content={"City"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "state",
-		header: () => <TableHeaderContent content={"State"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "zip",
-		header: () => <TableHeaderContent content={"ZIP"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "country",
-		header: () => <TableHeaderContent content={"Country"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as string} />
-		),
-	},
-	{
-		accessorKey: "encounters",
-		header: () => <TableHeaderContent content={"Encounters"} />,
-		cell: ({ cell }: { cell: { getValue: () => any } }) => (
-			<TableCellContent content={cell.getValue() as number} />
-		),
-	},
-	{
+	}),
+	columnHelper.accessor("phoneNumber", {
+		header: () => <TableHeaderContent content="Phone number" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("email", {
+		header: () => <TableHeaderContent content="Email" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("gender", {
+		header: () => <TableHeaderContent content="Gender" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("street", {
+		header: () => <TableHeaderContent content="Street" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("city", {
+		header: () => <TableHeaderContent content="City" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("state", {
+		header: () => <TableHeaderContent content="State" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("zip", {
+		header: () => <TableHeaderContent content="ZIP" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("country", {
+		header: () => <TableHeaderContent content="Country" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.accessor("encounters", {
+		header: () => <TableHeaderContent content="Encounters" />,
+		cell: (props) => <TableCellContent content={props.getValue()} />,
+	}),
+	columnHelper.display({
 		id: "actions",
 		header: () => <TableHeaderContent content={"Actions"} />,
-		cell: ({ row }: { row: { original: PatientRow } }) => (
+		cell: ({ row }) => (
 			<TableCellContent
 				content={
 					<button
@@ -985,7 +930,7 @@ const columns: ColumnDef<PatientRow>[] = [
 		meta: {
 			fixed: "right",
 		},
-	},
+	}),
 ];
 
 export type PatientTableProps = {
@@ -1014,19 +959,15 @@ export function PatientTable(props: PatientTableProps) {
 		columnConfigs,
 	} = props;
 
-	// Состояние сортировки
 	const [sortConfig, setSortConfig] = useState<{
 		key: string;
 		direction: "asc" | "desc";
 	} | null>(null);
 
-	// Состояние порядка колонок
 	const [columnOrder, setColumnOrder] = useState<string[]>([]);
 
-	// Состояние пинирования колонок
 	const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({});
 
-	// Инициализация пинирования из columnConfigs
 	useEffect(() => {
 		if (!enableColumnPinning || !columnConfigs) return;
 
@@ -1039,13 +980,12 @@ export function PatientTable(props: PatientTableProps) {
 		}
 	}, [enableColumnPinning, columnConfigs]);
 
-	// Обработчик сортировки
 	const handleSort = (columnKey: string) => {
 		setSortConfig((current) => {
 			if (current?.key === columnKey) {
 				return current.direction === "asc"
 					? { key: columnKey, direction: "desc" }
-					: null; // убираем сортировку при третьем клике
+					: null;
 			}
 			return { key: columnKey, direction: "asc" };
 		});
@@ -1208,7 +1148,6 @@ export function PatientTable(props: PatientTableProps) {
 		},
 	];
 
-	// Сортировка данных
 	const sortedData = useMemo(() => {
 		if (!sortConfig) return data;
 
@@ -1222,7 +1161,6 @@ export function PatientTable(props: PatientTableProps) {
 		});
 	}, [sortConfig]);
 
-	// Создаем columnWidths из columnConfigs
 	const generatedColumnWidths = useMemo(() => {
 		if (!columnConfigs) {
 			return columnWidths;
@@ -1238,19 +1176,16 @@ export function PatientTable(props: PatientTableProps) {
 		return { ...columnWidths, ...configWidths };
 	}, [columnConfigs, columnWidths]);
 
-	// Создаем колонки из конфигурации или используем дефолтные
 	const generatedColumns = useMemo(() => {
 		if (!columnConfigs) {
-			return columns; // Используем старые колонки если конфигурация не передана
+			return columns;
 		}
 
 		return columnConfigs.map((config): ColumnDef<PatientRow> => {
-			// Получаем размер колонки
 			const columnSize = config.width
 				? parseInt(config.width.replace("px", ""), 10)
 				: undefined;
 
-			// Для action колонок
 			if (config.type === "link" || config.type === "button") {
 				return {
 					id: config.key,
@@ -1272,7 +1207,6 @@ export function PatientTable(props: PatientTableProps) {
 				};
 			}
 
-			// Для обычных колонок
 			return {
 				accessorKey: config.key,
 				header: () => <TableHeaderContent content={config.label} />,
@@ -1291,7 +1225,6 @@ export function PatientTable(props: PatientTableProps) {
 		});
 	}, [columnConfigs]);
 
-	// Обновляем колонки с сортировкой и пинированием
 	const columnsWithSorting = generatedColumns.map((column) => ({
 		...column,
 		header: () => {
@@ -1308,7 +1241,6 @@ export function PatientTable(props: PatientTableProps) {
 			const handlePin = (direction: "left" | "right" | false) => {
 				const newPinning: ColumnPinningState = { ...columnPinning };
 
-				// Удаляем колонку из всех направлений
 				if (newPinning.left) {
 					newPinning.left = newPinning.left.filter((id) => id !== columnKey);
 				}
@@ -1316,7 +1248,6 @@ export function PatientTable(props: PatientTableProps) {
 					newPinning.right = newPinning.right.filter((id) => id !== columnKey);
 				}
 
-				// Добавляем в нужное направление если не false
 				if (direction === "left") {
 					newPinning.left = [...(newPinning.left || []), columnKey];
 				} else if (direction === "right") {
