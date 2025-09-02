@@ -146,7 +146,7 @@ function TabsTrigger({
 			data-slot="tabs-trigger"
 			className={cn(
 				baseTabsTriggerStyles,
-				onClose ? "justify-between" : "",
+				onClose ? "justify-between" : "justify-start",
 				className,
 			)}
 			{...props}
