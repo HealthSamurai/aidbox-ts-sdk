@@ -20,7 +20,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 // Base tabs styles
-const baseTabsStyles = cn("flex", "flex-col");
+const baseTabsStyles = cn("flex", "flex-col", "h-full");
 
 // Tabs add button container styles
 const tabsAddButtonContainerStyles = cn(
@@ -82,7 +82,7 @@ const baseTabsTriggerStyles = cn(
 );
 
 // Tabs content styles
-const tabsContentStyles = cn("flex-1", "outline-none");
+const tabsContentStyles = cn("grow", "outline-none", "overflow-auto");
 
 const tabsVariants = cva("", {
 	variants: {
@@ -317,7 +317,7 @@ export function TabsListDropdown({
 	return (
 		<Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="link" className="bg-bg-secondary h-full border-b">
+				<Button variant="link" className="bg-bg-secondary h-full border-b pr-6">
 					<ChevronDownIcon className="size-4" />
 				</Button>
 			</PopoverTrigger>
