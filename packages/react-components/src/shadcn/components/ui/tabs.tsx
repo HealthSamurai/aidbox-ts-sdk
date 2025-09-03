@@ -199,8 +199,20 @@ function checkScrollButtons(
 	}
 }
 
-// TODO: Maybe it's worth creating a separate component for the tab list with a scrollable menu.
 function TabsList({
+	className,
+	...props
+}: React.ComponentProps<typeof TabsPrimitive.List>) {
+	return (
+		<TabsPrimitive.List
+			data-slot="tabs-list"
+			className={cn("inline-flex w-fit items-center", className)}
+			{...props}
+		/>
+	);
+}
+
+function TabsBrowserList({
 	className,
 	children,
 	...props
@@ -214,6 +226,7 @@ function TabsList({
 	React.useEffect(() => {
 		if (!tabsListRef.current) return;
 		observerRef.current = new ResizeObserver(() => {
+			console.log("ResizeObserver", tabsListRef.current);
 			checkScrollButtons(
 				tabsListRef,
 				setCanScrollLeft,
@@ -226,6 +239,15 @@ function TabsList({
 			observerRef.current?.disconnect();
 		};
 	}, []);
+
+	// React.useEffect(() => {
+	// 	checkScrollButtons(
+	// 		tabsListRef,
+	// 		setCanScrollLeft,
+	// 		setCanScrollRight,
+	// 		setShowScrollButtons,
+	// 	);
+	// }, [children]);
 
 	return (
 		<React.Fragment>
@@ -388,4 +410,4 @@ function TabsContent({
 	);
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsBrowserList };
