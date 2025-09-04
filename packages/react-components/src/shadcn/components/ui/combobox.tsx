@@ -5,7 +5,6 @@ import * as React from "react";
 import {
 	Command,
 	CommandEmpty,
-	CommandGroup,
 	CommandInput,
 	CommandItem,
 	CommandList,
@@ -92,27 +91,26 @@ export function Combobox({
 					/>
 					<CommandList>
 						<CommandEmpty>{emptyText}</CommandEmpty>
-						<CommandGroup>
-							{filteredOptions.map((option) => (
-								<CommandItem
-									key={option.value}
-									value={option.value}
-									data-state={value === option.value ? "checked" : undefined}
-									onSelect={(currentValue) => {
-										onValueChange?.(currentValue);
-										setOpen(false);
-									}}
-								>
-									{option.label}
-									<CheckIcon
-										className={cn(
-											"ml-auto size-4",
-											value === option.value ? "opacity-100" : "opacity-0",
-										)}
-									/>
-								</CommandItem>
-							))}
-						</CommandGroup>
+
+						{filteredOptions.map((option) => (
+							<CommandItem
+								key={option.value}
+								value={option.value}
+								data-state={value === option.value ? "checked" : undefined}
+								onSelect={(currentValue) => {
+									onValueChange?.(currentValue);
+									setOpen(false);
+								}}
+							>
+								{option.label}
+								<CheckIcon
+									className={cn(
+										"ml-auto size-4",
+										value === option.value ? "opacity-100" : "opacity-0",
+									)}
+								/>
+							</CommandItem>
+						))}
 					</CommandList>
 				</Command>
 			</SelectContent>
