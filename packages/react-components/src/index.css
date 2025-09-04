@@ -117,3 +117,27 @@
 	-ms-overflow-style: none;
 	scrollbar-width: none;
 }
+
+body ::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+body ::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+body ::-webkit-scrollbar-thumb {
+	background-color: var(--color-elements-disabled);
+	border-radius: 4px;
+}
+
+body ::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color-elements-assistive);
+}
+@supports not selector(::-webkit-scrollbar) {
+	body {
+		scrollbar-color: var(--color-elements-disabled) rgba(0, 0, 0, 0);
+		scrollbar-width: thin;
+	}
+}
