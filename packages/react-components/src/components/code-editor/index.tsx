@@ -71,6 +71,44 @@ const baseTheme = EditorView.baseTheme({
 	},
 });
 
+const readOnlyTheme = EditorView.theme({
+	"&": {
+		backgroundColor: "var(--color-bg-secondary)",
+		height: "100%",
+		width: "100%",
+		fontSize: "14px",
+		paddingTop: "8px",
+		paddingBottom: "8px",
+	},
+	".cm-scroller": {
+		overflow: "auto",
+	},
+	".cm-content": {
+		fontFamily: "var(--font-family-mono)",
+		padding: "0",
+	},
+	"&.cm-focused": {
+		outline: "none",
+	},
+	".cm-gutter": {
+		fontFamily: "var(--font-family-mono)",
+	},
+	".cm-gutters": {
+		backgroundColor: "var(--color-bg-secondary)",
+		border: "none",
+	},
+	".cm-lineNumbers": {
+		paddingLeft: "16px",
+	},
+	".cm-activeLineGutter": {
+		backgroundColor: "var(--color-bg-secondary)",
+		color: "var(--color-text-primary)",
+	},
+	".cm-activeLine": {
+		backgroundColor: "rgba(255, 255, 255, 0)",
+	},
+});
+
 const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.propertyName, color: "#EA4A35" },
 	{ tag: tags.string, color: "#405CBF" },
@@ -97,6 +135,7 @@ function languageExtensions(mode: LanguageMode) {
 }
 
 type CodeEditorProps = {
+	readOnly?: boolean;
 	defaultValue?: string;
 	currentValue?: string;
 	onChange?: (value: string) => void;
@@ -112,6 +151,7 @@ export function CodeEditor({
 	currentValue,
 	onChange,
 	viewCallback,
+	readOnly = false,
 	id,
 	mode = "json",
 }: CodeEditorProps) {
@@ -122,6 +162,8 @@ export function CodeEditor({
 
 	const onChangeComparment = React.useRef(new Compartment());
 	const languageCompartment = React.useRef(new Compartment());
+	const readOnlyCompartment = React.useRef(new Compartment());
+	const themeCompartment = React.useRef(new Compartment());
 
 	React.useEffect(() => {
 		if (!domRef.current) {
@@ -133,6 +175,7 @@ export function CodeEditor({
 			state: EditorState.create({
 				doc: initialValue.current,
 				extensions: [
+					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
 					lineNumbers(),
 					foldGutter(),
 					highlightSpecialChars(),
@@ -150,7 +193,7 @@ export function CodeEditor({
 					highlightActiveLine(),
 					highlightActiveLineGutter(),
 					highlightSelectionMatches(),
-					baseTheme,
+					themeCompartment.current.of(baseTheme),
 					keymap.of([
 						...closeBracketsKeymap,
 						...defaultKeymap,
@@ -221,6 +264,22 @@ export function CodeEditor({
 			),
 		});
 	}, [mode, view]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: [
+				readOnlyCompartment.current.reconfigure(
+					EditorState.readOnly.of(readOnly),
+				),
+				themeCompartment.current.reconfigure(
+					readOnly ? readOnlyTheme : baseTheme,
+				),
+			],
+		});
+	}, [readOnly, view]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
