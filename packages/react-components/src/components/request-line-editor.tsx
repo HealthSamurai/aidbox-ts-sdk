@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import type * as React from "react";
 import { Input } from "#shadcn/components/ui/input";
 import {
@@ -11,7 +11,10 @@ import {
 import { cn } from "#shadcn/lib/utils";
 import { CopyIcon } from "./copy-icon";
 
-const requestMethodVariants = cva(
+const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
+type RequestMethod = (typeof METHODS)[number];
+
+const requestMethodVariants = cva<{ method: { [K in RequestMethod]: string } }>(
 	cn(
 		"border-r-0",
 		"rounded-r-none",
@@ -31,44 +34,42 @@ const requestMethodVariants = cva(
 				DELETE: "text-utility-red [&_svg]:text-utility-red",
 			},
 		},
-		defaultVariants: {
-			method: "GET",
-		},
 	},
 );
 
-type RequestMethod = VariantProps<typeof requestMethodVariants>["method"];
+type RequestMethodSelectorProps = {
+	value: string;
+	onValueChange?: (newMethod: string) => void;
+};
 
-interface RequestLineEditorProps extends React.ComponentProps<"div"> {
-	selectedMethod: string;
-	setMethod: (value: string) => void;
-	methods: string[];
-	inputValue?: string | undefined;
-	onInputChange?: React.ChangeEventHandler<HTMLInputElement>;
+function isKnownMethod(candidate: string): candidate is RequestMethod {
+	const methods: readonly string[] = METHODS;
+	return methods.includes(candidate);
 }
 
 function RequestMethodSelector({
-	selectedMethod,
-	setMethod,
-	methods,
-}: RequestLineEditorProps) {
+	value,
+	onValueChange,
+}: RequestMethodSelectorProps) {
+	console.log(value);
+	console.log(requestMethodVariants());
+	console.log(requestMethodVariants(undefined));
 	return (
-		<Select value={selectedMethod} onValueChange={setMethod}>
+		<Select
+			value={value}
+			{...(onValueChange ? { onValueChange: onValueChange } : {})}
+		>
 			<SelectTrigger
-				className={cn(
-					requestMethodVariants({ method: selectedMethod as RequestMethod }),
+				className={requestMethodVariants(
+					isKnownMethod(value) ? { method: value } : undefined,
 				)}
 			>
-				<SelectValue />
+				<SelectValue>{value}</SelectValue>
 			</SelectTrigger>
 			<SelectContent>
-				{methods.map((method) => (
+				{METHODS.map((method) => (
 					<SelectItem key={method} value={method}>
-						<span
-							className={cn(
-								requestMethodVariants({ method: method as RequestMethod }),
-							)}
-						>
+						<span className={requestMethodVariants({ method: method })}>
 							{method}
 						</span>
 					</SelectItem>
@@ -78,26 +79,29 @@ function RequestMethodSelector({
 	);
 }
 
+type RequestLineEditorProps = {
+	method: string;
+	onMethodChange: (newMethod: string) => void;
+	path?: string | undefined;
+	onPathChange?: React.ChangeEventHandler<HTMLInputElement>;
+	className?: string;
+};
+
 function RequestLineEditor({
 	className,
-	selectedMethod,
-	setMethod,
-	methods,
-	inputValue,
-	onInputChange,
+	method,
+	onMethodChange,
+	path,
+	onPathChange,
 }: RequestLineEditorProps) {
 	return (
 		<div className={cn("flex", className)}>
-			<RequestMethodSelector
-				selectedMethod={selectedMethod}
-				setMethod={setMethod}
-				methods={methods}
-			/>
+			<RequestMethodSelector value={method} onValueChange={onMethodChange} />
 			<Input
 				className="rounded-l-none"
-				value={inputValue}
-				rightSlot={<CopyIcon text={`${selectedMethod} ${inputValue}`} />}
-				{...(onInputChange !== undefined ? { onChange: onInputChange } : {})}
+				value={path}
+				rightSlot={<CopyIcon text={`${method} ${path}`} />}
+				{...(onPathChange !== undefined ? { onChange: onPathChange } : {})}
 			/>
 		</div>
 	);
