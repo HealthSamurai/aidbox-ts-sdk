@@ -175,6 +175,7 @@ export function CodeEditor({
 			state: EditorState.create({
 				doc: initialValue.current,
 				extensions: [
+					EditorView.contentAttributes.of({ "data-gramm": "false" }),
 					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
 					lineNumbers(),
 					foldGutter(),
