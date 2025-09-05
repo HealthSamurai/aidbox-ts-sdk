@@ -28,10 +28,12 @@ import {
 	keymap,
 	lineNumbers,
 	rectangularSelection,
+	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
 import * as React from "react";
-import { httpHighlightStyle, httpLanguage } from "./http-mode";
+
+import { http as http2 } from "./http";
 
 const baseTheme = EditorView.baseTheme({
 	"&": {
@@ -117,13 +119,14 @@ const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.null, color: "#569cd6" },
 ]);
 
-type LanguageMode = "json" | "http";
+type LanguageMode = "json" | "http" | "http2";
 
 function languageExtensions(mode: LanguageMode) {
-	if (mode === "http") {
+	if (mode === "http" || mode === "http2") {
+		const jsonLang = json();
 		return [
-			httpLanguage,
-			syntaxHighlighting(HighlightStyle.define(httpHighlightStyle)),
+			http2((ct) => (ct === "application/json" ? jsonLang.language : null)),
+			syntaxHighlighting(customHighlightStyle),
 		];
 	} else {
 		return [
@@ -139,6 +142,7 @@ type CodeEditorProps = {
 	defaultValue?: string;
 	currentValue?: string;
 	onChange?: (value: string) => void;
+	onUpdate?: (update: ViewUpdate) => void;
 	id?: string;
 	mode?: LanguageMode;
 	viewCallback?: (view: EditorView) => void;
@@ -150,6 +154,7 @@ export function CodeEditor({
 	defaultValue,
 	currentValue,
 	onChange,
+	onUpdate,
 	viewCallback,
 	readOnly = false,
 	id,
@@ -161,6 +166,7 @@ export function CodeEditor({
 	const initialValue = React.useRef(defaultValue ?? "");
 
 	const onChangeComparment = React.useRef(new Compartment());
+	const onUpdateComparment = React.useRef(new Compartment());
 	const languageCompartment = React.useRef(new Compartment());
 	const readOnlyCompartment = React.useRef(new Compartment());
 	const themeCompartment = React.useRef(new Compartment());
@@ -206,6 +212,7 @@ export function CodeEditor({
 					]),
 					lintGutter(),
 					onChangeComparment.current.of([]),
+					onUpdateComparment.current.of([]),
 				],
 			}),
 		});
@@ -225,7 +232,6 @@ export function CodeEditor({
 	}, [view, viewCallback]);
 
 	React.useEffect(() => {
-		console.log("Update");
 		view?.dispatch({
 			effects: onChangeComparment.current.reconfigure([
 				EditorView.updateListener.of((update) => {
@@ -236,6 +242,18 @@ export function CodeEditor({
 			]),
 		});
 	}, [view, onChange]);
+
+	React.useEffect(() => {
+		view?.dispatch({
+			effects: onUpdateComparment.current.reconfigure([
+				EditorView.updateListener.of((update) => {
+					if (onUpdate) {
+						onUpdate(update);
+					}
+				}),
+			]),
+		});
+	}, [view, onUpdate]);
 
 	// FIXME: it is probably better to have CM manage its state.
 	React.useEffect(() => {
