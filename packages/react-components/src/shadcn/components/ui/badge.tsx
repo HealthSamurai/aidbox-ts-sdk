@@ -4,26 +4,75 @@ import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
-const badgeVariants = cva(
-	"inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
-	{
-		variants: {
-			variant: {
-				default:
-					"border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-				secondary:
-					"border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
-				destructive:
-					"border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-				outline:
-					"text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-			},
-		},
-		defaultVariants: {
-			variant: "default",
+// Base badge styles
+const baseBadgeStyles = cn(
+	// Layout
+	"inline-flex",
+	"items-center",
+	"justify-center",
+	"w-fit",
+	"whitespace-nowrap",
+	"shrink-0",
+	"gap-1",
+	"overflow-hidden",
+	// Shape
+	"rounded-md",
+	// Borders
+	"border",
+	// Spacing
+	"px-2",
+	"py-0.5",
+	// Typography
+	"text-xs",
+	"font-medium",
+	// SVG
+	"[&>svg]:size-3",
+	"[&>svg]:pointer-events-none",
+	// Transitions
+	"transition-[color,box-shadow]",
+	// Focus
+	"focus-visible:ring-2",
+	"focus-visible:ring-utility-blue/70",
+	// Invalid
+	"aria-invalid:ring-2",
+	"aria-invalid:ring-utility-red/70",
+	"aria-invalid:border-border-error",
+);
+
+const badgeVariants = cva(baseBadgeStyles, {
+	variants: {
+		variant: {
+			default: cn(
+				"border-transparent",
+				"bg-bg-link",
+				"text-text-primary_on-brand",
+				"[a&]:hover:bg-bg-link_hover",
+			),
+			secondary: cn(
+				"border-transparent",
+				"bg-bg-secondary",
+				"text-text-secondary",
+				"[a&]:hover:bg-bg-tertiary",
+			),
+			destructive: cn(
+				"border-transparent",
+				"bg-bg-error-primary_inverse",
+				"text-text-primary_on-brand",
+				"[a&]:hover:bg-bg-error-primary_inverse_hover",
+				"focus-visible:ring-utility-red/70",
+			),
+			outline: cn(
+				"text-text-primary",
+				"border-border-primary",
+				"[a&]:hover:bg-bg-secondary",
+				"[a&]:hover:text-text-primary",
+			),
 		},
 	},
-);
+	defaultVariants: {
+		variant: "default",
+	},
+});
 
 function Badge({
 	className,

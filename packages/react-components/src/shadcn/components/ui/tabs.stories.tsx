@@ -16,6 +16,7 @@ import {
 	TabsAddButton,
 	TabsContent,
 	TabsList,
+	TabsListDropdown,
 	TabsTrigger,
 } from "#shadcn/components/ui/tabs";
 
@@ -144,6 +145,37 @@ export const Browser = {
 				</TabsTrigger>
 			</TabsList>
 			<TabsAddButton onClick={BrowserTabOnAdd} />
+			<TabsListDropdown
+				tabs={[
+					{
+						id: "first",
+						content: (
+							<span className="flex items-center gap-1">
+								<span className="text-utility-green">GET</span>
+								<span>/fhir/Patient</span>
+							</span>
+						),
+					},
+					{
+						id: "second",
+						content: (
+							<span className="flex items-center gap-1">
+								<span className="text-utility-yellow">POST</span>
+								<span>/fhir</span>
+							</span>
+						),
+					},
+					{
+						id: "third",
+						content: (
+							<span className="flex items-center gap-1">
+								<span className="text-utility-yellow">POST</span>
+								<span>/$graphql</span>
+							</span>
+						),
+					},
+				]}
+			/>
 		</Tabs>
 	),
 } satisfies Story;

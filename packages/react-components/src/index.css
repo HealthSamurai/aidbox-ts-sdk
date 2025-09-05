@@ -3,6 +3,11 @@
 @import "./tokens.css";
 @import "./typography.css";
 
+.lucide {
+	/* Change this! */
+	stroke-width: 1.5px;
+}
+
 @theme {
 	--color-selection: var(--color-blue-300);
 	--color-ring-red: var(--color-red-200);
@@ -11,7 +16,7 @@
 	--color-ring-purple: var(--color-purple-200);
 	--color-ring-orange: var(--color-orange-200);
 	--color-ring-pink: var(--color-pink-200);
-	--color-ring-blue: var(--color-blue-300);
+	--color-ring-blue: var(--color-blue-200);
 	--color-ring-red: var(--color-red-200);
 	--color-text-primary: var(--color-neutral-900);
 	--color-text-secondary: var(--color-neutral-500);
@@ -19,12 +24,13 @@
 	--color-text-primary_on-brand: var(--color-neutral-50);
 	--color-text-secondary_on-brand: var(--color-neutral-100);
 	--color-text-tertiary: var(--color-neutral-400);
+	--color-text-tertiary_hover: var(--color-neutral-500);
 	--color-text-quternary: var(--color-neutral-400);
 	--color-text-quternary_hover: var(--color-neutral-500);
 	--color-text-quternary_on-brand: var(--color-neutral-200);
 	--color-text-disabled: var(--color-neutral-300);
 	--color-text-link: var(--color-blue-500);
-	--color-text-link_hover: var(--color-blue-600);
+	--color-text-link_hover: var(--color-blue-700);
 	--color-text-link_disabled: var(--color-blue-400);
 	--color-text-brand-primary: var(--color-brand-500);
 	--color-text-brand-secondary: var(--color-brand-300);
@@ -39,6 +45,7 @@
 	--color-border-secondary: var(--color-neutral-200);
 	--color-border-separator: var(--color-neutral-200);
 	--color-border-disabled: var(--color-neutral-100);
+	--color-border-dark: var(--color-neutral-500);
 	--color-border-brand: var(--color-brand-500);
 	--color-border-link: var(--color-blue-500);
 	--color-border-error: var(--color-red-500);
@@ -90,7 +97,6 @@
 	--color-fg-success-secondary: var(--color-green-400);
 	--color-fg-warning-primary: var(--color-yellow-500);
 	--color-fg-warning-secondary: var(--color-yellow-400);
-
 	--color-utility-green: var(--color-green-500);
 	--color-utility-yellow: var(--color-yellow-600);
 	--color-utility-blue: var(--color-blue-500);
@@ -101,4 +107,37 @@
 @theme inline {
 	--font-family-sans: "Inter", system-ui, sans-serif;
 	--font-family-mono: "JetBrains Mono", monospace;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+body ::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+body ::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+body ::-webkit-scrollbar-thumb {
+	background-color: var(--color-elements-disabled);
+	border-radius: 4px;
+}
+
+body ::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color-elements-assistive);
+}
+@supports not selector(::-webkit-scrollbar) {
+	body {
+		scrollbar-color: var(--color-elements-disabled) rgba(0, 0, 0, 0);
+		scrollbar-width: thin;
+	}
 }

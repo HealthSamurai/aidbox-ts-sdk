@@ -4,6 +4,84 @@ import * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
+// Slider root styles
+const sliderRootStyles = cn(
+	// Layout
+	"relative",
+	"flex",
+	"w-full",
+	"items-center",
+	// Interaction
+	"touch-none",
+	"select-none",
+	// Disabled
+	"data-[disabled]:opacity-50",
+	// Vertical orientation
+	"data-[orientation=vertical]:h-full",
+	"data-[orientation=vertical]:min-h-44",
+	"data-[orientation=vertical]:w-auto",
+	"data-[orientation=vertical]:flex-col",
+);
+
+// Slider track styles
+const sliderTrackStyles = cn(
+	// Background
+	"bg-bg-quaternary",
+	// Layout
+	"relative",
+	"grow",
+	"overflow-hidden",
+	// Shape
+	"rounded-full",
+	// Horizontal orientation
+	"data-[orientation=horizontal]:h-1.5",
+	"data-[orientation=horizontal]:w-full",
+	// Vertical orientation
+	"data-[orientation=vertical]:h-full",
+	"data-[orientation=vertical]:w-1.5",
+);
+
+// Slider range styles
+const sliderRangeStyles = cn(
+	// Background
+	"bg-bg-link",
+	// Layout
+	"absolute",
+	// Horizontal orientation
+	"data-[orientation=horizontal]:h-full",
+	// Vertical orientation
+	"data-[orientation=vertical]:w-full",
+);
+
+// Slider thumb styles
+const sliderThumbStyles = cn(
+	// Layout
+	"block",
+	"size-4",
+	"shrink-0",
+	// Shape
+	"rounded-full",
+	// Borders
+	"border",
+	"border-border-link",
+	// Background
+	"bg-bg-primary",
+	// Shadow
+	"shadow-sm",
+	// Transitions
+	"transition-[color,box-shadow]",
+	// Hover
+	"hover:ring-4",
+	"hover:ring-utility-blue/70",
+	// Focus
+	"focus-visible:ring-4",
+	"focus-visible:ring-utility-blue/70",
+	"focus-visible:outline-hidden",
+	// Disabled
+	"disabled:pointer-events-none",
+	"disabled:opacity-50",
+);
+
 function Slider({
 	className,
 	defaultValue,
@@ -29,23 +107,16 @@ function Slider({
 			{...(value !== undefined ? { value } : {})}
 			min={min}
 			max={max}
-			className={cn(
-				"relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-				className,
-			)}
+			className={cn(sliderRootStyles, className)}
 			{...props}
 		>
 			<SliderPrimitive.Track
 				data-slot="slider-track"
-				className={cn(
-					"bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
-				)}
+				className={sliderTrackStyles}
 			>
 				<SliderPrimitive.Range
 					data-slot="slider-range"
-					className={cn(
-						"bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
-					)}
+					className={sliderRangeStyles}
 				/>
 			</SliderPrimitive.Track>
 			{Array.from({ length: _values.length }, (_, index) => (
@@ -53,7 +124,7 @@ function Slider({
 					data-slot="slider-thumb"
 					// biome-ignore lint/suspicious/noArrayIndexKey: FIXME: unchanged shadcn
 					key={index}
-					className="border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+					className={sliderThumbStyles}
 				/>
 			))}
 		</SliderPrimitive.Root>

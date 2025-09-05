@@ -14,6 +14,18 @@ import {
 import { Label } from "#shadcn/components/ui/label";
 import { cn } from "#shadcn/lib/utils";
 
+// Form item styles
+const formItemStyles = cn("grid", "gap-2");
+
+// Form label error styles
+const formLabelErrorStyles = cn("data-[error=true]:text-text-error-primary");
+
+// Form description styles
+const formDescriptionStyles = cn("text-text-secondary", "text-sm");
+
+// Form message styles
+const formMessageStyles = cn("text-text-error-primary", "text-sm");
+
 const Form = FormProvider;
 
 type FormFieldContextValue<
@@ -78,7 +90,7 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
 		<FormItemContext.Provider value={{ id }}>
 			<div
 				data-slot="form-item"
-				className={cn("grid gap-2", className)}
+				className={cn(formItemStyles, className)}
 				{...props}
 			/>
 		</FormItemContext.Provider>
@@ -95,7 +107,7 @@ function FormLabel({
 		<Label
 			data-slot="form-label"
 			data-error={!!error}
-			className={cn("data-[error=true]:text-destructive", className)}
+			className={cn(formLabelErrorStyles, className)}
 			htmlFor={formItemId}
 			{...props}
 		/>
@@ -128,7 +140,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
 		<p
 			data-slot="form-description"
 			id={formDescriptionId}
-			className={cn("text-muted-foreground text-sm", className)}
+			className={cn(formDescriptionStyles, className)}
 			{...props}
 		/>
 	);
@@ -146,7 +158,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 		<p
 			data-slot="form-message"
 			id={formMessageId}
-			className={cn("text-destructive text-sm", className)}
+			className={cn(formMessageStyles, className)}
 			{...props}
 		>
 			{body}

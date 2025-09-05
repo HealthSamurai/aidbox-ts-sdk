@@ -5,6 +5,31 @@ import * as React from "react";
 import { toggleVariants } from "#shadcn/components/ui/toggle";
 import { cn } from "#shadcn/lib/utils";
 
+// Toggle group styles
+const toggleGroupStyles = cn(
+	"group/toggle-group",
+	"flex",
+	"w-fit",
+	"items-center",
+	"rounded-md",
+	"data-[variant=outline]:shadow-xs",
+);
+
+// Toggle group item styles
+const toggleGroupItemStyles = cn(
+	"min-w-0",
+	"flex-1",
+	"shrink-0",
+	"rounded-none",
+	"shadow-none",
+	"first:rounded-l-md",
+	"last:rounded-r-md",
+	"focus:z-10",
+	"focus-visible:z-10",
+	"data-[variant=outline]:border-l-0",
+	"data-[variant=outline]:first:border-l",
+);
+
 const ToggleGroupContext = React.createContext<
 	VariantProps<typeof toggleVariants>
 >({
@@ -25,10 +50,7 @@ function ToggleGroup({
 			data-slot="toggle-group"
 			data-variant={variant}
 			data-size={size}
-			className={cn(
-				"group/toggle-group flex w-fit items-center rounded-md data-[variant=outline]:shadow-xs",
-				className,
-			)}
+			className={cn(toggleGroupStyles, className)}
 			{...props}
 		>
 			<ToggleGroupContext.Provider value={{ variant, size }}>
@@ -58,7 +80,7 @@ function ToggleGroupItem({
 					variant: context.variant || variant,
 					size: context.size || size,
 				}),
-				"min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l",
+				toggleGroupItemStyles,
 				className,
 			)}
 			{...props}
