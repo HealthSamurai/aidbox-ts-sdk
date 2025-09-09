@@ -18,13 +18,9 @@ const meta: Meta<typeof RequestLineEditor> = {
 export default meta;
 type Story = StoryObj<typeof RequestLineEditor>;
 
-function RequestLineEditorWrapper({
-	selectedMethod,
-	methods,
-	inputValue,
-}: RequestLineEditorProps) {
-	const [currentSelectedMethod, setMethod] = React.useState(selectedMethod);
-	const [currentInputValue, setInputValue] = React.useState(inputValue);
+function RequestLineEditorWrapper({ method, path }: RequestLineEditorProps) {
+	const [currentSelectedMethod, setMethod] = React.useState(method);
+	const [currentInputValue, setInputValue] = React.useState(path);
 	const actionSetMethod = (method: string) => {
 		action("setMethod")(method);
 		setMethod(method);
@@ -35,56 +31,50 @@ function RequestLineEditorWrapper({
 	};
 	return (
 		<RequestLineEditor
-			methods={methods}
-			selectedMethod={currentSelectedMethod}
-			setMethod={actionSetMethod}
-			inputValue={currentInputValue}
-			onInputChange={actionSetInputValue}
+			method={currentSelectedMethod}
+			onMethodChange={actionSetMethod}
+			path={currentInputValue}
+			onPathChange={actionSetInputValue}
 		/>
 	);
 }
 
 export const GET: Story = {
 	args: {
-		selectedMethod: "GET",
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-		inputValue: "/fhir/Patient",
+		method: "GET",
+		path: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
 export const POST: Story = {
 	args: {
-		selectedMethod: "POST",
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-		inputValue: "/fhir/Patient",
+		method: "POST",
+		path: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
 export const PUT: Story = {
 	args: {
-		selectedMethod: "PUT",
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-		inputValue: "/fhir/Patient",
+		method: "PUT",
+		path: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
 export const PATCH: Story = {
 	args: {
-		selectedMethod: "PATCH",
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-		inputValue: "/fhir/Patient",
+		method: "PATCH",
+		path: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
 
 export const DELETE: Story = {
 	args: {
-		selectedMethod: "DELETE",
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-		inputValue: "/fhir/Patient",
+		method: "DELETE",
+		path: "/fhir/Patient",
 	},
 	render: (args) => <RequestLineEditorWrapper {...args} />,
 };
