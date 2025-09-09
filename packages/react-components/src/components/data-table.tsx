@@ -1,0 +1,117 @@
+"use client";
+
+import {
+	type ColumnDef,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
+
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "../shadcn/components/ui/table";
+
+export interface DataTableProps<TData, TValue> {
+	columns: ColumnDef<TData, TValue>[];
+	data: TData[];
+}
+
+export function DataTable<TData, TValue>({
+	columns,
+	data,
+}: DataTableProps<TData, TValue>) {
+	const table = useReactTable({
+		data,
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		columnResizeMode: "onChange",
+		enableColumnResizing: true,
+	});
+
+	return (
+		<div className="overflow-hidden w-full">
+			<Table className="w-full">
+				<TableHeader>
+					{table.getHeaderGroups().map((headerGroup) => (
+						<TableRow key={headerGroup.id}>
+							{headerGroup.headers.map((header) => {
+								return (
+									<TableHead
+										key={header.id}
+										className="relative group border"
+										style={{
+											width:
+												header.column.getIndex() ===
+												headerGroup.headers.length - 1
+													? "w-full"
+													: header.getSize(),
+										}}
+									>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+										{header.column.getCanResize() && (
+											<div
+												{...{
+													onMouseDown: header.getResizeHandler(),
+													onTouchStart: header.getResizeHandler(),
+													className: `hidden group-hover:block absolute top-0 right-0 h-full w-1 bg-border-secondary cursor-col-resize hover:bg-border-secondary`,
+													style: {
+														userSelect: "none",
+														touchAction: "none",
+													},
+												}}
+											/>
+										)}
+									</TableHead>
+								);
+							})}
+						</TableRow>
+					))}
+				</TableHeader>
+				<TableBody>
+					{table.getRowModel().rows?.length ? (
+						table.getRowModel().rows.map((row) => (
+							<TableRow
+								key={row.id}
+								data-state={row.getIsSelected() && "selected"}
+							>
+								{row.getVisibleCells().map((cell) => (
+									<TableCell
+										className="border"
+										key={cell.id}
+										style={{
+											width:
+												cell.column.getIndex() ===
+												row.getVisibleCells().length - 1
+													? "w-full"
+													: cell.column.getSize(),
+										}}
+									>
+										{flexRender(cell.column.columnDef.cell, cell.getContext())}
+									</TableCell>
+								))}
+							</TableRow>
+						))
+					) : (
+						<TableRow>
+							<TableCell colSpan={columns.length} className="h-24 text-center">
+								No results.
+							</TableCell>
+						</TableRow>
+					)}
+				</TableBody>
+			</Table>
+		</div>
+	);
+}
+
+export type { ColumnDef };

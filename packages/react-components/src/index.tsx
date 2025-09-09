@@ -2,6 +2,7 @@
 
 export * from "./components/code-editor";
 export * from "./components/copy-icon";
+export * from "./components/data-table";
 export * from "./components/request-line-editor";
 export * from "./icons";
 export * from "./shadcn/components/ui/accordion";
