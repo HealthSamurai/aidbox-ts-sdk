@@ -1,7 +1,13 @@
 "use client";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, type VariantProps } from "class-variance-authority";
-import { ChevronDownIcon, Plus, X } from "lucide-react";
+import {
+	ChevronDownIcon,
+	ChevronLeft,
+	ChevronRight,
+	Plus,
+	X,
+} from "lucide-react";
 import * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 import { Button } from "./button";
@@ -24,6 +30,14 @@ const tabsAddButtonContainerStyles = cn(
 	"bg-bg-secondary",
 	"border-l",
 	"border-b",
+);
+
+// Tabs list styles
+const tabsListStyles = cn(
+	"inline-flex",
+	"w-fit",
+	"items-center",
+	"no-scrollbar",
 );
 
 // Base tabs trigger styles
@@ -126,16 +140,327 @@ export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
 	);
 }
 
+const horizontalScroll = (event: React.WheelEvent) => {
+	const mode = event.deltaMode;
+	let deltaPx = 0;
+
+	if (mode === 0) {
+		deltaPx = event.deltaY;
+	} else if (mode === 1) {
+		deltaPx = event.deltaY * 160;
+	} else if (mode === 2) {
+		deltaPx = event.currentTarget.clientWidth;
+	}
+
+	const newScrollLeft = event.currentTarget.scrollLeft + deltaPx;
+
+	event.currentTarget.scrollTo({
+		left: newScrollLeft,
+		behavior: "smooth",
+	});
+};
+
+const performHorizontalScroll = (
+	tabsListRef: React.RefObject<HTMLDivElement | null>,
+	direction: "left" | "right",
+) => {
+	if (!tabsListRef.current) return;
+	const scrollAmount = 160;
+	let newScrollLeft = tabsListRef.current.scrollLeft;
+
+	if (direction === "left") {
+		newScrollLeft -= scrollAmount;
+		newScrollLeft -= newScrollLeft % scrollAmount;
+	} else {
+		newScrollLeft += scrollAmount;
+
+		const rightCoord = newScrollLeft + tabsListRef.current.clientWidth;
+
+		if (rightCoord % scrollAmount !== 0) {
+			newScrollLeft += scrollAmount - (rightCoord % scrollAmount);
+		}
+	}
+
+	tabsListRef.current.scrollTo({
+		left: newScrollLeft,
+		behavior: "smooth",
+	});
+};
+
+type EdgeScrollPosition = "touch" | "depart";
+type FlowType = "overflow" | "underflow";
+
+type TabsListProps = {
+	onLeftEdge?: (position: EdgeScrollPosition) => void;
+	onRightEdge?: (position: EdgeScrollPosition) => void;
+	onFlow?: (flow: FlowType) => void;
+	onResize?: (entries: ResizeObserverEntry[]) => void;
+	onTabChange?: (mutationRecords: MutationRecord[]) => void;
+} & React.ComponentProps<typeof TabsPrimitive.List>;
+
 function TabsList({
 	className,
+	onLeftEdge,
+	onRightEdge,
+	onResize,
+	onFlow,
+	onTabChange,
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: TabsListProps) {
+	const tabListRef = React.useRef<HTMLDivElement | null>(null);
+
+	const onLeftEdgeRef = React.useRef(onLeftEdge);
+	React.useEffect(() => {
+		onLeftEdgeRef.current = onLeftEdge;
+	}, [onLeftEdge]);
+
+	const onResizeRef = React.useRef(onResize);
+	React.useEffect(() => {
+		onResizeRef.current = onResize;
+	}, [onResize]);
+
+	const onRightEdgeRef = React.useRef(onRightEdge);
+	React.useEffect(() => {
+		onRightEdgeRef.current = onRightEdge;
+	}, [onRightEdge]);
+
+	const onFlowRef = React.useRef(onFlow);
+	React.useEffect(() => {
+		onFlowRef.current = onFlow;
+	}, [onFlow]);
+
+	const onTabChangeRef = React.useRef(onTabChange);
+	React.useEffect(() => {
+		onTabChangeRef.current = onTabChange;
+	}, [onTabChange]);
+
+	React.useEffect(() => {
+		if (tabListRef.current === null) {
+			return;
+		}
+		const tabList = tabListRef.current;
+
+		let last: {
+			scrollLeft: number;
+			scrollWidth: number;
+			clientWidth: number;
+		} | null = null;
+
+		const handleScroll = () => {
+			if (onLeftEdgeRef.current) {
+				const newState: EdgeScrollPosition =
+					tabList.scrollLeft < 1 ? "touch" : "depart";
+
+				if (last === null) {
+					onLeftEdgeRef.current(newState);
+				} else {
+					const lastState: EdgeScrollPosition =
+						last.scrollLeft < 1 ? "touch" : "depart";
+
+					if (lastState !== newState) {
+						onLeftEdgeRef.current(newState);
+					}
+				}
+			}
+
+			if (onRightEdgeRef.current) {
+				const newState: EdgeScrollPosition =
+					tabList.scrollWidth - tabList.clientWidth - tabList.scrollLeft < 1
+						? "touch"
+						: "depart";
+
+				if (last === null) {
+					onRightEdgeRef.current(newState);
+				} else {
+					const lastState: EdgeScrollPosition =
+						last.scrollWidth - last.clientWidth - last.scrollLeft < 1
+							? "touch"
+							: "depart";
+
+					if (lastState !== newState) {
+						onRightEdgeRef.current(newState);
+					}
+				}
+			}
+
+			if (onFlowRef.current) {
+				const newState: FlowType =
+					tabList.scrollWidth > tabList.clientWidth ? "overflow" : "underflow";
+
+				if (last === null) {
+					onFlowRef.current(newState);
+				} else {
+					const lastState =
+						last.scrollWidth > last.clientWidth ? "overflow" : "underflow";
+					if (lastState !== newState) {
+						onFlowRef.current(newState);
+					}
+				}
+			}
+
+			last = {
+				scrollLeft: tabList.scrollLeft,
+				scrollWidth: tabList.scrollWidth,
+				clientWidth: tabList.clientWidth,
+			};
+		};
+
+		const scrollCallback = (_ev: unknown) => handleScroll();
+		const resizeObserver = new ResizeObserver((entries) => {
+			handleScroll();
+			if (onResizeRef.current) {
+				onResizeRef.current(entries);
+			}
+		});
+		const mutationObserver = new MutationObserver((mutationRecords) => {
+			handleScroll();
+			if (onTabChangeRef.current) {
+				onTabChangeRef.current(mutationRecords);
+			}
+		});
+
+		tabList.addEventListener("scroll", scrollCallback, { passive: true });
+		resizeObserver.observe(tabList);
+		mutationObserver.observe(tabList, { childList: true });
+
+		return () => {
+			tabList.removeEventListener("scroll", scrollCallback);
+			resizeObserver.disconnect();
+			mutationObserver.disconnect();
+		};
+	}, []);
+
 	return (
 		<TabsPrimitive.List
 			data-slot="tabs-list"
 			className={cn("inline-flex w-fit items-center", className)}
 			{...props}
+			ref={(element) => {
+				tabListRef.current = element;
+				if (props.ref !== undefined && props.ref !== null) {
+					if (typeof props.ref === "function") {
+						props.ref(element);
+					} else {
+						props.ref.current = element;
+					}
+				}
+			}}
 		/>
+	);
+}
+
+type TabScrollButtonProps = {
+	disabled: boolean;
+	onClick: () => void;
+};
+
+function TabScrollLeftButton({
+	disabled,
+	onClick,
+}: TabScrollButtonProps): React.ReactElement {
+	return (
+		<Button
+			variant="link"
+			size="small"
+			disabled={disabled}
+			className="h-full border-r border-b bg-bg-secondary"
+			onClick={onClick}
+		>
+			<ChevronLeft />
+		</Button>
+	);
+}
+
+function TabScrollRightButton({
+	disabled,
+	onClick,
+}: TabScrollButtonProps): React.ReactElement {
+	return (
+		<Button
+			variant="link"
+			size="small"
+			disabled={disabled}
+			className="h-full border-l border-b bg-bg-secondary"
+			onClick={onClick}
+		>
+			<ChevronRight />
+		</Button>
+	);
+}
+
+function TabsBrowserList({
+	className,
+	children,
+	...props
+}: React.ComponentProps<typeof TabsPrimitive.List>) {
+	const tabsListRef = React.useRef<HTMLDivElement | null>(null);
+
+	const [showScrollButtons, setShowScrollButtons] = React.useState(false);
+	const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+	const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+	return (
+		<React.Fragment>
+			{showScrollButtons && (
+				<TabScrollLeftButton
+					disabled={!canScrollLeft}
+					onClick={() => performHorizontalScroll(tabsListRef, "left")}
+				/>
+			)}
+
+			<TabsList
+				onLeftEdge={(edgeState) => {
+					if (edgeState === "touch") {
+						setCanScrollLeft(false);
+					} else {
+						setCanScrollLeft(true);
+					}
+				}}
+				onRightEdge={(edgeState) => {
+					if (edgeState === "touch") {
+						setCanScrollRight(false);
+					} else {
+						setCanScrollRight(true);
+					}
+				}}
+				onFlow={(flow) => {
+					if (flow === "overflow") {
+						setShowScrollButtons(true);
+					} else {
+						setShowScrollButtons(false);
+					}
+				}}
+				onResize={() => {
+					tabsListRef.current
+						?.querySelector<HTMLButtonElement>('button[data-state="active"]')
+						?.scrollIntoView();
+				}}
+				onTabChange={(entries) => {
+					if (
+						entries.filter((entry) => entry.addedNodes.length !== 0).length !==
+						0
+					) {
+						tabsListRef.current
+							?.querySelector<HTMLButtonElement>('button[data-state="active"]')
+							?.scrollIntoView();
+					}
+				}}
+				data-slot="tabs-list"
+				className={cn(tabsListStyles, className)}
+				onWheel={(event) => horizontalScroll(event)}
+				{...props}
+				ref={tabsListRef}
+			>
+				{children}
+			</TabsList>
+
+			{showScrollButtons && (
+				<TabScrollRightButton
+					disabled={!canScrollRight}
+					onClick={() => performHorizontalScroll(tabsListRef, "right")}
+				/>
+			)}
+		</React.Fragment>
 	);
 }
 
@@ -245,4 +570,4 @@ function TabsContent({
 	);
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsBrowserList };
