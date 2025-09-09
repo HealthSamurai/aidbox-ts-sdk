@@ -6,6 +6,63 @@ import type * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 import { Button } from "./button";
 
+// Base tabs styles
+const baseTabsStyles = cn("flex", "flex-col", "h-full");
+
+// Tabs add button container styles
+const tabsAddButtonContainerStyles = cn(
+	"grow",
+	"h-full",
+	"bg-bg-secondary",
+	"border-l",
+	"border-b",
+);
+
+// Base tabs trigger styles
+const baseTabsTriggerStyles = cn(
+	// Layout & Sizing
+	"box-border",
+	"flex-1",
+	"h-10",
+	"inline-flex",
+	"items-center",
+	"justify-center",
+	"px-3",
+	"whitespace-nowrap",
+	// Spacing & Padding
+	"pb-2",
+	"pt-2.5",
+	// Typography
+	"typo-body",
+	// Colors & States
+	"cursor-pointer",
+	"text-text-tertiary",
+	"hover:bg-bg-secondary/60",
+	"hover:text-text-tertiary_hover",
+	"data-[state=active]:text-text-primary",
+	"data-[state=active]:border-b-border-brand",
+	"disabled:opacity-50",
+	"disabled:pointer-events-none",
+	// Borders
+	"border-b-2",
+	"border-b-transparent",
+	// Focus & Accessibility
+	"focus-visible:ring-2",
+	"focus-visible:ring-utility-blue/70",
+	"focus-visible:outline-1",
+	// Transitions
+	"transition-[color,box-shadow]",
+	// Icons
+	"[&_svg]:pointer-events-none",
+	"[&_svg]:shrink-0",
+	"[&_svg:not([class*='size-'])]:size-4",
+	// Groups
+	"group/tabs-trigger",
+);
+
+// Tabs content styles
+const tabsContentStyles = cn("grow", "outline-none", "overflow-auto");
+
 const tabsVariants = cva("", {
 	variants: {
 		variant: {
@@ -20,6 +77,7 @@ const tabsVariants = cva("", {
 				 **:data-[slot=tabs-list]:divide-x`,
 				// TabsTrigger
 				`**:data-[slot=tabs-trigger]:max-w-80 
+				 **:data-[slot=tabs-trigger]:w-60
 				 **:data-[slot=tabs-trigger]:min-w-40
 				 **:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-1
 				 **:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-border-secondary
@@ -39,7 +97,7 @@ function Tabs({
 	return (
 		<TabsPrimitive.Root
 			data-slot="tabs"
-			className={cn("flex flex-col", tabsVariants({ variant }), className)}
+			className={cn(baseTabsStyles, tabsVariants({ variant }), className)}
 			{...props}
 		/>
 	);
@@ -47,7 +105,7 @@ function Tabs({
 
 export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
 	return (
-		<div className="grow h-full bg-bg-secondary border-l border-b">
+		<div className={tabsAddButtonContainerStyles}>
 			<Button
 				data-slot="tabs-add-button"
 				variant="link"
@@ -84,15 +142,8 @@ function TabsTrigger({
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
-				"group/tabs-trigger",
-				"box-border h-10 typo-body px-3 pb-2 pt-2.5 cursor-pointer text-text-tertiary data-[state=active]:text-text-primary",
-				"data-[state=active]:border-b-border-brand border-b-2 border-b-transparent hover:text-text-tertiary-hover focus-visible:border-ring",
-				"focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:text-muted-foreground",
-				"inline-flex flex-1 items-center justify-center whitespace-nowrap transition-[color,box-shadow]",
-				"focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50",
-				"[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-				"hover:bg-bg-secondary/60",
-				onClose ? "justify-between" : "",
+				baseTabsTriggerStyles,
+				onClose ? "justify-between" : "justify-start",
 				className,
 			)}
 			{...props}
@@ -107,7 +158,7 @@ function TabsTrigger({
 					}}
 					variant="link"
 					size="small"
-					className="p-0 ml-2"
+					className="p-0 ml-2 opacity-0 group-hover/tabs-trigger:opacity-100 transition-opacity"
 					asChild
 				>
 					<span>
@@ -126,7 +177,7 @@ function TabsContent({
 	return (
 		<TabsPrimitive.Content
 			data-slot="tabs-content"
-			className={cn("flex-1 outline-none", className)}
+			className={cn(tabsContentStyles, className)}
 			{...props}
 		/>
 	);

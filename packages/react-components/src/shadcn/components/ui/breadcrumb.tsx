@@ -13,7 +13,13 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
 		<ol
 			data-slot="breadcrumb-list"
 			className={cn(
-				"text-text-tertiary typo-body flex flex-wrap items-center break-words gap-2",
+				"text-text-tertiary",
+				"typo-body",
+				"flex",
+				"flex-wrap",
+				"items-center",
+				"break-words",
+				"gap-2",
 				className,
 			)}
 			{...props}
@@ -25,7 +31,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 	return (
 		<li
 			data-slot="breadcrumb-item"
-			className={cn("inline-flex items-center", className)}
+			className={cn("inline-flex", "items-center", className)}
 			{...props}
 		/>
 	);
@@ -44,9 +50,17 @@ function BreadcrumbLink({
 		<Comp
 			data-slot="breadcrumb-link"
 			className={cn(
-				"typo-body bg-bg-tertiary text-text-tertiary rounded-md px-2 py-1 transition-colors",
+				"typo-body",
+				"bg-bg-tertiary",
+				"text-text-tertiary",
+				"rounded-md",
+				"px-2",
+				"py-1",
+				"transition-colors",
 				"hover:text-text-secondary",
-				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+				"focus-visible:outline-none",
+				"focus-visible:ring-2",
+				"focus-visible:ring-utility-blue/70",
 				className,
 			)}
 			{...props}
@@ -64,7 +78,10 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
 			aria-disabled="true"
 			aria-current="page"
 			className={cn(
-				"typo-page-header text-text-primary px-0 py-0.5",
+				"typo-page-header",
+				"text-text-primary",
+				"px-0",
+				"py-0.5",
 				className,
 			)}
 			{...props}
@@ -82,7 +99,12 @@ function BreadcrumbSeparator({
 			data-slot="breadcrumb-separator"
 			role="presentation"
 			aria-hidden="true"
-			className={cn("[&>svg]:size-3.5 text-text-quternary text-xs", className)}
+			className={cn(
+				"[&>svg]:size-3.5",
+				"text-text-tertiary",
+				"text-xs",
+				className,
+			)}
 			{...props}
 		>
 			{children ?? "/"}
@@ -99,7 +121,13 @@ function BreadcrumbEllipsis({
 			data-slot="breadcrumb-ellipsis"
 			role="presentation"
 			aria-hidden="true"
-			className={cn("flex size-9 items-center justify-center", className)}
+			className={cn(
+				"flex",
+				"size-9",
+				"items-center",
+				"justify-center",
+				className,
+			)}
 			{...props}
 		>
 			<MoreHorizontal className="size-4" />

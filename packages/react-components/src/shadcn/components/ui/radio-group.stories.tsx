@@ -11,19 +11,27 @@ type Story = StoryObj<typeof meta>;
 
 export const Demo = {
 	render: () => (
-		<RadioGroup defaultValue="comfortable">
-			<div className="flex items-center gap-3">
-				<RadioGroupItem value="default" id="r1" />
-				<Label htmlFor="r1">Default</Label>
-			</div>
-			<div className="flex items-center gap-3">
-				<RadioGroupItem value="comfortable" id="r2" />
-				<Label htmlFor="r2">Comfortable</Label>
-			</div>
-			<div className="flex items-center gap-3">
-				<RadioGroupItem value="compact" id="r3" />
-				<Label htmlFor="r3">Compact</Label>
-			</div>
-		</RadioGroup>
+		<div className="space-y-6">
+			<RadioGroup defaultValue="checked">
+				<div className="flex items-center gap-3">
+					<RadioGroupItem value="default" id="r1" />
+					<Label htmlFor="r1">Default</Label>
+				</div>
+				<div className="flex items-center gap-3">
+					<RadioGroupItem value="checked" id="r2" />
+					<Label htmlFor="r2">Checked</Label>
+				</div>
+				<div className="flex items-center gap-3">
+					<RadioGroupItem value="disabled" id="r3" disabled />
+					<Label htmlFor="r3">Disabled</Label>
+				</div>
+			</RadioGroup>
+			<RadioGroup defaultValue="disabled-checked">
+				<div className="flex items-center gap-3">
+					<RadioGroupItem value="disabled-checked" id="r4" disabled />
+					<Label htmlFor="r4">Disabled Checked</Label>
+				</div>
+			</RadioGroup>
+		</div>
 	),
 } satisfies Story;
