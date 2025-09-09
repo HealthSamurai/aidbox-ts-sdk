@@ -3,57 +3,309 @@ import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
-const iconBaseClasses =
-	"absolute top-1/2 -translate-y-1/2 cursor-pointer z-10 flex items-center justify-center [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0";
+// Base icon styles
+const iconBaseClasses = cn(
+	// Positioning
+	"absolute",
+	"top-1/2",
+	"-translate-y-1/2",
+	"z-10",
 
-const iconLeftPosition =
-	"left-3 hover:text-text-tertiary hover:cursor-default transition-colors duration-300";
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+	"justify-center",
 
-const iconRightContainer =
-	"absolute right-3 top-1/2 -translate-y-1/2 flex gap-2 z-10";
+	// Cursor & Interactions
+	"cursor-default",
+	"[&_svg]:pointer-events-none",
 
-const iconNormalColor =
-	"text-text-tertiary hover:text-fg-secondary transition-colors duration-300";
-const iconInvalidColor =
-	"text-fg-tertiary hover:text-fg-secondary transition-colors duration-300";
-const iconDisabledColor =
-	"text-text-disabled hover:cursor-not-allowed transition-colors duration-300";
+	// Sizing
+	"[&_svg:not([class*='size-'])]:size-4",
+	"shrink-0",
+	"[&_svg]:shrink-0",
+);
 
-const iconWrapperClasses = "[&>svg]:w-full [&>svg]:h-full [&>svg]:stroke-[1.5]";
+// Left icon positioning
+const iconLeftPosition = cn(
+	// Positioning
+	"left-3",
 
-const iconRightItemClasses =
-	"cursor-pointer flex items-center justify-center transition-colors duration-300";
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
 
-const suffixClasses =
-	"border-border-primary bg-bg-tertiary text-text-tertiary flex items-center rounded-r-md border px-3 py-1 typo-body cursor-default transition-colors duration-300";
+// Right icon container
+const iconRightContainer = cn(
+	// Positioning
+	"absolute",
+	"right-3",
+	"top-1/2",
+	"-translate-y-1/2",
 
-const suffixDisabledClasses =
-	"border-border-primary bg-bg-tertiary text-text-disabled flex items-center rounded-r-md border px-3 py-1 typo-body hover:cursor-not-allowed transition-colors duration-300";
+	// Layout & Flexbox
+	"flex",
+	"gap-2",
 
-const suffixInvalidClasses =
-	"border-border-error bg-bg-secondary flex items-center rounded-r-md border px-3 py-1 text-text-tertiary typo-body cursor-default transition-colors duration-300";
+	// Z-index
+	"z-10",
+);
+
+// Icon color states
+const iconNormalColor = cn(
+	// Colors
+	"text-text-tertiary",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+const iconInvalidColor = cn(
+	// Colors
+	"text-text-tertiary",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+const iconDisabledColor = cn(
+	// Colors
+	"text-text-disabled",
+
+	// Cursor & Interactions
+	"hover:cursor-not-allowed",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+// Icon wrapper styles
+const iconWrapperClasses = cn(
+	// Sizing
+	"flex",
+	"items-center",
+	"[&>svg]:w-full",
+	"[&>svg]:h-full",
+	"[&>svg]:stroke-[1.5]",
+);
+
+// Right icon item styles
+const iconRightItemClasses = cn(
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+	"justify-center",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+// Suffix styles
+const suffixClasses = cn(
+	// Borders
+	"border-border-primary",
+	"border",
+
+	// Background & Colors
+	"bg-bg-tertiary",
+	"text-text-tertiary",
+
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+
+	// Spacing & Sizing
+	"rounded-r-md",
+	"px-3",
+	"py-1",
+
+	// Typography
+	"typo-body",
+
+	// Cursor & Interactions
+	"cursor-default",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+// Disabled suffix styles
+const suffixDisabledClasses = cn(
+	// Borders
+	"border-border-primary",
+	"border",
+
+	// Background & Colors
+	"bg-bg-tertiary",
+	"text-text-disabled",
+
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+
+	// Spacing & Sizing
+	"rounded-r-md",
+	"px-3",
+	"py-1",
+
+	// Typography
+	"typo-body",
+
+	// Cursor & Interactions
+	"hover:cursor-not-allowed",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+// Invalid suffix styles
+const suffixInvalidClasses = cn(
+	// Borders
+	"border-border-error",
+	"border",
+
+	// Background & Colors
+	"bg-bg-secondary",
+	"text-text-tertiary",
+
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+
+	// Spacing & Sizing
+	"rounded-r-md",
+	"px-3",
+	"py-1",
+
+	// Typography
+	"typo-body",
+
+	// Cursor & Interactions
+	"cursor-default",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
 
 const inputVariants = cva(
 	cn(
-		"h-9 file:text-text-primary placeholder:text-text-quternary disabled:placeholder:text-text-disabled selection:bg-bg-primary selection:text-text-primary-foreground border-border-primary hover:border-border-primary_hover flex w-full min-w-0 border bg-transparent px-3 py-2 typo-body text-base transition-all duration-300 outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-md file:font-medium disabled:bg-bg-secondary disabled:cursor-not-allowed disabled:border-border-primary md:text-md selection:bg-selection",
-		"focus-visible:ring-4 focus-visible:ring-ring-blue focus-visible:border-border-link",
-		"aria-invalid:ring-destructive aria-invalid:text-text-error-primary aria-invalid:border-border-error-primary",
-		"",
+		// Sizing & Layout
+		"h-9",
+		"flex",
+		"w-full",
+		"min-w-0",
+
+		// Spacing & Padding
+		"px-3",
+		"py-2",
+
+		// Borders
+		"border",
+		"border-border-primary",
+
+		// Background & Colors
+		"bg-transparent",
+		"text-base",
+
+		// Typography
+		"typo-body",
+		"md:text-md",
+
+		// File input styles
+		"file:text-text-primary",
+		"file:inline-flex",
+		"file:h-7",
+		"file:border-0",
+		"file:bg-transparent",
+		"file:text-md",
+		"file:font-medium",
+
+		// Placeholder styles
+		"placeholder:text-text-quternary",
+
+		// Selection styles
+		"selection:bg-bg-primary",
+		"selection:text-text-primary-foreground",
+		"selection:bg-selection",
+
+		// Hover states
+		"hover:border-border-primary_hover",
+
+		// Focus states
+
+		"focus-visible:border-border-link",
+
+		// Invalid states
+		"aria-invalid:ring-destructive",
+		"aria-invalid:text-text-error-primary",
+		"aria-invalid:border-border-error-primary",
+
+		// Disabled states
+		"disabled:bg-bg-secondary",
+		"disabled:cursor-not-allowed",
+		"disabled:border-border-primary",
+		"disabled:text-text-disabled",
+		"disabled:placeholder:text-text-disabled",
+
+		// Transitions
+		"transition-all",
+		"duration-300",
+
+		// Outline
+		"outline-none",
+
+		// Border radius
 		"rounded-md",
 	),
 	{
 		variants: {
 			hasLeftSlot: {
-				true: "pl-9",
+				true: cn(
+					// Left padding for icon
+					"pl-9",
+				),
 			},
 			hasRightSlot: {
-				true: "pr-9",
+				true: cn(
+					// Right padding for icon
+					"pr-9",
+				),
 			},
 			hasSuffix: {
-				true: "border-r-0 focus-visible:ring-offset-0 rounded-l-md rounded-r-none focus-visible:border-r-1",
+				true: cn(
+					// Border adjustments for suffix
+					"border-r-0",
+					"rounded-l-md",
+					"rounded-r-none",
+
+					// Focus adjustments
+					"focus-visible:ring-offset-0",
+					"focus-visible:border-r-1",
+				),
 			},
 			invalid: {
-				true: "border-border-error focus-visible:ring-4 focus-visible:ring-ring-red focus-visible:border-border-error hover:border-border-error_inverse transition-all duration-300",
+				true: cn(
+					// Invalid border colors
+					"border-border-error",
+					"hover:border-border-error_inverse",
+
+					// Invalid focus states
+					"focus-visible:ring-4",
+					"focus-visible:ring-ring-red",
+					"focus-visible:border-border-error",
+
+					// Transitions
+					"transition-all",
+					"duration-300",
+				),
 			},
 		},
 		defaultVariants: {

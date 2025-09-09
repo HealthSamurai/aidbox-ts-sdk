@@ -477,35 +477,77 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 	);
 }
 
-const sidebarMenuButtonVariants = cva(
-	cn(
-		"typo-body text-text-secondary flex items-center gap-2 overflow-hidden rounded-lg py-2 px-[0.44rem] outline-hidden ",
-		"ring-sidebar-ring transition-all focus-visible:ring-2 active:bg-bg-quaternary disabled:pointer-events-none",
-		"disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50",
-		"data-[active=true]:bg-bg-brand-secondary data-[active=true]:text-text-primary data-[state=open]:hover:bg-sidebar-accent",
-		"data-[state=open]:hover:text-sidebar-accent-foreground  group-data-[collapsible=icon]:py-2! group-data-[collapsible=icon]:px-[0.44rem]!",
-		"[&>span:last-child]:truncate [&>svg]:size-5 [&>svg]:shrink-0 hover:bg-bg-secondary hover:text-text-primary",
-		"data-[active=true]:[&>svg]:text-text-brand-primary w-full",
-	),
-	{
-		variants: {
-			variant: {
-				default: "",
-				outline:
-					"shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
-			},
-			size: {
-				default: "",
-				sm: "",
-				lg: "h-12 text-sm group-data-[collapsible=icon]:p-0!",
-			},
+// Base sidebar menu button styles
+const baseSidebarMenuButtonStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"gap-2",
+	"w-full",
+	"overflow-hidden",
+	// Shape
+	"rounded-lg",
+	// Spacing
+	"py-2",
+	"px-[0.44rem]",
+	// Typography
+	"typo-body",
+	"text-text-secondary",
+	// Interaction
+	"outline-hidden",
+	"transition-all",
+	"cursor-pointer",
+	// Focus
+	"focus-visible:ring-2",
+	"focus-visible:ring-utility-blue/70",
+	// Hover
+	"hover:bg-bg-secondary",
+	"hover:text-text-primary",
+	// Active
+	"active:bg-bg-quaternary",
+	"data-[active=true]:bg-bg-brand-secondary",
+	"data-[active=true]:text-text-primary",
+	"data-[active=true]:[&>svg]:text-text-brand-primary",
+	// Open state
+	"data-[state=open]:hover:bg-bg-secondary",
+	"data-[state=open]:hover:text-text-primary",
+	// Disabled
+	"disabled:pointer-events-none",
+	"disabled:opacity-50",
+	"aria-disabled:pointer-events-none",
+	"aria-disabled:opacity-50",
+	// Group styles
+	"group-has-data-[sidebar=menu-action]/menu-item:pr-8",
+	"group-data-[collapsible=icon]:py-2!",
+	"group-data-[collapsible=icon]:px-[0.44rem]!",
+	// Content styles
+	"[&>span:last-child]:truncate",
+	"[&>svg]:size-5",
+	"[&>svg]:shrink-0",
+);
+
+const sidebarMenuButtonVariants = cva(baseSidebarMenuButtonStyles, {
+	variants: {
+		variant: {
+			default: cn(""),
+			outline: cn(
+				"shadow-[0_0_0_1px_hsl(var(--sidebar-border))]",
+				"hover:bg-bg-secondary",
+				"hover:text-text-primary",
+				"hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+			),
 		},
-		defaultVariants: {
-			variant: "default",
-			size: "default",
+		size: {
+			default: cn(""),
+			sm: cn(""),
+			lg: cn("h-12", "text-sm", "group-data-[collapsible=icon]:p-0!"),
 		},
 	},
-);
+	defaultVariants: {
+		variant: "default",
+		size: "default",
+	},
+});
 
 function SidebarMenuButton({
 	asChild = false,

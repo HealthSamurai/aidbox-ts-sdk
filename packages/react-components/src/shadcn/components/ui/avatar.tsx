@@ -3,6 +3,15 @@ import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
+const avatarStyles = cn(
+	"relative",
+	"flex",
+	"size-8",
+	"shrink-0",
+	"overflow-hidden",
+	"rounded-full",
+);
+
 function Avatar({
 	className,
 	...props
@@ -10,10 +19,7 @@ function Avatar({
 	return (
 		<AvatarPrimitive.Root
 			data-slot="avatar"
-			className={cn(
-				"relative flex size-8 shrink-0 overflow-hidden rounded-full",
-				className,
-			)}
+			className={cn(avatarStyles, className)}
 			{...props}
 		/>
 	);
@@ -26,7 +32,7 @@ function AvatarImage({
 	return (
 		<AvatarPrimitive.Image
 			data-slot="avatar-image"
-			className={cn("aspect-square size-full", className)}
+			className={cn("aspect-square", "size-full", className)}
 			{...props}
 		/>
 	);
@@ -40,7 +46,12 @@ function AvatarFallback({
 		<AvatarPrimitive.Fallback
 			data-slot="avatar-fallback"
 			className={cn(
-				"bg-muted flex size-full items-center justify-center rounded-full",
+				"bg-bg-tertiary",
+				"flex",
+				"size-full",
+				"items-center",
+				"justify-center",
+				"rounded-full",
 				className,
 			)}
 			{...props}
