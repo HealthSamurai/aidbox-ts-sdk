@@ -28,7 +28,7 @@ export const Default: Story = {
 	},
 	render: () => (
 		<div className="h-[500px] w-[500px]">
-			<CodeEditor />
+			<CodeEditor mode="http" />
 		</div>
 	),
 };
