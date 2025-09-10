@@ -1,0 +1,74 @@
+@top Http {
+    httpRequest
+}
+
+@tokens {
+    eof { @eof }
+
+    lf { $[\n] }
+    notLf { ![\n] }
+
+    cr { $[\r] }
+    notCr { ![\r] }
+
+    colon { $[:] }
+    notColon { ![:] }
+
+    space { $[ \t] }
+    notSpace { ![ \t] }
+
+    headerNameChar { ![\n\r \t:] }
+    headerNameText { headerNameChar+ }
+
+    headerValueFirstChar { ![\n\r \t] }
+    headerValueChar { ![\n\r] }
+    headerValueLastChar { headerValueFirstChar }
+    headerValueText { headerValueFirstChar headerValueChar* headerValueLastChar | headerValueFirstChar }
+
+    methodChar { ![\n\r \t] }
+    methodText { methodChar+ }
+
+    pathChar { ![\n\r] }
+    firstPathChar { ![\n\r \t] }
+    pathText { firstPathChar pathChar* }
+
+    crlf { (cr lf) | cr | lf }
+
+    bodyChar { _ }
+}
+
+HttpRequestMethod[group="Method"] {
+    methodText
+}
+
+HttpRequestPath {
+    pathText
+}
+
+httpRequestLine {
+    space* HttpRequestMethod space+ HttpRequestPath crlf
+}
+
+HttpHeaderName {
+    headerNameText
+}
+
+HttpHeaderValue {
+    headerValueText
+}
+
+HttpHeader {
+    space* HttpHeaderName space* colon space* HttpHeaderValue space* crlf
+}
+
+HttpHeaders {
+    HttpHeader+
+}
+
+HttpBody {
+    bodyChar*
+}
+
+httpRequest {
+    httpRequestLine HttpHeaders? crlf HttpBody
+}
