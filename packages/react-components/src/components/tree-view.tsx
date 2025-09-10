@@ -11,6 +11,25 @@ import {
 import { useTree } from "@headless-tree/react";
 import type React from "react";
 import { Tree, TreeItem, TreeItemLabel } from "#shadcn/components/ui/tree";
+import { cn } from "#shadcn/lib/utils.js";
+
+// Styles
+const treeItemStyle = cn(
+	"relative",
+	"before:absolute",
+	"before:inset-0",
+	"before:-ms-1",
+	"before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]",
+);
+
+const treeItemLabelStyle = cn(
+	"before:bg-background",
+	"relative",
+	"before:absolute",
+	"before:inset-x-0",
+	"before:-inset-y-0",
+	"before:-z-10",
+);
 
 export interface Item<T> {
 	name: string;
@@ -82,13 +101,9 @@ export default function TreeView<T>({
 		<Tree tree={tree} indent={indent}>
 			{tree.getItems().map((item) => {
 				return (
-					<TreeItem
-						key={item.getId()}
-						item={item}
-						className="relative before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
-					>
+					<TreeItem key={item.getId()} item={item} className={treeItemStyle}>
 						<TreeItemLabel
-							className="before:bg-background relative before:absolute before:inset-x-0 before:-inset-y-0 before:-z-10"
+							className={treeItemLabelStyle}
 							onClick={() => onSelectItem?.(item)}
 						>
 							{customItemView ? customItemView(item) : item.getItemData()?.name}
