@@ -1,10 +1,18 @@
 "use client";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Plus, X } from "lucide-react";
-import type * as React from "react";
+import { ChevronDownIcon, Plus, X } from "lucide-react";
+import * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 import { Button } from "./button";
+import {
+	Command,
+	CommandEmpty,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "./command";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 // Base tabs styles
 const baseTabsStyles = cn("flex", "flex-col", "h-full");
@@ -128,6 +136,60 @@ function TabsList({
 			className={cn("inline-flex w-fit items-center", className)}
 			{...props}
 		/>
+	);
+}
+
+export function TabsListDropdown({
+	tabs,
+	handleTabSelect,
+	handleCloseTab,
+}: {
+	tabs: { id: string; content: React.ReactNode }[];
+	handleTabSelect?: (tabId: string) => void;
+	handleCloseTab?: (tabId: string) => void;
+}) {
+	const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+	return (
+		<Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+			<PopoverTrigger asChild>
+				<Button variant="link" className="bg-bg-secondary h-full border-b pr-6">
+					<ChevronDownIcon className="size-4" />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className="w-80 p-0 mr-3" align="end">
+				<Command>
+					<CommandInput placeholder="Search tabs..." />
+					<CommandList>
+						<CommandEmpty>Not tabs found.</CommandEmpty>
+						{tabs.map((tab) => (
+							<CommandItem
+								key={tab.id}
+								onSelect={() => {
+									handleTabSelect?.(tab.id);
+									setIsMenuOpen(false);
+								}}
+								className="group flex items-center justify-between"
+							>
+								{tab.content}
+								{tabs.length > 1 && (
+									<Button
+										variant="ghost"
+										size="small"
+										className="opacity-0 group-hover:opacity-100 transition-opacity p-1 ml-2"
+										onClick={(e) => {
+											e.stopPropagation();
+											handleCloseTab?.(tab.id);
+										}}
+									>
+										<X className="size-3" />
+									</Button>
+								)}
+							</CommandItem>
+						))}
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
 	);
 }
 
