@@ -31,7 +31,7 @@ const treeItemLabelStyle = cn(
 	"before:-z-10",
 );
 
-export interface Item<T> {
+interface Item<T> {
 	name: string;
 	children?: string[];
 	meta?: T;
@@ -58,7 +58,7 @@ const customClickBehavior: FeatureImplementation = {
 
 const indent = 20;
 
-export default function TreeView<T>({
+function TreeView<T>({
 	rootItemId,
 	items,
 	selectedItemId,
@@ -114,3 +114,5 @@ export default function TreeView<T>({
 		</Tree>
 	);
 }
+
+export { TreeView, type Item };

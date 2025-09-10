@@ -6,7 +6,7 @@ import { action } from "storybook/actions";
 import { Button } from "#shadcn/components/ui/button.js";
 import { PinIcon } from "../icons";
 import type { Item } from "./tree-view";
-import TreeView from "./tree-view";
+import { TreeView } from "./tree-view";
 
 const meta: Meta<typeof TreeView> = {
 	title: "Component/Tree view",
