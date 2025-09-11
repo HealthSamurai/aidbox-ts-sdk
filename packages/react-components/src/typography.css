@@ -42,10 +42,16 @@ body {
 	font-weight: var(--font-weight-normal);
 	line-height: var(--font-leading-4);
 }
-.typo-label-xs {
+.typo-body-xs {
 	font-size: var(--font-size-xs);
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-3);
+}
+.typo-label-xs {
+	font-size: var(--font-size-xs);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-medium);
 	line-height: var(--font-leading-3);
 }
 
