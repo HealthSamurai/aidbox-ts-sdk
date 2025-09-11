@@ -31,7 +31,7 @@ const treeItemLabelStyle = cn(
 	"before:-z-10",
 );
 
-interface Item<T> {
+interface TreeViewItem<T> {
 	name: string;
 	children?: string[];
 	meta?: T;
@@ -69,22 +69,23 @@ function TreeView<T>({
 	rootItemId: string;
 	selectedItemId?: string;
 	expandedItemIds?: string[];
-	onSelectItem?: (item: ItemInstance<Item<T>>) => void;
-	items: Record<string, Item<T>>;
-	customItemView?: (item: ItemInstance<Item<T>>) => React.ReactNode;
+	onSelectItem?: (item: ItemInstance<TreeViewItem<T>>) => void;
+	items: Record<string, TreeViewItem<T>>;
+	customItemView?: (item: ItemInstance<TreeViewItem<T>>) => React.ReactNode;
 }) {
-	const treeConfig: TreeConfig<Item<T>> = {
+	const treeConfig: TreeConfig<TreeViewItem<T>> = {
 		initialState: {
 			selectedItems: selectedItemId ? [selectedItemId] : [],
 			expandedItems: expandedItemIds ?? [],
 		},
 		indent,
 		rootItemId: rootItemId,
-		isItemFolder: (item: ItemInstance<Item<T>>) =>
+		isItemFolder: (item: ItemInstance<TreeViewItem<T>>) =>
 			item.getItemData()?.children !== undefined,
-		getItemName: (item: ItemInstance<Item<T>>) => item.getItemData()?.name,
+		getItemName: (item: ItemInstance<TreeViewItem<T>>) =>
+			item.getItemData()?.name,
 		dataLoader: {
-			getItem: (itemId) => items[itemId] as Item<T>,
+			getItem: (itemId) => items[itemId] as TreeViewItem<T>,
 			getChildren: (itemId) => items[itemId]?.children ?? [],
 		},
 		features: [
@@ -95,7 +96,7 @@ function TreeView<T>({
 		],
 	};
 
-	const tree = useTree<Item<T>>(treeConfig);
+	const tree = useTree<TreeViewItem<T>>(treeConfig);
 
 	return (
 		<Tree tree={tree} indent={indent}>
@@ -115,4 +116,4 @@ function TreeView<T>({
 	);
 }
 
-export { TreeView, type Item };
+export { TreeView, type TreeViewItem };

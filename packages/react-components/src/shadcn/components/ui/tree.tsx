@@ -197,4 +197,4 @@ function TreeDragLine({
 	);
 }
 
-export { Tree, TreeItem, TreeItemLabel, TreeDragLine };
+export { Tree, TreeItem, TreeItemLabel, TreeDragLine, type ItemInstance };
