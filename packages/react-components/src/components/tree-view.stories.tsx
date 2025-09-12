@@ -5,8 +5,8 @@ import React from "react";
 import { action } from "storybook/actions";
 import { Button } from "#shadcn/components/ui/button.js";
 import { PinIcon } from "../icons";
-import type { Item } from "./tree-view";
-import TreeView from "./tree-view";
+import type { TreeViewItem } from "./tree-view";
+import { TreeView } from "./tree-view";
 
 const meta: Meta<typeof TreeView> = {
 	title: "Component/Tree view",
@@ -16,17 +16,16 @@ const meta: Meta<typeof TreeView> = {
 	},
 	tags: ["autodocs"],
 };
-
-export default meta;
-type Story = StoryObj<typeof TreeView<ItemMeta>>;
-
 type ItemMeta = {
 	pinned?: boolean;
 	method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 	path?: string;
 };
 
-const items: Record<string, Item<ItemMeta>> = {
+export default meta;
+type Story = StoryObj<typeof TreeView<ItemMeta>>;
+
+const items: Record<string, TreeViewItem<ItemMeta>> = {
 	root: {
 		name: "Root",
 		children: ["collection1", "collection2", "collection3"],
@@ -168,7 +167,7 @@ export const Default: Story = {
 	render: (args) => <TreeView {...args} />,
 };
 
-const customItemView = (item: ItemInstance<Item<ItemMeta>>) => {
+const customItemView = (item: ItemInstance<TreeViewItem<ItemMeta>>) => {
 	const isRootLevel = item.getItemMeta().level === 0;
 	const hasChildren = item.getItemData()?.children !== undefined;
 	const requestMethhod = item.getItemData()?.meta?.method;
@@ -179,7 +178,7 @@ const customItemView = (item: ItemInstance<Item<ItemMeta>>) => {
 		switch (requestMethhod) {
 			case "GET":
 				return (
-					<div className=" opacity-50 group-hover/tree-item-label:opacity-100 in-data-[selected=true]:opacity-100 font-medium min-w-13 w-13 text-utility-green text-left">
+					<div className="opacity-50 group-hover/tree-item-label:opacity-100 in-data-[selected=true]:opacity-100 font-medium min-w-13 w-13 text-utility-green text-left">
 						GET
 					</div>
 				);

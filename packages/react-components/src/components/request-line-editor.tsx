@@ -1,5 +1,6 @@
 import { cva } from "class-variance-authority";
 import type * as React from "react";
+import { toast } from "sonner";
 import { Input } from "#shadcn/components/ui/input";
 import {
 	Select,
@@ -51,9 +52,6 @@ function RequestMethodSelector({
 	value,
 	onValueChange,
 }: RequestMethodSelectorProps) {
-	console.log(value);
-	console.log(requestMethodVariants());
-	console.log(requestMethodVariants(undefined));
 	return (
 		<Select
 			value={value}
@@ -100,7 +98,29 @@ function RequestLineEditor({
 			<Input
 				className="rounded-l-none"
 				value={path}
-				rightSlot={<CopyIcon text={`${method} ${path}`} />}
+				rightSlot={
+					<CopyIcon
+						text={`${method} ${path}`}
+						tooltipText="Copy request line"
+						showToast={false}
+						onCopy={(text) => {
+							// Custom toast for request line
+							const truncatedText =
+								text.length > 30 ? `${text.slice(0, 30)}...` : text;
+							toast(
+								<div className="flex flex-col gap-1">
+									<span className="typo-body">Request line copied</span>
+									<span className="typo-code text-text-secondary">
+										{truncatedText}
+									</span>
+								</div>,
+								{
+									duration: 2000,
+								},
+							);
+						}}
+					/>
+				}
 				{...(onPathChange !== undefined ? { onChange: onPathChange } : {})}
 			/>
 		</div>

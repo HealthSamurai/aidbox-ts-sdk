@@ -11,8 +11,27 @@ import {
 import { useTree } from "@headless-tree/react";
 import type React from "react";
 import { Tree, TreeItem, TreeItemLabel } from "#shadcn/components/ui/tree";
+import { cn } from "#shadcn/lib/utils.js";
 
-export interface Item<T> {
+// Styles
+const treeItemStyle = cn(
+	"relative",
+	"before:absolute",
+	"before:inset-0",
+	"before:-ms-1",
+	"before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]",
+);
+
+const treeItemLabelStyle = cn(
+	"before:bg-background",
+	"relative",
+	"before:absolute",
+	"before:inset-x-0",
+	"before:-inset-y-0",
+	"before:-z-10",
+);
+
+interface TreeViewItem<T> {
 	name: string;
 	children?: string[];
 	meta?: T;
@@ -39,7 +58,7 @@ const customClickBehavior: FeatureImplementation = {
 
 const indent = 20;
 
-export default function TreeView<T>({
+function TreeView<T>({
 	rootItemId,
 	items,
 	selectedItemId,
@@ -50,22 +69,23 @@ export default function TreeView<T>({
 	rootItemId: string;
 	selectedItemId?: string;
 	expandedItemIds?: string[];
-	onSelectItem?: (item: ItemInstance<Item<T>>) => void;
-	items: Record<string, Item<T>>;
-	customItemView?: (item: ItemInstance<Item<T>>) => React.ReactNode;
+	onSelectItem?: (item: ItemInstance<TreeViewItem<T>>) => void;
+	items: Record<string, TreeViewItem<T>>;
+	customItemView?: (item: ItemInstance<TreeViewItem<T>>) => React.ReactNode;
 }) {
-	const treeConfig: TreeConfig<Item<T>> = {
+	const treeConfig: TreeConfig<TreeViewItem<T>> = {
 		initialState: {
 			selectedItems: selectedItemId ? [selectedItemId] : [],
 			expandedItems: expandedItemIds ?? [],
 		},
 		indent,
 		rootItemId: rootItemId,
-		isItemFolder: (item: ItemInstance<Item<T>>) =>
+		isItemFolder: (item: ItemInstance<TreeViewItem<T>>) =>
 			item.getItemData()?.children !== undefined,
-		getItemName: (item: ItemInstance<Item<T>>) => item.getItemData()?.name,
+		getItemName: (item: ItemInstance<TreeViewItem<T>>) =>
+			item.getItemData()?.name,
 		dataLoader: {
-			getItem: (itemId) => items[itemId] as Item<T>,
+			getItem: (itemId) => items[itemId] as TreeViewItem<T>,
 			getChildren: (itemId) => items[itemId]?.children ?? [],
 		},
 		features: [
@@ -76,19 +96,15 @@ export default function TreeView<T>({
 		],
 	};
 
-	const tree = useTree<Item<T>>(treeConfig);
+	const tree = useTree<TreeViewItem<T>>(treeConfig);
 
 	return (
 		<Tree tree={tree} indent={indent}>
 			{tree.getItems().map((item) => {
 				return (
-					<TreeItem
-						key={item.getId()}
-						item={item}
-						className="relative before:absolute before:inset-0 before:-ms-1 before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]"
-					>
+					<TreeItem key={item.getId()} item={item} className={treeItemStyle}>
 						<TreeItemLabel
-							className="before:bg-background relative before:absolute before:inset-x-0 before:-inset-y-0 before:-z-10"
+							className={treeItemLabelStyle}
 							onClick={() => onSelectItem?.(item)}
 						>
 							{customItemView ? customItemView(item) : item.getItemData()?.name}
@@ -99,3 +115,5 @@ export default function TreeView<T>({
 		</Tree>
 	);
 }
+
+export { TreeView, type TreeViewItem };
