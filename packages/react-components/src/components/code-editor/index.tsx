@@ -6,6 +6,7 @@ import {
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
+import { yaml } from "@codemirror/lang-yaml";
 import {
 	bracketMatching,
 	foldGutter,
@@ -124,8 +125,15 @@ type LanguageMode = "json" | "http";
 function languageExtensions(mode: LanguageMode) {
 	if (mode === "http") {
 		const jsonLang = json();
+		const yamlLang = yaml();
 		return [
-			http((ct) => (ct === "application/json" ? jsonLang.language : null)),
+			http((ct) =>
+				ct === "application/json"
+					? jsonLang.language
+					: ct === "text/yaml"
+						? yamlLang.language
+						: null,
+			),
 			syntaxHighlighting(customHighlightStyle),
 		];
 	} else {
