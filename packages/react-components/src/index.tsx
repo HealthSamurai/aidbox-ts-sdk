@@ -6,6 +6,7 @@ export * from "./components/data-table";
 export * from "./components/request-line-editor";
 export * from "./components/segment-control";
 export * from "./components/split-button";
+export * from "./components/tree-view";
 export * from "./icons";
 export * from "./shadcn/components/ui/accordion";
 export * from "./shadcn/components/ui/alert";
