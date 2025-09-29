@@ -21,8 +21,7 @@ const dropdownMenuContentStyles = cn(
 	"border",
 	"border-border-separator",
 	// Spacing
-	"px-2",
-	"py-3",
+	"p-2",
 	"space-y-0.5",
 	// Shadow
 	"shadow-lg",
