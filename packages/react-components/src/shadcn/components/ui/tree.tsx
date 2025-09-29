@@ -5,6 +5,12 @@ import * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
+type WithMeta = {
+	meta?: {
+		lastNode?: boolean;
+	};
+};
+
 // biome-ignore lint/suspicious/noExplicitAny: FIXME Origin UI as-is
 interface TreeContextValue<T = any> {
 	indent: number;
@@ -135,17 +141,22 @@ function TreeItem<T = any>({
 // biome-ignore lint/suspicious/noExplicitAny: FIXME Origin UI as-is
 interface TreeItemLabelProps<T = any>
 	extends React.HTMLAttributes<HTMLSpanElement> {
+	hideChevron?: boolean;
+	disableHover?: boolean;
 	item?: ItemInstance<T>;
+	horizontalLines?: boolean;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: FIXME Origin UI as-is
-function TreeItemLabel<T = any>({
+function TreeItemLabel<T>({
 	item: propItem,
 	children,
 	className,
+	disableHover,
+	horizontalLines,
+	hideChevron,
 	...props
-}: TreeItemLabelProps<T>) {
-	const { currentItem } = useTreeContext<T>();
+}: TreeItemLabelProps<T & WithMeta>) {
+	const { currentItem } = useTreeContext<T & WithMeta>();
 	const item = propItem || currentItem;
 
 	if (!item) {
@@ -153,17 +164,39 @@ function TreeItemLabel<T = any>({
 		return null;
 	}
 
+	const data = item.getItemData?.();
+	const isLastNode = data?.meta?.lastNode;
+	const itemMeta = item.getItemMeta();
+
 	return (
 		<span
 			data-slot="tree-item-label"
 			className={cn(
-				"group/tree-item-label cursor-pointer in-data-[selected=true]:border-l-border-brand border-l-2 border-l-transparent in-focus-visible:ring-ring/50 bg-background hover:bg-bg-secondary in-data-[selected=true]:bg-bg-quaternary! text-text-secondary hover:text-text-primary in-data-[selected=true]:text-text-primary in-data-[drag-target=true]:bg-accent flex items-center gap-2 pr-2 pl-1.5 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-2.5 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-400/20! [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				"group/tree-item-label relative select-text cursor-pointer border-l-2 border-l-transparent in-focus-visible:ring-ring/50 bg-background text-text-secondary in-data-[drag-target=true]:bg-accent flex items-center gap-2 pr-2 pl-2.5 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-2.5 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-400/20! [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				!disableHover &&
+					"in-data-[selected=true]:bg-bg-secondary hover:bg-bg-secondary hover:text-text-primary in-data-[selected=true]:text-text-primary",
+				disableHover && "text-text-primary",
 				className,
 			)}
 			{...props}
 		>
 			{item.isFolder() && (
-				<ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
+				<ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90 self-start mt-0.5" />
+			)}
+			{!item.isFolder() && horizontalLines && (
+				<div
+					className={`w-5 min-w-5 h-px border-t mt-2.25 -ml-1 self-start`}
+				></div>
+			)}
+			{item.isFolder() && item.isExpanded() && horizontalLines && (
+				<div
+					className={`absolute left-4.25 top-4 w-px min-h-full h-full border-l mt-2.25  self-start `}
+				></div>
+			)}
+			{horizontalLines && (
+				<div
+					className={`absolute left-0 top-5.5 -m-1.75 border-t w-4 ${isLastNode ? "h-full bg-inherit " : ""} ${itemMeta.level === 0 ? "hidden" : ""}`}
+				></div>
 			)}
 			{children ||
 				(typeof item.getItemName === "function" ? item.getItemName() : null)}
@@ -197,4 +230,4 @@ function TreeDragLine({
 	);
 }
 
-export { Tree, TreeItem, TreeItemLabel, TreeDragLine };
+export { Tree, TreeItem, TreeItemLabel, TreeDragLine, type ItemInstance };
