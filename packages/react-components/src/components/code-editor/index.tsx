@@ -252,6 +252,7 @@ function languageExtensions(mode: LanguageMode) {
 
 type CodeEditorProps = {
 	readOnly?: boolean;
+	isReadOnlyTheme?: boolean;
 	defaultValue?: string;
 	currentValue?: string;
 	onChange?: (value: string) => void;
@@ -272,6 +273,7 @@ export function CodeEditor({
 	readOnly = false,
 	id,
 	mode = "json",
+	isReadOnlyTheme = false,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -406,12 +408,22 @@ export function CodeEditor({
 				readOnlyCompartment.current.reconfigure(
 					EditorState.readOnly.of(readOnly),
 				),
-				themeCompartment.current.reconfigure(
-					readOnly ? readOnlyTheme : baseTheme,
-				),
 			],
 		});
 	}, [readOnly, view]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: [
+				themeCompartment.current.reconfigure(
+					isReadOnlyTheme ? readOnlyTheme : baseTheme,
+				),
+			],
+		});
+	}, [isReadOnlyTheme, view]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
