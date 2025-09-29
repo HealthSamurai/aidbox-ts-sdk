@@ -54,6 +54,7 @@ export * from "./shadcn/components/ui/textarea";
 export * from "./shadcn/components/ui/toggle";
 export * from "./shadcn/components/ui/toggle-group";
 export * from "./shadcn/components/ui/tooltip";
+export * from "./shadcn/components/ui/tree";
 
 // Hooks
 export * from "./shadcn/hooks/use-mobile";
