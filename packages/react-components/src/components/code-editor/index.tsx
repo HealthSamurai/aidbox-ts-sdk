@@ -120,7 +120,7 @@ const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.null, color: "#569cd6" },
 ]);
 
-type LanguageMode = "json" | "http";
+type LanguageMode = "json" | "http" | "yaml";
 
 function languageExtensions(mode: LanguageMode) {
 	if (mode === "http") {
@@ -136,6 +136,8 @@ function languageExtensions(mode: LanguageMode) {
 			),
 			syntaxHighlighting(customHighlightStyle),
 		];
+	} else if (mode === "yaml") {
+		return [yaml(), syntaxHighlighting(customHighlightStyle)];
 	} else {
 		return [
 			json(),
