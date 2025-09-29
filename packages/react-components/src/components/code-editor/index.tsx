@@ -6,6 +6,7 @@ import {
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
+import { SQLDialect, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
 import {
 	bracketMatching,
@@ -118,9 +119,106 @@ const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.number, color: "#00A984" },
 	{ tag: tags.bool, color: "#569cd6" },
 	{ tag: tags.null, color: "#569cd6" },
+	{ tag: tags.keyword, color: "#569cd6" },
+	{ tag: tags.operatorKeyword, color: "#405CBF" },
+	{ tag: tags.controlKeyword, color: "#EA4A35" },
+	{ tag: tags.typeName, color: "#00A984" },
+	{ tag: tags.variableName, color: "#EA4A35" },
+	{ tag: tags.operator, color: "#405CBF" },
+	{ tag: tags.comment, color: "#00A984" },
+	{ tag: tags.lineComment, color: "#00A984" },
+	{ tag: tags.blockComment, color: "#00A984" },
 ]);
 
-type LanguageMode = "json" | "http" | "yaml";
+const SQL_KEYWORDS = [
+	"select",
+	"from",
+	"where",
+	"and",
+	"or",
+	"not",
+	"in",
+	"between",
+	"like",
+	"insert",
+	"update",
+	"delete",
+	"create",
+	"drop",
+	"alter",
+	"table",
+	"index",
+	"join",
+	"inner",
+	"left",
+	"right",
+	"outer",
+	"on",
+	"as",
+	"order",
+	"by",
+	"group",
+	"having",
+	"limit",
+	"offset",
+	"union",
+	"intersect",
+	"except",
+	"distinct",
+	"all",
+	"exists",
+	"case",
+	"when",
+	"then",
+	"else",
+	"end",
+	"null",
+	"true",
+	"false",
+	"is",
+	"asc",
+	"desc",
+];
+
+const SQL_BUILTIN = [
+	"varchar",
+	"char",
+	"text",
+	"integer",
+	"int",
+	"bigint",
+	"decimal",
+	"numeric",
+	"float",
+	"real",
+	"boolean",
+	"date",
+	"time",
+	"timestamp",
+	"uuid",
+	"count",
+	"sum",
+	"avg",
+	"min",
+	"max",
+	"coalesce",
+	"concat",
+	"substring",
+	"upper",
+	"lower",
+	"trim",
+	"length",
+	"now",
+	"current_date",
+	"current_time",
+];
+
+const customSQLDialect = SQLDialect.define({
+	keywords: SQL_KEYWORDS.join(" "),
+	builtin: SQL_BUILTIN.join(" "),
+});
+
+type LanguageMode = "json" | "http" | "sql" | "yaml";
 
 function languageExtensions(mode: LanguageMode) {
 	if (mode === "http") {
@@ -134,6 +232,11 @@ function languageExtensions(mode: LanguageMode) {
 						? yamlLang.language
 						: null,
 			),
+			syntaxHighlighting(customHighlightStyle),
+		];
+	} else if (mode === "sql") {
+		return [
+			sql({ dialect: customSQLDialect }),
 			syntaxHighlighting(customHighlightStyle),
 		];
 	} else if (mode === "yaml") {
