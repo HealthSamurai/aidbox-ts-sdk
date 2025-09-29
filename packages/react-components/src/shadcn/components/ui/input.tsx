@@ -105,6 +105,37 @@ const iconRightItemClasses = cn(
 	"duration-300",
 );
 
+// Prefix styles
+const prefixClasses = cn(
+	// Borders
+	"border-border-primary",
+	"border",
+	"border-r-0",
+
+	// Background & Colors
+	"bg-bg-tertiary",
+	"text-text-tertiary",
+
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+
+	// Spacing & Sizing
+	"rounded-l-md",
+	"px-3",
+	"py-1",
+
+	// Typography
+	"typo-body",
+
+	// Cursor & Interactions
+	"cursor-default",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
 // Suffix styles
 const suffixClasses = cn(
 	// Borders
@@ -135,6 +166,36 @@ const suffixClasses = cn(
 	"duration-300",
 );
 
+// Disabled prefix styles
+const prefixDisabledClasses = cn(
+	// Borders
+	"border-border-primary",
+	"border",
+
+	// Background & Colors
+	"bg-bg-tertiary",
+	"text-text-disabled",
+
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+
+	// Spacing & Sizing
+	"rounded-l-md",
+	"px-3",
+	"py-1",
+
+	// Typography
+	"typo-body",
+
+	// Cursor & Interactions
+	"hover:cursor-not-allowed",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
 // Disabled suffix styles
 const suffixDisabledClasses = cn(
 	// Borders
@@ -159,6 +220,36 @@ const suffixDisabledClasses = cn(
 
 	// Cursor & Interactions
 	"hover:cursor-not-allowed",
+
+	// Transitions
+	"transition-colors",
+	"duration-300",
+);
+
+// Invalid prefix styles
+const prefixInvalidClasses = cn(
+	// Borders
+	"border-border-error",
+	"border",
+
+	// Background & Colors
+	"bg-bg-secondary",
+	"text-text-tertiary",
+
+	// Layout & Flexbox
+	"flex",
+	"items-center",
+
+	// Spacing & Sizing
+	"rounded-l-md",
+	"px-3",
+	"py-1",
+
+	// Typography
+	"typo-body",
+
+	// Cursor & Interactions
+	"cursor-default",
 
 	// Transitions
 	"transition-colors",
@@ -279,6 +370,17 @@ const inputVariants = cva(
 					"pr-9",
 				),
 			},
+			hasPrefix: {
+				true: cn(
+					// Border adjustments for prefix
+					"rounded-r-md",
+					"rounded-l-none",
+
+					// Focus adjustments
+					"focus-visible:ring-offset-0",
+					"focus-visible:border-l-1",
+				),
+			},
 			hasSuffix: {
 				true: cn(
 					// Border adjustments for suffix
@@ -309,6 +411,7 @@ const inputVariants = cva(
 			},
 		},
 		defaultVariants: {
+			hasPrefix: false,
 			hasSuffix: false,
 			invalid: false,
 		},
@@ -319,6 +422,7 @@ interface InputProps
 	extends React.ComponentProps<"input">,
 		VariantProps<typeof inputVariants> {
 	type?: "text" | "password";
+	prefixValue?: React.ReactNode;
 	suffix?: string;
 	invalid?: boolean;
 	leftSlot?: React.ReactNode;
@@ -329,6 +433,7 @@ function Input({
 	className,
 	type,
 	invalid,
+	prefixValue,
 	suffix,
 	leftSlot,
 	rightSlot,
@@ -390,6 +495,7 @@ function Input({
 					invalid,
 					hasLeftSlot: !!leftSlot,
 					hasRightSlot: !!rightSlot,
+					hasPrefix: !!prefixValue,
 					hasSuffix: !!suffix,
 					className,
 				}),
@@ -400,6 +506,19 @@ function Input({
 
 	return (
 		<div className="flex w-full min-w-0">
+			{prefixValue && (
+				<div
+					className={
+						props.disabled
+							? prefixDisabledClasses
+							: invalid
+								? prefixInvalidClasses
+								: prefixClasses
+					}
+				>
+					{prefixValue}
+				</div>
+			)}
 			<div className="flex-1 relative">
 				{renderLeftSlot()}
 				{inputElement}
