@@ -204,26 +204,24 @@ const FhirStructureView = ({
 	}, [tree]);
 
 	return (
-		<div className="flex flex-col h-full">
-			<div className="flex items-center gap-2 font-semibold text-text-secondary border-b pb-2 bg-bg-primary sticky top-0 z-10">
+		<div className="h-fit w-fit min-h-0 min-w-0">
+			<div className="flex items-center gap-2 font-semibold text-text-secondary border-b py-2 bg-bg-primary sticky top-0 z-100">
 				<div className="min-w-[260px] w-[260px] ml-9">Name</div>
 				<div className="min-w-[60px] w-[60px]">Flags</div>
 				<div className="min-w-[50px] w-[50px]">Card.</div>
 				<div className="min-w-[200px] w-[200px]">Type</div>
 				<div className="min-w-[200px] w-[200px]">Description</div>
 			</div>
-			<div className="flex-1 overflow-auto">
-				<TreeView
-					hideChevron={true}
-					horizontalLines={true}
-					disableHover={true}
-					zebra={true}
-					rootItemId="root"
-					items={tree}
-					customItemView={customItemView}
-					expandedItemIds={expandedItemIds}
-				/>
-			</div>
+			<TreeView
+				hideChevron={true}
+				horizontalLines={true}
+				disableHover={true}
+				zebra={true}
+				rootItemId="root"
+				items={tree}
+				customItemView={customItemView}
+				expandedItemIds={expandedItemIds}
+			/>
 		</div>
 	);
 };
