@@ -185,12 +185,12 @@ function TreeItemLabel<T>({
 			{item.isFolder() && (
 				<button
 					type="button"
-					className="cursor-pointer"
+					className="self-start mt-0.5 cursor-pointer"
 					onClick={() => {
 						item.isExpanded() ? item.collapse() : item.expand();
 					}}
 				>
-					<ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90 self-start mt-0.5" />
+					<ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
 				</button>
 			)}
 			{!item.isFolder() && horizontalLines && (
