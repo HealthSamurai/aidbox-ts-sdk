@@ -93,7 +93,7 @@ function TreeItem<T = any>({
 		"--tree-padding": `${item.getItemMeta().level * indent}px`,
 	} as React.CSSProperties;
 
-	const Comp = asChild ? Slot.Root : "button";
+	const Comp = asChild ? Slot.Root : "span";
 
 	return (
 		<TreeContext.Provider value={{ indent, currentItem: item }}>
@@ -130,7 +130,9 @@ function TreeItem<T = any>({
 						: undefined
 				}
 				aria-expanded={item.isExpanded()}
-				{...otherProps}
+				{...Object.fromEntries(
+					Object.entries(otherProps).filter(([key]) => key !== "onClick"),
+				)}
 			>
 				{children}
 			</Comp>
@@ -181,7 +183,15 @@ function TreeItemLabel<T>({
 			{...props}
 		>
 			{item.isFolder() && (
-				<ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90 self-start mt-0.5" />
+				<button
+					type="button"
+					className="cursor-pointer"
+					onClick={() => {
+						item.isExpanded() ? item.collapse() : item.expand();
+					}}
+				>
+					<ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90 self-start mt-0.5" />
+				</button>
 			)}
 			{!item.isFolder() && horizontalLines && (
 				<div
