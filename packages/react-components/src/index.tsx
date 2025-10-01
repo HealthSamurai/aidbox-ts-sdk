@@ -1,5 +1,6 @@
 // Shadcn Components
 export { toast } from "sonner";
+export * from "./components/button-dropdown";
 export * from "./components/code-editor";
 export * from "./components/copy-icon";
 export * from "./components/data-table";
@@ -57,6 +58,5 @@ export * from "./shadcn/components/ui/toggle";
 export * from "./shadcn/components/ui/toggle-group";
 export * from "./shadcn/components/ui/tooltip";
 export * from "./shadcn/components/ui/tree";
-
 // Hooks
 export * from "./shadcn/hooks/use-mobile";
