@@ -2,29 +2,73 @@ import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
-// Card styles
-const cardStyles = cn(
+// Base card styles
+const baseCardStyles = cn(
 	// Layout
 	"flex",
 	"flex-col",
 	"gap-6",
-	// Shape
-	"rounded-xl",
 	// Borders
 	"border",
 	"border-border-primary",
 	// Background & Colors
 	"bg-bg-primary",
 	"text-text-primary",
-	// Spacing
-	"py-6",
 	// Shadow
 	"shadow-sm",
 );
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+// Default card styles
+const defaultCardStyles = cn(
+	baseCardStyles,
+	// Shape
+	"rounded-xl",
+	// Spacing
+	"py-6",
+);
+
+// Round card styles
+const roundCardStyles = cn(
+	baseCardStyles,
+	// Shape
+	"rounded-3xl",
+	// Spacing
+	"px-8",
+	"py-6",
+);
+
+// Round white card styles (no border, no shadow)
+const roundWhiteCardStyles = cn(
+	// Layout
+	"flex",
+	"flex-col",
+	"gap-6",
+	// Background & Colors
+	"bg-bg-primary",
+	"text-text-primary",
+	// Shape
+	"rounded-3xl",
+	// Spacing
+	"px-8",
+	"py-6",
+);
+
+type CardVariant = "default" | "round" | "round-white";
+
+interface CardProps extends React.ComponentProps<"div"> {
+	variant?: CardVariant;
+}
+
+function Card({ className, variant = "default", ...props }: CardProps) {
+	const variantStyles =
+		variant === "round"
+			? roundCardStyles
+			: variant === "round-white"
+				? roundWhiteCardStyles
+				: defaultCardStyles;
+
 	return (
-		<div data-slot="card" className={cn(cardStyles, className)} {...props} />
+		<div data-slot="card" className={cn(variantStyles, className)} {...props} />
 	);
 }
 

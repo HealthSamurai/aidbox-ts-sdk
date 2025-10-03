@@ -15,14 +15,28 @@ import { Label } from "#shadcn/components/ui/label";
 
 const meta = {
 	title: "Component/Card",
-} satisfies Meta;
+	component: Card,
+	parameters: {
+		layout: "centered",
+	},
+	argTypes: {
+		variant: {
+			control: { type: "select" },
+			options: ["default", "round", "round-white"],
+			description: "Card variant",
+		},
+	},
+} satisfies Meta<typeof Card>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Demo = {
-	render: () => (
-		<Card className="w-full max-w-sm">
+	args: {
+		variant: "default",
+	},
+	render: ({ variant }) => (
+		<Card variant={variant || "default"} className="w-full max-w-sm">
 			<CardHeader>
 				<CardTitle>Login to your account</CardTitle>
 				<CardDescription>
