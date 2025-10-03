@@ -31,6 +31,7 @@ const segmentControlItemClass = cn(
 	"text-white/80",
 	"peer-checked:bg-bg-primary",
 	"peer-checked:text-text-secondary",
+	"select-none",
 );
 
 const SegmentControlItem = ({ children, value }: SegmentControlItemProps) => {
