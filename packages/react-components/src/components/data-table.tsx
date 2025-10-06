@@ -19,11 +19,13 @@ import {
 export interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
+	stickyHeader?: boolean;
 }
 
 export function DataTable<TData, TValue>({
 	columns,
 	data,
+	stickyHeader = false,
 }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
@@ -34,8 +36,8 @@ export function DataTable<TData, TValue>({
 	});
 
 	return (
-		<div className="overflow-hidden w-full">
-			<Table className="w-full">
+		<div className="overflow-hidden w-full h-full">
+			<Table className="relative w-full h-full">
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
@@ -43,7 +45,7 @@ export function DataTable<TData, TValue>({
 								return (
 									<TableHead
 										key={header.id}
-										className="relative group border"
+										className={`relative group border ${stickyHeader ? "sticky top-0 z-10 bg-background" : ""}`}
 										style={{
 											width:
 												header.column.getIndex() ===

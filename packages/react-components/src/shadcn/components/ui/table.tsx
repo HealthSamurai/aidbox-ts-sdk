@@ -3,7 +3,12 @@ import type * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 
 // Table container styles
-const tableContainerStyles = cn("relative", "w-full", "overflow-x-auto");
+const tableContainerStyles = cn(
+	"relative",
+	"h-full",
+	"w-full",
+	"overflow-auto",
+);
 
 // Table styles
 const tableStyles = cn("w-full", "caption-bottom", "text-sm");
