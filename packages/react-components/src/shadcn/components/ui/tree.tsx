@@ -48,7 +48,7 @@ function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
 	const mergedStyle = {
 		...propStyle,
 		"--tree-indent": `${indent}px`,
-		"--border": `var(--color-fg-disabled)`,
+		"--border": `var(--color-border-separator)`,
 	} as React.CSSProperties;
 
 	return (
