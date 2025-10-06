@@ -22,6 +22,7 @@ const treeItemStyle = cn(
 	"before:absolute",
 	"before:inset-0",
 	"before:-ms-1",
+	"before:-z-20",
 	"before:bg-[repeating-linear-gradient(to_right,transparent_0,transparent_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)-1px),var(--border)_calc(var(--tree-indent)))]",
 );
 
@@ -59,7 +60,7 @@ const customClickBehavior: FeatureImplementation = {
 	},
 };
 
-const indent = 24;
+const indent = 22;
 
 function TreeView<T>({
 	rootItemId,
@@ -73,6 +74,7 @@ function TreeView<T>({
 	zebra,
 	horizontalLines,
 	hideChevron,
+	itemLabelClassFn,
 }: {
 	rootItemId: string;
 	selectedItemId?: string;
@@ -90,6 +92,7 @@ function TreeView<T>({
 	zebra?: boolean;
 	horizontalLines?: boolean;
 	hideChevron?: boolean;
+	itemLabelClassFn?: (item: ItemInstance<TreeViewItem<T>>) => string;
 }) {
 	"use no memo";
 	const [state, setState] = React.useState<Partial<TreeState<TreeViewItem<T>>>>(
@@ -164,7 +167,7 @@ function TreeView<T>({
 						<TreeItemLabel
 							hideChevron={hideChevron ?? false}
 							disableHover={disableHover ?? false}
-							className={treeItemLabelStyle}
+							className={cn(treeItemLabelStyle, itemLabelClassFn?.(item))}
 							onClick={() => onSelectItem?.(item)}
 							horizontalLines={horizontalLines ?? false}
 						>
