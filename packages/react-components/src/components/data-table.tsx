@@ -27,6 +27,7 @@ export function DataTable<TData, TValue>({
 	data,
 	stickyHeader = false,
 }: DataTableProps<TData, TValue>) {
+	"use no memo";
 	const table = useReactTable({
 		data,
 		columns,
