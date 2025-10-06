@@ -91,6 +91,7 @@ function TreeView<T>({
 	horizontalLines?: boolean;
 	hideChevron?: boolean;
 }) {
+	"use no memo";
 	const [state, setState] = React.useState<Partial<TreeState<TreeViewItem<T>>>>(
 		{},
 	);
@@ -136,6 +137,15 @@ function TreeView<T>({
 			};
 		});
 	}, [selectedItemId]);
+
+	useEffect(() => {
+		setState((currentState) => {
+			return {
+				...currentState,
+				expandedItems: expandedItemIds ?? [],
+			};
+		});
+	}, [expandedItemIds]);
 
 	return (
 		<Tree tree={tree} indent={indent}>
