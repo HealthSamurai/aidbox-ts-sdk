@@ -229,17 +229,23 @@ const customItemView = (item: ItemInstance<TreeViewItem<ItemMeta>>) => {
 			</div>
 			<div className="gap-2 hidden group-hover/tree-item-label:flex items-center">
 				{isRootLevel && (
-					<Button variant="link" size="small" className="p-0 h-4">
-						{item.getItemData()?.meta?.pinned ? <PinIcon /> : <Pin />}
+					<Button variant="link" size="small" className="p-0 h-4" asChild>
+						<span>
+							{item.getItemData()?.meta?.pinned ? <PinIcon /> : <Pin />}
+						</span>
 					</Button>
 				)}
 				{hasChildren && (
-					<Button variant="link" size="small" className="p-0 h-4">
-						<Plus />
+					<Button variant="link" size="small" className="p-0 h-4" asChild>
+						<span>
+							<Plus />
+						</span>
 					</Button>
 				)}
-				<Button variant="link" size="small" className="p-0 h-4">
-					<Ellipsis />
+				<Button variant="link" size="small" className="p-0 h-4" asChild>
+					<span>
+						<Ellipsis />
+					</span>
 				</Button>
 			</div>
 		</div>
