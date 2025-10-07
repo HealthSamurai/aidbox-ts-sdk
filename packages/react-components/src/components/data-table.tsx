@@ -38,7 +38,7 @@ export function DataTable<TData, TValue>({
 
 	return (
 		<div className="overflow-hidden w-full h-full">
-			<Table className="relative w-full">
+			<Table className="relative border-spacing-0 border-separate w-full">
 				<TableHeader>
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
@@ -46,7 +46,7 @@ export function DataTable<TData, TValue>({
 								return (
 									<TableHead
 										key={header.id}
-										className={`relative group border ${stickyHeader ? "sticky top-0 z-10 bg-background" : ""}`}
+										className={`relative group border ${stickyHeader ? "sticky top-0 z-10 bg-bg-secondary text-elements-assistive" : ""}`}
 										style={{
 											width:
 												header.column.getIndex() ===
