@@ -1,10 +1,17 @@
 import {
+	ChevronDownIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	MoreHorizontalIcon,
 } from "lucide-react";
 import type * as React from "react";
 import { type Button, buttonVariants } from "#shadcn/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "#shadcn/components/ui/dropdown-menu";
 import { cn } from "#shadcn/lib/utils";
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
@@ -84,7 +91,6 @@ function PaginationPrevious({
 			{...props}
 		>
 			<ChevronLeftIcon />
-			<span className="hidden sm:block">Previous</span>
 		</PaginationLink>
 	);
 }
@@ -100,7 +106,6 @@ function PaginationNext({
 			className={cn("gap-1", "px-2.5", "sm:pr-2.5", className)}
 			{...props}
 		>
-			<span className="hidden sm:block">Next</span>
 			<ChevronRightIcon />
 		</PaginationLink>
 	);
@@ -129,6 +134,51 @@ function PaginationEllipsis({
 	);
 }
 
+type PaginationPageSizeSelectorProps = {
+	pageSize: number;
+	onPageSizeChange: (pageSize: number) => void;
+	pageSizeOptions?: number[];
+	className?: string;
+};
+
+function PaginationPageSizeSelector({
+	pageSize,
+	onPageSizeChange,
+	pageSizeOptions = [10, 20, 50, 100],
+	className,
+}: PaginationPageSizeSelectorProps) {
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger
+				className={cn(
+					"flex",
+					"items-center",
+					"gap-1",
+					"text-sm",
+					"text-text-secondary",
+					"hover:text-text-primary",
+					"outline-none",
+					className,
+				)}
+				data-slot="pagination-page-size-selector"
+			>
+				{pageSize} / Page
+				<ChevronDownIcon className="size-4" />
+			</DropdownMenuTrigger>
+			<DropdownMenuContent>
+				{pageSizeOptions.map((option) => (
+					<DropdownMenuItem
+						key={option}
+						onClick={() => onPageSizeChange(option)}
+					>
+						{option}
+					</DropdownMenuItem>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
+
 export {
 	Pagination,
 	PaginationContent,
@@ -137,4 +187,5 @@ export {
 	PaginationPrevious,
 	PaginationNext,
 	PaginationEllipsis,
+	PaginationPageSizeSelector,
 };
