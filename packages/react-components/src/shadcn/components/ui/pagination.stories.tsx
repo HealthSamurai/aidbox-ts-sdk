@@ -7,6 +7,7 @@ import {
 	PaginationItem,
 	PaginationLink,
 	PaginationNext,
+	PaginationPageSizeSelector,
 	PaginationPrevious,
 } from "#shadcn/components/ui/pagination";
 
@@ -20,6 +21,11 @@ type Story = StoryObj<typeof meta>;
 export const Demo = {
 	render: () => (
 		<Pagination>
+			<PaginationPageSizeSelector
+				pageSize={10}
+				onPageSizeChange={(_: number) => {}}
+				className="p-2"
+			/>
 			<PaginationContent>
 				<PaginationItem>
 					<PaginationPrevious href="#" />
@@ -33,10 +39,10 @@ export const Demo = {
 					</PaginationLink>
 				</PaginationItem>
 				<PaginationItem>
-					<PaginationLink href="#">3</PaginationLink>
+					<PaginationEllipsis />
 				</PaginationItem>
 				<PaginationItem>
-					<PaginationEllipsis />
+					<PaginationLink href="#">3</PaginationLink>
 				</PaginationItem>
 				<PaginationItem>
 					<PaginationNext href="#" />
