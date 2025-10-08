@@ -6,6 +6,8 @@ import type {
 	TreeState,
 } from "@headless-tree/core";
 import {
+	createOnDropHandler,
+	dragAndDropFeature,
 	hotkeysCoreFeature,
 	renamingFeature,
 	selectionFeature,
@@ -75,6 +77,8 @@ function TreeView<T>({
 	horizontalLines,
 	hideChevron,
 	itemLabelClassFn,
+	canReorder,
+	onDropFn,
 }: {
 	rootItemId: string;
 	selectedItemId?: string;
@@ -93,6 +97,12 @@ function TreeView<T>({
 	horizontalLines?: boolean;
 	hideChevron?: boolean;
 	itemLabelClassFn?: (item: ItemInstance<TreeViewItem<T>>) => string;
+	canReorder?: boolean;
+	onDropFn?: (
+		tree: TreeInstance<TreeViewItem<T>>,
+		item: ItemInstance<TreeViewItem<T>>,
+		newChildren: string[],
+	) => void;
 }) {
 	"use no memo";
 	const [state, setState] = React.useState<Partial<TreeState<TreeViewItem<T>>>>(
@@ -122,7 +132,12 @@ function TreeView<T>({
 			selectionFeature,
 			customClickBehavior,
 			renamingFeature,
+			dragAndDropFeature,
 		],
+		canReorder: canReorder ?? false,
+		onDrop: createOnDropHandler((item, newChildren) => {
+			onDropFn?.(tree, item, newChildren);
+		}),
 	};
 
 	const tree = useTree<TreeViewItem<T>>(treeConfig);
@@ -178,6 +193,10 @@ function TreeView<T>({
 					</TreeItem>
 				);
 			})}
+			<div
+				style={tree.getDragLineStyle()}
+				className="h-px bg-bg-link z-100 mx-4"
+			/>
 		</Tree>
 	);
 }
