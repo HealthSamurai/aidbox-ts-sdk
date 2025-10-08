@@ -177,7 +177,8 @@ function TreeItemLabel<T>({
 				"group/tree-item-label relative select-text in-focus-visible:ring-ring/50 bg-background text-text-secondary in-data-[drag-target=true]:bg-accent flex items-center gap-2 pr-2 pl-2.5 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-2.5 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-400/20! [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				!disableHover &&
 					"in-data-[selected=true]:bg-bg-secondary in-data-[selected=true]:text-text-primary",
-				item.isFolder() &&
+				!disableHover &&
+					item.isFolder() &&
 					"hover:bg-bg-secondary hover:text-text-primary cursor-pointer",
 				disableHover && "text-text-primary",
 				className,
