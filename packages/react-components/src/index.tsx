@@ -60,3 +60,4 @@ export * from "./shadcn/components/ui/tooltip";
 export * from "./shadcn/components/ui/tree";
 // Hooks
 export * from "./shadcn/hooks/use-mobile";
+export * from "./shadcn/lib/utils";

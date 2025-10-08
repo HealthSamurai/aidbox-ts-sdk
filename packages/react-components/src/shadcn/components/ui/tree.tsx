@@ -131,8 +131,15 @@ function TreeItem<T = any>({
 				}
 				aria-expanded={item.isExpanded()}
 				{...Object.fromEntries(
-					Object.entries(otherProps).filter(([key]) => key !== "onClick"),
+					Object.entries(otherProps).filter(
+						([key]) => key !== "onClick" && key !== "onDragStart",
+					),
 				)}
+				onDragStart={(e) => {
+					if ((e.target as HTMLElement).dataset.slot === "drag-handle") {
+						item.getProps().onDragStart(e);
+					}
+				}}
 			>
 				{children}
 			</Comp>
