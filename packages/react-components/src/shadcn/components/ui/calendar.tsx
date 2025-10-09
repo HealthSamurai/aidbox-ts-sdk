@@ -1,4 +1,3 @@
-"use client";
 import {
 	ChevronDownIcon,
 	ChevronLeftIcon,
@@ -12,6 +11,7 @@ import {
 } from "react-day-picker";
 import { Button, buttonVariants } from "#shadcn/components/ui/button";
 import { cn } from "#shadcn/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 function Calendar({
 	className,
@@ -156,6 +156,25 @@ function Calendar({
 					return (
 						<ChevronDownIcon className={cn("size-4", className)} {...props} />
 					);
+				},
+				Dropdown: ({ className, ...props }) => {
+					return (
+					  <Select
+						defaultValue={props.value?.toString() || ''}
+						onValueChange={(val) => props.onChange?.({ target: { value: val } } as any)}
+					  >
+						<SelectTrigger className="relative w-full" size={"regular"}>
+						  <SelectValue />
+						</SelectTrigger>
+						<SelectContent className="max-h-60 overflow-auto" side="bottom" sideOffset={4}>
+						  {props.options?.map((opt) => (
+							<SelectItem key={opt.value} value={opt.value.toString()}>
+							  {opt.label}
+							</SelectItem>
+						  ))}
+						</SelectContent>
+					  </Select>
+					)
 				},
 				DayButton: CalendarDayButton,
 				WeekNumber: ({ children, ...props }) => {
