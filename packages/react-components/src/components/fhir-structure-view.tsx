@@ -104,7 +104,7 @@ const customItemView = (item: ItemInstance<TreeViewItem<FhirStructure>>) => {
 	const binding = item.getItemData()?.meta?.binding;
 	const vsCoordinate = item.getItemData()?.meta?.vsCoordinate;
 	return (
-		<div className="flex items-start gap-2">
+		<div className="flex items-start gap-2 text-xs">
 			<div className={customItemFieldNameClass}>
 				{FiledIcon(item)}
 				{fieldName}
@@ -205,8 +205,8 @@ const FhirStructureView = ({
 
 	return (
 		<div className="h-fit w-fit min-h-0 min-w-0">
-			<div className="flex items-center gap-2 font-semibold text-text-secondary border-b py-2 bg-bg-primary sticky top-0 z-100">
-				<div className="min-w-[260px] w-[260px] ml-9">Name</div>
+			<div className="flex items-center gap-2 font-semibold text-xs text-text-secondary border-b py-2 bg-bg-primary sticky top-0 z-20">
+				<div className="min-w-[260px] w-[260px] ml-4">Name</div>
 				<div className="min-w-[60px] w-[60px]">Flags</div>
 				<div className="min-w-[50px] w-[50px]">Card.</div>
 				<div className="min-w-[200px] w-[200px]">Type</div>
