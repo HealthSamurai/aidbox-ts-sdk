@@ -1,4 +1,4 @@
-export const PlayIcon = () => {
+export function PlayIcon() {
 	return (
 		<svg
 			width="16"
@@ -16,9 +16,9 @@ export const PlayIcon = () => {
 			/>
 		</svg>
 	);
-};
+}
 
-export const PinIcon = () => {
+export function PinIcon() {
 	return (
 		<svg
 			width="16"
@@ -42,9 +42,9 @@ export const PinIcon = () => {
 			/>
 		</svg>
 	);
-};
+}
 
-export const ResourceIcon = () => {
+export function ResourceIcon() {
 	return (
 		<svg
 			width="16"
@@ -92,9 +92,9 @@ export const ResourceIcon = () => {
 			/>
 		</svg>
 	);
-};
+}
 
-export const BackoneElementIcon = () => {
+export function BackoneElementIcon() {
 	return (
 		<svg
 			width="16"
@@ -114,9 +114,9 @@ export const BackoneElementIcon = () => {
 			/>
 		</svg>
 	);
-};
+}
 
-export const TypCodeIcon = () => {
+export function TypCodeIcon() {
 	return (
 		<svg
 			width="16"
@@ -164,9 +164,9 @@ export const TypCodeIcon = () => {
 			/>
 		</svg>
 	);
-};
+}
 
-export const ReferenceIcon = () => {
+export function ReferenceIcon() {
 	return (
 		<svg
 			width="16"
@@ -200,9 +200,9 @@ export const ReferenceIcon = () => {
 			/>
 		</svg>
 	);
-};
+}
 
-export const ComplexTypeIcon = () => {
+export function ComplexTypeIcon() {
 	return (
 		<svg
 			width="16"
@@ -248,9 +248,9 @@ export const ComplexTypeIcon = () => {
 			</defs>
 		</svg>
 	);
-};
+}
 
-export const UnionIcon = () => {
+export function UnionIcon() {
 	return (
 		<svg
 			width="16"
@@ -284,4 +284,4 @@ export const UnionIcon = () => {
 			</g>
 		</svg>
 	);
-};
+}

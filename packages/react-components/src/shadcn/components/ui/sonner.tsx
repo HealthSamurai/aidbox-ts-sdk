@@ -9,7 +9,7 @@ import {
 } from "sonner";
 import { Button, type buttonVariants } from "./button";
 
-const Toaster = ({ ...props }: ToasterProps) => {
+function Toaster({ ...props }: ToasterProps) {
 	const { theme = "system" } = useTheme();
 
 	return (
@@ -28,10 +28,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
 			{...props}
 		/>
 	);
-};
+}
 
 // Custom toast wrapper with our buttons
-const toast = (
+function toast(
 	message: string,
 	options?: {
 		description?: string;
@@ -46,7 +46,7 @@ const toast = (
 			variant?: VariantProps<typeof buttonVariants>["variant"];
 		};
 	},
-) => {
+) {
 	return sonnerToast(message, {
 		...options,
 		action: options?.action ? (
@@ -68,6 +68,6 @@ const toast = (
 			</Button>
 		) : undefined,
 	});
-};
+}
 
 export { Toaster, toast };
