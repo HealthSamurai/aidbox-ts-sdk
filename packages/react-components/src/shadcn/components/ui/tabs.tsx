@@ -90,7 +90,7 @@ const tabsVariants = cva("", {
 		variant: {
 			browser: cn(
 				// Tabs
-				`flex-row 
+				`flex-row
 				 items-center
 				 h-10
 				 `,
@@ -98,7 +98,7 @@ const tabsVariants = cva("", {
 				`**:data-[slot=tabs-list]:overflow-x-auto
 				 **:data-[slot=tabs-list]:divide-x`,
 				// TabsTrigger
-				`**:data-[slot=tabs-trigger]:max-w-80 
+				`**:data-[slot=tabs-trigger]:max-w-80
 				 **:data-[slot=tabs-trigger]:w-60
 				 **:data-[slot=tabs-trigger]:min-w-40
 				 **:data-[slot=tabs-trigger]:data-[state=inactive]:text-text-secondary
@@ -111,19 +111,28 @@ const tabsVariants = cva("", {
 	},
 });
 
-function Tabs({
+type TabsProps<T extends string> = Omit<
+	React.ComponentProps<typeof TabsPrimitive.Root> &
+		VariantProps<typeof tabsVariants>,
+	"value" | "defaultValue" | "onValueChange"
+> & {
+	value?: T;
+	defaultValue?: T;
+	onValueChange?: (value: T) => void;
+};
+
+function Tabs<T extends string = string>({
 	className,
 	variant,
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.Root> &
-	VariantProps<typeof tabsVariants>) {
-	return (
-		<TabsPrimitive.Root
-			data-slot="tabs"
-			className={cn(baseTabsStyles, tabsVariants({ variant }), className)}
-			{...props}
-		/>
-	);
+}: TabsProps<T>) {
+	const tabProps = {
+		"data-slot": "tabs",
+		className: cn(baseTabsStyles, tabsVariants({ variant }), className),
+		...props,
+		onValueChange: (value: string) => props.onValueChange?.(value as T),
+	};
+	return <TabsPrimitive.Root {...tabProps} />;
 }
 
 export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
