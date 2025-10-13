@@ -34,7 +34,7 @@ const segmentControlItemClass = cn(
 	"select-none",
 );
 
-const SegmentControlItem = ({ children, value }: SegmentControlItemProps) => {
+function SegmentControlItem({ children, value }: SegmentControlItemProps) {
 	const { defaultValue, onValueChange, name } = useContext(
 		SegmentControlContext,
 	);
@@ -55,14 +55,14 @@ const SegmentControlItem = ({ children, value }: SegmentControlItemProps) => {
 			</label>
 		</div>
 	);
-};
+}
 
-const SegmentControl = ({
+function SegmentControl({
 	children,
 	defaultValue,
 	onValueChange,
 	name,
-}: SegmentControlProps & { children?: ReactNode }) => {
+}: SegmentControlProps & { children?: ReactNode }) {
 	const contextValue: SegmentControlContextType = {
 		...(defaultValue !== undefined && { defaultValue }),
 		...(onValueChange !== undefined && { onValueChange }),
@@ -76,6 +76,6 @@ const SegmentControl = ({
 			</div>
 		</SegmentControlContext.Provider>
 	);
-};
+}
 
 export { SegmentControl, SegmentControlItem };

@@ -167,7 +167,7 @@ export const Default: Story = {
 	render: (args) => <TreeView {...args} />,
 };
 
-const customItemView = (item: ItemInstance<TreeViewItem<ItemMeta>>) => {
+function customItemView(item: ItemInstance<TreeViewItem<ItemMeta>>) {
 	const isRootLevel = item.getItemMeta().level === 0;
 	const hasChildren = item.getItemData()?.children !== undefined;
 	const requestMethhod = item.getItemData()?.meta?.method;
@@ -250,7 +250,7 @@ const customItemView = (item: ItemInstance<TreeViewItem<ItemMeta>>) => {
 			</div>
 		</div>
 	);
-};
+}
 
 export const CustomItemView: Story = {
 	args: {

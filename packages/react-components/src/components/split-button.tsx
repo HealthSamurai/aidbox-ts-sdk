@@ -10,8 +10,8 @@ const splitButtonStyles = cn(
 	"*:data-[slot=dropdown-menu-trigger]:border-l-0",
 );
 
-const SplitButton = ({ children }: { children: React.ReactNode }) => {
+function SplitButton({ children }: { children: React.ReactNode }) {
 	return <div className={splitButtonStyles}>{children}</div>;
-};
+}
 
 export { SplitButton };

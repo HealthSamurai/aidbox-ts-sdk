@@ -141,7 +141,7 @@ export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
 	);
 }
 
-const horizontalScroll = (event: React.WheelEvent) => {
+function horizontalScroll(event: React.WheelEvent) {
 	const mode = event.deltaMode;
 	let deltaPx = 0;
 
@@ -159,12 +159,12 @@ const horizontalScroll = (event: React.WheelEvent) => {
 		left: newScrollLeft,
 		behavior: "smooth",
 	});
-};
+}
 
-const performHorizontalScroll = (
+function performHorizontalScroll(
 	tabsListRef: React.RefObject<HTMLDivElement | null>,
 	direction: "left" | "right",
-) => {
+) {
 	if (!tabsListRef.current) return;
 	const scrollAmount = 160;
 	let newScrollLeft = tabsListRef.current.scrollLeft;
@@ -186,7 +186,7 @@ const performHorizontalScroll = (
 		left: newScrollLeft,
 		behavior: "smooth",
 	});
-};
+}
 
 type EdgeScrollPosition = "touch" | "depart";
 type FlowType = "overflow" | "underflow";

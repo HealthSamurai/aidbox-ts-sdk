@@ -40,7 +40,7 @@ type FhirStructure = {
 	vsCoordinate?: Coordinate;
 };
 
-const FiledIcon = (item: ItemInstance<TreeViewItem<FhirStructure>>) => {
+function FiledIcon(item: ItemInstance<TreeViewItem<FhirStructure>>) {
 	const filedType = item.getItemData()?.meta?.type;
 
 	switch (filedType) {
@@ -76,7 +76,7 @@ const FiledIcon = (item: ItemInstance<TreeViewItem<FhirStructure>>) => {
 		default:
 			return <CustomIcon.ComplexTypeIcon />;
 	}
-};
+}
 
 const customItemFieldNameClass = cn(
 	"flex",
@@ -89,7 +89,7 @@ const customItemFieldNameClass = cn(
 	"in-data-[folder=true]:min-w-[calc(260px-var(--tree-padding))]",
 );
 
-const customItemView = (item: ItemInstance<TreeViewItem<FhirStructure>>) => {
+function customItemView(item: ItemInstance<TreeViewItem<FhirStructure>>) {
 	const fieldName = item.getItemData()?.name;
 	const cardinalityMin = item.getItemData()?.meta?.min;
 	const cardinalityMax = item.getItemData()?.meta?.max;
@@ -192,13 +192,13 @@ const customItemView = (item: ItemInstance<TreeViewItem<FhirStructure>>) => {
 			</div>
 		</div>
 	);
-};
+}
 
-const FhirStructureView = ({
+function FhirStructureView({
 	tree,
 }: {
 	tree: Record<string, TreeViewItem<FhirStructure>>;
-}) => {
+}) {
 	const expandedItemIds = React.useMemo(() => {
 		return Object.keys(tree ?? {});
 	}, [tree]);
@@ -224,6 +224,6 @@ const FhirStructureView = ({
 			/>
 		</div>
 	);
-};
+}
 
 export { FhirStructureView, type FhirStructure };
