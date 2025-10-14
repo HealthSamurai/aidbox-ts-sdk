@@ -6,3 +6,4 @@ packages/react-components/src/shadcn/components/ui/input+desc.tsx
 .vscode/settings.json
 packages/react-components/src/aidbox-ui.code-workspace
 CLAUDE.local.md
+COMPONENT_PATTERNS.md
