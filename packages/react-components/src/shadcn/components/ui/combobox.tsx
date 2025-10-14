@@ -56,17 +56,14 @@ export function Combobox({
 
 	const selectedOption = options.find((option) => option.value === value);
 
-	// Reset search when closing and auto-focus when opening
-	React.useEffect(() => {
-		if (!open) {
+	const changeOpen = (newOpen: boolean) => {
+		if (!newOpen) {
 			setSearchValue("");
 		} else {
-			// Auto-focus on search input when opening
-			setTimeout(() => {
-				inputRef.current?.focus();
-			}, 0);
+			inputRef.current?.focus();
 		}
-	}, [open]);
+		setOpen(newOpen);
+	};
 
 	return (
 		<Select
@@ -74,7 +71,7 @@ export function Combobox({
 			{...(onValueChange && { onValueChange })}
 			disabled={disabled}
 			open={open}
-			onOpenChange={setOpen}
+			onOpenChange={changeOpen}
 		>
 			<SelectTrigger className={className}>
 				<SelectValue placeholder={placeholder}>
@@ -99,7 +96,7 @@ export function Combobox({
 								data-state={value === option.value ? "checked" : undefined}
 								onSelect={(currentValue) => {
 									onValueChange?.(currentValue);
-									setOpen(false);
+									changeOpen(false);
 								}}
 							>
 								{option.label}
@@ -176,19 +173,17 @@ export function MultiCombobox({
 	};
 
 	// Reset search when closing and auto-focus when opening
-	React.useEffect(() => {
-		if (!open) {
+	const changeOpen = (newOpen: boolean) => {
+		if (!newOpen) {
 			setSearchValue("");
 		} else {
-			// Auto-focus on search input when opening
-			setTimeout(() => {
-				inputRef.current?.focus();
-			}, 0);
+			inputRef.current?.focus();
 		}
-	}, [open]);
+		setOpen(newOpen);
+	};
 
 	return (
-		<Select open={open} onOpenChange={setOpen}>
+		<Select open={open} onOpenChange={changeOpen}>
 			<SelectTrigger
 				className={`${className} ${displayText ? "!text-text-primary" : undefined}`}
 				disabled={disabled}
