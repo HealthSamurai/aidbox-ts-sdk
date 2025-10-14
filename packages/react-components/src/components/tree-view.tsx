@@ -3,7 +3,7 @@ import type {
 	ItemInstance,
 	TreeConfig,
 	TreeInstance,
-	TreeState,
+	Updater,
 } from "@headless-tree/core";
 import {
 	createOnDropHandler,
@@ -14,7 +14,7 @@ import {
 	syncDataLoaderFeature,
 } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { Tree, TreeItem, TreeItemLabel } from "#shadcn/components/ui/tree";
 import { cn } from "#shadcn/lib/utils.js";
 
@@ -45,45 +45,46 @@ interface TreeViewItem<T> {
 
 const customClickBehavior: FeatureImplementation = {
 	itemInstance: {
-		getProps: ({ tree, item, prev }) => ({
-			...prev?.(),
-			onClick: () => {
-				item.primaryAction();
-				if (item.isExpanded()) {
-					item.collapse();
-				} else {
-					item.expand();
-				}
-				if (!item.isFolder()) {
-					tree.setSelectedItems([item.getItemMeta().itemId]);
-				}
-			},
-		}),
+		getProps: ({ item, prev }) => {
+			return {
+				...prev?.(),
+				onClick: () => {
+					item.setFocused();
+					item.primaryAction();
+				},
+			};
+		},
 	},
 };
 
 const indent = 22;
 
-function TreeView<T>({
-	rootItemId,
-	items,
-	selectedItemId,
-	expandedItemIds,
-	onSelectItem,
-	customItemView,
-	onRename,
-	disableHover,
-	zebra,
-	horizontalLines,
-	hideChevron,
-	itemLabelClassFn,
-	canReorder,
-	onDropFn,
-}: {
+type ExpansionPropsUncontrolled = {
+	defaultExpandedItems?: string[];
+	expandedItems?: never;
+	onExpandedItemsChange?: never;
+};
+type ExpansionPropsControlled = {
+	defaultExpandedItems?: never;
+	expandedItems: string[];
+	onExpandedItemsChange: (items: string[]) => void;
+};
+type ExpansionProps = ExpansionPropsUncontrolled | ExpansionPropsControlled;
+
+type FocusPropsUncontrolled = {
+	defaultFocusedItem?: string;
+	focusedItem?: never;
+	onFocusedItemChange?: never;
+};
+type FocusPropsControlled = {
+	defaultFocusedItem?: never;
+	focusedItem: string | null;
+	onFocusedItemChange: (item: string | null) => void;
+};
+type FocusProps = FocusPropsUncontrolled | FocusPropsControlled;
+
+type TreeViewProps<T> = {
 	rootItemId: string;
-	selectedItemId?: string;
-	expandedItemIds?: string[];
-	onSelectItem?: (item: ItemInstance<TreeViewItem<T>>) => void;
 	items: Record<string, TreeViewItem<T>>;
 	customItemView?: (
 		item: ItemInstance<TreeViewItem<T>>,
@@ -103,18 +104,68 @@ function TreeView<T>({
 		item: ItemInstance<TreeViewItem<T>>,
 		newChildren: string[],
 	) => void;
-}) {
+} & ExpansionProps &
+	FocusProps;
+
+function TreeView<T>({
+	rootItemId,
+	items,
+	defaultFocusedItem,
+	focusedItem,
+	onFocusedItemChange,
+	defaultExpandedItems,
+	expandedItems,
+	onExpandedItemsChange,
+	customItemView,
+	onRename,
+	disableHover,
+	zebra,
+	horizontalLines,
+	hideChevron,
+	itemLabelClassFn,
+	canReorder,
+	onDropFn,
+}: TreeViewProps<T>) {
 	"use no memo";
-	const [state, setState] = React.useState<Partial<TreeState<TreeViewItem<T>>>>(
-		{},
-	);
+
+	const initialExpandedItems = defaultExpandedItems ?? expandedItems;
+	const initialFocusedItem = defaultFocusedItem ?? focusedItem;
+
+	const setExpandedItems =
+		expandedItems !== undefined && onExpandedItemsChange !== undefined
+			? (updater: Updater<string[]>) => {
+					const newVal =
+						updater instanceof Function ? updater(expandedItems) : updater;
+
+					onExpandedItemsChange(newVal);
+				}
+			: undefined;
+
+	const setFocusedItem =
+		focusedItem !== undefined && onFocusedItemChange !== undefined
+			? (updater: Updater<string | null>) => {
+					const newVal =
+						updater instanceof Function ? updater(focusedItem) : updater;
+
+					onFocusedItemChange(newVal);
+				}
+			: undefined;
+
 	const treeConfig: TreeConfig<TreeViewItem<T>> = {
 		initialState: {
-			selectedItems: selectedItemId ? [selectedItemId] : [],
-			expandedItems: expandedItemIds ?? [],
+			...(initialExpandedItems !== undefined
+				? { expandedItems: initialExpandedItems }
+				: {}),
+			...(initialFocusedItem !== undefined
+				? { focusedItem: initialFocusedItem }
+				: {}),
 		},
-		state,
-		setState,
+		state: {
+			...(expandedItems !== undefined ? { expandedItems } : {}),
+			...(focusedItem !== undefined ? { focusedItem } : {}),
+		},
+		...(setExpandedItems !== undefined ? { setExpandedItems } : {}),
+		...(setFocusedItem !== undefined ? { setFocusedItem } : {}),
 		indent,
 		rootItemId: rootItemId,
 		isItemFolder: (item: ItemInstance<TreeViewItem<T>>) =>
@@ -130,9 +181,9 @@ function TreeView<T>({
 			syncDataLoaderFeature,
 			hotkeysCoreFeature,
 			selectionFeature,
-			customClickBehavior,
 			renamingFeature,
 			dragAndDropFeature,
+			customClickBehavior,
 		],
 		canReorder: canReorder ?? false,
 		onDrop: createOnDropHandler((item, newChildren) => {
@@ -142,28 +193,11 @@ function TreeView<T>({
 
 	const tree = useTree<TreeViewItem<T>>(treeConfig);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We must have explicit sync here
-	useEffect(() => {
+	const [prevItems, setPrevItems] = React.useState<null | typeof items>(null);
+	if (prevItems !== items) {
 		tree.rebuildTree();
-	}, [items]);
-
-	useEffect(() => {
-		setState((currentState) => {
-			return {
-				...currentState,
-				selectedItems: selectedItemId ? [selectedItemId] : [],
-			};
-		});
-	}, [selectedItemId]);
-
-	useEffect(() => {
-		setState((currentState) => {
-			return {
-				...currentState,
-				expandedItems: expandedItemIds ?? [],
-			};
-		});
-	}, [expandedItemIds]);
+		setPrevItems(items);
+	}
 
 	return (
 		<Tree tree={tree} indent={indent}>
@@ -183,7 +217,7 @@ function TreeView<T>({
 							hideChevron={hideChevron ?? false}
 							disableHover={disableHover ?? false}
 							className={cn(treeItemLabelStyle, itemLabelClassFn?.(item))}
-							onClick={() => onSelectItem?.(item)}
+							// onClick={() => onSelectItem?.(item)}
 							horizontalLines={horizontalLines ?? false}
 						>
 							{customItemView

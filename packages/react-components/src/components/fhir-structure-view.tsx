@@ -213,6 +213,8 @@ function FhirStructureView({
 				<div className="min-w-[200px] w-[200px]">Description</div>
 			</div>
 			<TreeView
+				focusedItem={null}
+				onFocusedItemChange={() => {}}
 				hideChevron={true}
 				horizontalLines={true}
 				disableHover={true}
@@ -220,7 +222,7 @@ function FhirStructureView({
 				rootItemId="root"
 				items={tree}
 				customItemView={customItemView}
-				expandedItemIds={expandedItemIds}
+				defaultExpandedItems={expandedItemIds}
 			/>
 		</div>
 	);

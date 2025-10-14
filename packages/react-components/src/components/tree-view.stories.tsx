@@ -160,9 +160,9 @@ export const Default: Story = {
 	args: {
 		items: items,
 		rootItemId: "root",
-		selectedItemId: "request9",
-		expandedItemIds: ["collection3"],
-		onSelectItem: (a) => action("onSelectItem")(a),
+		focusedItem: "request9",
+		defaultExpandedItems: ["collection3"],
+		onFocusedItemChange: (a) => action("onSelectItem")(a),
 	},
 	render: (args) => <TreeView {...args} />,
 };
@@ -256,9 +256,9 @@ export const CustomItemView: Story = {
 	args: {
 		items: items,
 		rootItemId: "root",
-		selectedItemId: "request11",
-		expandedItemIds: ["collection3", "collection4"],
-		onSelectItem: (a) => action("onSelectItem")(a.getItemData()?.name),
+		focusedItem: "request11",
+		defaultExpandedItems: ["collection3", "collection4"],
+		onFocusedItemChange: (a) => action("onSelectItem")(a ? items[a]?.name : a),
 		customItemView: customItemView,
 	},
 	render: (args) => <TreeView {...args} />,
