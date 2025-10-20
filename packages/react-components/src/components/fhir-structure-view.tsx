@@ -15,16 +15,16 @@ type PackageSpec = {
 };
 
 type Coordinate = {
-	id: string;
-	packageSpec: PackageSpec;
-	"package-spec": PackageSpec;
-	label: string;
+	id?: string;
+	packageSpec?: PackageSpec;
+	"package-spec"?: PackageSpec;
+	label?: string;
 };
 
 type FhirStructure = {
 	type?: string;
-	min?: string;
-	max?: string;
+	min?: string | number;
+	max?: string | number;
 	lastNode?: boolean;
 	isSummary?: boolean;
 	isModifier?: boolean;

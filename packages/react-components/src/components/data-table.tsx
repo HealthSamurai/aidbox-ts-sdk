@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	type AccessorKeyColumnDef,
 	type ColumnDef,
 	flexRender,
 	getCoreRowModel,
@@ -117,4 +118,4 @@ export function DataTable<TData, TValue>({
 	);
 }
 
-export type { ColumnDef };
+export type { ColumnDef, AccessorKeyColumnDef };
