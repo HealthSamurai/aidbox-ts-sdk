@@ -1,5 +1,5 @@
 // Shadcn Components
-export { toast } from "sonner";
+export { type ExternalToast, toast } from "sonner";
 export * from "./components/button-dropdown";
 export * from "./components/code-editor";
 export * from "./components/copy-icon";
