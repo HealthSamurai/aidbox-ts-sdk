@@ -185,6 +185,9 @@ function TreeItemLabel<T>({
 				!disableHover &&
 					item.isFolder() &&
 					"hover:bg-bg-secondary hover:text-text-primary cursor-pointer",
+				!disableHover &&
+					!item.isFolder() &&
+					"hover:bg-bg-secondary hover:text-text-primary cursor-pointer",
 				disableHover && "text-text-primary",
 				className,
 			)}
