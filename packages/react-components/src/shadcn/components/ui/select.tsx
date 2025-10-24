@@ -48,6 +48,8 @@ const baseSelectTriggerStyles = cn(
 	"*:data-[slot=select-value]:flex",
 	"*:data-[slot=select-value]:items-center",
 	"*:data-[slot=select-value]:gap-2",
+	// Cursor
+	"cursor-pointer",
 	// Disabled
 	"disabled:pointer-events-none",
 	"disabled:cursor-not-allowed",
@@ -229,7 +231,7 @@ function SelectItem({
 				"flex",
 				"w-full",
 				"items-center",
-				"cursor-default",
+				"cursor-pointer",
 				"select-none",
 				// Shape
 				"rounded-md",
