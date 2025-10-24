@@ -15,10 +15,10 @@ export const Demo = {
 		const [date, setDate] = React.useState<Date | undefined>(undefined);
 
 		return (
-            <div>
-                <DatePicker value={date} onDateChange={setDate}/>
-                <span className="mt-4">{ date?.toString() }</span>
-            </div>
+			<div>
+				<DatePicker value={date} onDateChange={setDate} />
+				<span className="mt-4">{date?.toString()}</span>
+			</div>
 		);
 	},
 } satisfies Story;

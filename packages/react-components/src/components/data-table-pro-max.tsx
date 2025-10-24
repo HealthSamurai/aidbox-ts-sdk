@@ -1,25 +1,22 @@
-import type { CSSProperties, MouseEventHandler } from "react";
-import { useCallback, useMemo, useState, useEffect, useRef } from "react";
-import { Skeleton } from "#shadcn/components/ui/skeleton";
 import type {
 	Column,
 	ColumnDef,
 	ColumnFiltersState,
 	ColumnOrderState,
-	ColumnPinningState,
-	Header,
-	Table as TanstackTable,
-	PaginationState,
 	ColumnPinningPosition,
-	SortingState,
-	RowPinningState,
+	ColumnPinningState,
 	ColumnSizingState,
+	Header,
+	PaginationState,
 	Row,
-    TableOptions
+	RowPinningState,
+	SortingState,
+	TableOptions,
+	Table as TanstackTable,
 } from "@tanstack/react-table";
 import {
-    flexRender,
-    getCoreRowModel,
+	flexRender,
+	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -30,22 +27,35 @@ import {
 	GripVertical,
 	MoreHorizontal,
 	PinOff,
-    SearchIcon,
+	SearchIcon,
 } from "lucide-react";
-import { cn } from "#shadcn/lib/utils";
-
-// import { SearchIcon } from "./icons";
-// import { DebouncedInput } from "./debounce-input";
-// import { DatePicker } from "@/components/date-picker"
-// import { DateRangePicker } from "@/components/daterange-picker"
-import React from "react";
+import type { CSSProperties, MouseEventHandler } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Button } from "#shadcn/components/ui/button.js";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#shadcn/components/ui/dropdown-menu.js";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#shadcn/components/ui/select.js";
-import { DateRangePicker } from "./date-range-picker";
-import { DatePicker } from "./date-picker";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "#shadcn/components/ui/dropdown-menu.js";
 import { Input } from "#shadcn/components/ui/input.js";
-
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#shadcn/components/ui/select.js";
+import { Skeleton } from "#shadcn/components/ui/skeleton";
+import { cn } from "#shadcn/lib/utils";
+import { DatePicker } from "./date-picker";
+import { DateRangePicker } from "./date-range-picker";
 
 const styles = {
 	tableContainer: cn(
@@ -236,22 +246,86 @@ const TableHeader = ({
 	...props
 }: React.ComponentProps<"thead">) => <thead className={className} {...props} />;
 
-type TableBodyProps<T> ={
-	showFilters: boolean
-	table: TanstackTable<T>
-	pinnedRows: PinnedRows | undefined
+type SkeletonWhenNoDataProps<T> = {
+	table: TanstackTable<T>;
 	draggedColumn: string | null;
 	dropTarget: string | null;
-    filterConfigMap: Map<string, FilterConfig>;
-	handleRowClick: (row: T) => MouseEventHandler<HTMLTableRowElement>
+	showZebraStripes: boolean;
+};
+
+const SkeletonWhenNoData = <TData, _>({
+	table,
+	showZebraStripes,
+	draggedColumn,
+	dropTarget,
+}: SkeletonWhenNoDataProps<TData>) => {
+	return (
+		<>
+			<tr
+				className={cn(styles.dataRow, showZebraStripes && styles.dataRowZebra)}
+			>
+				{table.getVisibleFlatColumns().map((column) => (
+					<TableCell
+						key={`skeleton1-${column.id}`}
+						column={column}
+						draggedColumn={draggedColumn}
+						dropTarget={dropTarget}
+					>
+						<Skeleton className="h-5 w-full" />
+					</TableCell>
+				))}
+			</tr>
+			<tr
+				className={cn(styles.dataRow, showZebraStripes && styles.dataRowZebra)}
+			>
+				{table.getVisibleFlatColumns().map((column) => (
+					<TableCell
+						key={`skeleton2-${column.id}`}
+						column={column}
+						draggedColumn={draggedColumn}
+						dropTarget={dropTarget}
+					>
+						<Skeleton className="h-5 w-full" />
+					</TableCell>
+				))}
+			</tr>
+			<tr
+				className={cn(styles.dataRow, showZebraStripes && styles.dataRowZebra)}
+			>
+				{table.getVisibleFlatColumns().map((column) => (
+					<TableCell
+						key={`skeleton3-${column.id}`}
+						column={column}
+						draggedColumn={draggedColumn}
+						dropTarget={dropTarget}
+					>
+						<Skeleton className="h-5 w-full" />
+					</TableCell>
+				))}
+			</tr>
+		</>
+	);
+};
+
+const zebraRowStyle = (rowIndex: number, showFilters: boolean) => {
+	const effectiveIndex = showFilters ? rowIndex : rowIndex + 1;
+	return effectiveIndex % 2 === 0 ? styles.dataRowZebra : "";
+};
+
+type TableBodyProps<T> = {
+	table: TanstackTable<T>;
+	pinnedRows: PinnedRows | undefined;
+	draggedColumn: string | null;
+	dropTarget: string | null;
+	filterConfigMap: Map<string, FilterConfig>;
+	handleRowClick: (row: T) => MouseEventHandler<HTMLTableRowElement>;
 	showZebraStripes: boolean;
 	isLoading?: boolean;
-} & React.ComponentProps<"tbody">
+} & React.ComponentProps<"tbody">;
 
 const TableBody = <TData, _>({
 	table,
 	pinnedRows,
-	showFilters,
 	draggedColumn,
 	dropTarget,
 	filterConfigMap,
@@ -261,9 +335,12 @@ const TableBody = <TData, _>({
 	className,
 	...props
 }: TableBodyProps<TData>) => {
+	const showFilters = filterConfigMap.size > 0;
+
 	if (pinnedRows) {
-		return	<tbody className={className} {...props}>
-				{showFilters && filterConfigMap.size > 0 && (
+		return (
+			<tbody className={className} {...props}>
+				{showFilters && (
 					<FilterRow
 						headers={table.getHeaderGroups()[0]?.headers || []}
 						draggedColumn={draggedColumn}
@@ -271,7 +348,7 @@ const TableBody = <TData, _>({
 						filterConfigMap={filterConfigMap}
 					/>
 				)}
-				{table.getTopRows().map((row, rowIndex) =>
+				{table.getTopRows().map((row, rowIndex) => (
 					<TableRow
 						key={`row-${row.id}`}
 						row={row}
@@ -279,15 +356,18 @@ const TableBody = <TData, _>({
 						onClick={handleRowClick(row.original)}
 						draggedColumn={draggedColumn}
 						dropTarget={dropTarget}
-						showZebraStripes={showZebraStripes}
 						rowIndex={rowIndex}
-						showFilters={showFilters}
+						className={
+							showZebraStripes
+								? zebraRowStyle(rowIndex, showFilters)
+								: undefined
+						}
 					/>
-				)}
+				))}
 				<GapRow table={table}>
-					{ pinnedRows.gap ? pinnedRows.gap : <span/> }
+					{pinnedRows.gap ? pinnedRows.gap : <span />}
 				</GapRow>
-				{table.getCenterRows().map((row, rowIndex) =>
+				{table.getCenterRows().map((row, rowIndex) => (
 					<TableRow
 						key={`row-${row.id}`}
 						row={row}
@@ -295,17 +375,22 @@ const TableBody = <TData, _>({
 						onClick={handleRowClick(row.original)}
 						draggedColumn={draggedColumn}
 						dropTarget={dropTarget}
-						showZebraStripes={showZebraStripes}
 						rowIndex={rowIndex}
-						showFilters={showFilters}
+						className={
+							showZebraStripes
+								? zebraRowStyle(rowIndex, showFilters)
+								: undefined
+						}
 					/>
-				)}
+				))}
 			</tbody>
-		} else {
-			const rows = table.getRowModel().rows;
+		);
+	} else {
+		const rows = table.getRowModel().rows;
 
-			return <tbody className={className} {...props}>
-				{showFilters && filterConfigMap.size > 0 && (
+		return (
+			<tbody className={className} {...props}>
+				{filterConfigMap.size > 0 && (
 					<FilterRow
 						headers={table.getHeaderGroups()[0]?.headers || []}
 						draggedColumn={draggedColumn}
@@ -315,28 +400,19 @@ const TableBody = <TData, _>({
 				)}
 				{rows.length === 0 ? (
 					isLoading ? (
-						// Show 3 skeleton rows when loading with no data
-						[...Array(3)].map((_, index) => (
-							<tr key={`skeleton-${index}`} className={cn(styles.dataRow, showZebraStripes && index % 2 === (showFilters ? 0 : 1) && styles.dataRowZebra)}>
-								{table.getVisibleFlatColumns().map((column) => (
-									<TableCell
-										key={`skeleton-${index}-${column.id}`}
-										column={column}
-										draggedColumn={draggedColumn}
-										dropTarget={dropTarget}
-									>
-										<Skeleton className="h-5 w-full" />
-									</TableCell>
-								))}
-							</tr>
-						))
+						<SkeletonWhenNoData
+							table={table}
+							draggedColumn={draggedColumn}
+							dropTarget={dropTarget}
+							showZebraStripes={showZebraStripes}
+						/>
 					) : (
 						<GapRow table={table}>
 							<span>No data</span>
 						</GapRow>
 					)
 				) : (
-					rows.map((row, rowIndex) =>
+					rows.map((row, rowIndex) => (
 						<TableRow
 							key={`row-${row.id}`}
 							row={row}
@@ -344,27 +420,27 @@ const TableBody = <TData, _>({
 							onClick={handleRowClick(row.original)}
 							draggedColumn={draggedColumn}
 							dropTarget={dropTarget}
-							showZebraStripes={showZebraStripes}
 							rowIndex={rowIndex}
-							showFilters={showFilters}
+							className={
+								showZebraStripes
+									? zebraRowStyle(rowIndex, showFilters)
+									: undefined
+							}
 						/>
-					)
+					))
 				)}
 			</tbody>
-		}
-}
-
+		);
+	}
+};
 
 type TableRowProps<T> = {
-	row: Row<T>
-	isLoading: boolean
-	onClick: MouseEventHandler<HTMLTableRowElement>
-	draggedColumn: string | null
-	dropTarget: string | null
-	showZebraStripes: boolean
-	rowIndex: number
-	showFilters: boolean
-} & Omit<React.ComponentProps<"tr">, 'onClick'>
+	row: Row<T>;
+	isLoading: boolean;
+	draggedColumn: string | null;
+	dropTarget: string | null;
+	rowIndex: number;
+} & React.ComponentProps<"tr">;
 
 const TableRow = <TData, _>({
 	row,
@@ -372,71 +448,63 @@ const TableRow = <TData, _>({
 	onClick,
 	draggedColumn,
 	dropTarget,
-	showZebraStripes,
 	rowIndex,
-	showFilters,
 	className,
 	...props
 }: TableRowProps<TData>) => {
 	return (
-		<tr
-			className={cn(
-				styles.dataRow,
-				showZebraStripes &&
-					rowIndex % 2 === (showFilters ? 0 : 1) &&
-					styles.dataRowZebra,
-				className
-			)}
-			onClick={onClick}
-			{...props}
-		>
-			{isLoading ? (
-				row.getVisibleCells().map((cell) => (
-					<TableCell
-						key={cell.id}
-						column={cell.column}
-						draggedColumn={draggedColumn}
-						dropTarget={dropTarget}
-					>
-						<Skeleton className="h-5 w-full" />
-					</TableCell>
-				))
-			) : (
-				row.getVisibleCells().map((cell) => (
-					<TableCell
-						key={cell.id}
-						column={cell.column}
-						draggedColumn={draggedColumn}
-						dropTarget={dropTarget}
-					>
-						{flexRender(cell.column.columnDef.cell, cell.getContext())}
-					</TableCell>
-				))
-			)}
+		<tr className={cn(styles.dataRow, className)} onClick={onClick} {...props}>
+			{isLoading
+				? row.getVisibleCells().map((cell) => (
+						<TableCell
+							key={cell.id}
+							column={cell.column}
+							draggedColumn={draggedColumn}
+							dropTarget={dropTarget}
+						>
+							<Skeleton className="h-5 w-full" />
+						</TableCell>
+					))
+				: row.getVisibleCells().map((cell) => (
+						<TableCell
+							key={cell.id}
+							column={cell.column}
+							draggedColumn={draggedColumn}
+							dropTarget={dropTarget}
+						>
+							{flexRender(cell.column.columnDef.cell, cell.getContext())}
+						</TableCell>
+					))}
 		</tr>
-	)
+	);
 };
 
 type GapRowProps<T> = {
-	table: TanstackTable<T>
-} & React.ComponentProps<"tr">
+	table: TanstackTable<T>;
+} & React.ComponentProps<"tr">;
 
-const GapRow = <T, _>({ content, table, className, children, ...props }: GapRowProps<T>) => {
+const GapRow = <T, _>({
+	content,
+	table,
+	className,
+	children,
+	...props
+}: GapRowProps<T>) => {
 	return (
 		<tr className={className} {...props}>
 			<td
 				colSpan={table.getVisibleFlatColumns().length}
 				className="text-center py-4 text-gray-500"
 			>
-    	    	{ children }
-    	  </td>
+				{children}
+			</td>
 		</tr>
 	);
-}
+};
 
 export type TableHeaderSortProps = {
 	isSorted: false | "asc" | "desc";
-}
+};
 
 const TableHeaderSort = ({ isSorted }: TableHeaderSortProps) => {
 	return (
@@ -453,14 +521,19 @@ const TableHeaderSort = ({ isSorted }: TableHeaderSortProps) => {
 			)}
 		</div>
 	);
-}
+};
 
 export type TableHeaderResizeProps<T> = {
 	header: Header<T, unknown>;
-}
+};
 
-const TableHeaderResize = <TData, _>({ header }: TableHeaderResizeProps<TData>) => {
-	if (!header.column.columnDef.enableResizing || !header.column.getCanResize()) {
+const TableHeaderResize = <TData, _>({
+	header,
+}: TableHeaderResizeProps<TData>) => {
+	if (
+		!header.column.columnDef.enableResizing ||
+		!header.column.getCanResize()
+	) {
 		return null;
 	}
 
@@ -478,12 +551,12 @@ const TableHeaderResize = <TData, _>({ header }: TableHeaderResizeProps<TData>) 
 			}}
 		/>
 	);
-}
+};
 
 export type TableHeaderDragProps = {
 	onDragStart: (e: React.DragEvent<HTMLButtonElement>) => void;
 	onDragEnd: () => void;
-}
+};
 
 const TableHeaderDrag = ({ onDragStart, onDragEnd }: TableHeaderDragProps) => {
 	return (
@@ -498,82 +571,79 @@ const TableHeaderDrag = ({ onDragStart, onDragEnd }: TableHeaderDragProps) => {
 			<GripVertical className="w-4 h-4" />
 		</button>
 	);
-}
+};
 
 export type TableHeaderPinProps<T> = {
-	header: Header<T, unknown>,
-	isPinned: ColumnPinningPosition
-}
+	header: Header<T, unknown>;
+	isPinned: ColumnPinningPosition;
+};
 
 const TableHeaderPin = <TData, _>({
 	header,
-	isPinned
+	isPinned,
 }: TableHeaderPinProps<TData>) => {
-
-	const unpin = () => header.column.pin(false)
+	const unpin = () => header.column.pin(false);
 	const pinLeft = () => header.column.pin("left");
-	const pinRight = () => header.column.pin("right");					
+	const pinRight = () => header.column.pin("right");
 
-	return (
-		isPinned ? (
-			<Button
-				size="small"
-				variant="ghost"
-				className="h-6 w-6 p-0 ml-1 opacity-60 hover:opacity-100"
-				onClick={unpin}
-				title="Unpin column"
-			>
-				<PinOff className="h-3 w-3" />
-			</Button>
-		) : (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						size="small"
-						variant="ghost"
-						className="h-6 w-6 p-0 ml-1 opacity-60 hover:opacity-100"
-						title="Pin column"
-					>
-						<MoreHorizontal className="h-3 w-3" />
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
-					<DropdownMenuItem onClick={pinLeft}>
-						<ArrowLeftToLine className="mr-2 h-4 w-4" />
-						Stick to left
-					</DropdownMenuItem>
-					<DropdownMenuItem onClick={pinRight}>
-						<ArrowRightToLine className="mr-2 h-4 w-4" />
-						Stick to right
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		)
-	)
-}
+	return isPinned ? (
+		<Button
+			size="small"
+			variant="ghost"
+			className="h-6 w-6 p-0 ml-1 opacity-60 hover:opacity-100"
+			onClick={unpin}
+			title="Unpin column"
+		>
+			<PinOff className="h-3 w-3" />
+		</Button>
+	) : (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					size="small"
+					variant="ghost"
+					className="h-6 w-6 p-0 ml-1 opacity-60 hover:opacity-100"
+					title="Pin column"
+				>
+					<MoreHorizontal className="h-3 w-3" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				<DropdownMenuItem onClick={pinLeft}>
+					<ArrowLeftToLine className="mr-2 h-4 w-4" />
+					Stick to left
+				</DropdownMenuItem>
+				<DropdownMenuItem onClick={pinRight}>
+					<ArrowRightToLine className="mr-2 h-4 w-4" />
+					Stick to right
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+};
 
 type TableHeadProps<T> = {
-	header: Header<T, unknown>
-	columnOrder: string[]
-	enableColumnReordering: boolean
-	draggedColumn: string | null
-	dropTarget: string | null
-	setDropTarget: (x: string | null) => void
-	setDraggedColumn: (x: string | null) => void
-	setColumnOrder: (order: ColumnOrderState) => void
-} & React.ComponentProps<"th">
+	header: Header<T, unknown>;
+	columnOrder: string[];
+	enableColumnReordering: boolean;
+	draggedColumn: string | null;
+	dropTarget: string | null;
+	onDropColumn: (x: string | null) => void;
+	onChangeDraggedColumn: (x: string | null) => void;
+	onChangeColumnOrder: (order: ColumnOrderState) => void;
+} & React.ComponentProps<"th">;
 
-const TableHead =  <TData, _>({
+const TableHead = <TData, _>({
 	header,
 	columnOrder,
 	draggedColumn,
 	dropTarget,
 	enableColumnReordering,
-	setDropTarget,
-	setDraggedColumn,
-	setColumnOrder,
+	onDropColumn,
+	onChangeDraggedColumn,
+	onChangeColumnOrder,
 	className,
-	...props 
+	...props
 }: TableHeadProps<TData>) => {
 	const columnKey = header.id;
 	const isSortable = header.column.columnDef.enableSorting;
@@ -582,82 +652,98 @@ const TableHead =  <TData, _>({
 	const isDraggable = enableColumnReordering && !isPinned;
 	const isDragging = draggedColumn === columnKey;
 	const isDropTarget = dropTarget === columnKey;
-	const isLastLeftPinned = isPinned === "left" && header.column.getIsLastColumn("left");
-	const isFirstRightPinned = isPinned === "right" && header.column.getIsFirstColumn("right");
+	const isLastLeftPinned =
+		isPinned === "left" && header.column.getIsLastColumn("left");
+	const isFirstRightPinned =
+		isPinned === "right" && header.column.getIsFirstColumn("right");
 
-	const onClick = useCallback((e: React.MouseEvent<HTMLTableCellElement>) => {
-		const target = e.target as HTMLElement;
-		if (
-			target.closest("[data-resize-handle]") ||
-			target.closest("[data-drag-zone]") ||
-			target.closest("button") ||
-			target.closest("[role='menu']")
-		) {
-			return;
-		}
-		if (header.column.columnDef.enableSorting) {
-			isSorted ?
-				isSorted === 'desc' ? header.column.toggleSorting(false) : header.column.clearSorting()
-				: header.column.toggleSorting(true);
-		}
-	}, [header.column, isSorted, isSortable]);
+	const onClick = useCallback(
+		(e: React.MouseEvent<HTMLTableCellElement>) => {
+			const target = e.target as HTMLElement;
+			if (
+				target.closest("[data-resize-handle]") ||
+				target.closest("[data-drag-zone]") ||
+				target.closest("button") ||
+				target.closest("[role='menu']")
+			) {
+				return;
+			}
+			if (header.column.columnDef.enableSorting) {
+				isSorted
+					? isSorted === "desc"
+						? header.column.toggleSorting(false)
+						: header.column.clearSorting()
+					: header.column.toggleSorting(true);
+			}
+		},
+		[header.column, isSorted],
+	);
 
-	const onDragOver = useCallback((e: React.DragEvent<HTMLTableCellElement>) => {
-		if (
-			!isDraggable ||
-			!draggedColumn ||
-			draggedColumn === columnKey
-		)
-			return;
-		e.preventDefault();
-		setDropTarget(columnKey);
-	}, [isDraggable, draggedColumn, columnKey, setDropTarget]);
+	const onDragOver = useCallback(
+		(e: React.DragEvent<HTMLTableCellElement>) => {
+			if (!isDraggable || !draggedColumn || draggedColumn === columnKey) return;
+			e.preventDefault();
+			onDropColumn(columnKey);
+		},
+		[isDraggable, draggedColumn, columnKey, onDropColumn],
+	);
 
-	const onDragLeave = useCallback((e: React.DragEvent<HTMLTableCellElement>) => {
-		const rect = e.currentTarget.getBoundingClientRect();
-		const x = e.clientX;
-		const y = e.clientY;
-		if (
-			x < rect.left ||
-			x > rect.right ||
-			y < rect.top ||
-			y > rect.bottom
-		) {
-			setDropTarget(null);
-		}
-	}, [setDropTarget]);
+	const onDragLeave = useCallback(
+		(e: React.DragEvent<HTMLTableCellElement>) => {
+			const rect = e.currentTarget.getBoundingClientRect();
+			const x = e.clientX;
+			const y = e.clientY;
+			if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+				onDropColumn(null);
+			}
+		},
+		[onDropColumn],
+	);
 
-	const onDrop = useCallback((e: React.DragEvent<HTMLTableCellElement>) => {
-		e.preventDefault();
-		if (!isDraggable || !draggedColumn)
-			return;
+	const onDrop = useCallback(
+		(e: React.DragEvent<HTMLTableCellElement>) => {
+			e.preventDefault();
+			if (!isDraggable || !draggedColumn) return;
 
-		const draggedIndex = columnOrder.indexOf(draggedColumn);
-		const targetIndex = columnOrder.indexOf(columnKey);
+			const draggedIndex = columnOrder.indexOf(draggedColumn);
+			const targetIndex = columnOrder.indexOf(columnKey);
 
-		if (draggedIndex !== -1 && targetIndex !== -1) {
-			const newOrder = [...columnOrder];
-			newOrder.splice(draggedIndex, 1);
-			newOrder.splice(targetIndex, 0, draggedColumn);
-			setColumnOrder(newOrder);
-		}
+			if (draggedIndex !== -1 && targetIndex !== -1) {
+				const newOrder = [...columnOrder];
+				newOrder.splice(draggedIndex, 1);
+				newOrder.splice(targetIndex, 0, draggedColumn);
+				onChangeColumnOrder(newOrder);
+			}
 
-		setDraggedColumn(null);
-		setDropTarget(null);
-	}, [isDraggable, draggedColumn, columnOrder, columnKey, setColumnOrder, setDraggedColumn, setDropTarget]);
+			onChangeDraggedColumn(null);
+			onDropColumn(null);
+		},
+		[
+			isDraggable,
+			draggedColumn,
+			columnOrder,
+			columnKey,
+			onChangeColumnOrder,
+			onChangeDraggedColumn,
+			onDropColumn,
+		],
+	);
 
-	const onDragStart = useCallback((e: React.DragEvent<HTMLButtonElement>) => {
-		setDraggedColumn(columnKey);
-		e.dataTransfer.effectAllowed = "move";
-	}, [columnKey, setDraggedColumn]);
+	const onDragStart = useCallback(
+		(e: React.DragEvent<HTMLButtonElement>) => {
+			onChangeDraggedColumn(columnKey);
+			e.dataTransfer.effectAllowed = "move";
+		},
+		[columnKey, onChangeDraggedColumn],
+	);
 
 	const onDragEnd = useCallback(() => {
-		setDraggedColumn(null);
-		setDropTarget(null);
-	}, [setDraggedColumn, setDropTarget]);
+		onChangeDraggedColumn(null);
+		onDropColumn(null);
+	}, [onChangeDraggedColumn, onDropColumn]);
 
 	return (
-		<th 
+		<th
 			className={cn(
 				styles.cellPadding,
 				styles.th,
@@ -665,58 +751,73 @@ const TableHead =  <TData, _>({
 				"relative",
 				isSortable && styles.thSortable,
 				isSorted && styles.thSorted,
-				header.column.columnDef.enableResizing && header.column.getCanResize() && styles.resizableHeader,
+				header.column.columnDef.enableResizing &&
+					header.column.getCanResize() &&
+					styles.resizableHeader,
 				// this style degradate perfomance!
 				// isDraggable &&  styles.draggableHeader,
-				isDragging &&   styles.draggingHeader,
-				isDragging &&   styles.draggingColumn,
+				isDragging && styles.draggingHeader,
+				isDragging && styles.draggingColumn,
 				isDropTarget && styles.dropZone,
 				isDropTarget && styles.dropZoneActive,
 				className,
 			)}
-			style={{	
+			style={{
 				...getPinningStyles(header.column),
 				width: `calc(var(--header-${header?.id}-size) * 1px)`,
 			}}
 			data-pinned={isPinned || undefined}
-			data-last-col={ isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined}
+			data-last-col={
+				isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
+			}
 			onClick={onClick}
 			onDragOver={onDragOver}
 			onDragLeave={onDragLeave}
 			onDrop={onDrop}
 			{...props}
 		>
-			{isDraggable && <TableHeaderDrag onDragStart={onDragStart} onDragEnd={onDragEnd} />}
+			{isDraggable && (
+				<TableHeaderDrag onDragStart={onDragStart} onDragEnd={onDragEnd} />
+			)}
 			<div className={styles.headerContent}>
 				{flexRender(header.column.columnDef.header, header.getContext())}
 				<div className="flex items-center">
-					{isSortable && <TableHeaderSort isSorted={isSorted}/>}
-					{header.column.columnDef.enablePinning && <TableHeaderPin isPinned={isPinned} header={header}/> }
+					{isSortable && <TableHeaderSort isSorted={isSorted} />}
+					{header.column.columnDef.enablePinning && (
+						<TableHeaderPin isPinned={isPinned} header={header} />
+					)}
 				</div>
 			</div>
 			<TableHeaderResize header={header} />
 		</th>
-	)
+	);
 };
 
-
 type TableCellProps<TData, TValue> = {
-	column: Column<TData, TValue>
-	draggedColumn: string | null
-	dropTarget: string | null
-} & React.ComponentProps<"td">
+	column: Column<TData, TValue>;
+	draggedColumn: string | null;
+	dropTarget: string | null;
+} & React.ComponentProps<"td">;
 
-const TableCell = <TData, TValue>({ column, draggedColumn, dropTarget, className, ...props }: TableCellProps<TData, TValue>) => {
+const TableCell = <TData, TValue>({
+	column,
+	draggedColumn,
+	dropTarget,
+	className,
+	...props
+}: TableCellProps<TData, TValue>) => {
 	const columnKey = column.id;
 	const isPinned = column.getIsPinned();
 	const isSorted = column.columnDef.enableSorting && column.getIsSorted();
 	const isBeingDragged = draggedColumn === columnKey;
 	const isDropTarget = dropTarget === columnKey;
-	const isLastLeftPinned = isPinned === "left" && column.getIsLastColumn("left");
-	const isFirstRightPinned = isPinned === "right" && column.getIsFirstColumn("right");
+	const isLastLeftPinned =
+		isPinned === "left" && column.getIsLastColumn("left");
+	const isFirstRightPinned =
+		isPinned === "right" && column.getIsFirstColumn("right");
 
 	return (
-		<td 
+		<td
 			className={cn(
 				styles.cellPadding,
 				styles.dataCell,
@@ -725,7 +826,7 @@ const TableCell = <TData, TValue>({ column, draggedColumn, dropTarget, className
 				isBeingDragged && styles.draggingColumn,
 				isDropTarget && styles.dropZone,
 				isDropTarget && styles.dropZoneActive,
-				className
+				className,
 			)}
 			style={{
 				...getPinningStyles(column),
@@ -733,303 +834,369 @@ const TableCell = <TData, TValue>({ column, draggedColumn, dropTarget, className
 			}}
 			data-pinned={isPinned || undefined}
 			data-last-col={
-				isLastLeftPinned
-					? "left"
-					: isFirstRightPinned
-						? "right"
-						: undefined
+				isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
 			}
 			{...props}
 		/>
-	)
+	);
 };
-
 
 export type TableHeaderContentProps = {
 	content: React.ReactNode;
-}
+};
 
-export function TableHeaderContent({
-	content
-}: TableHeaderContentProps) {	
-	return (
-		<span className={styles.headerText}>{content}</span>
-	)
+export function TableHeaderContent({ content }: TableHeaderContentProps) {
+	return <span className={styles.headerText}>{content}</span>;
 }
 
 export type TableCellContentProps = {
 	content: React.ReactNode;
-}
+};
 
 export function TableCellContent({ content }: TableCellContentProps) {
 	return (
-	  <div
-		className={cn("text-sm font-normal leading-[24px] truncate w-full")}
-		title={typeof content === 'string' ? content : undefined}
-	  >
-		{content}
-	  </div>
+		<div
+			className={cn("text-sm font-normal leading-[24px] truncate w-full")}
+			title={typeof content === "string" ? content : undefined}
+		>
+			{content}
+		</div>
 	);
 }
 
 export type TableDoubleCellContentProps = {
-	content1: string | React.ReactNode,
-	content2: string | React.ReactNode
-}
+	content1: string | React.ReactNode;
+	content2: string | React.ReactNode;
+};
 
-export function TableDoubleCellContent({ content1, content2 }: TableDoubleCellContentProps) {
+export function TableDoubleCellContent({
+	content1,
+	content2,
+}: TableDoubleCellContentProps) {
 	return (
 		<div className={cn("text-sm font-normal truncate w-full leading-[24px]")}>
-			<div className="truncate w-full">
-				{content1}
-			</div>
-			<div className="truncate w-full">
-				{content2}
-			</div>
+			<div className="truncate w-full">{content1}</div>
+			<div className="truncate w-full">{content2}</div>
 		</div>
-	)
+	);
 }
 
 type BaseFilterConfig = {
-    columnId: string
-    enabled: boolean
-}
+	columnId: string;
+	enabled: boolean;
+};
 
 export type TextFilterConfig = BaseFilterConfig & {
-  type: 'text'
-  placeholder?: string
-  value?: string
-}
+	type: "text";
+	placeholder?: string;
+	value?: string;
+};
 
 export type DateFilterConfig = BaseFilterConfig & {
-  type: 'date'
-  placeholder?: string
-  value?: Date
-}
+	type: "date";
+	placeholder?: string;
+	value?: Date;
+};
 
 export type DateRangeFilterConfig = BaseFilterConfig & {
-  type: 'date-range'
-  fromPlaceholder?: string
-  toPlaceholder?: string
-  value?: {
-    from: string, 
-    to: string
-  }
-}
+	type: "date-range";
+	fromPlaceholder?: string;
+	toPlaceholder?: string;
+	value?: {
+		from: string;
+		to: string;
+	};
+};
 
 export type NumberFilterConfig = BaseFilterConfig & {
-  type: 'number'
-  value?: string
-  placeholder?: string
-  min?: number
-  max?: number
-  step?: number
-}
+	type: "number";
+	value?: string;
+	placeholder?: string;
+	min?: number;
+	max?: number;
+	step?: number;
+};
 
 export type EnumFilterConfig = BaseFilterConfig & {
-  type: 'enum'
-  options: { label: string; value: string }[] | string[]
-  placeholder?: string
-  value?: string
-}
-
-export type FilterConfig = TextFilterConfig | DateFilterConfig | DateRangeFilterConfig | NumberFilterConfig | EnumFilterConfig
-
-export const isTextFilter = (filter: FilterConfig): filter is TextFilterConfig => {
-  return filter.type === 'text';
+	type: "enum";
+	options: { label: string; value: string }[] | string[];
+	placeholder?: string;
+	value?: string;
 };
 
-export const isDateFilter = (filter: FilterConfig): filter is DateFilterConfig => {
-  return filter.type === 'date';
+export type FilterConfig =
+	| TextFilterConfig
+	| DateFilterConfig
+	| DateRangeFilterConfig
+	| NumberFilterConfig
+	| EnumFilterConfig;
+
+export const isTextFilter = (
+	filter: FilterConfig,
+): filter is TextFilterConfig => {
+	return filter.type === "text";
 };
 
-export const isDateRangeFilter = (filter: FilterConfig): filter is DateRangeFilterConfig => {
-  return filter.type === 'date-range';
+export const isDateFilter = (
+	filter: FilterConfig,
+): filter is DateFilterConfig => {
+	return filter.type === "date";
 };
 
-export const isNumberFilter = (filter: FilterConfig): filter is NumberFilterConfig => {
-  return filter.type === 'number';
+export const isDateRangeFilter = (
+	filter: FilterConfig,
+): filter is DateRangeFilterConfig => {
+	return filter.type === "date-range";
 };
 
-export const isEnumFilter = (filter: FilterConfig): filter is EnumFilterConfig => {
-  return filter.type === 'enum';
+export const isNumberFilter = (
+	filter: FilterConfig,
+): filter is NumberFilterConfig => {
+	return filter.type === "number";
 };
-  
+
+export const isEnumFilter = (
+	filter: FilterConfig,
+): filter is EnumFilterConfig => {
+	return filter.type === "enum";
+};
+
+type FilterValue = string | number | Date | { from?: Date; to?: Date };
+
 type BaseFilterProps = {
-  columnId: string;
-  onValueChange: (value: any) => void;
-}
+	columnId: string;
+	onValueChange: (value: FilterValue | undefined) => void;
+};
 
-type TextFilterProps =  {
-  filter: TextFilterConfig;
-} &  BaseFilterProps;
+type TextFilterProps = {
+	filter: TextFilterConfig;
+} & BaseFilterProps;
 
 type DateFilterProps = {
-  filter: DateFilterConfig
-} &  BaseFilterProps
+	filter: DateFilterConfig;
+} & BaseFilterProps;
 
 type DateRangeFilterProps = {
-  filter: DateRangeFilterConfig
-} &  BaseFilterProps;
+	filter: DateRangeFilterConfig;
+} & BaseFilterProps;
 
 type NumberFilterProps = {
-  filter: NumberFilterConfig
+	filter: NumberFilterConfig;
 } & BaseFilterProps;
 
 type EnumFilterProps = {
-  filter: EnumFilterConfig
-} &  BaseFilterProps
-  
-const filterInputClasses = "h-full text-sm border-0 bg-transparent focus-visible:ring-0 placeholder:text-[#CCCED3] pl-8 focus:outline-none";
-const filterIconClasses = "absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none";
+	filter: EnumFilterConfig;
+} & BaseFilterProps;
 
-export const TextFilter: React.FC<TextFilterProps> = ({ columnId, onValueChange, filter }: TextFilterProps) => {
-  return (
-    <div className="relative h-full">
-      <div className={filterIconClasses}>
-        <SearchIcon />
-      </div>
-      <Input
-        key={columnId}
-        type="text"
-        placeholder={filter.placeholder || columnId}
-        value={filter.value || ""}
-        onChange={onValueChange}
-        className={filterInputClasses}
-      />
-    </div>
-  );
+const filterInputClasses =
+	"h-full text-sm border-0 bg-transparent focus-visible:ring-0 placeholder:text-[#CCCED3] pl-8 focus:outline-none";
+const filterIconClasses =
+	"absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none";
+
+export const TextFilter: React.FC<TextFilterProps> = ({
+	columnId,
+	onValueChange,
+	filter,
+}: TextFilterProps) => {
+	return (
+		<div className="relative h-full">
+			<div className={filterIconClasses}>
+				<SearchIcon />
+			</div>
+			<Input
+				key={columnId}
+				type="text"
+				placeholder={filter.placeholder || columnId}
+				value={filter.value || ""}
+				onChange={(e) => onValueChange(e.target.value)}
+				className={filterInputClasses}
+			/>
+		</div>
+	);
 };
 
-export const DateFilter: React.FC<DateFilterProps> = ({ columnId, onValueChange, filter }: DateFilterProps) => {
-  return (
-      <DatePicker
-            key={columnId}
-		    onDateChange={onValueChange}
-		    value={filter.value}
-      />
-  );
+export const DateFilter: React.FC<DateFilterProps> = ({
+	columnId,
+	onValueChange,
+	filter,
+}: DateFilterProps) => {
+	return (
+		<DatePicker
+			key={columnId}
+			onDateChange={onValueChange}
+			value={filter.value}
+		/>
+	);
 };
-  
-export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({ columnId, onValueChange, filter }: DateRangeFilterProps) => {
-  // Convert string dates to Date objects for the component
-  
-  const dateValue = filter.value && filter.value.from && filter.value.to ? {
-    from: new Date(filter.value.from),
-    to: new Date(filter.value.to)
-  } : undefined;
 
-  return (
-    <DateRangePicker
-      key={columnId}
-      value={dateValue}
-      onDateRangeChange={onValueChange}
-      fromPlaceholder={filter.fromPlaceholder}
-      toPlaceholder={filter.toPlaceholder}
-    />
-  );
-};
-  
-export const NumberFilter: React.FC<NumberFilterProps> = ({ columnId, filter, onValueChange }: NumberFilterProps) => {
-  return (
-    <Input
-      key={columnId}
-      placeholder={filter.placeholder || columnId}
-      value={filter.value || ""}
-      onChange={onValueChange}
-      className="h-full text-sm border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-[#CCCED3] px-0"
-      min={filter.min}
-      max={filter.max}
-      step={filter.step}
-    />
-  );
-};
-  
-export const EnumFilter: React.FC<EnumFilterProps> = ({ filter, columnId, onValueChange }) => {
-  const CLEAR_VALUE = "__CLEAR__";
-  
-  const selectValue = filter.value === undefined || filter.value === null || filter.value === "" 
-    ? undefined 
-    : filter.value;
+export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
+	columnId,
+	onValueChange,
+	filter,
+}: DateRangeFilterProps) => {
+	// Convert string dates to Date objects for the component
 
-  const handleValueChange = (value: string) => {
-    if (value === CLEAR_VALUE) {
-      onValueChange(undefined);
-    } else {
-      onValueChange(value);
-    }
-  };
-  
-  return (
-    <Select
-      key={`${columnId}-${selectValue || 'empty'}`}
-      value={selectValue || CLEAR_VALUE}
-      onValueChange={handleValueChange}
-    >
-      <SelectTrigger size="small" className="w-full">
-        <SelectValue placeholder={filter.placeholder || columnId} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={CLEAR_VALUE}>
-          <span className="text-gray-500 italic">Clear selection</span>
-        </SelectItem>
-        {filter.options.map((opt) => {
-          const val = typeof opt === 'string' ? opt : opt.value;
-          const label = typeof opt === 'string' ? opt : opt.label;
-          return (
-            <SelectItem key={val} value={val}>
-              {label}
-            </SelectItem>
-          );
-        })}
-      </SelectContent>
-    </Select>
-  );
+	const dateValue =
+		filter.value?.from && filter.value.to
+			? {
+					from: new Date(filter.value.from),
+					to: new Date(filter.value.to),
+				}
+			: undefined;
+
+	return (
+		<DateRangePicker
+			key={columnId}
+			value={dateValue}
+			onDateRangeChange={onValueChange}
+			fromPlaceholder={filter.fromPlaceholder}
+			toPlaceholder={filter.toPlaceholder}
+		/>
+	);
+};
+
+export const NumberFilter: React.FC<NumberFilterProps> = ({
+	columnId,
+	filter,
+	onValueChange,
+}: NumberFilterProps) => {
+	return (
+		<Input
+			key={columnId}
+			placeholder={filter.placeholder || columnId}
+			value={filter.value || ""}
+			onChange={(e) => onValueChange(e.target.value)}
+			className="h-full text-sm border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-[#CCCED3] px-0"
+			min={filter.min}
+			max={filter.max}
+			step={filter.step}
+		/>
+	);
+};
+
+export const EnumFilter: React.FC<EnumFilterProps> = ({
+	filter,
+	columnId,
+	onValueChange,
+}) => {
+	const CLEAR_VALUE = "__CLEAR__";
+
+	const selectValue =
+		filter.value === undefined || filter.value === null || filter.value === ""
+			? undefined
+			: filter.value;
+
+	const handleValueChange = (value: string) => {
+		if (value === CLEAR_VALUE) {
+			onValueChange(undefined);
+		} else {
+			onValueChange(value);
+		}
+	};
+
+	return (
+		<Select
+			value={selectValue || CLEAR_VALUE}
+			onValueChange={handleValueChange}
+		>
+			<SelectTrigger size="small" className="w-full">
+				<SelectValue placeholder={filter.placeholder || columnId} />
+			</SelectTrigger>
+			<SelectContent>
+				<SelectItem value={CLEAR_VALUE}>
+					<span className="text-gray-500 italic">Clear selection</span>
+				</SelectItem>
+				{filter.options.map((opt) => {
+					const val = typeof opt === "string" ? opt : opt.value;
+					const label = typeof opt === "string" ? opt : opt.label;
+					return (
+						<SelectItem key={val} value={val}>
+							{label}
+						</SelectItem>
+					);
+				})}
+			</SelectContent>
+		</Select>
+	);
 };
 
 type FilterCellProps<TData, TValue> = {
-  filter: FilterConfig;
-  header: Header<TData, TValue>;
-}
-  
-function FilterCell<TData, TValue>({ filter, header }: FilterCellProps<TData, TValue>) {
-  const handleValueChange = useCallback((value: any) => {
-    header.column.setFilterValue(value);
-  }, [header.column]);
-  
-  switch (filter.type) {
-    case 'enum':
-      return <EnumFilter filter={filter} columnId={filter.columnId} onValueChange={handleValueChange}/>
-    case 'date-range':
-      return <DateRangeFilter filter={filter} columnId={filter.columnId} onValueChange={handleValueChange}/>
-    case 'number':
-      return <NumberFilter filter={filter} columnId={filter.columnId} onValueChange={handleValueChange}/>
-    case 'date':
-      return <DateFilter filter={filter} columnId={filter.columnId} onValueChange={handleValueChange}/>
-    case 'text':
-    default:
-      return <TextFilter filter={filter} columnId={filter.columnId} onValueChange={handleValueChange}/>
-  }
+	filter: FilterConfig;
+	header: Header<TData, TValue>;
+};
+
+function FilterCell<TData, TValue>({
+	filter,
+	header,
+}: FilterCellProps<TData, TValue>) {
+	const handleValueChange = useCallback(
+		(value: FilterValue | undefined) => {
+			header.column.setFilterValue(value);
+		},
+		[header.column],
+	);
+
+	switch (filter.type) {
+		case "enum":
+			return (
+				<EnumFilter
+					filter={filter}
+					columnId={filter.columnId}
+					onValueChange={handleValueChange}
+				/>
+			);
+		case "date-range":
+			return (
+				<DateRangeFilter
+					filter={filter}
+					columnId={filter.columnId}
+					onValueChange={handleValueChange}
+				/>
+			);
+		case "number":
+			return (
+				<NumberFilter
+					filter={filter}
+					columnId={filter.columnId}
+					onValueChange={handleValueChange}
+				/>
+			);
+		case "date":
+			return (
+				<DateFilter
+					filter={filter}
+					columnId={filter.columnId}
+					onValueChange={handleValueChange}
+				/>
+			);
+		default:
+			return (
+				<TextFilter
+					filter={filter}
+					columnId={filter.columnId}
+					onValueChange={handleValueChange}
+				/>
+			);
+	}
 }
 
 type FilterRowProps<TData, TValue> = {
 	headers: Header<TData, TValue>[];
 	draggedColumn: string | null;
 	dropTarget: string | null;
-    filterConfigMap: Map<string, FilterConfig>;
-}
+	filterConfigMap: Map<string, FilterConfig>;
+};
 
 function FilterRow<TData, TValue>({
 	headers,
 	draggedColumn,
 	dropTarget,
-    filterConfigMap: searchConfigMap,
+	filterConfigMap: searchConfigMap,
 }: FilterRowProps<TData, TValue>) {
 	return (
 		<tr className={styles.filterRow}>
 			{headers.map((header) => {
-
-                const filterConfig = searchConfigMap.get(header.column.id);
+				const filterConfig = searchConfigMap.get(header.column.id);
 
 				return (
 					<TableCell
@@ -1038,7 +1205,11 @@ function FilterRow<TData, TValue>({
 						draggedColumn={draggedColumn}
 						dropTarget={dropTarget}
 					>
-						{ filterConfig ? <FilterCell filter={filterConfig} header={header}/> : <div className={styles.filterActions}></div> }
+						{filterConfig ? (
+							<FilterCell filter={filterConfig} header={header} />
+						) : (
+							<div className={styles.filterActions}></div>
+						)}
 					</TableCell>
 				);
 			})}
@@ -1046,104 +1217,112 @@ function FilterRow<TData, TValue>({
 	);
 }
 
-export type ColumnFilterConfig = FilterConfig[]
+export type ColumnFilterConfig = FilterConfig[];
 
 export type PinnedRows = {
-	rowIds: string[]
-	gap?: React.ReactNode
-}
+	rowIds: string[];
+	gap?: React.ReactNode;
+};
 
 export type UiState = {
-	columnOrder: ColumnOrderState,
-	columnSizing: ColumnSizingState,
-	columnPinning: ColumnPinningState
-}
+	columnOrder: ColumnOrderState;
+	columnSizing: ColumnSizingState;
+	columnPinning: ColumnPinningState;
+};
 
 type PaginationComponentType = React.ComponentType<{
-	canPrevious: boolean
-	canNext: boolean
-	currentPage: number
-	pageSize: number
-	onChangePage: (i: number) => void
-	onPageSizeChange: (v: number) => void
-	pageCount?: number | undefined
-}>
+	canPrevious: boolean;
+	canNext: boolean;
+	currentPage: number;
+	pageSize: number;
+	onChangePage: (i: number) => void;
+	onPageSizeChange: (v: number) => void;
+	pageCount?: number | undefined;
+}>;
 
 export type DataTableProps<T> = {
 	columns: ColumnDef<T>[];
 	data: T[];
-    pageIndex: number;
-    pageSize: number;
-    getRowId?: (originalRow: T, index: number, parent?: Row<T> | undefined) => string
-    pageCount?: number;
+	pageIndex: number;
+	pageSize: number;
+	getRowId?: (
+		originalRow: T,
+		index: number,
+		parent?: Row<T> | undefined,
+	) => string;
+	pageCount?: number;
 	filterConfig?: ColumnFilterConfig;
 	sortingConfig?: SortingState;
 	showZebraStripes?: boolean;
-	showFilters?: boolean;
 	enableColumnReordering?: boolean;
 	onSort?: (sorting: SortingState) => void;
-    onFilter?: (filters: ColumnFiltersState) => void;
-    onPaginationChange?: (pagination: PaginationState) => void
+	onFilter?: (filters: ColumnFiltersState) => void;
+	onPaginationChange?: (pagination: PaginationState) => void;
 	onRowClick?: (row: T) => void;
 	onUiChange?: (uiState: UiState) => void;
 	initialUiState?: UiState;
-	pinnedRows?: PinnedRows
+	pinnedRows?: PinnedRows;
 	// getRowId: ((originalRow: T, index: number, parent?: Row<T> | undefined) => string)
-	isLoading?: boolean
-    paginationComponent?: PaginationComponentType
-}
+	isLoading?: boolean;
+	paginationComponent?: PaginationComponentType;
+};
 
 export const MemoizedTableBody = React.memo(
 	TableBody,
-	(prev, next) => prev.table.options.data === next.table.options.data
-  ) as typeof TableBody
+	(prev, next) => prev.table.options.data === next.table.options.data,
+) as typeof TableBody;
 
 export function DataTable<T>({
 	columns,
 	data,
 	pinnedRows,
-    pageIndex,
-    pageSize,
-    pageCount,
+	pageIndex,
+	pageSize,
+	pageCount,
 	filterConfig,
 	sortingConfig,
 	showZebraStripes = false,
-	showFilters = true,
 	enableColumnReordering = false,
 	onSort,
-    onFilter,
+	onFilter,
 	onPaginationChange,
-    onRowClick,
+	onRowClick,
 	getRowId,
 	onUiChange,
 	initialUiState,
-    paginationComponent: PaginationComponent,
-	isLoading = false
+	paginationComponent: PaginationComponent,
+	isLoading = false,
 }: DataTableProps<T>) {
-
 	const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
-	const [dropTarget, setDropTarget] = useState<string | null>(null);
+	const [dropColumn, setDropColumn] = useState<string | null>(null);
 
-    const filterConfigMap = useMemo(() => {
-        const map = new Map<string, FilterConfig>();
-        filterConfig?.forEach(filter => {
-          map.set(filter.columnId, filter);
-        });
-        return map;
-      }, [filterConfig]);
+	const filterConfigMap = useMemo(() => {
+		const map = new Map<string, FilterConfig>();
+		filterConfig?.forEach((filter) => {
+			map.set(filter.columnId, filter);
+		});
+		return map;
+	}, [filterConfig]);
 
-	const columnFilters = filterConfig?.reduce<{id:string, value: unknown}[]>((acc, filter) => {
-		if (filter.value !== undefined && filter.value !== null) {
-		  acc.push({id: filter.columnId, value: filter.value})
-		}
-		return acc
-	  }, []) || []
-  
-	const pagination = { pageIndex, pageSize }
+	const columnFilters =
+		filterConfig?.reduce<{ id: string; value: unknown }[]>((acc, filter) => {
+			if (filter.value !== undefined && filter.value !== null) {
+				acc.push({ id: filter.columnId, value: filter.value });
+			}
+			return acc;
+		}, []) || [];
+
+	const pagination = { pageIndex, pageSize };
 	const [sorting, setSorting] = useState<SortingState>(sortingConfig || []);
-	const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(initialUiState?.columnOrder || []);
-	const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(initialUiState?.columnSizing || {})
-	const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>(initialUiState?.columnPinning || { left: [], right: [] });
+	const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(
+		initialUiState?.columnOrder || [],
+	);
+	const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(
+		initialUiState?.columnSizing || {},
+	);
+	const [columnPinning, setColumnPinning] = React.useState<ColumnPinningState>(
+		initialUiState?.columnPinning || { left: [], right: [] },
+	);
 	const [rowPinning, setRowPinning] = React.useState<RowPinningState>({
 		top: pinnedRows?.rowIds || [],
 		bottom: [],
@@ -1157,7 +1336,7 @@ export function DataTable<T>({
 		columns: columns,
 		getCoreRowModel: getCoreRowModel(),
 		manualPagination: true,
-    	manualFiltering: true,
+		manualFiltering: true,
 		manualSorting: true,
 		columnResizeMode: "onChange",
 		state: {
@@ -1167,7 +1346,7 @@ export function DataTable<T>({
 			pagination,
 			sorting,
 			columnPinning,
-			rowPinning
+			rowPinning,
 		},
 		getRowId: getRowId,
 		onRowPinningChange: setRowPinning,
@@ -1175,24 +1354,25 @@ export function DataTable<T>({
 		onColumnPinningChange: setColumnPinning,
 		onColumnOrderChange: setColumnOrder,
 		onPaginationChange: (updater) => {
-			const newPagination = typeof updater === "function" ? updater(pagination) : updater;
-			onPaginationChange && onPaginationChange({
+			const newPagination =
+				typeof updater === "function" ? updater(pagination) : updater;
+			onPaginationChange?.({
 				pageIndex: newPagination.pageIndex + 1,
 				pageSize: newPagination.pageSize,
 			});
 		},
 		onColumnFiltersChange: (updater) => {
-			const newColumnFilters = typeof updater === "function" ? updater(columnFilters) : updater;
-			onFilter && onFilter(newColumnFilters);
+			const newColumnFilters =
+				typeof updater === "function" ? updater(columnFilters) : updater;
+			onFilter?.(newColumnFilters);
 		},
 		onSortingChange: (updater) => {
-			const newSort = typeof updater === "function" ? updater(sorting) : updater;
+			const newSort =
+				typeof updater === "function" ? updater(sorting) : updater;
 			setSorting(newSort);
-			onSort && onSort(newSort);
-		}
+			onSort?.(newSort);
+		},
 	} as TableOptions<T>);
-
-	
 
 	useEffect(() => {
 		// Skip the first render to avoid overwriting loaded state
@@ -1202,55 +1382,57 @@ export function DataTable<T>({
 		}
 
 		// Only call onUiChange after initialization for actual user changes
-		onUiChange && onUiChange({columnOrder, columnSizing, columnPinning});
-	}, [columnOrder, columnSizing, columnPinning]);
+		onUiChange?.({ columnOrder, columnSizing, columnPinning });
+	}, [onUiChange, columnOrder, columnSizing, columnPinning]);
 
-    const handleRowClick = (row: T): MouseEventHandler<HTMLTableRowElement> =>
-        (_) => onRowClick && onRowClick(row);
+	const handleRowClick =
+		(row: T): MouseEventHandler<HTMLTableRowElement> =>
+		(_) =>
+			onRowClick?.(row);
 
 	/**
-   * Instead of calling `column.getSize()` on every render for every header
-   * and especially every data cell (very expensive),
-   * we will calculate all column sizes at once at the root table level in a useMemo
-   * and pass the column sizes down as CSS variables to the <table> element.
-   */
+	 * Instead of calling `column.getSize()` on every render for every header
+	 * and especially every data cell (very expensive),
+	 * we will calculate all column sizes at once at the root table level in a useMemo
+	 * and pass the column sizes down as CSS variables to the <table> element.
+	 */
+	// biome-ignore lint/correctness/useExhaustiveDependencies: getFlatHeaders() returns new array reference on every render, adding it would defeat memoization and break resizing
 	const columnSizeVars = useMemo(() => {
-		const headers = table.getFlatHeaders()
-		const colSizes: { [key: string]: number } = {}
-		for (let i = 0; i < headers.length; i++) {
-		  const header = headers[i]!
-		  colSizes[`--header-${header.id}-size`] = header.getSize()
-		  colSizes[`--col-${header.column.id}-size`] = header.column.getSize()
-		}
-		return colSizes
+		const headers = table.getFlatHeaders();
+		const colSizes: { [key: string]: number } = {};
+		headers.forEach((header) => {
+			colSizes[`--header-${header.id}-size`] = header.getSize();
+			colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
+		});
+		return colSizes;
 	}, [table.getState().columnSizingInfo, table.getState().columnSizing]);
 
 	return (
 		<div>
 			<div className={`${styles.tableContainer} relative`}>
-				<Table className={styles.table} style={{...columnSizeVars}} >
+				<Table className={styles.table} style={{ ...columnSizeVars }}>
 					<TableHeader className={styles.thead}>
 						<tr className={"group"}>
-							{table.getHeaderGroups()[0]?.headers.map((header) =>
+							{table.getHeaderGroups()[0]?.headers.map((header) => (
 								<TableHead
 									key={`header-${header.id}`}
 									header={header}
 									columnOrder={table.getAllLeafColumns().map((col) => col.id)}
 									enableColumnReordering={enableColumnReordering}
 									draggedColumn={draggedColumn}
-									dropTarget={dropTarget}
-									setDraggedColumn={setDraggedColumn}
-									setDropTarget={setDropTarget}
-									setColumnOrder={setColumnOrder}
-								/>)}
+									dropTarget={dropColumn}
+									onChangeDraggedColumn={setDraggedColumn}
+									onDropColumn={setDropColumn}
+									onChangeColumnOrder={setColumnOrder}
+								/>
+							))}
 						</tr>
 					</TableHeader>
 					<TableBody
 						table={table}
 						pinnedRows={pinnedRows}
-						showFilters={showFilters}
 						draggedColumn={draggedColumn}
-						dropTarget={dropTarget}
+						dropTarget={dropColumn}
 						filterConfigMap={filterConfigMap}
 						handleRowClick={handleRowClick}
 						showZebraStripes={showZebraStripes}
@@ -1258,17 +1440,21 @@ export function DataTable<T>({
 					/>
 				</Table>
 			</div>
-			{PaginationComponent &&
-                <PaginationComponent
-                    pageCount={pageCount}
-                    currentPage={pageIndex}
-                    canPrevious={table.getCanPreviousPage()}
-                    canNext={pageCount === undefined ? data.length >= pageSize : table.getCanNextPage()}
-                    onChangePage={x => table.setPageIndex(x - 1)}
-                    onPageSizeChange={table.setPageSize}
-                    pageSize={pageSize}
-                /> }
+			{PaginationComponent && (
+				<PaginationComponent
+					pageCount={pageCount}
+					currentPage={pageIndex}
+					canPrevious={table.getCanPreviousPage()}
+					canNext={
+						pageCount === undefined
+							? data.length >= pageSize
+							: table.getCanNextPage()
+					}
+					onChangePage={(x) => table.setPageIndex(x - 1)}
+					onPageSizeChange={table.setPageSize}
+					pageSize={pageSize}
+				/>
+			)}
 		</div>
-		
 	);
 }

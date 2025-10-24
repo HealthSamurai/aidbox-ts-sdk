@@ -1,184 +1,318 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { DataTable, TableCellContent, TableHeaderContent, type ColumnFilterConfig } from "./data-table-pro-max";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useMemo, useState } from "react";
+import {
+	type ColumnFilterConfig,
+	DataTable,
+	type FilterConfig,
+	TableCellContent,
+	TableHeaderContent,
+} from "./data-table-pro-max";
 
 type PatientRow = {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
-    email?: string;
-    birthDate?: string;
-    gender?: 'male' | 'female' | 'other' | 'unknown';
-    street?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    zip?: string;
-    encounters?: number;
+	id: string;
+	firstName?: string;
+	lastName?: string;
+	phoneNumber?: string;
+	email?: string;
+	birthDate?: string;
+	gender?: "male" | "female" | "other" | "unknown";
+	street?: string;
+	city?: string;
+	state?: string;
+	country?: string;
+	zip?: string;
+	encounters?: number;
 };
 
 const patientsColumns: ColumnDef<PatientRow>[] = [
-    {
-      accessorKey: "firstName",
-      header: () => <TableHeaderContent content={"First name"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-      enableSorting: true,
-    },
-    {
-      accessorKey: "lastName",
-      header: () => <TableHeaderContent content={"Last name"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-      enableSorting: true
-    },
-    {
-      accessorKey: "id",
-      header: () => <TableHeaderContent content={"ID"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "birthDate",
-      header: () => <TableHeaderContent content={"Birth"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-      enableSorting: true,
-      minSize: 120
-    },
-    {
-      accessorKey: "phoneNumber",
-      header: () => <TableHeaderContent content={"Phone number"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-      enableSorting: true
-    },
-    {
-      accessorKey: "email",
-      header: () => <TableHeaderContent content={"Email"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-      enableSorting: true
-    },
-    {
-      accessorKey: "gender",
-      header: () => <TableHeaderContent content={"Gender"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "street",
-      header: () => <TableHeaderContent content={"Street"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "city",
-      header: () => <TableHeaderContent content={"City"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "state",
-      header: () => <TableHeaderContent content={"State"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "zip",
-      header: () => <TableHeaderContent content={"ZIP"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "country",
-      header: () => <TableHeaderContent content={"Country"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as string} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      accessorKey: "encounters",
-      header: () => <TableHeaderContent content={"Encounters"} />,
-      cell: ({ cell }) => <TableCellContent content={cell.getValue() as number} />,
-      enablePinning: true,
-      enableResizing: true,
-    },
-    {
-      id: "actions",
-      header: () => <TableHeaderContent content={"Actions"} />,
-      cell: (_) => (
-        <TableCellContent content={
-          <label
-            className="text-blue-600 hover:text-blue-800 cursor-pointer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Match
-          </label>
-        } />
-      ),
-      enablePinning: true,
-    },
+	{
+		accessorKey: "firstName",
+		header: () => <TableHeaderContent content={"First name"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+		enableSorting: true,
+	},
+	{
+		accessorKey: "lastName",
+		header: () => <TableHeaderContent content={"Last name"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+		enableSorting: true,
+	},
+	{
+		accessorKey: "id",
+		header: () => <TableHeaderContent content={"ID"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "birthDate",
+		header: () => <TableHeaderContent content={"Birth"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+		enableSorting: true,
+		minSize: 120,
+	},
+	{
+		accessorKey: "phoneNumber",
+		header: () => <TableHeaderContent content={"Phone number"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+		enableSorting: true,
+	},
+	{
+		accessorKey: "email",
+		header: () => <TableHeaderContent content={"Email"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+		enableSorting: true,
+	},
+	{
+		accessorKey: "gender",
+		header: () => <TableHeaderContent content={"Gender"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "street",
+		header: () => <TableHeaderContent content={"Street"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "city",
+		header: () => <TableHeaderContent content={"City"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "state",
+		header: () => <TableHeaderContent content={"State"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "zip",
+		header: () => <TableHeaderContent content={"ZIP"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "country",
+		header: () => <TableHeaderContent content={"Country"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as string} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		accessorKey: "encounters",
+		header: () => <TableHeaderContent content={"Encounters"} />,
+		cell: ({ cell }) => (
+			<TableCellContent content={cell.getValue() as number} />
+		),
+		enablePinning: true,
+		enableResizing: true,
+	},
+	{
+		id: "actions",
+		header: () => <TableHeaderContent content={"Actions"} />,
+		cell: (_) => (
+			<TableCellContent
+				content={
+					<button
+						type="button"
+						className="text-blue-600 hover:text-blue-800 cursor-pointer"
+						onClick={(e) => e.stopPropagation()}
+					>
+						Match
+					</button>
+				}
+			/>
+		),
+		enablePinning: true,
+	},
 ];
 
-const filterConfig: ColumnFilterConfig = [
-  {
-    enabled: true,
-    columnId: 'firstName',
-    type: 'text',
-    placeholder: 'Search',
+const initialFilterConfig: ColumnFilterConfig = [
+	{
+		enabled: true,
+		columnId: "firstName",
+		type: "text",
+		placeholder: "Search",
+	},
+	{
+		enabled: true,
+		columnId: "lastName",
+		type: "text",
+		placeholder: "Search",
+	},
+	{
+		enabled: true,
+		columnId: "id",
+		type: "text",
+		placeholder: "Search",
+	},
+	{
+		enabled: true,
+		columnId: "birthDate",
+		type: "date",
+		placeholder: "Pick date",
+	},
+	{
+		enabled: true,
+		columnId: "phoneNumber",
+		type: "text",
+		placeholder: "Search",
+	},
+	{
+		enabled: true,
+		columnId: "email",
+		type: "text",
+		placeholder: "Search",
+	},
+	{
+		enabled: true,
+		columnId: "gender",
+		type: "enum",
+		options: ["male", "female"],
+		placeholder: "Search",
+	},
+	{
+		enabled: true,
+		columnId: "encounters",
+		type: "text",
+		placeholder: "Search",
+	},
+];
 
-  },
-  {
-    enabled: true,
-    columnId: 'lastName',
-    type: 'text',
-    placeholder: 'Search',
+// Helper function to apply filters to data
+function filterData(
+	data: PatientRow[],
+	filterConfig: ColumnFilterConfig,
+): PatientRow[] {
+	return data.filter((row) => {
+		return filterConfig.every((filter) => {
+			if (!filter.value) return true;
 
-  },
-  {
-    enabled: true,
-    columnId: 'id',
-    type: 'text',
-    placeholder: 'Search',
-  },
-  {
-    enabled: true,
-    columnId: 'birthDate',
-    type: 'date',
-    placeholder: 'Pick date'
-  },
-  {
-    enabled: true,
-    columnId: 'phoneNumber',
-    type: 'text',
-    placeholder: 'Search',
-  },
-  {
-    enabled: true,
-    columnId: 'email',
-    type: 'text',
-    placeholder: 'Search',
-  },
-  {
-    enabled: true,
-    columnId: 'encounters',
-    type: 'text',
-    placeholder: 'Search'
-  }
-]
+			const columnValue = row[filter.columnId as keyof PatientRow];
+
+			switch (filter.type) {
+				case "text":
+					return String(columnValue || "")
+						.toLowerCase()
+						.includes(String(filter.value).toLowerCase());
+
+				case "date": {
+					if (!filter.value) return true;
+					const rowDate = new Date(columnValue as string);
+					const filterDate = new Date(filter.value as Date);
+					return (
+						rowDate.getFullYear() === filterDate.getFullYear() &&
+						rowDate.getMonth() === filterDate.getMonth() &&
+						rowDate.getDate() === filterDate.getDate()
+					);
+				}
+
+				case "enum":
+					return columnValue === filter.value;
+
+				case "number":
+					return String(columnValue) === String(filter.value);
+
+				default:
+					return true;
+			}
+		});
+	});
+}
+
+// Wrapper component that manages filter state
+function DataTableWithFilters() {
+	const [filterConfig, setFilterConfig] =
+		useState<ColumnFilterConfig>(initialFilterConfig);
+	const [pageIndex, setPageIndex] = useState(1);
+	const pageSize = 10;
+
+	// Apply filters to data
+	const filteredData = useMemo(() => {
+		return filterData(mockPatients, filterConfig);
+	}, [filterConfig]);
+
+	// Handle filter changes
+	const handleFilterChange = (
+		filters: Array<{ id: string; value: unknown }>,
+	) => {
+		setFilterConfig((prev) =>
+			prev.map((filter) => {
+				const newFilter = filters.find((f) => f.id === filter.columnId);
+				if (newFilter !== undefined) {
+					return { ...filter, value: newFilter.value } as FilterConfig;
+				}
+				// Clear the filter value if it's not in the new filters array
+				const { value, ...rest } = filter;
+				return rest as FilterConfig;
+			}),
+		);
+		// Reset to first page when filters change
+		setPageIndex(1);
+	};
+
+	return (
+		<div className="p-4">
+			<div className="mb-4 text-sm text-gray-600">
+				Showing {filteredData.length} of {mockPatients.length} patients
+			</div>
+			<DataTable
+				columns={patientsColumns}
+				data={filteredData}
+				filterConfig={filterConfig}
+				pageIndex={pageIndex}
+				pageSize={pageSize}
+				onFilter={handleFilterChange}
+				onPaginationChange={({ pageIndex }) => setPageIndex(pageIndex)}
+				onRowClick={console.log}
+				showZebraStripes={true}
+				enableColumnReordering={true}
+			/>
+		</div>
+	);
+}
 
 const mockPatients: PatientRow[] = [
 	{
@@ -492,15 +626,8 @@ const meta: Meta<typeof DataTable> = {
 export default meta;
 
 export const Default: StoryObj<typeof DataTable<PatientRow>> = {
-	args: {
-		columns: patientsColumns,
-		data: mockPatients,
-    filterConfig,
-		pageIndex: 1,
-		pageSize: 10,
-	},
 	parameters: {
 		layout: "fullscreen",
 	},
-	render: (args) => <DataTable {...args} />,
+	render: () => <DataTableWithFilters />,
 };
