@@ -17,6 +17,7 @@ type RequestMethod = (typeof METHODS)[number];
 
 const requestMethodVariants = cva<{ method: { [K in RequestMethod]: string } }>(
 	cn(
+		"cursor-pointer",
 		"border-r-0",
 		"rounded-r-none",
 		"shadow-none",
