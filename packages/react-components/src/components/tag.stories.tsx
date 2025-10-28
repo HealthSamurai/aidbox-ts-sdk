@@ -54,7 +54,7 @@ const meta: Meta<typeof Tag> = {
 		},
 		color: {
 			control: "select",
-			options: ["green", "gray", "red", "bright", "blue"],
+			options: ["green", "gray", "red", "bright", "blue", "yellow"],
 		},
 		subtle: {
 			control: "boolean",
@@ -203,6 +203,12 @@ export const AllVariants: Story = {
 			<Tag type="round" color="bright" subtle={true} icon={<InfoIcon />}>
 				offline_access
 			</Tag>
+			<Tag type="round" color="yellow" subtle={false} icon={<CheckIcon />}>
+				Missing
+			</Tag>
+			<Tag type="round" color="yellow" subtle={true} icon={<CheckIcon />}>
+				offline_access
+			</Tag>
 			<Tag type="square" color="green" subtle={false} icon={<CheckIcon />}>
 				authorization_code
 			</Tag>
@@ -219,6 +225,12 @@ export const AllVariants: Story = {
 				offline_access
 			</Tag>
 			<Tag type="square" color="bright" subtle={true} icon={<InfoIcon />}>
+				offline_access
+			</Tag>
+			<Tag type="square" color="yellow" subtle={false} icon={<CheckIcon />}>
+				Missing
+			</Tag>
+			<Tag type="square" color="yellow" subtle={true} icon={<CheckIcon />}>
 				offline_access
 			</Tag>
 		</div>

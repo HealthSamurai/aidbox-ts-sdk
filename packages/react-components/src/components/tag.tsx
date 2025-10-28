@@ -42,6 +42,7 @@ const tagVariants = cva(baseChipStyles, {
 			red: "",
 			bright: "",
 			blue: "",
+			yellow: "",
 		},
 		subtle: {
 			true: "",
@@ -98,6 +99,17 @@ const tagVariants = cva(baseChipStyles, {
 			color: "blue",
 			subtle: true,
 			class: "bg-bg-brand-secondary text-text-link",
+		},
+		// Yellow variants
+		{
+			color: "yellow",
+			subtle: false,
+			class: "bg-bg-warning-primary_inverse text-text-primary_on-brand",
+		},
+		{
+			color: "yellow",
+			subtle: true,
+			class: "bg-bg-warning-secondary text-text-warning-primary",
 		},
 	],
 	defaultVariants: {
