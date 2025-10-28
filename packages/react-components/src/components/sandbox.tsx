@@ -9,58 +9,87 @@ import {
 } from "../shadcn/components/ui/tooltip";
 import { cn } from "../shadcn/lib/utils";
 
+// Base sandbox styles
 const baseSandboxStyles = cn(
+	// Layout
 	"flex",
 	"flex-col",
 	"items-start",
 	"relative",
 	"size-full",
+	// Spacing
 	"gap-2",
 );
 
+// Input container styles
 const inputContainerStyles = cn(
+	// Layout
 	"flex",
 	"items-center",
 	"gap-2",
 	"w-full",
+	// Spacing
 	"px-3",
 	"py-2",
+	// Background & Border
 	"bg-bg-tertiary",
 	"rounded",
+	// Overflow
 	"overflow-hidden",
 );
 
-const contentStyles = cn("flex", "items-center", "gap-2", "flex-1", "min-w-0");
+// Content styles
+const contentStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"gap-2",
+	"flex-1",
+	"min-w-0",
+);
 
+// Text styles
 const textStyles = cn(
+	// Typography
 	"typo-body",
 	"text-text-primary",
+	// Layout
 	"flex-1",
 	"min-w-0",
 	"truncate",
 );
 
+// Copy button styles
 const copyButtonStyles = cn(
+	// Layout
 	"flex",
 	"items-center",
 	"justify-center",
 	"shrink-0",
+	// Sizing
 	"size-4",
+	// Hover
 	"hover:opacity-80",
 	"transition-opacity",
 	"duration-200",
 );
 
-export type SandboxProps = {
+export interface SandboxProps
+	extends Omit<React.ComponentProps<"div">, "children" | "onCopy"> {
 	url: string;
-	showCopy?: boolean;
-	copyIcon?: React.ReactNode;
-	tooltipText?: string;
-	showToast?: boolean;
-	onCopy?: (text: string) => void;
-} & Omit<React.ComponentProps<"div">, "children" | "onCopy">;
 
-export function Sandbox({
+	showCopy?: boolean;
+
+	copyIcon?: React.ReactNode;
+
+	tooltipText?: string;
+
+	showToast?: boolean;
+
+	onCopy?: (text: string) => void;
+}
+
+function Sandbox({
 	url,
 	showCopy = true,
 	copyIcon = <Copy />,
@@ -93,6 +122,7 @@ export function Sandbox({
 
 											if (showToast) {
 												toast("Copied", {
+												toast("Copied", {
 													description:
 														url.length > 50 ? `${url.slice(0, 50)}...` : url,
 													duration: 2000,
@@ -119,3 +149,5 @@ export function Sandbox({
 		</>
 	);
 }
+
+export { Sandbox };
