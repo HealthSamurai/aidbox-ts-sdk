@@ -17,17 +17,17 @@ import {
 	TableRow,
 } from "../shadcn/components/ui/table";
 
-export interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[];
+export interface DataTableProps<TData> {
+	columns: { [K in keyof TData]: ColumnDef<TData, TData[K]> }[keyof TData][];
 	data: TData[];
 	stickyHeader?: boolean;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
 	columns,
 	data,
 	stickyHeader = false,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
 	"use no memo";
 	const table = useReactTable({
 		data,
