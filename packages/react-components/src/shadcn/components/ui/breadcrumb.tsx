@@ -1,11 +1,23 @@
 import { Slot } from "@radix-ui/react-slot";
 import { MoreHorizontal } from "lucide-react";
 import type * as React from "react";
+import { createContext, useContext } from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
-function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
-	return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
+const BreadcrumbContext = createContext<{ isWhite?: boolean }>({});
+
+function Breadcrumb({
+	isWhite,
+	...props
+}: React.ComponentProps<"nav"> & { isWhite?: boolean }) {
+	return (
+		<BreadcrumbContext.Provider
+			value={isWhite !== undefined ? { isWhite } : {}}
+		>
+			<nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />
+		</BreadcrumbContext.Provider>
+	);
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
@@ -44,6 +56,7 @@ function BreadcrumbLink({
 }: React.ComponentProps<"a"> & {
 	asChild?: boolean;
 }) {
+	const { isWhite } = useContext(BreadcrumbContext);
 	const Comp = asChild ? Slot : "a";
 
 	return (
@@ -52,15 +65,16 @@ function BreadcrumbLink({
 			className={cn(
 				"typo-body",
 				"bg-bg-tertiary",
-				"text-text-tertiary",
 				"rounded-md",
 				"px-2",
 				"py-1",
 				"transition-colors",
-				"hover:text-text-secondary",
 				"focus-visible:outline-none",
 				"focus-visible:ring-2",
 				"focus-visible:ring-utility-blue/70",
+				isWhite
+					? ["text-text-tertiary", "hover:text-text-secondary"]
+					: ["text-text-tertiary", "hover:text-text-secondary"],
 				className,
 			)}
 			{...props}
@@ -69,6 +83,8 @@ function BreadcrumbLink({
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
+	const { isWhite } = useContext(BreadcrumbContext);
+
 	return (
 		// biome-ignore lint/a11y/useFocusableInteractive: FIXME: unchanged shadcn
 		// biome-ignore lint/a11y/useSemanticElements: FIXME: unchanged shadcn
@@ -79,9 +95,9 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
 			aria-current="page"
 			className={cn(
 				"typo-page-header",
-				"text-text-primary",
 				"px-0",
 				"py-0.5",
+				isWhite ? "text-white" : "text-text-primary",
 				className,
 			)}
 			{...props}

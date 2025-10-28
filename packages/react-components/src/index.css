@@ -38,7 +38,7 @@
 	--color-text-error-primary: var(--color-red-500);
 	--color-text-error-secondary: var(--color-red-400);
 	--color-text-success-primary: var(--color-green-500);
-	--color-text-warning-primary: var(--color-yellow-500);
+	--color-text-warning-primary: var(--color-yellow-600);
 	--color-white: #ffffff;
 	--color-border-primary: var(--color-neutral-300);
 	--color-border-primary_hover: var(--color-neutral-400);
@@ -52,6 +52,8 @@
 	--color-border-error_inverse: var(--color-red-400);
 	--color-border-error_inverse_hover: var(--color-red-300);
 	--color-border-success: var(--color-green-500);
+	--color-border-warning-primary: var(--color-yellow-500);
+	--color-border-warning-secondary: var(--color-yellow-300);
 	--color-bg-primary: #ffffff;
 	--color-bg-primary_inverse: var(--color-neutral-900);
 	--color-bg-secondary: var(--color-neutral-50);
