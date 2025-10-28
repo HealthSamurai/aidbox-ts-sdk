@@ -1,19 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DataTable, type DataTableProps } from "./data-table";
 
-const meta: Meta<typeof DataTable> = {
+type Data = {
+	name: string;
+	age: number;
+};
+
+const meta: Meta<typeof DataTable<Data>> = {
 	title: "Component/Data table",
-	component: DataTable,
+	component: DataTable<Data>,
 	tags: ["autodocs"],
 };
 
 export default meta;
-type Story = StoryObj<typeof DataTable>;
+type Story = StoryObj<typeof meta>;
 
-function DataTableWrapper<TData, TValue>({
-	columns,
-	data,
-}: DataTableProps<TData, TValue>) {
+function DataTableWrapper({ columns, data }: DataTableProps<Data>) {
 	return <DataTable columns={columns} data={data} />;
 }
 
