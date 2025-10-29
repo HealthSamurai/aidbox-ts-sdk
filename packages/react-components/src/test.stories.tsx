@@ -16,22 +16,15 @@ export const Frame1333 = {
 	render: () => (
 		<div
 			style={{
-				width: "2735px",
-				height: "2132px",
 				backgroundColor: "#ffffff",
-				position: "relative",
+				padding: "40px",
+				display: "flex",
+				flexDirection: "column",
+				gap: "40px",
 			}}
 		>
 			{/* Tabs (Content1 | Content2) */}
-			<div
-				style={{
-					position: "absolute",
-					left: "311px",
-					top: "269px",
-					width: "692px",
-					height: "262px",
-				}}
-			>
+			<div>
 				<Tabs defaultValue="content1">
 					<TabsList>
 						<TabsTrigger value="content1">Content 1</TabsTrigger>
@@ -47,53 +40,16 @@ export const Frame1333 = {
 			</div>
 
 			{/* segmentControl (Yaml | Json) */}
-			<div
-				style={{
-					position: "absolute",
-					left: "264px",
-					top: "868px",
-					width: "2215px",
-					height: "262px",
-					display: "flex",
-					alignItems: "center",
-					padding: "20px",
-				}}
-			>
+			<div>
 				<ToggleGroup type="single" variant="outline" defaultValue="yaml">
 					<ToggleGroupItem value="yaml">YAML</ToggleGroupItem>
 					<ToggleGroupItem value="json">JSON</ToggleGroupItem>
 				</ToggleGroup>
 			</div>
 
-			{/* primaryButton */}
-			<div
-				style={{
-					position: "absolute",
-					left: "311px",
-					top: "1323px",
-					width: "692px",
-					height: "262px",
-					display: "flex",
-					alignItems: "center",
-					padding: "20px",
-				}}
-			>
+			{/* Buttons */}
+			<div style={{ display: "flex", gap: "20px" }}>
 				<Button variant="primary">Primary Button</Button>
-			</div>
-
-			{/* secondaryButton */}
-			<div
-				style={{
-					position: "absolute",
-					left: "1053px",
-					top: "1323px",
-					width: "692px",
-					height: "262px",
-					display: "flex",
-					alignItems: "center",
-					padding: "20px",
-				}}
-			>
 				<Button variant="secondary">Secondary Button</Button>
 			</div>
 		</div>
