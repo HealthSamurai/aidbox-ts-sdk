@@ -8,6 +8,11 @@
       "path": "src/shadcn/components/ui/textarea.tsx",
       "content": "import type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Textarea styles\nconst textareaStyles = cn(\n\t// Layout\n\t\"flex\",\n\t\"w-full\",\n\t\"min-h-16\",\n\t\"field-sizing-content\",\n\t// Shape\n\t\"rounded-md\",\n\t// Borders\n\t\"border\",\n\t\"border-border-primary\",\n\t// Background & Colors\n\t\"bg-transparent\",\n\t\"text-base\",\n\t// Spacing\n\t\"px-3\",\n\t\"py-2\",\n\t// Typography\n\t\"md:text-sm\",\n\t// Placeholder\n\t\"placeholder:text-text-tertiary\",\n\t// Transitions\n\t\"transition-[color,box-shadow]\",\n\t\"outline-none\",\n\t// Hover\n\t\"hover:border-border-primary_hover\",\n\t// Focus\n\t\"focus-visible:border-border-link\",\n\t\"focus-visible:ring-2\",\n\t\"focus-visible:ring-utility-blue/70\",\n\t// Invalid\n\t\"aria-invalid:border-border-error\",\n\t\"aria-invalid:ring-2\",\n\t\"aria-invalid:ring-utility-red/70\",\n\t// Disabled\n\t\"disabled:cursor-not-allowed\",\n\t\"disabled:opacity-50\",\n\t\"disabled:border-border-disabled\",\n);\n\nfunction Textarea({ className, ...props }: React.ComponentProps<\"textarea\">) {\n\treturn (\n\t\t<textarea\n\t\t\tdata-slot=\"textarea\"\n\t\t\tclassName={cn(textareaStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Textarea };\n",
       "type": "registry:component"
+    },
+    {
+      "path": "src/shadcn/components/ui/textarea.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport { Textarea } from \"#shadcn/components/ui/textarea\";\n\nconst meta = {\n\ttitle: \"Component/Textarea\",\n} satisfies Meta;\nexport default meta;\n\ntype Story = StoryObj<typeof meta>;\n\nexport const Demo = {\n\trender: () => <Textarea placeholder=\"Type your message here.\" />,\n} satisfies Story;\n",
+      "type": "registry:ui"
     }
   ]
 }

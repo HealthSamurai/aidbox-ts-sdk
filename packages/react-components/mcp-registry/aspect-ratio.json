@@ -8,6 +8,11 @@
       "path": "src/shadcn/components/ui/aspect-ratio.tsx",
       "content": "\"use client\";\nimport * as AspectRatioPrimitive from \"@radix-ui/react-aspect-ratio\";\n\nfunction AspectRatio({\n\t...props\n}: React.ComponentProps<typeof AspectRatioPrimitive.Root>) {\n\treturn <AspectRatioPrimitive.Root data-slot=\"aspect-ratio\" {...props} />;\n}\n\nexport { AspectRatio };\n",
       "type": "registry:component"
+    },
+    {
+      "path": "src/shadcn/components/ui/aspect-ratio.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport { AspectRatio } from \"#shadcn/components/ui/aspect-ratio\";\n\nconst meta = {\n\ttitle: \"Component/Aspect ration\",\n} satisfies Meta;\nexport default meta;\n\ntype Story = StoryObj<typeof meta>;\n\nexport const Demo = {\n\trender: () => (\n\t\t<AspectRatio ratio={16 / 9} className=\"bg-muted rounded-lg\">\n\t\t\t<img\n\t\t\t\tsrc=\"https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?w=800&dpr=2&q=80\"\n\t\t\t\talt=\"Aspect Ration demonstraion image.\"\n\t\t\t\tclassName=\"h-full w-full rounded-lg object-cover dark:brightness-[0.2] dark:grayscale\"\n\t\t\t/>\n\t\t</AspectRatio>\n\t),\n} satisfies Story;\n",
+      "type": "registry:ui"
     }
   ]
 }

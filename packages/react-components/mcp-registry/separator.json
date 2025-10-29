@@ -8,6 +8,11 @@
       "path": "src/shadcn/components/ui/separator.tsx",
       "content": "\"use client\";\nimport * as SeparatorPrimitive from \"@radix-ui/react-separator\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Separator styles\nconst separatorStyles = cn(\n\t// Background\n\t\"bg-border-separator\",\n\t// Layout\n\t\"shrink-0\",\n\t// Horizontal orientation\n\t\"data-[orientation=horizontal]:h-px\",\n\t\"data-[orientation=horizontal]:w-full\",\n\t// Vertical orientation\n\t\"data-[orientation=vertical]:h-full\",\n\t\"data-[orientation=vertical]:w-px\",\n);\n\nfunction Separator({\n\tclassName,\n\torientation = \"horizontal\",\n\tdecorative = true,\n\t...props\n}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {\n\treturn (\n\t\t<SeparatorPrimitive.Root\n\t\t\tdata-slot=\"separator\"\n\t\t\tdecorative={decorative}\n\t\t\torientation={orientation}\n\t\t\tclassName={cn(separatorStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Separator };\n",
       "type": "registry:component"
+    },
+    {
+      "path": "src/shadcn/components/ui/separator.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport { Separator } from \"#shadcn/components/ui/separator\";\n\nconst meta = {\n\ttitle: \"Component/Separator\",\n} satisfies Meta;\nexport default meta;\n\ntype Story = StoryObj<typeof meta>;\n\nexport const Demo = {\n\trender: () => (\n\t\t<div>\n\t\t\t<div className=\"space-y-1\">\n\t\t\t\t<h4 className=\"text-sm leading-none font-medium\">Radix Primitives</h4>\n\t\t\t\t<p className=\"text-muted-foreground text-sm\">\n\t\t\t\t\tAn open-source UI component library.\n\t\t\t\t</p>\n\t\t\t</div>\n\t\t\t<Separator className=\"my-4\" />\n\t\t\t<div className=\"flex h-5 items-center space-x-4 text-sm\">\n\t\t\t\t<div>Blog</div>\n\t\t\t\t<Separator orientation=\"vertical\" />\n\t\t\t\t<div>Docs</div>\n\t\t\t\t<Separator orientation=\"vertical\" />\n\t\t\t\t<div>Source</div>\n\t\t\t</div>\n\t\t</div>\n\t),\n} satisfies Story;\n",
+      "type": "registry:ui"
     }
   ]
 }

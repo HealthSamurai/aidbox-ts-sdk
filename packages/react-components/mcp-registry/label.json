@@ -8,6 +8,11 @@
       "path": "src/shadcn/components/ui/label.tsx",
       "content": "\"use client\";\nimport * as LabelPrimitive from \"@radix-ui/react-label\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Label styles\nconst labelStyles = cn(\n\t// Layout\n\t\"flex\",\n\t\"items-center\",\n\t\"gap-2\",\n\t// Typography\n\t\"text-text-primary\",\n\t\"typo-label\",\n\t\"leading-none\",\n\t// Interaction\n\t\"select-none\",\n\t// Group disabled states\n\t\"group-data-[disabled=true]:pointer-events-none\",\n\t\"group-data-[disabled=true]:opacity-50\",\n\t// Peer disabled states\n\t\"peer-disabled:cursor-not-allowed\",\n\t\"peer-disabled:opacity-50\",\n);\n\nfunction Label({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof LabelPrimitive.Root>) {\n\treturn (\n\t\t<LabelPrimitive.Root\n\t\t\tdata-slot=\"label\"\n\t\t\tclassName={cn(labelStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Label };\n",
       "type": "registry:component"
+    },
+    {
+      "path": "src/shadcn/components/ui/label.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport { Checkbox } from \"#shadcn/components/ui/checkbox\";\nimport { Label } from \"#shadcn/components/ui/label\";\n\nconst meta = {\n\ttitle: \"Component/Label\",\n} satisfies Meta;\nexport default meta;\n\ntype Story = StoryObj<typeof meta>;\n\nexport const Demo = {\n\trender: () => (\n\t\t<div>\n\t\t\t<div className=\"flex items-center space-x-2\">\n\t\t\t\t<Checkbox id=\"terms\" />\n\t\t\t\t<Label htmlFor=\"terms\">Accept terms and conditions</Label>\n\t\t\t</div>\n\t\t</div>\n\t),\n} satisfies Story;\n",
+      "type": "registry:ui"
     }
   ]
 }

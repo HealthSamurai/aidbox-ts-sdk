@@ -8,6 +8,11 @@
       "path": "src/shadcn/components/ui/skeleton.tsx",
       "content": "import { cn } from \"#shadcn/lib/utils\";\n\n// Skeleton styles\nconst skeletonStyles = cn(\"bg-bg-tertiary\", \"animate-pulse\", \"rounded-md\");\n\nfunction Skeleton({ className, ...props }: React.ComponentProps<\"div\">) {\n\treturn (\n\t\t<div\n\t\t\tdata-slot=\"skeleton\"\n\t\t\tclassName={cn(skeletonStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Skeleton };\n",
       "type": "registry:component"
+    },
+    {
+      "path": "src/shadcn/components/ui/skeleton.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport { Skeleton } from \"#shadcn/components/ui/skeleton\";\n\nconst meta = {\n\ttitle: \"Component/Skeleton\",\n} satisfies Meta;\nexport default meta;\n\ntype Story = StoryObj<typeof meta>;\n\nexport const Demo = {\n\trender: () => (\n\t\t<div className=\"flex items-center space-x-4\">\n\t\t\t<Skeleton className=\"h-12 w-12 rounded-full\" />\n\t\t\t<div className=\"space-y-2\">\n\t\t\t\t<Skeleton className=\"h-4 w-[250px]\" />\n\t\t\t\t<Skeleton className=\"h-4 w-[200px]\" />\n\t\t\t</div>\n\t\t</div>\n\t),\n} satisfies Story;\n",
+      "type": "registry:ui"
     }
   ]
 }

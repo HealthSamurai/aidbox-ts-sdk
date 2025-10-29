@@ -8,6 +8,11 @@
       "path": "src/shadcn/components/ui/progress.tsx",
       "content": "import * as ProgressPrimitive from \"@radix-ui/react-progress\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Progress root styles\nconst progressRootStyles = cn(\n\t\"relative\",\n\t\"h-2\",\n\t\"w-full\",\n\t\"overflow-hidden\",\n\t\"rounded-full\",\n\t\"bg-bg-quaternary\",\n);\n\n// Progress indicator styles\nconst progressIndicatorStyles = cn(\n\t\"bg-bg-link\",\n\t\"h-full\",\n\t\"w-full\",\n\t\"flex-1\",\n\t\"transition-all\",\n);\n\nfunction Progress({\n\tclassName,\n\tvalue,\n\t...props\n}: React.ComponentProps<typeof ProgressPrimitive.Root>) {\n\treturn (\n\t\t<ProgressPrimitive.Root\n\t\t\tdata-slot=\"progress\"\n\t\t\tclassName={cn(progressRootStyles, className)}\n\t\t\t{...props}\n\t\t>\n\t\t\t<ProgressPrimitive.Indicator\n\t\t\t\tdata-slot=\"progress-indicator\"\n\t\t\t\tclassName={progressIndicatorStyles}\n\t\t\t\tstyle={{ transform: `translateX(-${100 - (value || 0)}%)` }}\n\t\t\t/>\n\t\t</ProgressPrimitive.Root>\n\t);\n}\n\nexport { Progress };\n",
       "type": "registry:component"
+    },
+    {
+      "path": "src/shadcn/components/ui/progress.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport * as React from \"react\";\nimport { Progress } from \"#shadcn/components/ui/progress\";\n\nconst meta = {\n\ttitle: \"Component/Progress\",\n} satisfies Meta;\nexport default meta;\n\ntype Story = StoryObj<typeof meta>;\n\nexport const Demo = {\n\trender: () => {\n\t\tconst [progress, setProgress] = React.useState(13);\n\n\t\tReact.useEffect(() => {\n\t\t\tconst timer = setTimeout(() => setProgress(66), 500);\n\t\t\treturn () => clearTimeout(timer);\n\t\t}, []);\n\n\t\treturn <Progress value={progress} className=\"w-[60%]\" />;\n\t},\n} satisfies Story;\n",
+      "type": "registry:ui"
     }
   ]
 }

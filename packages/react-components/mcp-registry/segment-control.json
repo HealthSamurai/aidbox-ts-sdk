@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "segment-control",
+  "type": "registry:component",
+  "description": "A segmented control component for selecting between multiple options.",
+  "files": [
+    {
+      "path": "src/components/segment-control.tsx",
+      "content": "import { createContext, type ReactNode, useContext } from \"react\";\nimport { cn } from \"#shadcn/lib/utils.js\";\n\ninterface SegmentControlContextType {\n\tdefaultValue?: string;\n\tonValueChange?: (value: string) => void;\n\tname?: string;\n}\n\nconst SegmentControlContext = createContext<SegmentControlContextType>({});\n\nexport interface SegmentControlProps {\n\tdefaultValue?: string;\n\tonValueChange?: (value: string) => void;\n\tname?: string;\n}\n\ninterface SegmentControlItemProps {\n\tchildren: ReactNode;\n\tvalue: string;\n}\nconst segmentControlItemClass = cn(\n\t\"flex\",\n\t\"items-center\",\n\t\"justify-center\",\n\t\"px-2\",\n\t\"py-0.5\",\n\t\"text-sm\",\n\t\"cursor-pointer\",\n\t\"rounded-2xl\",\n\t\"text-white/80\",\n\t\"peer-checked:bg-bg-primary\",\n\t\"peer-checked:text-text-secondary\",\n\t\"select-none\",\n);\n\nfunction SegmentControlItem({ children, value }: SegmentControlItemProps) {\n\tconst { defaultValue, onValueChange, name } = useContext(\n\t\tSegmentControlContext,\n\t);\n\n\treturn (\n\t\t<div className=\"relative\">\n\t\t\t<input\n\t\t\t\ttype=\"radio\"\n\t\t\t\tid={`${name}-${value}`}\n\t\t\t\tname={name}\n\t\t\t\tvalue={value}\n\t\t\t\tdefaultChecked={value === defaultValue}\n\t\t\t\tonChange={(e) => onValueChange?.(e.target.value)}\n\t\t\t\tclassName=\"sr-only peer\"\n\t\t\t/>\n\t\t\t<label htmlFor={`${name}-${value}`} className={segmentControlItemClass}>\n\t\t\t\t{children}\n\t\t\t</label>\n\t\t</div>\n\t);\n}\n\nfunction SegmentControl({\n\tchildren,\n\tdefaultValue,\n\tonValueChange,\n\tname,\n}: SegmentControlProps & { children?: ReactNode }) {\n\tconst contextValue: SegmentControlContextType = {\n\t\t...(defaultValue !== undefined && { defaultValue }),\n\t\t...(onValueChange !== undefined && { onValueChange }),\n\t\tname: name || \"react-components-segment-control\",\n\t};\n\n\treturn (\n\t\t<SegmentControlContext.Provider value={contextValue}>\n\t\t\t<div className=\"inline-flex bg-gray-500 p-0.5 gap-0 rounded-full\">\n\t\t\t\t{children}\n\t\t\t</div>\n\t\t</SegmentControlContext.Provider>\n\t);\n}\n\nexport { SegmentControl, SegmentControlItem };\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "src/components/segment-control.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\n\nimport { SegmentControl, SegmentControlItem } from \"./segment-control\";\n\nconst meta = {\n\ttitle: \"Component/SegmentControl\",\n\tcomponent: SegmentControl,\n\tparameters: {\n\t\tlayout: \"centered\",\n\t},\n\ttags: [\"autodocs\"],\n} satisfies Meta<typeof SegmentControl>;\n\nexport default meta;\ntype Story = StoryObj<typeof meta>;\n\nexport const Default: Story = {\n\trender: () => {\n\t\treturn (\n\t\t\t<SegmentControl\n\t\t\t\tdefaultValue=\"yaml\"\n\t\t\t\tonValueChange={(value) => console.log(\"Selected:\", value)}\n\t\t\t>\n\t\t\t\t<SegmentControlItem value=\"yaml\">YAML</SegmentControlItem>\n\t\t\t\t<SegmentControlItem value=\"json\">JSON</SegmentControlItem>\n\t\t\t</SegmentControl>\n\t\t);\n\t},\n};\n",
+      "type": "registry:ui"
+    }
+  ]
+}

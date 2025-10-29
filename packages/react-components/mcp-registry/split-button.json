@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "split-button",
+  "type": "registry:component",
+  "description": "A split button component with a primary action and dropdown menu.",
+  "files": [
+    {
+      "path": "src/components/split-button.tsx",
+      "content": "import { cn } from \"#shadcn/lib/utils\";\n\nconst splitButtonStyles = cn(\n\t\"flex\",\n\t\"*:data-[slot=button]:rounded-r-none\",\n\t\"*:data-[slot=dropdown-menu-trigger]:px-1\",\n\t\"*:data-[slot=dropdown-menu-trigger]:py-2\",\n\t\"*:data-[slot=dropdown-menu-trigger]:rounded-l-none\",\n\t\"*:data-[slot=dropdown-menu-trigger]:border-l-0\",\n\t\"*:data-[slot=dropdown-menu-trigger]:border-l-0\",\n);\n\nfunction SplitButton({ children }: { children: React.ReactNode }) {\n\treturn <div className={splitButtonStyles}>{children}</div>;\n}\n\nexport { SplitButton };\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "src/components/split-button.stories.tsx",
+      "content": "import type { Meta, StoryObj } from \"@storybook/react-vite\";\nimport { ChevronDown, Plus, Save } from \"lucide-react\";\nimport { Button } from \"#shadcn/components/ui/button.js\";\nimport {\n\tDropdownMenu,\n\tDropdownMenuContent,\n\tDropdownMenuItem,\n\tDropdownMenuLabel,\n\tDropdownMenuSeparator,\n\tDropdownMenuTrigger,\n} from \"#shadcn/components/ui/dropdown-menu.js\";\nimport { SplitButton } from \"./split-button\";\n\nconst meta: Meta<typeof SplitButton> = {\n\ttitle: \"Component/SplitButton\",\n\tcomponent: SplitButton,\n};\n\nexport default meta;\n\ntype Story = StoryObj<typeof SplitButton>;\n\nexport const Default: Story = {\n\trender: () => (\n\t\t<SplitButton>\n\t\t\t<Button variant=\"secondary\">\n\t\t\t\t<Save />\n\t\t\t\tSave\n\t\t\t</Button>\n\t\t\t<DropdownMenu>\n\t\t\t\t<DropdownMenuTrigger asChild>\n\t\t\t\t\t<Button variant=\"secondary\">\n\t\t\t\t\t\t<ChevronDown />\n\t\t\t\t\t</Button>\n\t\t\t\t</DropdownMenuTrigger>\n\t\t\t\t<DropdownMenuContent>\n\t\t\t\t\t<DropdownMenuLabel>Save to collection:</DropdownMenuLabel>\n\t\t\t\t\t<DropdownMenuSeparator />\n\t\t\t\t\t<DropdownMenuItem disabled>No collections</DropdownMenuItem>\n\t\t\t\t\t<DropdownMenuSeparator />\n\t\t\t\t\t<DropdownMenuItem>\n\t\t\t\t\t\t<Plus className=\"text-fg-link\" />\n\t\t\t\t\t\tNew collection\n\t\t\t\t\t</DropdownMenuItem>\n\t\t\t\t</DropdownMenuContent>\n\t\t\t</DropdownMenu>\n\t\t</SplitButton>\n\t),\n};\n",
+      "type": "registry:ui"
+    }
+  ]
+}

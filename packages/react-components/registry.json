@@ -11,6 +11,10 @@
                 {
                     "path": "src/shadcn/components/ui/accordion.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/accordion.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -22,6 +26,10 @@
                 {
                     "path": "src/shadcn/components/ui/alert-dialog.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/alert-dialog.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -33,6 +41,10 @@
                 {
                     "path": "src/shadcn/components/ui/alert.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/alert.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -44,6 +56,10 @@
                 {
                     "path": "src/shadcn/components/ui/aspect-ratio.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/aspect-ratio.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -55,6 +71,10 @@
                 {
                     "path": "src/shadcn/components/ui/avatar.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/avatar.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -66,6 +86,10 @@
                 {
                     "path": "src/shadcn/components/ui/badge.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/badge.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -77,6 +101,10 @@
                 {
                     "path": "src/shadcn/components/ui/breadcrumb.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/breadcrumb.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -88,6 +116,10 @@
                 {
                     "path": "src/shadcn/components/ui/button.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/button.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -99,6 +131,10 @@
                 {
                     "path": "src/shadcn/components/ui/calendar.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/calendar.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -110,6 +146,10 @@
                 {
                     "path": "src/shadcn/components/ui/card.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/card.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -121,6 +161,10 @@
                 {
                     "path": "src/shadcn/components/ui/carousel.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/carousel.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -132,6 +176,10 @@
                 {
                     "path": "src/shadcn/components/ui/chart.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/chart.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -143,6 +191,10 @@
                 {
                     "path": "src/shadcn/components/ui/checkbox.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/checkbox.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -154,6 +206,10 @@
                 {
                     "path": "src/shadcn/components/ui/collapsible.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/collapsible.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -165,6 +221,10 @@
                 {
                     "path": "src/shadcn/components/ui/combobox.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/combobox.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -176,6 +236,10 @@
                 {
                     "path": "src/shadcn/components/ui/command.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/command.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -187,6 +251,10 @@
                 {
                     "path": "src/shadcn/components/ui/context-menu.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/context-menu.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -198,6 +266,10 @@
                 {
                     "path": "src/shadcn/components/ui/dialog.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/dialog.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -209,6 +281,10 @@
                 {
                     "path": "src/shadcn/components/ui/drawer.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/drawer.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -220,6 +296,10 @@
                 {
                     "path": "src/shadcn/components/ui/dropdown-menu.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/dropdown-menu.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -231,6 +311,10 @@
                 {
                     "path": "src/shadcn/components/ui/form.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/form.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -242,6 +326,10 @@
                 {
                     "path": "src/shadcn/components/ui/hover-card.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/hover-card.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -253,6 +341,10 @@
                 {
                     "path": "src/shadcn/components/ui/input-otp.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/input-otp.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -264,6 +356,10 @@
                 {
                     "path": "src/shadcn/components/ui/input.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/input.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -275,6 +371,10 @@
                 {
                     "path": "src/shadcn/components/ui/label.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/label.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -286,6 +386,10 @@
                 {
                     "path": "src/shadcn/components/ui/menubar.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/menubar.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -297,6 +401,10 @@
                 {
                     "path": "src/shadcn/components/ui/navigation-menu.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/navigation-menu.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -308,6 +416,10 @@
                 {
                     "path": "src/shadcn/components/ui/pagination.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/pagination.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -319,6 +431,10 @@
                 {
                     "path": "src/shadcn/components/ui/popover.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/popover.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -330,6 +446,10 @@
                 {
                     "path": "src/shadcn/components/ui/progress.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/progress.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -341,6 +461,10 @@
                 {
                     "path": "src/shadcn/components/ui/radio-group.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/radio-group.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -352,6 +476,10 @@
                 {
                     "path": "src/shadcn/components/ui/resizable.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/resizable.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -363,6 +491,10 @@
                 {
                     "path": "src/shadcn/components/ui/scroll-area.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/scroll-area.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -374,6 +506,10 @@
                 {
                     "path": "src/shadcn/components/ui/select.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/select.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -385,6 +521,10 @@
                 {
                     "path": "src/shadcn/components/ui/separator.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/separator.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -396,6 +536,10 @@
                 {
                     "path": "src/shadcn/components/ui/sheet.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/sheet.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -407,6 +551,10 @@
                 {
                     "path": "src/shadcn/components/ui/sidebar.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/sidebar.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -418,6 +566,10 @@
                 {
                     "path": "src/shadcn/components/ui/skeleton.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/skeleton.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -429,6 +581,10 @@
                 {
                     "path": "src/shadcn/components/ui/slider.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/slider.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -440,6 +596,10 @@
                 {
                     "path": "src/shadcn/components/ui/sonner.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/sonner.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -451,6 +611,10 @@
                 {
                     "path": "src/shadcn/components/ui/switch.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/switch.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -462,6 +626,10 @@
                 {
                     "path": "src/shadcn/components/ui/table.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/table.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -473,6 +641,10 @@
                 {
                     "path": "src/shadcn/components/ui/tabs.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/tabs.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -484,6 +656,10 @@
                 {
                     "path": "src/shadcn/components/ui/textarea.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/textarea.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -495,6 +671,10 @@
                 {
                     "path": "src/shadcn/components/ui/toggle-group.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/toggle-group.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -506,6 +686,10 @@
                 {
                     "path": "src/shadcn/components/ui/toggle.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/toggle.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -517,6 +701,10 @@
                 {
                     "path": "src/shadcn/components/ui/tooltip.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/shadcn/components/ui/tooltip.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -539,6 +727,10 @@
                 {
                     "path": "src/components/button-dropdown.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/button-dropdown.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -549,10 +741,6 @@
             "files": [
                 {
                     "path": "src/components/code-editor/index.tsx",
-                    "type": "registry:component"
-                },
-                {
-                    "path": "src/components/code-editor/http.ts",
                     "type": "registry:component"
                 }
             ]
@@ -576,6 +764,10 @@
                 {
                     "path": "src/components/data-table.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/data-table.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -587,6 +779,10 @@
                 {
                     "path": "src/components/fhir-structure-view.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/fhir-structure-view.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -598,6 +794,10 @@
                 {
                     "path": "src/components/request-line-editor.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/request-line-editor.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -609,6 +809,10 @@
                 {
                     "path": "src/components/segment-control.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/segment-control.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -620,6 +824,10 @@
                 {
                     "path": "src/components/split-button.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/split-button.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         },
@@ -631,6 +839,10 @@
                 {
                     "path": "src/components/tree-view.tsx",
                     "type": "registry:component"
+                },
+                {
+                    "path": "src/components/tree-view.stories.tsx",
+                    "type": "registry:ui"
                 }
             ]
         }

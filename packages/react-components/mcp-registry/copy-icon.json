@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "copy-icon",
+  "type": "registry:component",
+  "description": "A copy to clipboard button with tooltip and toast notification.",
+  "files": [
+    {
+      "path": "src/components/copy-icon.tsx",
+      "content": "import { Check, Copy } from \"lucide-react\";\nimport * as React from \"react\";\nimport { toast } from \"sonner\";\nimport {\n\tTooltip,\n\tTooltipContent,\n\tTooltipTrigger,\n} from \"#shadcn/components/ui/tooltip\";\n\ninterface CopyIconProps {\n\ttext: string;\n\tshowTooltip?: boolean;\n\ttooltipText?: string;\n\tshowToast?: boolean;\n\tonCopy?: (text: string) => void;\n}\n\nfunction CopyIcon({\n\ttext,\n\tshowTooltip = true,\n\ttooltipText = \"Copy\",\n\tshowToast = true,\n\tonCopy,\n\t...props\n}: CopyIconProps) {\n\tconst [isActive, setIsActive] = React.useState(false);\n\n\tasync function handleClick() {\n\t\ttry {\n\t\t\tawait navigator.clipboard.writeText(text);\n\t\t\tsetIsActive(true);\n\n\t\t\tif (showToast) {\n\t\t\t\tconst truncatedText =\n\t\t\t\t\ttext.length > 30 ? `${text.slice(0, 30)}...` : text;\n\t\t\t\ttoast(\n\t\t\t\t\t<div className=\"flex flex-col gap-1\">\n\t\t\t\t\t\t<span className=\"typo-body\">Successfully copied</span>\n\t\t\t\t\t\t<span className=\"typo-code text-text-secondary\">\n\t\t\t\t\t\t\t{truncatedText}\n\t\t\t\t\t\t</span>\n\t\t\t\t\t</div>,\n\t\t\t\t\t{\n\t\t\t\t\t\tduration: 2000,\n\t\t\t\t\t},\n\t\t\t\t);\n\t\t\t}\n\n\t\t\tonCopy?.(text);\n\n\t\t\tsetTimeout(() => {\n\t\t\t\tsetIsActive(false);\n\t\t\t}, 1000);\n\t\t} catch (error) {\n\t\t\tconsole.error(\"Failed to copy to clipboard:\", error);\n\t\t}\n\t}\n\n\tconst button = (\n\t\t<button\n\t\t\t{...props}\n\t\t\ttype=\"button\"\n\t\t\tonClick={handleClick}\n\t\t\tstyle={{ cursor: \"pointer\" }}\n\t\t>\n\t\t\t{isActive ? <Check /> : <Copy />}\n\t\t</button>\n\t);\n\n\tif (!showTooltip) {\n\t\treturn button;\n\t}\n\n\treturn (\n\t\t<Tooltip>\n\t\t\t<TooltipTrigger asChild>{button}</TooltipTrigger>\n\t\t\t<TooltipContent>\n\t\t\t\t<p>{tooltipText}</p>\n\t\t\t</TooltipContent>\n\t\t</Tooltip>\n\t);\n}\n\nexport { CopyIcon };\n",
+      "type": "registry:component"
+    }
+  ]
+}
