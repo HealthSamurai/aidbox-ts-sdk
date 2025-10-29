@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "separator",
+  "type": "registry:component",
+  "description": "Visually or semantically separates content.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/separator.tsx",
+      "content": "\"use client\";\nimport * as SeparatorPrimitive from \"@radix-ui/react-separator\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Separator styles\nconst separatorStyles = cn(\n\t// Background\n\t\"bg-border-separator\",\n\t// Layout\n\t\"shrink-0\",\n\t// Horizontal orientation\n\t\"data-[orientation=horizontal]:h-px\",\n\t\"data-[orientation=horizontal]:w-full\",\n\t// Vertical orientation\n\t\"data-[orientation=vertical]:h-full\",\n\t\"data-[orientation=vertical]:w-px\",\n);\n\nfunction Separator({\n\tclassName,\n\torientation = \"horizontal\",\n\tdecorative = true,\n\t...props\n}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {\n\treturn (\n\t\t<SeparatorPrimitive.Root\n\t\t\tdata-slot=\"separator\"\n\t\t\tdecorative={decorative}\n\t\t\torientation={orientation}\n\t\t\tclassName={cn(separatorStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Separator };\n",
+      "type": "registry:component"
+    }
+  ]
+}

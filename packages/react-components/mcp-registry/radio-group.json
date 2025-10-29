@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "radio-group",
+  "type": "registry:component",
+  "description": "A set of checkable buttons—known as radio buttons—where no more than one of the buttons can be checked at a time.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/radio-group.tsx",
+      "content": "\"use client\";\nimport * as RadioGroupPrimitive from \"@radix-ui/react-radio-group\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\nfunction RadioGroup({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {\n\treturn (\n\t\t<RadioGroupPrimitive.Root\n\t\t\tdata-slot=\"radio-group\"\n\t\t\tclassName={cn(\"grid\", \"gap-3\", className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nfunction RadioGroupItem({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {\n\treturn (\n\t\t<RadioGroupPrimitive.Item\n\t\t\tdata-slot=\"radio-group-item\"\n\t\t\tclassName={cn(\n\t\t\t\t// Base styles\n\t\t\t\t\"aspect-square\",\n\t\t\t\t\"size-4\",\n\t\t\t\t\"shrink-0\",\n\t\t\t\t\"rounded-full\",\n\t\t\t\t\"overflow-hidden\",\n\t\t\t\t\"relative\",\n\t\t\t\t\"outline-none\",\n\t\t\t\t\"cursor-pointer\",\n\t\t\t\t// Animations\n\t\t\t\t\"transition-all\",\n\t\t\t\t\"duration-200\",\n\t\t\t\t\"active:scale-90\",\n\t\t\t\t\"active:duration-75\",\n\t\t\t\t// Default state:\n\t\t\t\t\"bg-white\",\n\t\t\t\t\"border-[1.6px]\",\n\t\t\t\t\"border-solid\",\n\t\t\t\t\"border-border-primary\",\n\t\t\t\t// Checked state:\n\t\t\t\t\"data-[state=checked]:bg-bg-link\",\n\t\t\t\t\"data-[state=checked]:border-bg-link\",\n\t\t\t\t// Disabled states\n\t\t\t\t\"disabled:cursor-not-allowed\",\n\t\t\t\t\"disabled:active:scale-100\",\n\t\t\t\t\"disabled:bg-white\",\n\t\t\t\t\"disabled:border-border-secondary\",\n\t\t\t\t\"disabled:data-[state=checked]:bg-border-secondary\",\n\t\t\t\t\"disabled:data-[state=checked]:border-border-secondary\",\n\t\t\t\t// Focus styles\n\t\t\t\t\"focus-visible:ring-2\",\n\t\t\t\t\"focus-visible:ring-bg-link\",\n\t\t\t\t\"focus-visible:ring-offset-2\",\n\t\t\t\tclassName,\n\t\t\t)}\n\t\t\t{...props}\n\t\t>\n\t\t\t<RadioGroupPrimitive.Indicator\n\t\t\t\tdata-slot=\"radio-group-indicator\"\n\t\t\t\tclassName={cn(\n\t\t\t\t\t\"absolute\",\n\t\t\t\t\t\"inset-0\",\n\t\t\t\t\t\"flex\",\n\t\t\t\t\t\"items-center\",\n\t\t\t\t\t\"justify-center\",\n\t\t\t\t)}\n\t\t\t>\n\t\t\t\t<div className={cn(\"size-1.5\", \"rounded-full\", \"bg-white\")} />\n\t\t\t</RadioGroupPrimitive.Indicator>\n\t\t</RadioGroupPrimitive.Item>\n\t);\n}\n\nexport { RadioGroup, RadioGroupItem };\n",
+      "type": "registry:component"
+    }
+  ]
+}

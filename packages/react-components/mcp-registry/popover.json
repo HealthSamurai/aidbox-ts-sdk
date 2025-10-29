@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "popover",
+  "type": "registry:component",
+  "description": "Displays rich content in a portal, triggered by a button.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/popover.tsx",
+      "content": "\"use client\";\nimport * as PopoverPrimitive from \"@radix-ui/react-popover\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Popover content styles\nconst popoverContentStyles = cn(\n\t// Layout\n\t\"z-50\",\n\t\"w-72\",\n\t\"origin-(--radix-popover-content-transform-origin)\",\n\t\"outline-hidden\",\n\t// Shape\n\t\"rounded-md\",\n\t// Borders\n\t\"border\",\n\t\"border-border-primary\",\n\t// Background & Colors\n\t\"bg-bg-primary\",\n\t\"text-text-primary\",\n\t// Spacing\n\t\"p-4\",\n\t// Shadow\n\t\"shadow-md\",\n\t// Animations - open\n\t\"data-[state=open]:animate-in\",\n\t\"data-[state=open]:fade-in-0\",\n\t\"data-[state=open]:zoom-in-95\",\n\t// Animations - closed\n\t\"data-[state=closed]:animate-out\",\n\t\"data-[state=closed]:fade-out-0\",\n\t\"data-[state=closed]:zoom-out-95\",\n\t// Slide animations\n\t\"data-[side=bottom]:slide-in-from-top-2\",\n\t\"data-[side=left]:slide-in-from-right-2\",\n\t\"data-[side=right]:slide-in-from-left-2\",\n\t\"data-[side=top]:slide-in-from-bottom-2\",\n);\n\nfunction Popover({\n\t...props\n}: React.ComponentProps<typeof PopoverPrimitive.Root>) {\n\treturn <PopoverPrimitive.Root data-slot=\"popover\" {...props} />;\n}\n\nfunction PopoverTrigger({\n\t...props\n}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {\n\treturn <PopoverPrimitive.Trigger data-slot=\"popover-trigger\" {...props} />;\n}\n\nfunction PopoverContent({\n\tclassName,\n\talign = \"center\",\n\tsideOffset = 4,\n\t...props\n}: React.ComponentProps<typeof PopoverPrimitive.Content>) {\n\treturn (\n\t\t<PopoverPrimitive.Portal>\n\t\t\t<PopoverPrimitive.Content\n\t\t\t\tdata-slot=\"popover-content\"\n\t\t\t\talign={align}\n\t\t\t\tsideOffset={sideOffset}\n\t\t\t\tclassName={cn(popoverContentStyles, className)}\n\t\t\t\t{...props}\n\t\t\t/>\n\t\t</PopoverPrimitive.Portal>\n\t);\n}\n\nfunction PopoverAnchor({\n\t...props\n}: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {\n\treturn <PopoverPrimitive.Anchor data-slot=\"popover-anchor\" {...props} />;\n}\n\nexport { Popover, PopoverTrigger, PopoverContent, PopoverAnchor };\n",
+      "type": "registry:component"
+    }
+  ]
+}

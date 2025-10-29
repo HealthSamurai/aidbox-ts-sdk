@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "alert",
+  "type": "registry:component",
+  "description": "Displays a callout for user attention.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/alert.tsx",
+      "content": "import { cva, type VariantProps } from \"class-variance-authority\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\nconst baseAlertStyles = cn(\n\t// Layout\n\t\"relative\",\n\t\"w-full\",\n\t\"grid\",\n\t\"items-start\",\n\t\"grid-cols-[0_1fr]\",\n\t\"has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr]\",\n\t\"gap-y-0.5\",\n\t\"has-[>svg]:gap-x-3\",\n\t// Shape\n\t\"rounded-lg\",\n\t// Borders\n\t\"border\",\n\t\"border-border-primary\",\n\t// Spacing\n\t\"px-4\",\n\t\"py-3\",\n\t// Typography\n\t\"text-sm\",\n\t// SVG styles\n\t\"[&>svg]:size-4\",\n\t\"[&>svg]:translate-y-0.5\",\n\t\"[&>svg]:text-current\",\n);\n\nconst alertVariants = cva(baseAlertStyles, {\n\tvariants: {\n\t\tvariant: {\n\t\t\tdefault: cn(\"bg-bg-primary\", \"text-text-primary\"),\n\t\t\tdestructive: cn(\n\t\t\t\t\"text-text-error-primary\",\n\t\t\t\t\"bg-bg-error-primary\",\n\t\t\t\t\"border-border-error\",\n\t\t\t\t\"[&>svg]:text-current\",\n\t\t\t\t\"*:data-[slot=alert-description]:text-fg-error-secondary\",\n\t\t\t),\n\t\t},\n\t},\n\tdefaultVariants: {\n\t\tvariant: \"default\",\n\t},\n});\n\nfunction Alert({\n\tclassName,\n\tvariant,\n\t...props\n}: React.ComponentProps<\"div\"> & VariantProps<typeof alertVariants>) {\n\treturn (\n\t\t<div\n\t\t\tdata-slot=\"alert\"\n\t\t\trole=\"alert\"\n\t\t\tclassName={cn(alertVariants({ variant }), className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nfunction AlertTitle({ className, ...props }: React.ComponentProps<\"div\">) {\n\treturn (\n\t\t<div\n\t\t\tdata-slot=\"alert-title\"\n\t\t\tclassName={cn(\n\t\t\t\t\"col-start-2\",\n\t\t\t\t\"line-clamp-1\",\n\t\t\t\t\"min-h-4\",\n\t\t\t\t\"font-medium\",\n\t\t\t\t\"tracking-tight\",\n\t\t\t\tclassName,\n\t\t\t)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nfunction AlertDescription({\n\tclassName,\n\t...props\n}: React.ComponentProps<\"div\">) {\n\treturn (\n\t\t<div\n\t\t\tdata-slot=\"alert-description\"\n\t\t\tclassName={cn(\n\t\t\t\t\"text-text-secondary\",\n\t\t\t\t\"col-start-2\",\n\t\t\t\t\"grid\",\n\t\t\t\t\"justify-items-start\",\n\t\t\t\t\"gap-1\",\n\t\t\t\t\"text-sm\",\n\t\t\t\t\"[&_p]:leading-relaxed\",\n\t\t\t\tclassName,\n\t\t\t)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Alert, AlertTitle, AlertDescription };\n",
+      "type": "registry:component"
+    }
+  ]
+}

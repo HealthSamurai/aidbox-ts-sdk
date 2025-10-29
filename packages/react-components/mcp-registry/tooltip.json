@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tooltip",
+  "type": "registry:component",
+  "description": "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/tooltip.tsx",
+      "content": "\"use client\";\nimport * as TooltipPrimitive from \"@radix-ui/react-tooltip\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Tooltip content styles\nconst tooltipContentStyles = cn(\n\t// Layout\n\t\"z-50\",\n\t\"w-fit\",\n\t\"origin-(--radix-tooltip-content-transform-origin)\",\n\t// Shape\n\t\"rounded-md\",\n\t// Background & Colors\n\t\"bg-bg-overlay\",\n\t\"text-text-primary_on-brand\",\n\t// Spacing\n\t\"px-3\",\n\t\"py-1.5\",\n\t// Typography\n\t\"text-xs\",\n\t\"text-balance\",\n\t// Animations - open\n\t\"animate-in\",\n\t\"fade-in-0\",\n\t\"zoom-in-95\",\n\t// Animations - closed\n\t\"data-[state=closed]:animate-out\",\n\t\"data-[state=closed]:fade-out-0\",\n\t\"data-[state=closed]:zoom-out-95\",\n\t// Slide animations\n\t\"data-[side=bottom]:slide-in-from-top-2\",\n\t\"data-[side=left]:slide-in-from-right-2\",\n\t\"data-[side=right]:slide-in-from-left-2\",\n\t\"data-[side=top]:slide-in-from-bottom-2\",\n);\n\nfunction TooltipProvider({\n\tdelayDuration = 0,\n\t...props\n}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {\n\treturn (\n\t\t<TooltipPrimitive.Provider\n\t\t\tdata-slot=\"tooltip-provider\"\n\t\t\tdelayDuration={delayDuration}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nfunction Tooltip({\n\t...props\n}: React.ComponentProps<typeof TooltipPrimitive.Root>) {\n\treturn (\n\t\t<TooltipProvider>\n\t\t\t<TooltipPrimitive.Root data-slot=\"tooltip\" {...props} />\n\t\t</TooltipProvider>\n\t);\n}\n\nfunction TooltipTrigger({\n\t...props\n}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {\n\treturn <TooltipPrimitive.Trigger data-slot=\"tooltip-trigger\" {...props} />;\n}\n\nfunction TooltipContent({\n\tclassName,\n\tsideOffset = 0,\n\tchildren,\n\t...props\n}: React.ComponentProps<typeof TooltipPrimitive.Content>) {\n\treturn (\n\t\t<TooltipPrimitive.Portal>\n\t\t\t<TooltipPrimitive.Content\n\t\t\t\tdata-slot=\"tooltip-content\"\n\t\t\t\tsideOffset={sideOffset}\n\t\t\t\tclassName={cn(tooltipContentStyles, className)}\n\t\t\t\t{...props}\n\t\t\t>\n\t\t\t\t{children}\n\t\t\t</TooltipPrimitive.Content>\n\t\t</TooltipPrimitive.Portal>\n\t);\n}\n\nexport { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };\n",
+      "type": "registry:component"
+    }
+  ]
+}

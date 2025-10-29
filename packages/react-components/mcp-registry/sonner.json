@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sonner",
+  "type": "registry:component",
+  "description": "An opinionated toast component for React.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/sonner.tsx",
+      "content": "\"use client\";\n\nimport type { VariantProps } from \"class-variance-authority\";\nimport { useTheme } from \"next-themes\";\nimport {\n\tToaster as Sonner,\n\ttoast as sonnerToast,\n\ttype ToasterProps,\n} from \"sonner\";\nimport { Button, type buttonVariants } from \"./button\";\n\nfunction Toaster({ ...props }: ToasterProps) {\n\tconst { theme = \"system\" } = useTheme();\n\n\treturn (\n\t\t<Sonner\n\t\t\ttheme={\n\t\t\t\ttheme === \"system\" ? \"system\" : theme === \"dark\" ? \"dark\" : \"light\"\n\t\t\t}\n\t\t\tclassName=\"toaster group\"\n\t\t\tstyle={\n\t\t\t\t{\n\t\t\t\t\t\"--normal-bg\": \"var(--popover)\",\n\t\t\t\t\t\"--normal-text\": \"var(--popover-foreground)\",\n\t\t\t\t\t\"--normal-border\": \"var(--border)\",\n\t\t\t\t} as React.CSSProperties\n\t\t\t}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\n// Custom toast wrapper with our buttons\nfunction toast(\n\tmessage: string,\n\toptions?: {\n\t\tdescription?: string;\n\t\taction?: {\n\t\t\tlabel: string;\n\t\t\tonClick: () => void;\n\t\t\tvariant?: VariantProps<typeof buttonVariants>[\"variant\"];\n\t\t};\n\t\tcancel?: {\n\t\t\tlabel: string;\n\t\t\tonClick: () => void;\n\t\t\tvariant?: VariantProps<typeof buttonVariants>[\"variant\"];\n\t\t};\n\t},\n) {\n\treturn sonnerToast(message, {\n\t\t...options,\n\t\taction: options?.action ? (\n\t\t\t<Button\n\t\t\t\tvariant={options.action.variant || \"secondary\"}\n\t\t\t\tsize=\"small\"\n\t\t\t\tonClick={options.action.onClick}\n\t\t\t>\n\t\t\t\t{options.action.label}\n\t\t\t</Button>\n\t\t) : undefined,\n\t\tcancel: options?.cancel ? (\n\t\t\t<Button\n\t\t\t\tvariant={options.cancel.variant || \"ghost\"}\n\t\t\t\tsize=\"small\"\n\t\t\t\tonClick={options.cancel.onClick}\n\t\t\t>\n\t\t\t\t{options.cancel.label}\n\t\t\t</Button>\n\t\t) : undefined,\n\t});\n}\n\nexport { Toaster, toast };\n",
+      "type": "registry:component"
+    }
+  ]
+}

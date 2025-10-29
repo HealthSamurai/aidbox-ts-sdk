@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "avatar",
+  "type": "registry:component",
+  "description": "An image element with a fallback for representing the user.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/avatar.tsx",
+      "content": "import * as AvatarPrimitive from \"@radix-ui/react-avatar\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\nconst avatarStyles = cn(\n\t\"relative\",\n\t\"flex\",\n\t\"size-8\",\n\t\"shrink-0\",\n\t\"overflow-hidden\",\n\t\"rounded-full\",\n);\n\nfunction Avatar({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof AvatarPrimitive.Root>) {\n\treturn (\n\t\t<AvatarPrimitive.Root\n\t\t\tdata-slot=\"avatar\"\n\t\t\tclassName={cn(avatarStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nfunction AvatarImage({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof AvatarPrimitive.Image>) {\n\treturn (\n\t\t<AvatarPrimitive.Image\n\t\t\tdata-slot=\"avatar-image\"\n\t\t\tclassName={cn(\"aspect-square\", \"size-full\", className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nfunction AvatarFallback({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {\n\treturn (\n\t\t<AvatarPrimitive.Fallback\n\t\t\tdata-slot=\"avatar-fallback\"\n\t\t\tclassName={cn(\n\t\t\t\t\"bg-bg-tertiary\",\n\t\t\t\t\"flex\",\n\t\t\t\t\"size-full\",\n\t\t\t\t\"items-center\",\n\t\t\t\t\"justify-center\",\n\t\t\t\t\"rounded-full\",\n\t\t\t\tclassName,\n\t\t\t)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Avatar, AvatarImage, AvatarFallback };\n",
+      "type": "registry:component"
+    }
+  ]
+}

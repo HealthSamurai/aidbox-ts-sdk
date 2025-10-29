@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "toggle",
+  "type": "registry:component",
+  "description": "A two-state button that can be either on or off.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/toggle.tsx",
+      "content": "import * as TogglePrimitive from \"@radix-ui/react-toggle\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Base toggle styles\nconst baseToggleStyles = cn(\n\t// Layout\n\t\"inline-flex\",\n\t\"items-center\",\n\t\"justify-center\",\n\t\"gap-2\",\n\t\"whitespace-nowrap\",\n\t// Shape\n\t\"rounded-md\",\n\t// Typography\n\t\"text-sm\",\n\t\"font-medium\",\n\t// Interaction\n\t\"outline-none\",\n\t\"transition-[color,box-shadow]\",\n\t// Hover\n\t\"hover:bg-bg-tertiary\",\n\t\"hover:text-text-secondary\",\n\t// Pressed/On state\n\t\"data-[state=on]:bg-bg-secondary\",\n\t\"data-[state=on]:text-text-primary\",\n\t// Disabled\n\t\"disabled:pointer-events-none\",\n\t\"disabled:opacity-50\",\n\t// SVG icons\n\t\"[&_svg]:pointer-events-none\",\n\t\"[&_svg:not([class*='size-'])]:size-4\",\n\t\"[&_svg]:shrink-0\",\n\t// Focus\n\t\"focus-visible:ring-2\",\n\t\"focus-visible:ring-utility-blue/70\",\n\t// Invalid\n\t\"aria-invalid:ring-2\",\n\t\"aria-invalid:ring-utility-red/70\",\n\t\"aria-invalid:border-border-error\",\n);\n\nconst toggleVariants = cva(baseToggleStyles, {\n\tvariants: {\n\t\tvariant: {\n\t\t\tdefault: cn(\"bg-transparent\"),\n\t\t\toutline: cn(\n\t\t\t\t\"border\",\n\t\t\t\t\"border-border-primary\",\n\t\t\t\t\"bg-transparent\",\n\t\t\t\t\"shadow-xs\",\n\t\t\t\t\"hover:bg-bg-secondary\",\n\t\t\t\t\"hover:text-text-primary\",\n\t\t\t),\n\t\t},\n\t\tsize: {\n\t\t\tdefault: cn(\"h-9\", \"px-2\", \"min-w-9\"),\n\t\t\tsm: cn(\"h-8\", \"px-1.5\", \"min-w-8\"),\n\t\t\tlg: cn(\"h-10\", \"px-2.5\", \"min-w-10\"),\n\t\t},\n\t},\n\tdefaultVariants: {\n\t\tvariant: \"default\",\n\t\tsize: \"default\",\n\t},\n});\n\nfunction Toggle({\n\tclassName,\n\tvariant,\n\tsize,\n\t...props\n}: React.ComponentProps<typeof TogglePrimitive.Root> &\n\tVariantProps<typeof toggleVariants>) {\n\treturn (\n\t\t<TogglePrimitive.Root\n\t\t\tdata-slot=\"toggle\"\n\t\t\tclassName={cn(toggleVariants({ variant, size, className }))}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Toggle, toggleVariants };\n",
+      "type": "registry:component"
+    }
+  ]
+}

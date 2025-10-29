@@ -1,0 +1,535 @@
+{
+    "$schema": "https://ui.shadcn.com/schema/registry.json",
+    "name": "@aidbox",
+    "homepage": "https://github.com/HealthSamurai/aidbox-ts-sdk",
+    "items": [
+        {
+            "name": "accordion",
+            "type": "registry:component",
+            "description": "A vertically stacked set of interactive headings that each reveal a section of content.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/accordion.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "alert-dialog",
+            "type": "registry:component",
+            "description": "A modal dialog that interrupts the user with important content and expects a response.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/alert-dialog.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "alert",
+            "type": "registry:component",
+            "description": "Displays a callout for user attention.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/alert.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "aspect-ratio",
+            "type": "registry:component",
+            "description": "Displays content within a desired ratio.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/aspect-ratio.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "avatar",
+            "type": "registry:component",
+            "description": "An image element with a fallback for representing the user.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/avatar.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "badge",
+            "type": "registry:component",
+            "description": "Displays a badge or a component that looks like a badge.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/badge.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "breadcrumb",
+            "type": "registry:component",
+            "description": "Displays the path to the current resource using a hierarchy of links.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/breadcrumb.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "button",
+            "type": "registry:component",
+            "description": "Displays a button or a component that looks like a button.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/button.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "calendar",
+            "type": "registry:component",
+            "description": "A date field component that allows users to enter and edit date.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/calendar.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "card",
+            "type": "registry:component",
+            "description": "Displays a card with header, content, and footer.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/card.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "carousel",
+            "type": "registry:component",
+            "description": "A carousel with motion and swipe built using Embla.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/carousel.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "chart",
+            "type": "registry:component",
+            "description": "Charts built using Recharts.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/chart.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "checkbox",
+            "type": "registry:component",
+            "description": "A control that allows the user to toggle between checked and not checked.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/checkbox.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "collapsible",
+            "type": "registry:component",
+            "description": "An interactive component which expands/collapses a panel.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/collapsible.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "combobox",
+            "type": "registry:component",
+            "description": "Autocomplete input and command palette with a list of suggestions.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/combobox.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "command",
+            "type": "registry:component",
+            "description": "Fast, composable, unstyled command menu for React.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/command.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "context-menu",
+            "type": "registry:component",
+            "description": "Displays a menu to the user — such as a set of actions or functions — triggered by a button.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/context-menu.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "dialog",
+            "type": "registry:component",
+            "description": "A window overlaid on either the primary window or another dialog window, rendering the content underneath inert.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/dialog.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "drawer",
+            "type": "registry:component",
+            "description": "A drawer component for React.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/drawer.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "dropdown-menu",
+            "type": "registry:component",
+            "description": "Displays a menu to the user — such as a set of actions or functions — triggered by a button.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/dropdown-menu.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "form",
+            "type": "registry:component",
+            "description": "Building forms with React Hook Form and Zod.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/form.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "hover-card",
+            "type": "registry:component",
+            "description": "For sighted users to preview content available behind a link.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/hover-card.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "input-otp",
+            "type": "registry:component",
+            "description": "Accessible one-time password component with copy paste functionality.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/input-otp.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "input",
+            "type": "registry:component",
+            "description": "Displays a form input field or a component that looks like an input field.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/input.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "label",
+            "type": "registry:component",
+            "description": "Renders an accessible label associated with controls.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/label.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "menubar",
+            "type": "registry:component",
+            "description": "A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/menubar.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "navigation-menu",
+            "type": "registry:component",
+            "description": "A collection of links for navigating websites.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/navigation-menu.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "pagination",
+            "type": "registry:component",
+            "description": "Pagination with page navigation, next and previous links.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/pagination.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "popover",
+            "type": "registry:component",
+            "description": "Displays rich content in a portal, triggered by a button.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/popover.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "progress",
+            "type": "registry:component",
+            "description": "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/progress.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "radio-group",
+            "type": "registry:component",
+            "description": "A set of checkable buttons—known as radio buttons—where no more than one of the buttons can be checked at a time.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/radio-group.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "resizable",
+            "type": "registry:component",
+            "description": "Accessible resizable panel groups and layouts with keyboard support.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/resizable.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "scroll-area",
+            "type": "registry:component",
+            "description": "Augments native scroll functionality for custom, cross-browser styling.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/scroll-area.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "select",
+            "type": "registry:component",
+            "description": "Displays a list of options for the user to pick from—triggered by a button.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/select.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "separator",
+            "type": "registry:component",
+            "description": "Visually or semantically separates content.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/separator.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "sheet",
+            "type": "registry:component",
+            "description": "Extends the Dialog component to display content that complements the main content of the screen.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/sheet.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "sidebar",
+            "type": "registry:component",
+            "description": "A composable, themeable and customizable sidebar component.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/sidebar.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "skeleton",
+            "type": "registry:component",
+            "description": "Use to show a placeholder while content is loading.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/skeleton.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "slider",
+            "type": "registry:component",
+            "description": "An input where the user selects a value from within a given range.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/slider.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "sonner",
+            "type": "registry:component",
+            "description": "An opinionated toast component for React.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/sonner.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "switch",
+            "type": "registry:component",
+            "description": "A control that allows the user to toggle between checked and not checked.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/switch.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "table",
+            "type": "registry:component",
+            "description": "A responsive table component.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/table.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "tabs",
+            "type": "registry:component",
+            "description": "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/tabs.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "textarea",
+            "type": "registry:component",
+            "description": "Displays a form textarea or a component that looks like a textarea.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/textarea.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "toggle-group",
+            "type": "registry:component",
+            "description": "A set of two-state buttons that can be toggled on or off.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/toggle-group.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "toggle",
+            "type": "registry:component",
+            "description": "A two-state button that can be either on or off.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/toggle.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "tooltip",
+            "type": "registry:component",
+            "description": "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/tooltip.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "tree",
+            "type": "registry:component",
+            "description": "A tree view component for displaying hierarchical data.",
+            "files": [
+                {
+                    "path": "src/shadcn/components/ui/tree.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        }
+    ]
+}

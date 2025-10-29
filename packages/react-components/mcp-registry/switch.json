@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "switch",
+  "type": "registry:component",
+  "description": "A control that allows the user to toggle between checked and not checked.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/switch.tsx",
+      "content": "\"use client\";\nimport * as SwitchPrimitive from \"@radix-ui/react-switch\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Switch root styles\nconst switchRootStyles = cn(\n\t// Layout\n\t\"peer\",\n\t\"inline-flex\",\n\t\"items-center\",\n\t\"shrink-0\",\n\t// Size\n\t\"h-[1.15rem]\",\n\t\"w-8\",\n\t// Shape\n\t\"rounded-full\",\n\t\"border\",\n\t\"border-transparent\",\n\t// Interaction\n\t\"transition-all\",\n\t\"outline-none\",\n\t\"cursor-pointer\",\n\t// States\n\t\"data-[state=unchecked]:bg-bg-quaternary\",\n\t\"data-[state=checked]:bg-bg-link\",\n\t\"hover:data-[state=unchecked]:bg-bg-tertiary\",\n\t\"hover:data-[state=checked]:bg-bg-link_hover\",\n\t// Focus\n\t\"focus-visible:ring-2\",\n\t\"focus-visible:ring-utility-blue/70\",\n\t// Disabled\n\t\"disabled:cursor-not-allowed\",\n\t\"disabled:opacity-50\",\n\t\"disabled:data-[state=checked]:bg-bg-disabled\",\n\t\"disabled:data-[state=unchecked]:bg-bg-disabled\",\n);\n\n// Switch thumb styles\nconst switchThumbStyles = cn(\n\t// Layout\n\t\"pointer-events-none\",\n\t\"block\",\n\t// Size\n\t\"size-4\",\n\t// Shape\n\t\"rounded-full\",\n\t\"ring-0\",\n\t// Color\n\t\"bg-bg-primary\",\n\t// Animation\n\t\"transition-transform\",\n\t\"data-[state=checked]:translate-x-[calc(100%-2px)]\",\n\t\"data-[state=unchecked]:translate-x-0\",\n);\n\nfunction Switch({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof SwitchPrimitive.Root>) {\n\treturn (\n\t\t<SwitchPrimitive.Root\n\t\t\tdata-slot=\"switch\"\n\t\t\tclassName={cn(switchRootStyles, className)}\n\t\t\t{...props}\n\t\t>\n\t\t\t<SwitchPrimitive.Thumb\n\t\t\t\tdata-slot=\"switch-thumb\"\n\t\t\t\tclassName={switchThumbStyles}\n\t\t\t/>\n\t\t</SwitchPrimitive.Root>\n\t);\n}\n\nexport { Switch };\n",
+      "type": "registry:component"
+    }
+  ]
+}

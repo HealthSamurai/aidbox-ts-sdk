@@ -1,0 +1,13 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "label",
+  "type": "registry:component",
+  "description": "Renders an accessible label associated with controls.",
+  "files": [
+    {
+      "path": "src/shadcn/components/ui/label.tsx",
+      "content": "\"use client\";\nimport * as LabelPrimitive from \"@radix-ui/react-label\";\nimport type * as React from \"react\";\n\nimport { cn } from \"#shadcn/lib/utils\";\n\n// Label styles\nconst labelStyles = cn(\n\t// Layout\n\t\"flex\",\n\t\"items-center\",\n\t\"gap-2\",\n\t// Typography\n\t\"text-text-primary\",\n\t\"typo-label\",\n\t\"leading-none\",\n\t// Interaction\n\t\"select-none\",\n\t// Group disabled states\n\t\"group-data-[disabled=true]:pointer-events-none\",\n\t\"group-data-[disabled=true]:opacity-50\",\n\t// Peer disabled states\n\t\"peer-disabled:cursor-not-allowed\",\n\t\"peer-disabled:opacity-50\",\n);\n\nfunction Label({\n\tclassName,\n\t...props\n}: React.ComponentProps<typeof LabelPrimitive.Root>) {\n\treturn (\n\t\t<LabelPrimitive.Root\n\t\t\tdata-slot=\"label\"\n\t\t\tclassName={cn(labelStyles, className)}\n\t\t\t{...props}\n\t\t/>\n\t);\n}\n\nexport { Label };\n",
+      "type": "registry:component"
+    }
+  ]
+}
