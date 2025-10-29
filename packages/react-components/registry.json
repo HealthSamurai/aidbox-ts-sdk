@@ -530,6 +530,109 @@
                     "type": "registry:component"
                 }
             ]
+        },
+        {
+            "name": "button-dropdown",
+            "type": "registry:component",
+            "description": "A button with dropdown menu for selecting from multiple options.",
+            "files": [
+                {
+                    "path": "src/components/button-dropdown.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "code-editor",
+            "type": "registry:component",
+            "description": "A code editor component with syntax highlighting for JSON, SQL, YAML, and HTTP.",
+            "files": [
+                {
+                    "path": "src/components/code-editor/index.tsx",
+                    "type": "registry:component"
+                },
+                {
+                    "path": "src/components/code-editor/http.ts",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "copy-icon",
+            "type": "registry:component",
+            "description": "A copy to clipboard button with tooltip and toast notification.",
+            "files": [
+                {
+                    "path": "src/components/copy-icon.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "data-table",
+            "type": "registry:component",
+            "description": "A data table component with column resizing built on TanStack Table.",
+            "files": [
+                {
+                    "path": "src/components/data-table.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "fhir-structure-view",
+            "type": "registry:component",
+            "description": "A specialized tree view for displaying FHIR structure definitions.",
+            "files": [
+                {
+                    "path": "src/components/fhir-structure-view.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "request-line-editor",
+            "type": "registry:component",
+            "description": "An editor for HTTP request lines with method selector and path input.",
+            "files": [
+                {
+                    "path": "src/components/request-line-editor.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "segment-control",
+            "type": "registry:component",
+            "description": "A segmented control component for selecting between multiple options.",
+            "files": [
+                {
+                    "path": "src/components/segment-control.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "split-button",
+            "type": "registry:component",
+            "description": "A split button component with a primary action and dropdown menu.",
+            "files": [
+                {
+                    "path": "src/components/split-button.tsx",
+                    "type": "registry:component"
+                }
+            ]
+        },
+        {
+            "name": "tree-view",
+            "type": "registry:component",
+            "description": "A customizable tree view component with drag and drop, renaming, and custom rendering.",
+            "files": [
+                {
+                    "path": "src/components/tree-view.tsx",
+                    "type": "registry:component"
+                }
+            ]
         }
     ]
 }
