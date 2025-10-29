@@ -18,7 +18,12 @@ import {
 } from "../shadcn/components/ui/table";
 
 export interface DataTableProps<TData> {
-	columns: { [K in keyof TData]: ColumnDef<TData, TData[K]> }[keyof TData][];
+	// It is not possible to allow arbitrary and nested data structures
+	// and have more type safety. Note that the useReactTable type definition
+	// is exactly the same.
+	// There is an open issue: https://github.com/TanStack/table/issues/4382
+	// biome-ignore lint/suspicious/noExplicitAny: cannot be stricter while being a useful library
+	columns: ColumnDef<TData, any>[];
 	data: TData[];
 	stickyHeader?: boolean;
 }
