@@ -1,5 +1,6 @@
-import { Copy } from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "../shadcn/components/ui/sonner";
 import {
@@ -74,11 +75,28 @@ const copyButtonStyles = cn(
 	"duration-200",
 );
 
+// Eye button styles
+const eyeButtonStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"justify-center",
+	"shrink-0",
+	// Sizing
+	"size-4",
+	// Hover
+	"hover:opacity-80",
+	"transition-opacity",
+	"duration-200",
+);
+
 export interface SandboxProps
 	extends Omit<React.ComponentProps<"div">, "children" | "onCopy"> {
 	url: string;
 
 	showCopy?: boolean;
+
+	showEye?: boolean;
 
 	copyIcon?: React.ReactNode;
 
@@ -92,6 +110,7 @@ export interface SandboxProps
 function Sandbox({
 	url,
 	showCopy = true,
+	showEye = true,
 	copyIcon = <Copy />,
 	tooltipText = "Copy URL",
 	showToast = true,
@@ -99,6 +118,8 @@ function Sandbox({
 	className,
 	...props
 }: SandboxProps) {
+	const [isVisible, setIsVisible] = useState(true);
+
 	return (
 		<>
 			<div
@@ -108,8 +129,26 @@ function Sandbox({
 			>
 				<div className={inputContainerStyles}>
 					<div className={contentStyles}>
-						<span className={textStyles}>{url}</span>
+						<span className={textStyles}>
+							{isVisible ? url : "•".repeat(url.length)}
+						</span>
 					</div>
+					{showEye && (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									className={eyeButtonStyles}
+									onClick={() => setIsVisible(!isVisible)}
+								>
+									{isVisible ? <Eye /> : <EyeOff />}
+								</button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{isVisible ? "Hide URL" : "Show URL"}</p>
+							</TooltipContent>
+						</Tooltip>
+					)}
 					{showCopy && (
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -121,7 +160,6 @@ function Sandbox({
 											await navigator.clipboard.writeText(url);
 
 											if (showToast) {
-												toast("Copied", {
 												toast("Copied", {
 													description:
 														url.length > 50 ? `${url.slice(0, 50)}...` : url,
