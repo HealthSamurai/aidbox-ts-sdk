@@ -56,17 +56,11 @@ body {
 }
 
 .h1 {
-	font-size: var(--font-size-4xl);
+	font-size: var(--font-size-5xl);
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-extrabold);
-	line-height: var(--font-leading-none);
+	line-height: var(--font-leading-14);
 	letter-spacing: var(--font-tracking-tight);
-}
-
-@media (min-width: 1024px) {
-	.h1 {
-		font-size: var(--font-size-5xl);
-	}
 }
 
 .h3 {
@@ -106,7 +100,7 @@ body {
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-bold);
 	line-height: var(--font-leading-10);
-	letter-spacing: var(--font-tracking-normal);
+	letter-spacing: var(--font-tracking-tight);
 }
 
 .body16 {
