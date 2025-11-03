@@ -63,19 +63,27 @@ body {
 	letter-spacing: var(--font-tracking-tight);
 }
 
+.h2 {
+	font-size: var(--font-size-4xl);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-bold);
+	line-height: var(--font-leading-10);
+	letter-spacing: var(--font-tracking-tight);
+}
+
 .h3 {
-	font-size: var(--font-size-2xl);
+	font-size: var(--font-size-3xl);
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-semibold);
-	line-height: var(--font-leading-none);
+	line-height: var(--font-leading-9);
 	letter-spacing: var(--font-tracking-tight);
 }
 
 .h4 {
-	font-size: var(--font-size-xl);
+	font-size: var(--font-size-2xl);
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-semibold);
-	line-height: var(--font-leading-none);
+	line-height: var(--font-leading-8);
 	letter-spacing: var(--font-tracking-tight);
 }
 
@@ -95,18 +103,42 @@ body {
 	letter-spacing: var(--font-tracking-tight);
 }
 
-.h2 {
-	font-size: var(--font-size-4xl);
+.caption {
+	font-size: var(--font-size-xl);
 	font-family: var(--font-family-sans);
-	font-weight: var(--font-weight-bold);
-	line-height: var(--font-leading-10);
+	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-7);
 	letter-spacing: var(--font-tracking-tight);
+}
+
+.body14 {
+	font-size: var(--font-size-sm);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-5);
+	letter-spacing: var(--font-tracking-normal);
+}
+
+.body14bold {
+	font-size: var(--font-size-sm);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-medium);
+	line-height: var(--font-leading-5);
+	letter-spacing: var(--font-tracking-normal);
 }
 
 .body16 {
 	font-size: var(--font-size-base);
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-6);
+	letter-spacing: var(--font-tracking-normal);
+}
+
+.body16bold {
+	font-size: var(--font-size-base);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-medium);
 	line-height: var(--font-leading-6);
 	letter-spacing: var(--font-tracking-normal);
 }
