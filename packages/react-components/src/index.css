@@ -104,6 +104,7 @@
 	--color-utility-blue: var(--color-blue-500);
 	--color-utility-violet: var(--color-violet-500);
 	--color-utility-red: var(--color-red-500);
+	--font-leading-14: 56px;
 }
 
 @theme inline {
