@@ -1,0 +1,232 @@
+import Cookies from "js-cookie";
+import YAML from "yaml";
+import type {
+	AidboxRawResponse,
+	AidboxRequestParams,
+	AidboxResponse,
+	ClientParams,
+	OperationOutcome,
+	UIHistoryResponse,
+	UserInfo,
+} from "./types";
+
+const defaultHeaders = {
+	"Content-Type": "application/json",
+	Accept: "application/json",
+};
+
+export interface Client {
+	getAidboxBaseURL: () => string;
+	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
+	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T>>;
+	fetchUIHistory: () => Promise<UIHistoryResponse | OperationOutcome>;
+	performLogout: () => void;
+	fetchUserInfo: () => Promise<UserInfo>;
+}
+
+export function makeClient(params: ClientParams): Client {
+	const basepath = params.basepath;
+	const getAidboxBaseURL = (): string => {
+		const cookies = document.cookie.split("; ");
+		for (const cookie of cookies) {
+			const [name, rest] = cookie.split("=");
+			if (name === "aidbox-base-url") {
+				return decodeURIComponent(rest ?? "");
+			}
+		}
+
+		return `${basepath}//${window.location.host}`;
+	};
+
+	const aidboxRawRequest = async ({
+		method,
+		url,
+		headers = {},
+		params = [],
+		body,
+	}: AidboxRequestParams): Promise<AidboxRawResponse> => {
+		const startTime = Date.now();
+		const baseURL = getAidboxBaseURL();
+
+		const urlObj = new URL(url.startsWith("/") ? url.slice(1) : url, baseURL);
+		params.forEach(([key, value]) => {
+			urlObj.searchParams.append(key, value);
+		});
+
+		const requestHeaders = { ...defaultHeaders, ...headers };
+
+		const response = await fetch(urlObj.toString(), {
+			method,
+			headers: requestHeaders,
+			body: body || null,
+			credentials: "include",
+		});
+		const responseHeaders: Record<string, string> = {};
+		response.headers.forEach((value, key) => {
+			responseHeaders[key] = value;
+		});
+
+		const result: AidboxRawResponse = {
+			response,
+			responseHeaders,
+			duration: Date.now() - startTime,
+			request: {
+				method,
+				url,
+				params,
+				headers: requestHeaders,
+				body: body || "",
+			},
+		};
+
+		if (!response.ok) {
+			if (response.status === 401 || response.status === 403) {
+				const encodedLocation = btoa(window.location.href);
+				window.location.href = `${baseURL}/auth/login?redirect_to=${encodedLocation}`;
+				throw Error("Authentication required", { cause: result });
+			}
+
+			throw Error(`HTTP ${response.status}: ${response.statusText}`, {
+				cause: result,
+			});
+		}
+
+		return result;
+	};
+
+	const coerceBody = async (
+		response: Response,
+		contentType: string,
+	): Promise<unknown> => {
+		switch (contentType) {
+			case "application/json":
+				return await response.json();
+			case "text/yaml":
+				return YAML.parse(await response.text());
+			default:
+				throw Error(
+					`failed to coerce body: unknown content-type ${contentType}`,
+				);
+		}
+	};
+
+	const tryCoerceBody = async (
+		response: Response,
+		contentType: string,
+	): Promise<unknown | undefined> => {
+		try {
+			return await coerceBody(response, contentType);
+		} catch (_) {
+			return undefined;
+		}
+	};
+
+	const aidboxRequest = async <T>(
+		params: AidboxRequestParams,
+	): Promise<AidboxResponse<T | OperationOutcome>> => {
+		try {
+			const response: AidboxRawResponse = await aidboxRawRequest(params);
+
+			const contentType = response.responseHeaders["content-type"];
+			if (!contentType)
+				throw Error("server didn't specify response content-type");
+
+			const body = (await coerceBody(response.response, contentType)) as T;
+
+			return {
+				...response,
+				response: {
+					...response.response,
+					body,
+				},
+			};
+		} catch (e) {
+			if (e instanceof Error) {
+				const cause = e.cause as AidboxRawResponse;
+
+				const contentType = cause.responseHeaders["content-type"];
+				if (!contentType)
+					throw Error("server didn't specify response content-type");
+
+				const body = await tryCoerceBody(cause.response, contentType);
+
+				if (
+					body &&
+					(body as OperationOutcome).resourceType === "OperationOutcome"
+				) {
+					return {
+						...cause,
+						response: {
+							...cause.response,
+							body: body as OperationOutcome,
+						},
+					};
+				}
+			}
+			throw e;
+		}
+	};
+
+	const fetchUserInfo = async (): Promise<UserInfo> => {
+		const response = await fetch(`${getAidboxBaseURL()}/auth/userinfo`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			credentials: "include",
+		});
+
+		if (!response.ok) {
+			const encodedLocation = btoa(window.location.href);
+			window.location.href = `${getAidboxBaseURL()}/auth/login?redirect_to=${encodedLocation}`;
+		}
+
+		return response.json();
+	};
+
+	const performLogout = async () => {
+		const response = await fetch(`${getAidboxBaseURL()}/auth/logout`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+			credentials: "include",
+		});
+
+		Cookies.remove("asid", { path: "/" });
+
+		const encodedLocation = btoa(window.location.href);
+		window.location.href = `${getAidboxBaseURL()}/auth/login?redirect_to=${encodedLocation}`;
+
+		return response;
+	};
+
+	const fetchUIHistory = async (): Promise<
+		UIHistoryResponse | OperationOutcome
+	> => {
+		const response = await aidboxRequest<UIHistoryResponse>({
+			method: "GET",
+			url: "/ui_history",
+			params: [
+				[".type", "http"],
+				["_sort", "-_lastUpdated"],
+				["_count", "100"],
+			],
+		}).then((response: AidboxResponse<UIHistoryResponse>) => {
+			return response.response.body;
+		});
+
+		return response;
+	};
+
+	return {
+		getAidboxBaseURL,
+		aidboxRawRequest,
+		aidboxRequest,
+		fetchUIHistory,
+		performLogout,
+		fetchUserInfo,
+	};
+}

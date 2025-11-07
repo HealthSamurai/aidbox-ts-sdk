@@ -1,0 +1,36 @@
+{
+	"name": "@health-samurai/aidbox-client",
+	"version": "0.0.0-alpha1",
+	"description": "A client library for communicating with Aidbox",
+	"author": "Health Samurai",
+	"type": "module",
+	"main": "./dist/src/clients/aidbox/client.js",
+	"types": "./dist/src/clients/aidbox/types.d.ts",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": "./dist/src/clients/aidbox/client.js"
+	},
+	"scripts": {
+		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && echo success",
+		"format": "biome format",
+		"format:check": "biome format",
+		"format:fix": "biome format --write",
+		"lint": "biome check",
+		"lint:check": "biome check",
+		"lint:fix": "biome check --write",
+		"tsc:check": "tsc -b --noEmit"
+	},
+	"dependencies": {
+		"@types/js-cookie": "^3.0.6",
+		"yaml": "^2.8.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk"
+	}
+}
