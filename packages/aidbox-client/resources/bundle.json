@@ -1,0 +1,16 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/AccessPolicy"
+      },
+      "resource": {
+        "engine": "allow",
+        "resourceType": "AccessPolicy"
+      }
+    }
+  ]
+}
