@@ -36,3 +36,26 @@ export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
 		body: T | OperationOutcome;
 	};
 };
+
+export class AidboxClientError extends Error {
+	constructor(msg: string, cause: AidboxRawResponse) {
+		super(msg, { cause });
+		this.name = "AidboxError";
+
+		Object.setPrototypeOf(this, AidboxClientError.prototype);
+	}
+}
+
+export type AidboxClientBodyCoersionErrorCause = {
+	contentType: string;
+	body: string | undefined;
+};
+
+export class AidboxBodyCoersionError extends Error {
+	constructor(msg: string, cause: AidboxClientBodyCoersionErrorCause) {
+		super(msg, { cause });
+		this.name = "BodyCoersionError";
+
+		Object.setPrototypeOf(this, AidboxBodyCoersionError.prototype);
+	}
+}

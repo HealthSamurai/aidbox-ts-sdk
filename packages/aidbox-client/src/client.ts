@@ -8,6 +8,7 @@ import type {
 	ClientParams,
 	UserInfo,
 } from "./types";
+import { AidboxBodyCoersionError, AidboxClientError } from "./types";
 
 const defaultHeaders = {
 	"Content-Type": "application/json",
@@ -82,12 +83,13 @@ export function makeClient(params: ClientParams): Client {
 			if (response.status === 401 || response.status === 403) {
 				const encodedLocation = btoa(window.location.href);
 				window.location.href = `${baseURL}/auth/login?redirect_to=${encodedLocation}`;
-				throw Error("Authentication required", { cause: result });
+				throw new AidboxClientError("Authentication required", result);
 			}
 
-			throw Error(`HTTP ${response.status}: ${response.statusText}`, {
-				cause: result,
-			});
+			throw new AidboxClientError(
+				`HTTP ${response.status}: ${response.statusText}`,
+				result,
+			);
 		}
 
 		return result;
@@ -97,16 +99,26 @@ export function makeClient(params: ClientParams): Client {
 		response: Response,
 		contentType: string,
 	): Promise<unknown> => {
-		switch (contentType) {
-			case "application/json":
-				return await response.json();
-			case "text/yaml":
-				return YAML.parse(await response.text());
-			default:
-				throw Error(
-					`failed to coerce body: unknown content-type ${contentType}`,
-				);
+		let body: string | undefined;
+		try {
+			body = await response.text();
+			switch (contentType) {
+				case "application/json":
+					return JSON.parse(body);
+				case "text/yaml":
+					return YAML.parse(body);
+			}
+		} catch (e) {
+			throw new AidboxBodyCoersionError(
+				`failed to coerce body: ${(e as Error).message}`,
+				{ contentType, body },
+			);
 		}
+		// default:
+		throw new AidboxBodyCoersionError(
+			`failed to coerce body: unknown content-type ${contentType}`,
+			{ contentType, body },
+		);
 	};
 
 	const tryCoerceBody = async (
@@ -140,7 +152,7 @@ export function makeClient(params: ClientParams): Client {
 				},
 			};
 		} catch (e) {
-			if (e instanceof Error) {
+			if (e instanceof AidboxClientError) {
 				const cause = e.cause as AidboxRawResponse;
 
 				const contentType = cause.responseHeaders["content-type"];
@@ -161,6 +173,7 @@ export function makeClient(params: ClientParams): Client {
 						},
 					};
 				}
+			} else if (e instanceof AidboxBodyCoersionError) {
 			}
 			throw e;
 		}
