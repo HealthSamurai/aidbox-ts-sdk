@@ -1,0 +1,14 @@
+export type { BackboneElement } from "./BackboneElement";
+export type { Bundle } from "./Bundle";
+export type { CodeableConcept } from "./CodeableConcept";
+export type { Coding } from "./Coding";
+export type { DomainResource } from "./DomainResource";
+export type { Element } from "./Element";
+export type { Identifier } from "./Identifier";
+export type { Meta } from "./Meta";
+export type { Narrative } from "./Narrative";
+export type { OperationOutcome } from "./OperationOutcome";
+export type { Period } from "./Period";
+export type { Reference } from "./Reference";
+export type { Resource } from "./Resource";
+export type { Signature } from "./Signature";

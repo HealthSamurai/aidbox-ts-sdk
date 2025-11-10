@@ -1,3 +1,4 @@
+import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 import Cookies from "js-cookie";
 import YAML from "yaml";
 import type {
@@ -7,7 +8,6 @@ import type {
 	ClientParams,
 	UserInfo,
 } from "./types";
-import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 
 const defaultHeaders = {
 	"Content-Type": "application/json",
