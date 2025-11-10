@@ -1,24 +1,7 @@
+import type { OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
+
 export interface ClientParams {
 	basepath: string;
-}
-
-export interface UIHistoryResource {
-	id: string;
-	command: string;
-	meta: {
-		createdAt: string;
-	};
-}
-
-export interface UIHistoryEntry {
-	resource: UIHistoryResource;
-}
-
-export interface UIHistoryResponse {
-	resourceType: "Bundle";
-	type: "searchset";
-	total: number;
-	entry: UIHistoryEntry[];
 }
 
 export interface UserInfo {
@@ -52,8 +35,4 @@ export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
 	response: Omit<Response, "body"> & {
 		body: T | OperationOutcome;
 	};
-};
-
-export type OperationOutcome = {
-	resourceType: string;
 };

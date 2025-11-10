@@ -18,8 +18,8 @@
 		/* Linting */
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
-		"exactOptionalPropertyTypes": true,
-		"noUnusedLocals": true,
+		// FIXME: codegen: "exactOptionalPropertyTypes": true,
+		// FIXME: codegen: "noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"erasableSyntaxOnly": true,
 		"noFallthroughCasesInSwitch": true,
@@ -28,7 +28,10 @@
 		"emitDeclarationOnly": true,
 		"declarationMap": true,
 
-		"baseUrl": "."
+		"baseUrl": ".",
+		"paths": {
+			"@fhir-types/*": ["./src/fhir-types/*"]
+		}
 	},
 	"include": ["src"]
 }

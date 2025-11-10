@@ -5,10 +5,9 @@ import type {
 	AidboxRequestParams,
 	AidboxResponse,
 	ClientParams,
-	OperationOutcome,
-	UIHistoryResponse,
 	UserInfo,
 } from "./types";
+import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 
 const defaultHeaders = {
 	"Content-Type": "application/json",
@@ -19,7 +18,7 @@ export interface Client {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
 	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T>>;
-	fetchUIHistory: () => Promise<UIHistoryResponse | OperationOutcome>;
+	fetchUIHistory: () => Promise<Bundle | OperationOutcome>;
 	performLogout: () => void;
 	fetchUserInfo: () => Promise<UserInfo>;
 }
@@ -203,10 +202,8 @@ export function makeClient(params: ClientParams): Client {
 		return response;
 	};
 
-	const fetchUIHistory = async (): Promise<
-		UIHistoryResponse | OperationOutcome
-	> => {
-		const response = await aidboxRequest<UIHistoryResponse>({
+	const fetchUIHistory = async (): Promise<Bundle | OperationOutcome> => {
+		const response = await aidboxRequest<Bundle>({
 			method: "GET",
 			url: "/ui_history",
 			params: [
@@ -214,7 +211,7 @@ export function makeClient(params: ClientParams): Client {
 				["_sort", "-_lastUpdated"],
 				["_count", "100"],
 			],
-		}).then((response: AidboxResponse<UIHistoryResponse>) => {
+		}).then((response: AidboxResponse<Bundle>) => {
 			return response.response.body;
 		});
 

@@ -20,7 +20,8 @@
 		"lint": "biome check",
 		"lint:check": "biome check",
 		"lint:fix": "biome check --write",
-		"tsc:check": "tsc -b --noEmit"
+		"typecheck": "tsc -b --noEmit",
+		"generate-types": "pnpm exec tsx scripts/generate-types.ts"
 	},
 	"dependencies": {
 		"@types/js-cookie": "^3.0.6",
@@ -34,6 +35,9 @@
 		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk"
 	},
 	"devDependencies": {
+		"@atomic-ehr/codegen": "canary",
+		"@types/node": "^24.2.0",
+		"tsx": "^4.20.4",
 		"typescript": "~5.8.3"
 	}
 }
