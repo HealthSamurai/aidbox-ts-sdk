@@ -4,13 +4,13 @@
 	"description": "A client library for communicating with Aidbox",
 	"author": "Health Samurai",
 	"type": "module",
-	"main": "./dist/src/clients/aidbox/index.js",
-	"types": "./dist/src/clients/aidbox/index.types.d.ts",
+	"main": "./dist/src/index.js",
+	"types": "./dist/src/index.types.d.ts",
 	"files": [
 		"dist"
 	],
 	"exports": {
-		".": "./dist/src/clients/aidbox/index.js"
+		".": "./dist/src/index.js"
 	},
 	"scripts": {
 		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && pnpm exec tsc -b --force && echo success",
