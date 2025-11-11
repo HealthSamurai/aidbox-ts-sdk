@@ -25,7 +25,8 @@ export interface Client {
 }
 
 export function makeClient(params: ClientParams): Client {
-	const basepath = params.basepath;
+	const baseurl = params.baseurl;
+
 	const getAidboxBaseURL = (): string => {
 		const cookies = document.cookie.split("; ");
 		for (const cookie of cookies) {
@@ -35,7 +36,7 @@ export function makeClient(params: ClientParams): Client {
 			}
 		}
 
-		return `${basepath}//${window.location.host}`;
+		return `${baseurl}//${window.location.host}`;
 	};
 
 	const aidboxRawRequest = async ({

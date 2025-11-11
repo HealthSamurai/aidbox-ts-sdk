@@ -1,7 +1,7 @@
 import type { OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 
 export interface ClientParams {
-	basepath: string;
+	baseurl: string;
 }
 
 export interface UserInfo {
