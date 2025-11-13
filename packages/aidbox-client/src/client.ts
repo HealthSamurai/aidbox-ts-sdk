@@ -36,7 +36,8 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 		const startTime = Date.now();
 		const baseURL = getAidboxBaseURL();
 
-		if (!url.startsWith("/")) throw new Error();
+		if (!url.startsWith("/"))
+			throw new Error("url must start with forward slash");
 
 		const urlObj = new URL(url, baseURL);
 
