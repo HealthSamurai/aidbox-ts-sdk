@@ -36,7 +36,7 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 			}
 		}
 
-		return `${baseurl}//${window.location.host}`;
+		return baseurl;
 	};
 
 	const aidboxRawRequest = async ({
