@@ -2,10 +2,10 @@ import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 import Cookies from "js-cookie";
 import YAML from "yaml";
 import type {
+	AidboxClientParams,
 	AidboxRawResponse,
 	AidboxRequestParams,
 	AidboxResponse,
-	ClientParams,
 	UserInfo,
 } from "./types";
 import { AidboxBodyCoersionError, AidboxClientError } from "./types";
@@ -15,16 +15,16 @@ const defaultHeaders = {
 	Accept: "application/json",
 };
 
-export interface Client {
+export interface AidboxClient {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
 	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T>>;
 	fetchUIHistory: () => Promise<Bundle | OperationOutcome>;
-	performLogout: () => void;
+	performLogout: () => Promise<Response>;
 	fetchUserInfo: () => Promise<UserInfo>;
 }
 
-export function makeClient(params: ClientParams): Client {
+export function makeClient(params: AidboxClientParams): AidboxClient {
 	const baseurl = params.baseurl;
 
 	const getAidboxBaseURL = (): string => {

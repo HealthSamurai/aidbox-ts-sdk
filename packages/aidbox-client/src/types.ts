@@ -1,6 +1,6 @@
 import type { OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 
-export interface ClientParams {
+export interface AidboxClientParams {
 	baseurl: string;
 }
 
