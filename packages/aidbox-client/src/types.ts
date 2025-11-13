@@ -40,9 +40,7 @@ export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
 export class AidboxClientError extends Error {
 	constructor(msg: string, cause: AidboxRawResponse) {
 		super(msg, { cause });
-		this.name = "AidboxError";
-
-		Object.setPrototypeOf(this, AidboxClientError.prototype);
+		this.name = "AidboxClientError";
 	}
 }
 
@@ -54,8 +52,6 @@ export type AidboxClientBodyCoersionErrorCause = {
 export class AidboxBodyCoersionError extends Error {
 	constructor(msg: string, cause: AidboxClientBodyCoersionErrorCause) {
 		super(msg, { cause });
-		this.name = "BodyCoersionError";
-
-		Object.setPrototypeOf(this, AidboxBodyCoersionError.prototype);
+		this.name = "AidboxBodyCoersionError";
 	}
 }
