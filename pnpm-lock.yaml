@@ -32,7 +32,7 @@ importers:
     devDependencies:
       '@atomic-ehr/codegen':
         specifier: canary
-        version: 0.0.1-canary.20251112173503.8beba25(@types/node@24.2.0)(typescript@5.8.3)
+        version: 0.0.1-canary.20251113131621.e96bdcb(@types/node@24.2.0)(typescript@5.8.3)
       '@types/node':
         specifier: ^24.2.0
         version: 24.2.0
@@ -299,12 +299,12 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@atomic-ehr/codegen@0.0.1-canary.20251112173503.8beba25':
-    resolution: {integrity: sha512-bLvfXhUx8EtGEhdy5yo2YuCjN987fBEOLkOq/Fv2I/EjDEfSKpDduSoCQE4ZrcWx1EzovSufSRjMvB6vpiYxsQ==}
+  '@atomic-ehr/codegen@0.0.1-canary.20251113131621.e96bdcb':
+    resolution: {integrity: sha512-GDoRD0xTUWOaoyEPqRN+puCOANi1S/8BK+CoS9BQVzh770bb6MSzYGx3ykCl4xBh64260lSzIB8m0pbtw/oe4A==}
     hasBin: true
 
-  '@atomic-ehr/fhir-canonical-manager@0.0.14':
-    resolution: {integrity: sha512-UbNEdzWEpHIUpmcN9c5oORz9STuF0O51I0qw4H5IVgaKCOIzuzVjwcws0L3SiHecujJAuK6hwrDsXBJ8wbHPBA==}
+  '@atomic-ehr/fhir-canonical-manager@0.0.15':
+    resolution: {integrity: sha512-hVtvJrs7NjSuDx8RiUpEglaF3PuKESGRNslvEtsIl6cThnwSdovTCo+LgKD8u3W0aMdq0Dpbah9ISvkeB9+ASw==}
     hasBin: true
     peerDependencies:
       typescript: ^5
@@ -4138,9 +4138,9 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.30
 
-  '@atomic-ehr/codegen@0.0.1-canary.20251112173503.8beba25(@types/node@24.2.0)(typescript@5.8.3)':
+  '@atomic-ehr/codegen@0.0.1-canary.20251113131621.e96bdcb(@types/node@24.2.0)(typescript@5.8.3)':
     dependencies:
-      '@atomic-ehr/fhir-canonical-manager': 0.0.14(typescript@5.8.3)
+      '@atomic-ehr/fhir-canonical-manager': 0.0.15(typescript@5.8.3)
       '@atomic-ehr/fhirschema': 0.0.2(typescript@5.8.3)
       '@inquirer/prompts': 7.10.0(@types/node@24.2.0)
       ajv: 8.17.1
@@ -4153,7 +4153,7 @@ snapshots:
       - '@types/node'
       - typescript
 
-  '@atomic-ehr/fhir-canonical-manager@0.0.14(typescript@5.8.3)':
+  '@atomic-ehr/fhir-canonical-manager@0.0.15(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 
