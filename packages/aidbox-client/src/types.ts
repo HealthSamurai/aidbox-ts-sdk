@@ -25,7 +25,7 @@ export type AidboxRawResponse = {
 	request: {
 		method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 		url: string;
-		headers?: [string, string][];
+		headers?: Record<string, string>;
 		params?: [string, string][];
 		body?: string;
 	};

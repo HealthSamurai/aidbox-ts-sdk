@@ -45,13 +45,13 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 			urlObj.searchParams.append(key, value);
 		});
 
-		const requestHeaders: [string, string][] = [
-			["content-type", "application/json"],
-			["accept", "application/json"],
-		];
+		const requestHeaders: Record<string, string> = {
+			"content-type": "application/json",
+			accept: "application/json",
+		};
 
 		Object.entries(headers).forEach(([header, value]) => {
-			requestHeaders.push([header.toLowerCase(), value]);
+			requestHeaders[header.toLowerCase()] = value;
 		});
 
 		const response = await fetch(urlObj.toString(), {
@@ -137,17 +137,6 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 		);
 	};
 
-	const tryCoerceBody = async (
-		response: Response,
-		contentType: string,
-	): Promise<unknown | undefined> => {
-		try {
-			return await coerceBody(response, contentType);
-		} catch (_) {
-			return undefined;
-		}
-	};
-
 	const aidboxRequest = async <T>(
 		params: AidboxRequestParams,
 	): Promise<AidboxResponse<T | OperationOutcome>> => {
@@ -170,17 +159,16 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 		} catch (e) {
 			if (e instanceof AidboxClientError) {
 				const cause = e.cause as AidboxRawResponse;
+				const responseCopy = cause.response.clone(); // rethrown if body is not an OperationOutcome
 
 				const contentType = cause.responseHeaders["content-type"];
 				if (!contentType)
 					throw Error("server didn't specify response content-type");
 
-				const body = await tryCoerceBody(cause.response, contentType);
+				// consumes original response body stream
+				const body = await coerceBody(cause.response, contentType);
 
-				if (
-					body &&
-					(body as OperationOutcome).resourceType === "OperationOutcome"
-				) {
+				if ((body as OperationOutcome).resourceType === "OperationOutcome") {
 					return {
 						...cause,
 						response: {
@@ -188,8 +176,13 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 							body: body as OperationOutcome,
 						},
 					};
+				} else {
+					throw new AidboxClientError(e.message, {
+						...cause,
+						// cloned response still has its body as a stream
+						response: responseCopy,
+					});
 				}
-			} else if (e instanceof AidboxBodyCoersionError) {
 			}
 			throw e;
 		}
