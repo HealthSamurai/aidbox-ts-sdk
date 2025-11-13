@@ -10,32 +10,19 @@ import type {
 } from "./types";
 import { AidboxBodyCoersionError, AidboxClientError } from "./types";
 
-const defaultHeaders = {
-	"Content-Type": "application/json",
-	Accept: "application/json",
-};
-
-export interface AidboxClient {
+export type AidboxClient = {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
 	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T>>;
 	fetchUIHistory: () => Promise<Bundle | OperationOutcome>;
 	performLogout: () => Promise<Response>;
 	fetchUserInfo: () => Promise<UserInfo>;
-}
+};
 
 export function makeClient(params: AidboxClientParams): AidboxClient {
 	const baseurl = params.baseurl;
 
 	const getAidboxBaseURL = (): string => {
-		const cookies = document.cookie.split("; ");
-		for (const cookie of cookies) {
-			const [name, rest] = cookie.split("=");
-			if (name === "aidbox-base-url") {
-				return decodeURIComponent(rest ?? "");
-			}
-		}
-
 		return baseurl;
 	};
 
@@ -49,12 +36,22 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 		const startTime = Date.now();
 		const baseURL = getAidboxBaseURL();
 
-		const urlObj = new URL(url.startsWith("/") ? url.slice(1) : url, baseURL);
+		if (!url.startsWith("/")) throw new Error();
+
+		const urlObj = new URL(url, baseURL);
+
 		params.forEach(([key, value]) => {
 			urlObj.searchParams.append(key, value);
 		});
 
-		const requestHeaders = { ...defaultHeaders, ...headers };
+		const requestHeaders: [string, string][] = [
+			["content-type", "application/json"],
+			["accept", "application/json"]
+		];
+
+		Object.entries(headers).forEach(([header, value]) => {
+			requestHeaders.push([header.toLowerCase(), value]);
+		});
 
 		const response = await fetch(urlObj.toString(), {
 			method,
@@ -62,6 +59,7 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 			body: body || null,
 			credentials: "include",
 		});
+
 		const responseHeaders: Record<string, string> = {};
 		response.headers.forEach((value, key) => {
 			responseHeaders[key] = value;
@@ -96,6 +94,15 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 		return result;
 	};
 
+	const normalizeContentType = (contentType: string) => {
+		const semicolon = contentType.indexOf(";");
+		if (semicolon !== -1) {
+			return contentType.substring(0, semicolon).toLowerCase();
+		} else {
+			return contentType.toLowerCase();
+		}
+	};
+
 	const coerceBody = async (
 		response: Response,
 		contentType: string,
@@ -103,17 +110,24 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 		let body: string | undefined;
 		try {
 			body = await response.text();
-			switch (contentType) {
+			switch (normalizeContentType(contentType)) {
 				case "application/json":
+				case "application/fhir+json":
 					return JSON.parse(body);
 				case "text/yaml":
 					return YAML.parse(body);
 			}
 		} catch (e) {
-			throw new AidboxBodyCoersionError(
-				`failed to coerce body: ${(e as Error).message}`,
-				{ contentType, body },
-			);
+			let message: string;
+			if (e instanceof Error) {
+				message = e.message;
+			} else {
+				message = "unknown error";
+			}
+			throw new AidboxBodyCoersionError(`failed to coerce body: ${message}`, {
+				contentType,
+				body,
+			});
 		}
 		// default:
 		throw new AidboxBodyCoersionError(
