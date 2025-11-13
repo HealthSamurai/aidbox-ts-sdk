@@ -46,7 +46,7 @@ export function makeClient(params: AidboxClientParams): AidboxClient {
 
 		const requestHeaders: [string, string][] = [
 			["content-type", "application/json"],
-			["accept", "application/json"]
+			["accept", "application/json"],
 		];
 
 		Object.entries(headers).forEach(([header, value]) => {
