@@ -18,8 +18,8 @@
 		/* Linting */
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
-		// FIXME: codegen: "exactOptionalPropertyTypes": true,
-		// FIXME: codegen: "noUnusedLocals": true,
+		"exactOptionalPropertyTypes": true,
+		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"erasableSyntaxOnly": true,
 		"noFallthroughCasesInSwitch": true,
