@@ -1,34 +1,28 @@
 import type { OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 
-export interface AidboxClientParams {
+export type AidboxClientParams = {
 	baseurl: string;
-}
+	onRawResponseHook?: (resp: AidboxRawResponse) => AidboxRawResponse;
+};
 
 export interface UserInfo {
 	id: string;
 	email?: string;
 }
 
-export interface AidboxRequestParams {
+export type AidboxRequestParams = {
 	method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 	url: string;
 	headers?: Record<string, string>;
 	params?: [string, string][];
 	body?: string;
-	streamBody?: boolean;
-}
+};
 
 export type AidboxRawResponse = {
 	response: Response;
 	responseHeaders: Record<string, string>;
 	duration: number;
-	request: {
-		method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-		url: string;
-		headers?: Record<string, string>;
-		params?: [string, string][];
-		body?: string;
-	};
+	request: AidboxRequestParams;
 };
 
 export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
@@ -41,17 +35,5 @@ export class AidboxClientError extends Error {
 	constructor(msg: string, cause: AidboxRawResponse) {
 		super(msg, { cause });
 		this.name = "AidboxClientError";
-	}
-}
-
-export type AidboxClientBodyCoersionErrorCause = {
-	contentType: string;
-	body: string | undefined;
-};
-
-export class AidboxBodyCoersionError extends Error {
-	constructor(msg: string, cause: AidboxClientBodyCoersionErrorCause) {
-		super(msg, { cause });
-		this.name = "AidboxBodyCoersionError";
 	}
 }
