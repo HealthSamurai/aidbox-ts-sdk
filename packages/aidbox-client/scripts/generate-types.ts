@@ -6,7 +6,7 @@ const builder = new APIBuilder()
 	.verbose()
 	.throwException()
 	.fromPackage("hl7.fhir.r4.core", "4.0.1")
-	.typescript({ withDebugComment: false })
+	.typescript({ withDebugComment: false, generateProfile: false })
 	.outputTo("./src/fhir-types")
 	.treeShake({
 		"hl7.fhir.r4.core": {
@@ -21,7 +21,7 @@ const builder = new APIBuilder()
 			"http://hl7.org/fhir/StructureDefinition/Element": {
 				ignoreFields: ["extension"],
 			},
-		},
+		}
 	})
 	.cleanOutput(true);
 
@@ -30,8 +30,8 @@ const report = await builder.generate();
 console.log(report);
 
 if (report.success) {
-	console.log("✅ FHIR R4 types generated successfully!");
+	console.log("✅ FHIR types generated successfully!");
 } else {
-	console.error("❌ FHIR R4 types generation failed.");
+	console.error("❌ FHIR types generation failed.");
 	process.exit(1);
 }

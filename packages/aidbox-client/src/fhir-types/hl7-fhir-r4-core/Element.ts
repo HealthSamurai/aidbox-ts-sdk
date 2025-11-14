@@ -2,8 +2,9 @@
 // GitHub: https://github.com/orgs/atomic-ehr/repositories
 // Any manual changes made to this file may be overwritten.
 
+
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/Element
 export interface Element {
-	id?: string;
-	_id?: Element;
+    id?: string;
+    _id?: Element;
 }

@@ -7,4 +7,5 @@ import type { Element } from "../hl7-fhir-r4-core/Element";
 export type { Element } from "../hl7-fhir-r4-core/Element";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/BackboneElement
-export interface BackboneElement extends Element {}
+export interface BackboneElement extends Element {
+}

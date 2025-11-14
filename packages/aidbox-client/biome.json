@@ -9,6 +9,7 @@
 		"includes": [
 			".storybook/**",
 			"src/**",
+			"!src/fhir-types/**",
 			".vscode/**",
 			"biome.json",
 			"index.html",

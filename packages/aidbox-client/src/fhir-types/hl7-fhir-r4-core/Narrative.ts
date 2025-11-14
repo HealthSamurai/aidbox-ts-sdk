@@ -8,8 +8,8 @@ export type { Element } from "../hl7-fhir-r4-core/Element";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/Narrative
 export interface Narrative extends Element {
-	div: string;
-	_div?: Element;
-	status: "generated" | "extensions" | "additional" | "empty";
-	_status?: Element;
+    div: string;
+    _div?: Element;
+    status: "generated" | "extensions" | "additional" | "empty";
+    _status?: Element;
 }

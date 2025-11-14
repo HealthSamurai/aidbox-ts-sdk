@@ -12,29 +12,15 @@ export type { Reference } from "../hl7-fhir-r4-core/Reference";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/Signature
 export interface Signature extends Element {
-	data?: string;
-	_data?: Element;
-	onBehalfOf?: Reference<
-		| "Device"
-		| "Organization"
-		| "Patient"
-		| "Practitioner"
-		| "PractitionerRole"
-		| "RelatedPerson"
-	>;
-	sigFormat?: string;
-	_sigFormat?: Element;
-	targetFormat?: string;
-	_targetFormat?: Element;
-	type: Coding[];
-	when: string;
-	_when?: Element;
-	who: Reference<
-		| "Device"
-		| "Organization"
-		| "Patient"
-		| "Practitioner"
-		| "PractitionerRole"
-		| "RelatedPerson"
-	>;
+    data?: string;
+    _data?: Element;
+    onBehalfOf?: Reference<"Device" | "Organization" | "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson">;
+    sigFormat?: string;
+    _sigFormat?: Element;
+    targetFormat?: string;
+    _targetFormat?: Element;
+    type: Coding[];
+    when: string;
+    _when?: Element;
+    who: Reference<"Device" | "Organization" | "Patient" | "Practitioner" | "PractitionerRole" | "RelatedPerson">;
 }

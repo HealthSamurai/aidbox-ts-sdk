@@ -31,8 +31,8 @@ importers:
         version: 2.8.1
     devDependencies:
       '@atomic-ehr/codegen':
-        specifier: canary
-        version: 0.0.1-canary.20251113131621.e96bdcb(@types/node@24.2.0)(typescript@5.8.3)
+        specifier: ^0.0.2
+        version: 0.0.2(@types/node@24.2.0)(typescript@5.8.3)
       '@types/node':
         specifier: ^24.2.0
         version: 24.2.0
@@ -299,8 +299,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@atomic-ehr/codegen@0.0.1-canary.20251113131621.e96bdcb':
-    resolution: {integrity: sha512-GDoRD0xTUWOaoyEPqRN+puCOANi1S/8BK+CoS9BQVzh770bb6MSzYGx3ykCl4xBh64260lSzIB8m0pbtw/oe4A==}
+  '@atomic-ehr/codegen@0.0.2':
+    resolution: {integrity: sha512-u3U1uiyN2ushbCB3h81a/ntVTk9nX56CXEbPhU1Bzi/a1pxZcJGyjH0h3BT2Pazu+PYJdeiN9b/d29Ci5hk92g==}
     hasBin: true
 
   '@atomic-ehr/fhir-canonical-manager@0.0.15':
@@ -309,8 +309,8 @@ packages:
     peerDependencies:
       typescript: ^5
 
-  '@atomic-ehr/fhirschema@0.0.2':
-    resolution: {integrity: sha512-OA4CVjTUEdw43Efg5I5rj95je4GC3lRiLM/kUqadcK3Po24vnINUsB8YdOP/F3ffdUYKQcJ+z09sWQVeAC2z/A==}
+  '@atomic-ehr/fhirschema@0.0.5':
+    resolution: {integrity: sha512-B/8ScNnnQUIR6d3FsIuGGvanOyE2j7W3mAubVmpPE2I/tho+meEBRrGgs5E+AY4jDz9mviTdOta08RpIhH2kew==}
     peerDependencies:
       typescript: ^5
 
@@ -4138,10 +4138,10 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.30
 
-  '@atomic-ehr/codegen@0.0.1-canary.20251113131621.e96bdcb(@types/node@24.2.0)(typescript@5.8.3)':
+  '@atomic-ehr/codegen@0.0.2(@types/node@24.2.0)(typescript@5.8.3)':
     dependencies:
       '@atomic-ehr/fhir-canonical-manager': 0.0.15(typescript@5.8.3)
-      '@atomic-ehr/fhirschema': 0.0.2(typescript@5.8.3)
+      '@atomic-ehr/fhirschema': 0.0.5(typescript@5.8.3)
       '@inquirer/prompts': 7.10.0(@types/node@24.2.0)
       ajv: 8.17.1
       handlebars: 4.7.8
@@ -4157,7 +4157,7 @@ snapshots:
     dependencies:
       typescript: 5.8.3
 
-  '@atomic-ehr/fhirschema@0.0.2(typescript@5.8.3)':
+  '@atomic-ehr/fhirschema@0.0.5(typescript@5.8.3)':
     dependencies:
       typescript: 5.8.3
 

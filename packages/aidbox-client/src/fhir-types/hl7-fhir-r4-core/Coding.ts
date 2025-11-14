@@ -8,14 +8,14 @@ export type { Element } from "../hl7-fhir-r4-core/Element";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/Coding
 export interface Coding extends Element {
-	code?: string;
-	_code?: Element;
-	display?: string;
-	_display?: Element;
-	system?: string;
-	_system?: Element;
-	userSelected?: boolean;
-	_userSelected?: Element;
-	version?: string;
-	_version?: Element;
+    code?: string;
+    _code?: Element;
+    display?: string;
+    _display?: Element;
+    system?: string;
+    _system?: Element;
+    userSelected?: boolean;
+    _userSelected?: Element;
+    version?: string;
+    _version?: Element;
 }

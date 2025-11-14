@@ -10,7 +10,7 @@ export type { Element } from "../hl7-fhir-r4-core/Element";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/CodeableConcept
 export interface CodeableConcept extends Element {
-	coding?: Coding[];
-	text?: string;
-	_text?: Element;
+    coding?: Coding[];
+    text?: string;
+    _text?: Element;
 }

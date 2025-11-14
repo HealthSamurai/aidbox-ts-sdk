@@ -8,13 +8,13 @@ export type { Meta } from "../hl7-fhir-r4-core/Meta";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/Resource
 export interface Resource {
-	resourceType: "Bundle" | "DomainResource" | "OperationOutcome" | "Resource";
+    resourceType: "Bundle" | "DomainResource" | "OperationOutcome" | "Resource";
 
-	id?: string;
-	_id?: Element;
-	implicitRules?: string;
-	_implicitRules?: Element;
-	language?: string;
-	_language?: Element;
-	meta?: Meta;
+    id?: string;
+    _id?: Element;
+    implicitRules?: string;
+    _implicitRules?: Element;
+    language?: string;
+    _language?: Element;
+    meta?: Meta;
 }
