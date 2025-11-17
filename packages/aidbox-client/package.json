@@ -22,7 +22,8 @@
 		"lint:fix": "biome check --write",
 		"typecheck": "tsc -b --noEmit",
 		"generate-types": "tsx scripts/generate-types.ts",
-		"test": "vitest"
+		"test": "vitest run",
+		"test:watch": "vitest watch"
 	},
 	"dependencies": {
 		"@types/js-cookie": "^3.0.6",
