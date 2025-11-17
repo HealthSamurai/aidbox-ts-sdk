@@ -40,7 +40,7 @@ describe("AidboxClient", () => {
         }),
       });
 
-      const client = makeClient({
+      const client = makeClient<Bundle, OperationOutcome>({
         baseurl: "http://localhost:8080",
       });
 

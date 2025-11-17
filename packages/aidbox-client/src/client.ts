@@ -10,13 +10,13 @@ import type {
 } from "./types";
 import { AidboxClientError } from "./types";
 
-export type AidboxClient = {
+export type AidboxClient<TBundle = Bundle, TOperationOutcome = OperationOutcome> = {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
 	aidboxRequest: <T>(
 		params: AidboxRequestParams,
-	) => Promise<AidboxResponse<T | OperationOutcome>>;
-	fetchUIHistory: () => Promise<Bundle | OperationOutcome>;
+	) => Promise<AidboxResponse<T | TOperationOutcome>>;
+	fetchUIHistory: () => Promise<TBundle | TOperationOutcome>;
 	performLogout: () => Promise<Response>;
 	fetchUserInfo: () => Promise<UserInfo>;
 };
@@ -27,10 +27,10 @@ type InternalAidboxErrorResponse = {
 	request: AidboxRequestParams;
 };
 
-export function makeClient({
+export function makeClient<TBundle, TOperationOutcome>({
 	baseurl,
 	onRawResponseHook = (resp) => resp,
-}: AidboxClientParams): AidboxClient {
+}: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome> {
 	const getAidboxBaseURL = (): string => {
 		return baseurl;
 	};
@@ -168,7 +168,7 @@ export function makeClient({
 
 	const aidboxRequest = async <T>(
 		params: AidboxRequestParams,
-	): Promise<AidboxResponse<T | OperationOutcome>> => {
+	): Promise<AidboxResponse<T | TOperationOutcome>> => {
 		const result = await internalAidboxRawRequest(params);
 
 		if (isInternalErrorResponse(result)) throw result.error;
@@ -176,7 +176,7 @@ export function makeClient({
 		const hookResult = onRawResponseHook(result);
 
 		const responseCopy = hookResult.response.clone(); // rethrown if body is not an OperationOutcome
-		const body = await coerceBody<T | OperationOutcome>(hookResult);
+		const body = await coerceBody<T | TOperationOutcome>(hookResult);
 
 		if (hookResult.response.status < 200 || hookResult.response.status > 299) {
 			if ((body as OperationOutcome).resourceType === "OperationOutcome")
@@ -233,8 +233,8 @@ export function makeClient({
 		});
 	};
 
-	const fetchUIHistory = async (): Promise<Bundle | OperationOutcome> => {
-		const response = await aidboxRequest<Bundle>({
+	const fetchUIHistory = async (): Promise<TBundle | TOperationOutcome> => {
+		const response = await aidboxRequest<TBundle>({
 			method: "GET",
 			url: "/ui_history",
 			params: [
@@ -243,7 +243,7 @@ export function makeClient({
 				["_count", "100"],
 			],
 		}).then(
-			({ response }: AidboxResponse<Bundle | OperationOutcome>) =>
+			({ response }: AidboxResponse<TBundle | TOperationOutcome>) =>
 				response.body,
 		);
 
