@@ -27,11 +27,7 @@
 		"outDir": "dist",
 		"emitDeclarationOnly": true,
 		"declarationMap": true,
-
-		"baseUrl": ".",
-		"paths": {
-			"@fhir-types/*": ["./src/fhir-types/*"]
-		}
+		"baseUrl": "."
 	},
 	"include": ["src", "test"]
 }

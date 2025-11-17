@@ -1,4 +1,4 @@
-import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
+import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import Cookies from "js-cookie";
 import YAML from "yaml";
 import type {
