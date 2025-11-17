@@ -13,7 +13,7 @@ import { AidboxClientError } from "./types";
 export type AidboxClient = {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
-	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T>>;
+	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T | OperationOutcome>>;
 	fetchUIHistory: () => Promise<Bundle | OperationOutcome>;
 	performLogout: () => Promise<Response>;
 	fetchUserInfo: () => Promise<UserInfo>;
