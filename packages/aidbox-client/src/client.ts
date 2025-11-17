@@ -240,7 +240,7 @@ export function makeClient({
 				["_sort", "-_lastUpdated"],
 				["_count", "100"],
 			],
-		}).then(({ response }: AidboxResponse<Bundle>) => response.body);
+		}).then(({ response }: AidboxResponse<Bundle | OperationOutcome>) => response.body);
 
 		return response;
 	};

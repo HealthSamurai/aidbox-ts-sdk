@@ -33,5 +33,5 @@
 			"@fhir-types/*": ["./src/fhir-types/*"]
 		}
 	},
-	"include": ["src"]
+	"include": ["src", "test"]
 }

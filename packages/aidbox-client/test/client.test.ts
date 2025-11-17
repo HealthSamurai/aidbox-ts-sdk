@@ -1,14 +1,30 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect,  vi } from "vitest";
 import { makeClient } from "../src/client.js";
-import type { Patient } from "@fhir-types/hl7-fhir-r4-core";
+import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
+import type { AidboxResponse } from "src/types.js";
 
 describe("AidboxClient", () => {
   describe("GET request", () => {
     it("should successfully fetch a resource", async () => {
-      const mockResponse = {
-        resourceType: "Patient",
-        id: "example-patient",
-        name: [{ given: ["John"], family: "Doe" }],
+      const mockResponse: Bundle = {
+        resourceType: "Bundle",
+        id: "foo",
+        type: "searchset",
+        total: 2,
+        entry: [
+          {
+            resource: {
+              resourceType: "Resource",
+              id: "patient-1"
+            },
+          },
+          {
+            resource: {
+              resourceType: "Resource",
+              id: "patient-2",
+            },
+          },
+        ],
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue({
@@ -28,15 +44,15 @@ describe("AidboxClient", () => {
         baseurl: "http://localhost:8080",
       });
 
-      const result = await client.aidboxRequest<Patient>({
+      const result: AidboxResponse<Bundle | OperationOutcome> = await client.aidboxRequest<Bundle>({
         method: "GET",
-        url: "/Patient/example-patient",
+        url: "/Bundle/foo",
       });
 
       expect(result.response.status).toBe(200);
       expect(result.response.body).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:8080/Patient/example-patient",
+        "http://localhost:8080/Bundle/foo",
         expect.objectContaining({
           method: "GET",
           headers: expect.objectContaining({

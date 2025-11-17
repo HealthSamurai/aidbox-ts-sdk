@@ -1,4 +1,3 @@
-import type { OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
 
 export type AidboxClientParams = {
 	baseurl: string;
@@ -27,7 +26,7 @@ export type AidboxRawResponse = {
 
 export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
 	response: Omit<Response, "body"> & {
-		body: T | OperationOutcome;
+		body: T;
 	};
 };
 
