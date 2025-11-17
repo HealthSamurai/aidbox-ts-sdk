@@ -1,4 +1,3 @@
-
 export type AidboxClientParams = {
 	baseurl: string;
 	onRawResponseHook?: (resp: AidboxRawResponse) => AidboxRawResponse;

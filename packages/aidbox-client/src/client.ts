@@ -13,7 +13,9 @@ import { AidboxClientError } from "./types";
 export type AidboxClient = {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
-	aidboxRequest: <T>(params: AidboxRequestParams) => Promise<AidboxResponse<T | OperationOutcome>>;
+	aidboxRequest: <T>(
+		params: AidboxRequestParams,
+	) => Promise<AidboxResponse<T | OperationOutcome>>;
 	fetchUIHistory: () => Promise<Bundle | OperationOutcome>;
 	performLogout: () => Promise<Response>;
 	fetchUserInfo: () => Promise<UserInfo>;
@@ -240,7 +242,10 @@ export function makeClient({
 				["_sort", "-_lastUpdated"],
 				["_count", "100"],
 			],
-		}).then(({ response }: AidboxResponse<Bundle | OperationOutcome>) => response.body);
+		}).then(
+			({ response }: AidboxResponse<Bundle | OperationOutcome>) =>
+				response.body,
+		);
 
 		return response;
 	};
