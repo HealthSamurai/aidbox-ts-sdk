@@ -21,7 +21,7 @@ const builder = new APIBuilder()
 			"http://hl7.org/fhir/StructureDefinition/Element": {
 				ignoreFields: ["extension"],
 			},
-		}
+		},
 	})
 	.cleanOutput(true);
 

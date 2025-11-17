@@ -225,7 +225,7 @@ export function makeClient({
 				"Content-Type": "application/json",
 				Accept: "application/json",
 			},
-		}).then(({response}: AidboxRawResponse) => {
+		}).then(({ response }: AidboxRawResponse) => {
 			Cookies.remove("asid", { path: "/" });
 			return response;
 		});
