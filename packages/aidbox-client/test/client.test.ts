@@ -1,6 +1,6 @@
 import { describe, it, expect,  vi } from "vitest";
-import { makeClient } from "../src/client.js";
-import type { Bundle, OperationOutcome } from "@fhir-types/hl7-fhir-r4-core";
+import { makeClient } from "src/client.js";
+import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
 import type { AidboxResponse } from "src/types.js";
 
 describe("AidboxClient", () => {
