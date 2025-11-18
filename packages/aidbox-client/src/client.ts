@@ -1,6 +1,6 @@
-import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import Cookies from "js-cookie";
 import YAML from "yaml";
+import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import type {
 	AidboxClientParams,
 	AidboxRawResponse,
@@ -10,13 +10,16 @@ import type {
 } from "./types";
 import { AidboxClientError } from "./types";
 
-export type AidboxClient<TBundle = Bundle, TOperationOutcome = OperationOutcome> = {
+export type AidboxClient<
+	TBundle = Bundle,
+	TOperationOutcome = OperationOutcome,
+> = {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
 	aidboxRequest: <T>(
 		params: AidboxRequestParams,
 	) => Promise<AidboxResponse<T | TOperationOutcome>>;
-	fetchUIHistory: () => Promise<TBundle | TOperationOutcome>;
+	fetchUIHistory: () => Promise<TBundle>;
 	performLogout: () => Promise<Response>;
 	fetchUserInfo: () => Promise<UserInfo>;
 };
@@ -233,19 +236,16 @@ export function makeClient<TBundle, TOperationOutcome>({
 		});
 	};
 
-	const fetchUIHistory = async (): Promise<TBundle | TOperationOutcome> => {
-		const response = await aidboxRequest<TBundle>({
+	const fetchUIHistory = async (): Promise<TBundle> => {
+		const response = await aidboxRawRequest({
 			method: "GET",
-			url: "/ui_history",
+			url: "/fhir/ui_history",
 			params: [
 				[".type", "http"],
 				["_sort", "-_lastUpdated"],
 				["_count", "100"],
 			],
-		}).then(
-			({ response }: AidboxResponse<TBundle | TOperationOutcome>) =>
-				response.body,
-		);
+		}).then((response: AidboxRawResponse) => coerceBody<TBundle>(response));
 
 		return response;
 	};
