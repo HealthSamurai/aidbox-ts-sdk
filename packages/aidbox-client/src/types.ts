@@ -1,12 +1,13 @@
+import type { Resource } from "./fhir-types/hl7-fhir-r4-core";
+
 export type AidboxClientParams = {
 	baseurl: string;
 	onRawResponseHook?: (resp: AidboxRawResponse) => AidboxRawResponse;
 };
 
-export interface UserInfo {
-	id: string;
+export type User = Resource & {
 	email?: string;
-}
+};
 
 export type AidboxRequestParams = {
 	method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";

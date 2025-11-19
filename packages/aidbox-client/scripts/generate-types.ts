@@ -10,6 +10,7 @@ const builder = new APIBuilder()
 	.outputTo("./src/fhir-types")
 	.treeShake({
 		"hl7.fhir.r4.core": {
+			"http://hl7.org/fhir/StructureDefinition/Resource": {},
 			"http://hl7.org/fhir/StructureDefinition/Bundle": {},
 			"http://hl7.org/fhir/StructureDefinition/OperationOutcome": {},
 			"http://hl7.org/fhir/StructureDefinition/DomainResource": {

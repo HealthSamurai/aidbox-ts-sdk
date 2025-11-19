@@ -6,13 +6,14 @@ import type {
 	AidboxRawResponse,
 	AidboxRequestParams,
 	AidboxResponse,
-	UserInfo,
+	User,
 } from "./types";
 import { AidboxClientError } from "./types";
 
 export type AidboxClient<
 	TBundle = Bundle,
 	TOperationOutcome = OperationOutcome,
+	TUser = User,
 > = {
 	getAidboxBaseURL: () => string;
 	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
@@ -21,7 +22,7 @@ export type AidboxClient<
 	) => Promise<AidboxResponse<T | TOperationOutcome>>;
 	fetchUIHistory: () => Promise<TBundle>;
 	performLogout: () => Promise<Response>;
-	fetchUserInfo: () => Promise<UserInfo>;
+	fetchUserInfo: () => Promise<TUser>;
 };
 
 type InternalAidboxErrorResponse = {
@@ -30,10 +31,10 @@ type InternalAidboxErrorResponse = {
 	request: AidboxRequestParams;
 };
 
-export function makeClient<TBundle, TOperationOutcome>({
+export function makeClient<TBundle, TOperationOutcome, TUser>({
 	baseurl,
 	onRawResponseHook = (resp) => resp,
-}: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome> {
+}: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
 	const getAidboxBaseURL = (): string => {
 		return baseurl;
 	};
@@ -209,17 +210,17 @@ export function makeClient<TBundle, TOperationOutcome>({
 		};
 	};
 
-	const fetchUserInfo = async (): Promise<UserInfo> => {
-		const response = await aidboxRawRequest({
+	const fetchUserInfo = async (): Promise<TUser> => {
+		const user = await aidboxRawRequest({
 			url: "/auth/userinfo",
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
 			},
-		}).then(({ response }: AidboxRawResponse) => response.json());
+		}).then((response) => coerceBody<TUser>(response));
 
-		return response;
+		return user;
 	};
 
 	const performLogout = async () => {
@@ -237,7 +238,7 @@ export function makeClient<TBundle, TOperationOutcome>({
 	};
 
 	const fetchUIHistory = async (): Promise<TBundle> => {
-		const response = await aidboxRawRequest({
+		const history = await aidboxRawRequest({
 			method: "GET",
 			url: "/fhir/ui_history",
 			params: [
@@ -245,9 +246,9 @@ export function makeClient<TBundle, TOperationOutcome>({
 				["_sort", "-_lastUpdated"],
 				["_count", "100"],
 			],
-		}).then((response: AidboxRawResponse) => coerceBody<TBundle>(response));
+		}).then((response) => coerceBody<TBundle>(response));
 
-		return response;
+		return history;
 	};
 
 	return {

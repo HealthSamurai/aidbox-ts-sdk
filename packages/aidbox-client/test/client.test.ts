@@ -1,7 +1,7 @@
 import { describe, it, expect,  vi } from "vitest";
 import { makeClient } from "src/client.js";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
-import type { AidboxResponse } from "src/types.js";
+import type { AidboxResponse, User } from "src/types.js";
 
 describe("AidboxClient", () => {
   describe("GET request", () => {
@@ -40,7 +40,7 @@ describe("AidboxClient", () => {
         }),
       });
 
-      const client = makeClient<Bundle, OperationOutcome>({
+      const client = makeClient<Bundle, OperationOutcome, User>({
         baseurl: "http://localhost:8080",
       });
 
