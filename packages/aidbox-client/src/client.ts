@@ -1,5 +1,4 @@
 import Cookies from "js-cookie";
-import YAML from "yaml";
 import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import type {
 	AidboxClientParams,
@@ -8,7 +7,8 @@ import type {
 	AidboxResponse,
 	User,
 } from "./types";
-import { AidboxClientError } from "./types";
+import { AidboxClientError, AidboxErrorResponse } from "./types";
+import { coerceBody } from "./utils";
 
 export type AidboxClient<
 	TBundle = Bundle,
@@ -31,18 +31,18 @@ type InternalAidboxErrorResponse = {
 	request: AidboxRequestParams;
 };
 
+const isInternalErrorResponse = (
+	resp: InternalAidboxErrorResponse | AidboxRawResponse,
+): resp is InternalAidboxErrorResponse => {
+	return (resp as InternalAidboxErrorResponse).error !== undefined;
+};
+
 export function makeClient<TBundle, TOperationOutcome, TUser>({
 	baseurl,
 	onRawResponseHook = (resp) => resp,
 }: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
 	const getAidboxBaseURL = (): string => {
 		return baseurl;
-	};
-
-	const isInternalErrorResponse = (
-		resp: InternalAidboxErrorResponse | AidboxRawResponse,
-	): resp is InternalAidboxErrorResponse => {
-		return (resp as InternalAidboxErrorResponse).error !== undefined;
 	};
 
 	const internalAidboxRawRequest = async (
@@ -53,7 +53,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		if (!requestParams.url.startsWith("/"))
 			return {
-				error: new Error("url must start with forward slash"),
+				error: new AidboxClientError("url must start with a forward slash"),
 				duration: Date.now() - startTime,
 				request: requestParams,
 			};
@@ -119,55 +119,12 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		const hookResult = onRawResponseHook(result);
 
 		if (hookResult.response.status < 200 || hookResult.response.status > 299)
-			throw new AidboxClientError(
+			throw new AidboxErrorResponse(
 				`HTTP ${result.response.status}: ${result.response.statusText}`,
 				hookResult,
 			);
 
 		return hookResult;
-	};
-
-	const normalizeContentType = (contentType: string) => {
-		const semicolon = contentType.indexOf(";");
-		if (semicolon !== -1) {
-			return contentType.substring(0, semicolon).toLowerCase();
-		} else {
-			return contentType.toLowerCase();
-		}
-	};
-
-	const coerceBody = async <T>(resp: AidboxRawResponse): Promise<T> => {
-		const response = resp.response;
-		const contentType = resp.responseHeaders["content-type"];
-		if (!contentType)
-			throw new AidboxClientError(
-				"server didn't specify response content-type",
-				resp,
-			);
-
-		const responseCopy = response.clone(); // thrown if unable to parse body
-
-		try {
-			switch (normalizeContentType(contentType)) {
-				case "application/json":
-				case "application/fhir+json":
-					return await response.json();
-				case "text/yaml":
-					return YAML.parse(await response.text());
-			}
-		} catch (e) {
-			const message: string = e instanceof Error ? e.message : "unknown error";
-			throw new AidboxClientError(`failed to coerce body: ${message}`, {
-				...resp,
-				// cloned response still has its body as a stream
-				response: responseCopy,
-			});
-		}
-		// default:
-		throw new AidboxClientError(
-			`failed to coerce body: unknown content-type ${contentType}`,
-			resp,
-		);
 	};
 
 	const aidboxRequest = async <T>(
@@ -192,7 +149,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 					},
 				};
 
-			throw new AidboxClientError(
+			throw new AidboxErrorResponse(
 				`HTTP ${hookResult.response.status}: ${hookResult.response.statusText}`,
 				{
 					...hookResult,

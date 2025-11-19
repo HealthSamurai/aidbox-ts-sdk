@@ -32,11 +32,18 @@ export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
 };
 
 export class AidboxClientError extends Error {
+	constructor(msg: string) {
+		super(msg);
+		this.name = "AidboxClientError";
+	}
+}
+
+export class AidboxErrorResponse extends Error {
 	rawResponse: AidboxRawResponse;
 
 	constructor(msg: string, cause: AidboxRawResponse) {
 		super(msg);
 		this.rawResponse = cause;
-		this.name = "AidboxClientError";
+		this.name = "AidboxErrorResponse";
 	}
 }
