@@ -5,6 +5,7 @@ export type AidboxClientParams = {
 	onRawResponseHook?: (resp: AidboxRawResponse) => AidboxRawResponse;
 };
 
+// FIXME: sansara#6557 Generate from IG
 export type User = Resource & {
 	email?: string;
 };
