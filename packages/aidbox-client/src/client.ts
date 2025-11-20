@@ -39,7 +39,7 @@ const isInternalErrorResponse = (
 
 export function makeClient<TBundle, TOperationOutcome, TUser>({
 	baseurl,
-	onRawResponseHook = (resp) => resp,
+	onResponse = undefined,
 }: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
 	const getAidboxBaseURL = (): string => {
 		return baseurl;
@@ -127,15 +127,15 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		if (isInternalErrorResponse(result)) throw result.error;
 
-		const hookResult = onRawResponseHook(result);
+		if (onResponse) onResponse(result.response.clone());
 
-		if (hookResult.response.status < 200 || hookResult.response.status > 299)
+		if (!result.response.ok)
 			throw new AidboxErrorResponse(
 				`HTTP ${result.response.status}: ${result.response.statusText}`,
-				hookResult,
+				result,
 			);
 
-		return hookResult;
+		return result;
 	};
 
 	const aidboxRequest = async <T>(
@@ -145,27 +145,26 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		if (isInternalErrorResponse(result)) throw result.error;
 
-		const hookResult = onRawResponseHook(result);
+		if (onResponse) onResponse(result.response.clone());
 
-		const body = await coerceBody<T | TOperationOutcome>(hookResult);
+		const body = await coerceBody<T | TOperationOutcome>(result);
 
-		if (hookResult.response.status < 200 || hookResult.response.status > 299) {
+		const response = {
+			...result,
+			responseBody: body,
+		};
+
+		if (!result.response.ok) {
 			if ((body as OperationOutcome).resourceType === "OperationOutcome")
-				return {
-					...hookResult,
-					responseBody: body,
-				};
+				return response;
 
 			throw new AidboxErrorResponse(
-				`HTTP ${hookResult.response.status}: ${hookResult.response.statusText}`,
-				hookResult,
+				`HTTP ${result.response.status}: ${result.response.statusText}`,
+				result,
 			);
 		}
 
-		return {
-			...hookResult,
-			responseBody: body,
-		};
+		return response;
 	};
 
 	const fetchUserInfo = async (): Promise<TUser> => {

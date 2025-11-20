@@ -2,7 +2,7 @@ import type { Resource } from "./fhir-types/hl7-fhir-r4-core";
 
 export type AidboxClientParams = {
 	baseurl: string;
-	onRawResponseHook?: (resp: AidboxRawResponse) => AidboxRawResponse;
+	onResponse?: (resp: Response) => void;
 };
 
 // FIXME: sansara#6557 Generate from IG
