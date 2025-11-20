@@ -39,7 +39,7 @@
 		"@codemirror/lint": "^6.8.5",
 		"@codemirror/search": "^6.5.11",
 		"@codemirror/state": "^6.5.2",
-		"@codemirror/view": "^6.38.1",
+		"@codemirror/view": "^6.38.8",
 		"@headless-tree/core": "^1.4.0",
 		"@headless-tree/react": "^1.4.0",
 		"@hookform/resolvers": "^5.2.1",
