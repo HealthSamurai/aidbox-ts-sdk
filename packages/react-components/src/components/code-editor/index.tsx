@@ -18,7 +18,7 @@ import {
 } from "@codemirror/language";
 import { linter, lintGutter, lintKeymap } from "@codemirror/lint";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { Compartment, EditorState } from "@codemirror/state";
+import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import {
 	crosshairCursor,
 	drawSelection,
@@ -260,6 +260,7 @@ type CodeEditorProps = {
 	id?: string;
 	mode?: LanguageMode;
 	viewCallback?: (view: EditorView) => void;
+	additionalExtensions?: Extension[];
 };
 
 export type CodeEditorView = EditorView;
@@ -274,6 +275,7 @@ export function CodeEditor({
 	id,
 	mode = "json",
 	isReadOnlyTheme = false,
+	additionalExtensions,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -285,6 +287,7 @@ export function CodeEditor({
 	const languageCompartment = React.useRef(new Compartment());
 	const readOnlyCompartment = React.useRef(new Compartment());
 	const themeCompartment = React.useRef(new Compartment());
+	const additionalExtensionsCompartment = React.useRef(new Compartment());
 
 	React.useEffect(() => {
 		if (!domRef.current) {
@@ -328,6 +331,7 @@ export function CodeEditor({
 					lintGutter(),
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
+					additionalExtensionsCompartment.current.of([]),
 				],
 			}),
 		});
@@ -424,6 +428,19 @@ export function CodeEditor({
 			],
 		});
 	}, [isReadOnlyTheme, view]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: [
+				additionalExtensionsCompartment.current.reconfigure(
+					additionalExtensions ?? [],
+				),
+			],
+		});
+	}, [additionalExtensions, view]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
