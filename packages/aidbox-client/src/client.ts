@@ -68,7 +68,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		const requestHeaders: Record<string, string> = {
 			"content-type": "application/json",
-			accept: "application/json",
+			"accept": "application/json",
 		};
 
 		Object.entries(headers).forEach(([header, value]) => {
@@ -89,6 +89,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 				headers: requestHeaders,
 				body: body || null,
 				credentials: "include",
+				cache: "no-store",
 			});
 			const responseHeaders: Record<string, string> = {};
 			response.headers.forEach((value, key) => {
