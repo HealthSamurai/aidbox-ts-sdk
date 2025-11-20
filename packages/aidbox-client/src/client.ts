@@ -153,10 +153,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			if ((body as OperationOutcome).resourceType === "OperationOutcome")
 				return {
 					...hookResult,
-					response: {
-						...hookResult.response,
-						body: body,
-					},
+					responseBody: body,
 				};
 
 			throw new AidboxErrorResponse(
@@ -167,10 +164,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		return {
 			...hookResult,
-			response: {
-				...hookResult.response,
-				body,
-			},
+			responseBody: body,
 		};
 	};
 

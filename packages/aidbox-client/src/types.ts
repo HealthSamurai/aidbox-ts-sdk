@@ -25,10 +25,8 @@ export type AidboxRawResponse = {
 	request: AidboxRequestParams;
 };
 
-export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
-	response: Omit<Response, "body"> & {
-		body: T;
-	};
+export type AidboxResponse<T> = AidboxRawResponse & {
+	responseBody: T;
 };
 
 export class AidboxClientError extends Error {
