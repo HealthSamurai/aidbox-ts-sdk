@@ -12,31 +12,26 @@ const normalizeContentType = (contentType: string) => {
 };
 
 export const coerceBody = async <T>(resp: AidboxRawResponse): Promise<T> => {
-	const response = resp.response;
 	const contentType = resp.responseHeaders["content-type"];
 	if (!contentType)
 		throw new AidboxErrorResponse(
-			"server didn't specify response content-type",
+			"can't coerce body to the specifyed type: server didn't specify response content-type",
 			resp,
 		);
 
-	const responseCopy = response.clone(); // thrown if unable to parse body
+	const responseCopy = resp.response.clone();
 
 	try {
 		switch (normalizeContentType(contentType)) {
 			case "application/json":
 			case "application/fhir+json":
-				return await response.json();
+				return await responseCopy.json();
 			case "text/yaml":
-				return YAML.parse(await response.text());
+				return YAML.parse(await responseCopy.text());
 		}
 	} catch (e) {
 		const message: string = e instanceof Error ? e.message : "unknown error";
-		throw new AidboxErrorResponse(`failed to coerce body: ${message}`, {
-			...resp,
-			// cloned response still has its body as a stream
-			response: responseCopy,
-		});
+		throw new AidboxErrorResponse(`failed to coerce body: ${message}`, resp);
 	}
 	// default:
 	throw new AidboxErrorResponse(

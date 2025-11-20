@@ -34,7 +34,7 @@ type InternalAidboxErrorResponse = {
 const isInternalErrorResponse = (
 	resp: InternalAidboxErrorResponse | AidboxRawResponse,
 ): resp is InternalAidboxErrorResponse => {
-	return 'error' in resp;
+	return "error" in resp;
 };
 
 export function makeClient<TBundle, TOperationOutcome, TUser>({
@@ -53,7 +53,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		if (!requestParams.url.startsWith("/"))
 			return {
-				error: new AidboxClientError("url must start with a forward slash", {request: requestParams}),
+				error: new AidboxClientError("url must start with a forward slash", {
+					request: requestParams,
+				}),
 				duration: Date.now() - startTime,
 				request: requestParams,
 			};
@@ -68,7 +70,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		const requestHeaders: Record<string, string> = {
 			"content-type": "application/json",
-			"accept": "application/json",
+			accept: "application/json",
 		};
 
 		Object.entries(headers).forEach(([header, value]) => {
@@ -90,7 +92,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 				body: body || null,
 				credentials: "include",
 				cache: "no-store",
-			}) ;
+			});
 			const responseHeaders: Record<string, string> = {};
 			response.headers.forEach((value, key) => {
 				responseHeaders[key] = value;
@@ -103,7 +105,15 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			};
 		} catch (e) {
 			return {
-				error: new AidboxClientError("error while sending the request", {cause: e, request: request}),
+				error: new AidboxClientError(
+					e && typeof e === "object" && "message" in e
+						? `error during request: ${e.message}`
+						: "unknown error during request",
+					{
+						cause: e,
+						request: request,
+					},
+				),
 				duration: Date.now() - startTime,
 				request,
 			};
@@ -137,7 +147,6 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		const hookResult = onRawResponseHook(result);
 
-		const responseCopy = hookResult.response.clone(); // rethrown if body is not an OperationOutcome
 		const body = await coerceBody<T | TOperationOutcome>(hookResult);
 
 		if (hookResult.response.status < 200 || hookResult.response.status > 299) {
@@ -152,10 +161,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 			throw new AidboxErrorResponse(
 				`HTTP ${hookResult.response.status}: ${hookResult.response.statusText}`,
-				{
-					...hookResult,
-					response: responseCopy,
-				},
+				hookResult,
 			);
 		}
 
