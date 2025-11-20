@@ -34,7 +34,7 @@ type InternalAidboxErrorResponse = {
 const isInternalErrorResponse = (
 	resp: InternalAidboxErrorResponse | AidboxRawResponse,
 ): resp is InternalAidboxErrorResponse => {
-	return (resp as InternalAidboxErrorResponse).error !== undefined;
+	return 'error' in resp;
 };
 
 export function makeClient<TBundle, TOperationOutcome, TUser>({
@@ -80,7 +80,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			url,
 			params,
 			headers: requestHeaders,
-			body: body || "",
+			body: body ?? "",
 		};
 
 		try {
