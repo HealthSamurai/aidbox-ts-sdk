@@ -1,0 +1,40 @@
+{
+	"name": "@health-samurai/aidbox-fhirpath-lsp",
+	"version": "0.0.0-alpha.1",
+	"type": "module",
+	"files": [
+		"dist",
+		"src"
+	],
+	"exports": {
+		".": "./dist/src/index.js"
+	},
+	"scripts": {
+		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && echo success",
+		"build:watch": "tsx scripts/watch.node.ts",
+		"format": "biome format",
+		"format:check": "biome format",
+		"format:fix": "biome format --write",
+		"lint": "biome check",
+		"lint:check": "biome check",
+		"lint:fix": "biome check --write",
+		"tsc:check": "tsc -b --noEmit"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"@swc/cli": "^0.7.8",
+		"@swc/core": "^1.13.5",
+		"chokidar": "^4.0.3",
+		"tsx": "^4.20.4",
+		"typescript": "~5.8.3",
+		"vitest": "^3.2.4"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk"
+	}
+}
