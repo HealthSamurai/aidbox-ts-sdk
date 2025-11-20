@@ -32,9 +32,15 @@ export type AidboxResponse<T> = Omit<AidboxRawResponse, "response"> & {
 };
 
 export class AidboxClientError extends Error {
-	constructor(msg: string) {
-		super(msg);
+	request: AidboxRequestParams;
+
+	constructor(msg: string, {cause, request}: {cause?: unknown; request: AidboxRequestParams}) {
+		if (cause)
+			super(msg, {cause});
+		else
+			super(msg);
 		this.name = "AidboxClientError";
+		this.request = request;
 	}
 }
 

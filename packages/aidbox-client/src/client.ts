@@ -53,7 +53,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		if (!requestParams.url.startsWith("/"))
 			return {
-				error: new AidboxClientError("url must start with a forward slash"),
+				error: new AidboxClientError("url must start with a forward slash", {request: requestParams}),
 				duration: Date.now() - startTime,
 				request: requestParams,
 			};
@@ -90,7 +90,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 				body: body || null,
 				credentials: "include",
 				cache: "no-store",
-			});
+			}) ;
 			const responseHeaders: Record<string, string> = {};
 			response.headers.forEach((value, key) => {
 				responseHeaders[key] = value;
@@ -103,7 +103,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			};
 		} catch (e) {
 			return {
-				error: e,
+				error: new AidboxClientError("error while sending the request", {cause: e, request: request}),
 				duration: Date.now() - startTime,
 				request,
 			};
