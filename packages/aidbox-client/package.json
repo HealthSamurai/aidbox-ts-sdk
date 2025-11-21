@@ -1,0 +1,47 @@
+{
+	"name": "@health-samurai/aidbox-client",
+	"version": "0.0.0-alpha.1",
+	"description": "A client library for communicating with Aidbox",
+	"author": "Health Samurai",
+	"type": "module",
+	"main": "./dist/src/index.js",
+	"types": "./dist/src/index.types.d.ts",
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": "./dist/src/index.js"
+	},
+	"scripts": {
+		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && echo success",
+		"format": "biome format",
+		"format:check": "biome format",
+		"format:fix": "biome format --write",
+		"lint": "biome check",
+		"lint:check": "biome check",
+		"lint:fix": "biome check --write",
+		"typecheck": "tsc -b --noEmit",
+		"generate-types": "tsx scripts/generate-types.ts",
+		"test": "vitest run",
+		"test:watch": "vitest watch"
+	},
+	"dependencies": {
+		"@types/js-cookie": "^3.0.6",
+		"js-cookie": "^3.0.5",
+		"yaml": "^2.8.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk"
+	},
+	"devDependencies": {
+		"@atomic-ehr/codegen": "0.0.2-canary.20251117105828.24a32f4",
+		"@types/node": "^24.2.0",
+		"tsx": "^4.20.4",
+		"typescript": "~5.8.3",
+		"vitest": "^3.2.4"
+	}
+}
