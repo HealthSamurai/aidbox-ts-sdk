@@ -15,9 +15,9 @@ export type AidboxClient<
 	TOperationOutcome = OperationOutcome,
 	TUser = User,
 > = {
-	getAidboxBaseURL: () => string;
-	aidboxRawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
-	aidboxRequest: <T>(
+	getBaseURL: () => string;
+	rawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
+	request: <T>(
 		params: AidboxRequestParams,
 	) => Promise<AidboxResponse<T | TOperationOutcome>>;
 	fetchUIHistory: () => Promise<TBundle>;
@@ -41,15 +41,15 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	baseurl,
 	onResponse = undefined,
 }: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
-	const getAidboxBaseURL = (): string => {
+	const getBaseURL = (): string => {
 		return baseurl;
 	};
 
-	const internalAidboxRawRequest = async (
+	const internalRawRequest = async (
 		requestParams: AidboxRequestParams,
 	): Promise<AidboxRawResponse | InternalAidboxErrorResponse> => {
 		const startTime = Date.now();
-		const baseURL = getAidboxBaseURL();
+		const baseURL = getBaseURL();
 
 		if (!requestParams.url.startsWith("/"))
 			return {
@@ -120,10 +120,10 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		}
 	};
 
-	const aidboxRawRequest = async (
+	const rawRequest = async (
 		requestParams: AidboxRequestParams,
 	): Promise<AidboxRawResponse> => {
-		const result = await internalAidboxRawRequest(requestParams);
+		const result = await internalRawRequest(requestParams);
 
 		if (isInternalErrorResponse(result)) throw result.error;
 
@@ -138,10 +138,10 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		return result;
 	};
 
-	const aidboxRequest = async <T>(
+	const request = async <T>(
 		params: AidboxRequestParams,
 	): Promise<AidboxResponse<T | TOperationOutcome>> => {
-		const result = await internalAidboxRawRequest(params);
+		const result = await internalRawRequest(params);
 
 		if (isInternalErrorResponse(result)) throw result.error;
 
@@ -168,7 +168,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	const fetchUserInfo = async (): Promise<TUser> => {
-		const user = await aidboxRawRequest({
+		const user = await rawRequest({
 			url: "/auth/userinfo",
 			method: "GET",
 			headers: {
@@ -181,7 +181,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	const performLogout = async () => {
-		return await aidboxRawRequest({
+		return await rawRequest({
 			url: "/auth/logout",
 			method: "POST",
 			headers: {
@@ -195,7 +195,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	const fetchUIHistory = async (): Promise<TBundle> => {
-		const history = await aidboxRawRequest({
+		const history = await rawRequest({
 			method: "GET",
 			url: "/fhir/ui_history",
 			params: [
@@ -209,9 +209,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	return {
-		getAidboxBaseURL,
-		aidboxRawRequest,
-		aidboxRequest,
+		getBaseURL,
+		rawRequest,
+		request,
 		fetchUIHistory,
 		performLogout,
 		fetchUserInfo,

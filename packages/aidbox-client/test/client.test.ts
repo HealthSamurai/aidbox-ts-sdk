@@ -44,7 +44,7 @@ describe("AidboxClient", () => {
         baseurl: "http://localhost:8080",
       });
 
-      const result: AidboxResponse<Bundle | OperationOutcome> = await client.aidboxRequest<Bundle>({
+      const result: AidboxResponse<Bundle | OperationOutcome> = await client.request<Bundle>({
         method: "GET",
         url: "/Bundle/foo",
       });
