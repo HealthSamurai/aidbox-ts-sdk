@@ -50,7 +50,7 @@ describe("AidboxClient", () => {
       });
 
       expect(result.response.status).toBe(200);
-      expect(result.response.body).toEqual(mockResponse);
+      expect(result.responseBody).toEqual(mockResponse);
       expect(fetch).toHaveBeenCalledWith(
         "http://localhost:8080/Bundle/foo",
         expect.objectContaining({
