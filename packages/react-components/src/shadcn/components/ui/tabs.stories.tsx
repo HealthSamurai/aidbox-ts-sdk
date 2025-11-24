@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { action } from "storybook/internal/actions";
+import { action } from "storybook/actions";
 import { Button } from "#shadcn/components/ui/button";
 import {
 	Card,
