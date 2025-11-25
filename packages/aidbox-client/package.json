@@ -26,8 +26,6 @@
 		"test:watch": "vitest watch"
 	},
 	"dependencies": {
-		"@types/js-cookie": "^3.0.6",
-		"js-cookie": "^3.0.5",
 		"yaml": "^2.8.1"
 	},
 	"publishConfig": {
@@ -38,7 +36,7 @@
 		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk"
 	},
 	"devDependencies": {
-		"@atomic-ehr/codegen": "0.0.2-canary.20251117105828.24a32f4",
+		"@atomic-ehr/codegen": "^0.0.3",
 		"@types/node": "^24.2.0",
 		"tsx": "^4.20.4",
 		"typescript": "~5.8.3",

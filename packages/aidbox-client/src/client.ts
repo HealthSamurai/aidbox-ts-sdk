@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import type {
 	AidboxClientParams,
@@ -181,17 +180,16 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	const performLogout = async () => {
-		return await rawRequest({
-			url: "/auth/logout",
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-			},
-		}).then(({ response }: AidboxRawResponse) => {
-			Cookies.remove("asid", { path: "/" });
-			return response;
-		});
+		return (
+			await rawRequest({
+				url: "/auth/logout",
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			})
+		).response;
 	};
 
 	const fetchUIHistory = async (): Promise<TBundle> => {
