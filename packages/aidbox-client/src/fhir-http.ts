@@ -1,4 +1,4 @@
-type Query = [string, string][];
+type SearchParameters = [string, string][];
 
 export type ReadOptions = {
 	type: string;
@@ -24,14 +24,25 @@ export type UpdateOptions = CreateOptions & {
 };
 
 export type ConditionalUpdateOptions = CreateOptions & {
-	query?: Query;
+	searchParameters: SearchParameters;
 };
 
 export type PatchOptions = Omit<UpdateOptions, "resource"> & {
 	patch: object;
 };
 
-export type DeleteOptions = Omit<UpdateOptions, "resource">;
+export type ConditionalPatchOptions = CreateOptions & {
+	searchParameters: SearchParameters;
+	patch: object;
+};
+
+export type DeleteOptions = Omit<UpdateOptions, "resource"> & {
+	searchParameters: SearchParameters;
+};
+
+export type DeleteHistoryVersionOptions = Omit<UpdateOptions, "resource"> & {
+	vid: string;
+};
 
 export type HistoryOptions = {
 	type?: string;

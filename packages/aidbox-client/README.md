@@ -76,16 +76,16 @@ Both methods can throw `RequestError` class, if the error happened before the re
 
 Additional set of methods is provided to work with FHIR server in a more convinient way:
 
-- [ ] Instance Level Interaction
+- [x] Instance Level Interaction
   - [x] `read` - Read the current state of the resource
   - [x] `vread` - Read the state of a specific version of the resource
   - [x] `update` - Update an existing resource by its id (or create it if it is new)
   - [x] `conditionalUpdate` - Update an existing resource based on some identification criteria (or create it if it is new)
   - [x] `patch` - Update an existing resource by posting a set of changes to it
-  - [ ] `conditionalPatch` - Update an existing resource, based on some identification criteria, by posting a set of changes to it
+  - [x] `conditionalPatch` - Update an existing resource, based on some identification criteria, by posting a set of changes to it
   - [x] `delete` - Delete a resource
-  - [ ] `deleteHistory` - Delete all historical versions of a resource
-  - [ ] `deleteHistoryVersion` - Delete a specific version of a resource
+  - [x] `deleteHistory` - Delete all historical versions of a resource
+  - [x] `deleteHistoryVersion` - Delete a specific version of a resource
   - [x] `history` - Retrieve the change history for a particular resource
 - [ ] Type Level Interaction
   - [x] `create` - Create a new resource with a server assigned id
@@ -97,7 +97,7 @@ Additional set of methods is provided to work with FHIR server in a more convini
 - [ ] Whole System Interaction
   - [ ] `capabilities` - Get a capability statement for the system
   - [ ] `transaction` - Perform multiple interactions (e.g., create, read, update, delete, patch, and/or [extended operations]) in a single interaction
-  - [ ] `delete` - Conditional Delete across all resource types based on some filter criteria
+  - [x] `delete` - Conditional Delete across all resource types based on some filter criteria
   - [x] `history` - Retrieve the change history for all resources
   - [x] `search` - Search across all resource types based on some filter criteria
 - [ ] Compartment Interaction

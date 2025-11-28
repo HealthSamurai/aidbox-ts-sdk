@@ -1,6 +1,8 @@
 import type {
+	ConditionalPatchOptions,
 	ConditionalUpdateOptions,
 	CreateOptions,
+	DeleteHistoryVersionOptions,
 	DeleteOptions,
 	HistoryOptions,
 	OperationOptions,
@@ -155,8 +157,23 @@ export type FhirServerClient<
 	) => Promise<
 		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
 	>;
+	conditionalPatch: <T>(
+		opts: ConditionalPatchOptions,
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	delete: <T>(
 		opts: DeleteOptions,
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
+	deleteHistory: <T>(
+		opts: DeleteOptions,
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
+	deleteHistoryVersion: <T>(
+		opts: DeleteHistoryVersionOptions,
 	) => Promise<
 		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
 	>;

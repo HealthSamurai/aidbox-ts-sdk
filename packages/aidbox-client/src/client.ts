@@ -1,6 +1,8 @@
 import type {
+	ConditionalPatchOptions,
 	ConditionalUpdateOptions,
 	CreateOptions,
+	DeleteHistoryVersionOptions,
 	DeleteOptions,
 	HistoryOptions,
 	OperationOptions,
@@ -282,7 +284,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			url: `/fhir/${opts.type}`,
 			method: "PUT",
 			body: JSON.stringify(opts.resource),
-			params: opts.query ?? [],
+			params: opts.searchParameters,
 		});
 	};
 
@@ -299,6 +301,20 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		});
 	};
 
+	const conditionalPatch = async <T>(
+		opts: ConditionalPatchOptions,
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}`,
+			method: "PATCH",
+			headers: { "Content-Type": "application/json-patch+json" },
+			params: opts.searchParameters,
+			body: JSON.stringify(opts.patch),
+		});
+	};
+
 	const deleteOp = async <T>(
 		opts: DeleteOptions,
 	): Promise<
@@ -306,6 +322,29 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	> => {
 		return await request<T>({
 			url: `/fhir/${opts.type}/${opts.id}`,
+			method: "DELETE",
+			params: opts.searchParameters ?? [],
+		});
+	};
+
+	const deleteHistory = async <T>(
+		opts: DeleteOptions,
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/${opts.id}/_history`,
+			method: "DELETE",
+		});
+	};
+
+	const deleteHistoryVersion = async <T>(
+		opts: DeleteHistoryVersionOptions,
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/${opts.id}/_history/${opts.vid}`,
 			method: "DELETE",
 		});
 	};
@@ -381,7 +420,10 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		update,
 		conditionalUpdate,
 		patch,
+		conditionalPatch,
 		delete: deleteOp,
+		deleteHistory,
+		deleteHistoryVersion,
 		history,
 		operation,
 		validate,
