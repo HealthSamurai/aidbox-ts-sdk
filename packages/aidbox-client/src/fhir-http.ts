@@ -1,3 +1,5 @@
+type Query = [string, string][];
+
 export type ReadOptions = {
 	type: string;
 	id: string;
@@ -19,6 +21,10 @@ export type CreateOptions = {
 
 export type UpdateOptions = CreateOptions & {
 	id: string;
+};
+
+export type ConditionalUpdateOptions = CreateOptions & {
+	query?: Query;
 };
 
 export type PatchOptions = Omit<UpdateOptions, "resource"> & {

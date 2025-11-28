@@ -1,4 +1,5 @@
 import type {
+	ConditionalUpdateOptions,
 	CreateOptions,
 	DeleteOptions,
 	HistoryOptions,
@@ -14,9 +15,9 @@ import type { OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import { Err, Ok, type Result } from "./result";
 import type {
 	ClientParams,
-	ResourceResponse,
 	FhirServerClient,
 	RequestParams,
+	ResourceResponse,
 	ResponseWithMeta,
 } from "./types";
 import { ErrorResponse, RequestError } from "./types";
@@ -160,7 +161,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 	const request = async <T>(
 		params: RequestParams,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		const response = await internalRawRequest(params);
 
 		if (isInternalErrorResponse(response)) throw response.error;
@@ -211,7 +214,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	/// FHIR HTTP methods
 	const read = async <T>(
 		opts: ReadOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		return await request({
 			url: `/fhir/${opts.type}/${opts.id}`,
 			method: "GET",
@@ -220,7 +225,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 	const vread = async <T>(
 		opts: VReadOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		return await request({
 			url: `/fhir/${opts.type}/${opts.id}/_history/${opts.vid}`,
 			method: "GET",
@@ -244,7 +251,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 	const create = async <T>(
 		opts: CreateOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		return await request<T>({
 			url: `/fhir/${opts.type}/`,
 			method: "POST",
@@ -254,7 +263,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 	const update = async <T>(
 		opts: UpdateOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		return await request<T>({
 			url: `/fhir/${opts.type}/${opts.id}`,
 			method: "PUT",
@@ -262,9 +273,24 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		});
 	};
 
+	const conditionalUpdate = async <T>(
+		opts: ConditionalUpdateOptions,
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}`,
+			method: "PUT",
+			body: JSON.stringify(opts.resource),
+			params: opts.query ?? [],
+		});
+	};
+
 	const patch = async <T>(
 		opts: PatchOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		return await request<T>({
 			url: `/fhir/${opts.type}/${opts.id}`,
 			method: "PATCH",
@@ -275,7 +301,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 	const deleteOp = async <T>(
 		opts: DeleteOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		return await request<T>({
 			url: `/fhir/${opts.type}/${opts.id}`,
 			method: "DELETE",
@@ -298,14 +326,19 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		};
 
 		if (opts.id && !opts.type)
-			throw new RequestError("resource type must be specified if ID is provided", { request: requestParams });
+			throw new RequestError(
+				"resource type must be specified if ID is provided",
+				{ request: requestParams },
+			);
 
 		return await request<TBundle>(requestParams);
 	};
 
 	const operation = async <T>(
 		opts: OperationOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> => {
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
 		const url = ["/fhir"];
 		if (opts.type) url.push(opts.type);
 		if (opts.id) url.push(opts.id);
@@ -324,7 +357,10 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	const validate = async (
 		opts: ValidateOptions,
 	): Promise<
-		Result<ResourceResponse<TOperationOutcome>, ResourceResponse<TOperationOutcome>>
+		Result<
+			ResourceResponse<TOperationOutcome>,
+			ResourceResponse<TOperationOutcome>
+		>
 	> => {
 		return await operation<TOperationOutcome>({
 			operation: "$validate",
@@ -343,6 +379,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		search,
 		create,
 		update,
+		conditionalUpdate,
 		patch,
 		delete: deleteOp,
 		history,

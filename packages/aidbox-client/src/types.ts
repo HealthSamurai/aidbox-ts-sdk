@@ -1,4 +1,5 @@
 import type {
+	ConditionalUpdateOptions,
 	CreateOptions,
 	DeleteOptions,
 	HistoryOptions,
@@ -111,7 +112,9 @@ export type FhirServerClient<
 	 */
 	request: <T>(
 		params: RequestParams,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	/** Performs a request to `/auth/logout`. */
 	performLogout: () => Promise<Response>;
 	/** Performs a request to `/auth/userinfo`. */
@@ -119,10 +122,14 @@ export type FhirServerClient<
 	// FHIR methods
 	read: <T>(
 		opts: ReadOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	vread: <T>(
 		opts: VReadOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	search: (
 		opts: SearchOptions,
 	) => Promise<
@@ -130,16 +137,29 @@ export type FhirServerClient<
 	>;
 	create: <T>(
 		opts: CreateOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	update: <T>(
 		opts: UpdateOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
+	conditionalUpdate: <T>(
+		opts: ConditionalUpdateOptions,
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	patch: <T>(
 		opts: PatchOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	delete: <T>(
 		opts: DeleteOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	history: (
 		opts: HistoryOptions,
 	) => Promise<
@@ -147,10 +167,15 @@ export type FhirServerClient<
 	>;
 	operation: <T>(
 		opts: OperationOptions,
-	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>; // $run, $validate
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>; // $run, $validate
 	validate: (
 		opts: ValidateOptions,
 	) => Promise<
-		Result<ResourceResponse<TOperationOutcome>, ResourceResponse<TOperationOutcome>>
+		Result<
+			ResourceResponse<TOperationOutcome>,
+			ResourceResponse<TOperationOutcome>
+		>
 	>;
 };

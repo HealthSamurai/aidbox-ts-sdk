@@ -80,9 +80,9 @@ Additional set of methods is provided to work with FHIR server in a more convini
   - [x] `read` - Read the current state of the resource
   - [x] `vread` - Read the state of a specific version of the resource
   - [x] `update` - Update an existing resource by its id (or create it if it is new)
-  - [ ] `conditionalUpdate` - Update an existing resource based on some identification criteria (or create it if it is new)
+  - [x] `conditionalUpdate` - Update an existing resource based on some identification criteria (or create it if it is new)
   - [x] `patch` - Update an existing resource by posting a set of changes to it
-  - [ ] `caonditionalPatch` - Update an existing resource, based on some identification criteria, by posting a set of changes to it
+  - [ ] `conditionalPatch` - Update an existing resource, based on some identification criteria, by posting a set of changes to it
   - [x] `delete` - Delete a resource
   - [ ] `deleteHistory` - Delete all historical versions of a resource
   - [ ] `deleteHistoryVersion` - Delete a specific version of a resource
