@@ -298,7 +298,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		};
 
 		if (opts.id && !opts.type)
-			throw new RequestError("must specify", { request: requestParams });
+			throw new RequestError("resource type must be specified if ID is provided", { request: requestParams });
 
 		return await request<TBundle>(requestParams);
 	};
@@ -350,3 +350,4 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		validate,
 	};
 }
+//

@@ -2,45 +2,52 @@
 
 ### decisions
 
-- api method per each FHIR interaction https://build.fhir.org/codesystem-restful-interaction.html
-- tcar object argument (typed) for fixed set of params
-  - readOptions
-  - searchOptions...
-- searchSring (searchParam) builder (typed or just string)
+- API method per each FHIR interaction https://build.fhir.org/codesystem-restful-interaction.html
+- Object argument (typed) for fixed set of params
+  - `ReadOptions`
+  - `SearchOptions`...
+- Search sring (searchParam) builder (typed or just string)
   ``` typescript
-  ifMatch: client.Patient.buildSearch().identifier('1234567890'),
+  ifMatch: buildSearch().Patient.identifier('1234567890'),
   ```
-- result type pattern for returned data
+- `Result` type pattern for returned data:
   ```typescript
-  type Ok<T>  = { ok: true;  value: T; meta: ResponseMeta };
-  type Err<E> = { ok: false; error: E; meta?: ResponseMeta };
+  type Ok<T>  = { ok: true;  value: T; /* ... */ };
+  type Err<E> = { ok: false; error: E; /* ... */ };
 
   type Result<T, E> = Ok<T> | Err<E>;
   ```
 
 ## Options
-TODO!!! Operations
-https://build.fhir.org/operations.html
+- [ ] Instance Level Interaction
+  - [X] `read` - Read the current state of the resource
+  - [X] `vread` - Read the state of a specific version of the resource
+  - [X] `update` - Update an existing resource by its id (or create it if it is new)
+  - [ ] `conditionalUpdate` - Update an existing resource based on some identification criteria (or create it if it is new)
+  - [X] `patch` - Update an existing resource by posting a set of changes to it
+  - [ ] `caonditionalPatch` - Update an existing resource, based on some identification criteria, by posting a set of changes to it
+  - [X] `delete` - Delete a resource
+  - [ ] `deleteHistory` - Delete all historical versions of a resource
+  - [ ] `deleteHistoryVersion` - Delete a specific version of a resource
+  - [X] `history` - Retrieve the change history for a particular resource
+- [ ] Type Level Interaction
+  - [ ] `create` - Create a new resource with a server assigned id
+  - [ ] `conditionalCreate` - Create a new resource with a server assigned id if an equivalent resource does not already exist
+  - [ ] `search` - Search the resource type based on some filter criteria
+  - [ ] `conditionalDeleteSingle` - Conditional delete a single resource based on some identification criteria
+  - [ ] `conditionalDeleteMultiple` - Conditional delete one or more resources based on some identification criteria
+  - [ ] `history` - Retrieve the change history for a particular resource type
+- [ ] Whole System Interaction
+  - [ ] `capabilities` - Get a capability statement for the system
+  - [ ] `transaction` - Perform multiple interactions (e.g., create, read, update, delete, patch, and/or [extended operations]) in a single interaction
+  - [ ] `delete` - Conditional Delete across all resource types based on some filter criteria
+  - [ ] `history` - Retrieve the change history for all resources
+  - [ ] `search` - Search across all resource types based on some filter criteria
+- [ ] Compartment Interaction
+  - [ ] `search` - Search resources associated with a specific compartment instance (see [Search Contexts](https://build.fhir.org/search.html#searchcontexts) and [Compartments](https://build.fhir.org/compartmentdefinition.html))
 
-| Instance                 | Type                          | System         |
-|--------------------------|-------------------------------|----------------|
-| `read`                   |                               |                |
-| `vread`                  |                               |                |
-| `update`                 |                               |                |
-| `conditional update`     |                               |                |
-| `patch`                  |                               |                |
-| `conditional patch`      |                               |                |
-| `delete`                 |                               | `delete`       |
-| `delete-history`         |                               |                |
-| `delete-history-version` |                               |                |
-|                          | `search`                      | `search`       |
-|                          | `create`                      |                |
-|                          | `conditional create`          |                |
-|                          | `conditional delete single`   |                |
-|                          | `conditional delete multiple` |                |
-|                          |                               | `capabilities` |
-|                          |                               | `transaction`  |
-| `history`                | `history`                     | `history`      |
+TODO: Operations
+https://build.fhir.org/operations.html
 
 VERB [base]/[type]/[id] {?_format=[mime-type]}
 VERB corresponds to the HTTP verb used for the interaction
@@ -53,66 +60,31 @@ Content surrounded by [] is mandatory, and will be replaced by the string litera
 - `vid` The Version Id of a resource
 - `compartment` The name of a compartment
 - `parameters` URL parameters as defined for the particular interaction
+
 Content surrounded by {} is optional
-
-
-## Instance Level Interactions
-
-- `read` Read the current state of the resource
-- `vread` Read the state of a specific version of the resource
-- `update` Update an existing resource by its id (or create it if it is new)
-- `conditional update` Update an existing resource based on some identification criteria (or create it if it is new)
-- `patch` Update an existing resource by posting a set of changes to it
-- `conditional patch` Update an existing resource, based on some identification criteria, by posting a set of changes to it
-- `delete` Delete a resource
-- `delete-history` Delete all historical versions of a resource
-- `delete-history-version` Delete a specific version of a resource
-- `history` Retrieve the change history for a particular resource
-
-## Type Level Interactions
-
-- `create` Create a new resource with a server assigned id
-- `conditional create` Create a new resource with a server assigned id if an equivalent resource does not already exist
-- `search` Search the resource type based on some filter criteria
-- `conditional delete single` Conditional delete a single resource based on some identification criteria
-- `conditional delete multiple` Conditional delete one or more resources based on some identification criteria
-- `history` Retrieve the change history for a particular resource type
-
-## Whole System Interactions
-
-- `capabilities` Get a capability statement for the system
-- `batch/transaction`	Perform multiple interactions (e.g., create, read, update, delete, patch, and/or [extended operations]) in a single interaction
-- `delete` Conditional Delete across all resource types based on some filter criteria
-- `history` Retrieve the change history for all resources
-- `search` Search across all resource types based on some filter criteria
 
 ## Examples
 
-### General pattern
+``` typescript
+const patient = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
+const encounter = await client.read<Encounter>({type: 'Encounter', id: 'encounter-id'});
+
+const result = await client.update<Patient>({
+    type: 'Patient',
+    id: 'patient-id',
+    ifMatch: buildSearch().Patient.identifier('1234567890'),
+    resource: {
+        name: 'John Doe',
+    },
+})
+```
+
+### Discussed Alternatives
+
+- Generated methods for all types
 
 ``` typescript
-const patient   = await client.Patient.read('my-patient-id');
-const encounter = await client.Encounter.read('my-patient-id');
-
-const patient   = await client.Patient.update('my-patient-id');
-
-const result = await client.update({
-    type: 'Patient',
-    id: 'my-patient-id',
-    ifMatch: client.Patient.buildSearch().identifier('1234567890'),
-    resource: {
-        name: 'John Doe',
-    },
-})
-
-const result = await client.Patient.update({
-    id: 'my-patient-id',
-    ifMatch: client.Patient.buildSearch().identifier('1234567890'),
-    resource: {
-        name: 'John Doe',
-    },
-})
-
+const patient = await client.Patient.read('my-patient-id');
 ```
 
 - FHIR like
@@ -121,20 +93,13 @@ const result = await client.Patient.update({
 const patient = await client.read<Patient>('Patient/my-patient-id');
 ```
 
-
-- Tcar argument object
-
-``` typescript
-const patient = await client.read<Patient>({type: 'Patient', id: 'my-patient-id'} : readQuery);
-```
-
 - Sugar functions
 
 ``` typescript
 const patient = await client.read<Patient>('Patient', 'my-patient-id');
 ```
 
-- `Chain` like pattern
+- Method chaining
 
 ``` typescript
 const patient: Patient  = await client
@@ -143,8 +108,36 @@ const patient: Patient  = await client
   .id('my-patient-id')
 ```
 
+## Return data format
 
-### Return data
+Client returns a `Result<T, E>` object, with methods to check if the request was successful:
+
+```typescript
+const result = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
+if (result.isErr())
+    throw new Error("error reading Patient", { cause: result.error })
+
+const { resource: patient } = result.value;
+
+// work with patient.
+```
+
+Unwrapping is not required to modify the data in the result:
+
+```typescript
+const result = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
+
+return result
+  .map(({resource}: {resource: Patient}): Patient => {
+    /* work with Patient resource */
+  })
+  .mapErr(({resource}: {resource: OperationOutcome}): OperationOutcome => {
+    /* work with OperationOutcome resource */
+  });
+  // result is still Result<Patient, OperationOutcome>
+```
+
+### Discussed alternatives
 
 - Union type of <Patient> and <OperationOutcome>
 
@@ -177,11 +170,6 @@ const {result: Bundle, error: OperationOutcome} = await client.Search({type: 'Pa
 #### Search modification params (_count, _page)
 
 #### Resource type SearchParams
-
-``` typescript
-
-```
-
 
 ``` typescript
 // Supabse like client
