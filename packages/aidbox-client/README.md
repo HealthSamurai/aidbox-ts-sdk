@@ -6,41 +6,41 @@
 - tcar object argument (typed) for fixed set of params
   - readOptions
   - searchOptions...
-- searchSring (searchParam) builder (typed or just string) 
+- searchSring (searchParam) builder (typed or just string)
   ``` typescript
   ifMatch: client.Patient.buildSearch().identifier('1234567890'),
   ```
 - result type pattern for returned data
   ```typescript
-type Ok<T>  = { ok: true;  value: T; meta: ResponseMeta };
-type Err<E> = { ok: false; error: E; meta?: ResponseMeta };
+  type Ok<T>  = { ok: true;  value: T; meta: ResponseMeta };
+  type Err<E> = { ok: false; error: E; meta?: ResponseMeta };
 
-type Result<T, E> = Ok<T> | Err<E>;
+  type Result<T, E> = Ok<T> | Err<E>;
   ```
 
 ## Options
 TODO!!! Operations
 https://build.fhir.org/operations.html
 
-| Instance  | Type | System |
-|-----------|------|------|
-| `read` |  | |
-| `vread` |  | |
-| `update` |  | |
-| `conditional update` |  | |
-| `patch` |  | |
-| `conditional patch` |  | |
-| `delete` |  | `delete` |
-| `delete-history` |  | |
-| `delete-history-version` |  | |
-|  | `search` | `search` |
-|  | `create` | |
-|  | `conditional create` | |
-|  | `conditional delete single` | |
-|  | `conditional delete multiple` | |
-|  | | `capabilities` |
-|  | | `transaction` |
-| `history` | `history` | `history` |
+| Instance                 | Type                          | System         |
+|--------------------------|-------------------------------|----------------|
+| `read`                   |                               |                |
+| `vread`                  |                               |                |
+| `update`                 |                               |                |
+| `conditional update`     |                               |                |
+| `patch`                  |                               |                |
+| `conditional patch`      |                               |                |
+| `delete`                 |                               | `delete`       |
+| `delete-history`         |                               |                |
+| `delete-history-version` |                               |                |
+|                          | `search`                      | `search`       |
+|                          | `create`                      |                |
+|                          | `conditional create`          |                |
+|                          | `conditional delete single`   |                |
+|                          | `conditional delete multiple` |                |
+|                          |                               | `capabilities` |
+|                          |                               | `transaction`  |
+| `history`                | `history`                     | `history`      |
 
 VERB [base]/[type]/[id] {?_format=[mime-type]}
 VERB corresponds to the HTTP verb used for the interaction
@@ -122,7 +122,7 @@ const patient = await client.read<Patient>('Patient/my-patient-id');
 ```
 
 
-- Tcar argument object  
+- Tcar argument object
 
 ``` typescript
 const patient = await client.read<Patient>({type: 'Patient', id: 'my-patient-id'} : readQuery);
@@ -137,7 +137,7 @@ const patient = await client.read<Patient>('Patient', 'my-patient-id');
 - `Chain` like pattern
 
 ``` typescript
-const patient: Patient  = await client 
+const patient: Patient  = await client
   .read()
   .type('Patient')
   .id('my-patient-id')
@@ -150,16 +150,14 @@ const patient: Patient  = await client
 
 ``` typescript
 const patient: Patient | OperationOutcome = await client.read({
-    type: 'Patient', 
+    type: 'Patient',
     id: 'my-patient-id'
 })
 
 const bundle: Bundle | OperationOutcome = await client.search({
-    type: 'Patient', 
+    type: 'Patient',
     search: client.searchBuilder('Patient').identifier('1234567890')
 })
-
-
 ```
 
 - Tagged {data, outcome, error}
@@ -169,12 +167,10 @@ const { result: Patient, outcome: OperationOutcome} = await client.read({type: '
 
 const { result, outcome } = await client.Patient.read({id: 'my-patient-id'})
 
-
-
 const {result: Bundle, error: OperationOutcome} = await client.Search({type: 'Patient', id: 'my-patient-id'})
 ```
 
-### Functions as FHIR operations 
+### Functions as FHIR operations
 
 #### Required params
 
@@ -195,16 +191,16 @@ import { createClient } from '@health-samurai/aidbox-client'
   // Create a single supabase client for interacting with your database
 const client = new createClient('https://your-aidbox-instance.com');
 
-const { patient: <Patient>, error: <OperationOutcome> } = await client 
+const { patient: <Patient>, error: <OperationOutcome> } = await client
   .read('Patient')
   .id('my-patient-id');
 
-const { patient: <Patient>, error: <OperationOutcome> } = await client 
+const { patient: <Patient>, error: <OperationOutcome> } = await client
   .vread('Patient')
   .id('my-patient-id')
   .vid('my-patient-id-2020');
 
-const { result: <Bundle>, error: <OperationOutcome> } = await client 
+const { result: <Bundle>, error: <OperationOutcome> } = await client
   .search({type: 'Patient'})
 
       .sp_family('John Doe')
@@ -215,10 +211,7 @@ const { result: <Bundle>, error: <OperationOutcome> } = await client
   ._count(10)
   ._page(3);
 
-
 //-----------
-
-
 
 const patient = await box.read<Patient>('Patient', 'my-patient-id'});
 
@@ -232,7 +225,7 @@ const patient = await box.conditionalUpdate<Patient>( 'Patient', 'name=John%20Do
     name: 'John Doe',
 });
 
-const patient = await box.patch<Patient>( 'Patient', 'my-patient-id', 
+const patient = await box.patch<Patient>( 'Patient', 'my-patient-id',
 'application/json-patch+json',  // or 'application/xml-patch+xml'
 {
     name: 'John Doe',
@@ -254,38 +247,31 @@ const patient = await box.FHIR.Type.Delete<Patient>('Patient', 'name=foo');
 const patient = await box.Logout<Patient>('Patient', 'name=foo');
 const patient = await box.Validate<Patient>('Patient', 'name=foo');
 
-
 const patient = await box.Operation<Patient>('Patient', 'name=foo');
-
-
-
 ```
 
-
-
-
-| Interaction | Response | Content-Type | Body | Location | Versioning | Status Codes |
-|-------------|----------|--------------|------|----------|------------|--------------|
-| read | R | R: Resource | N/A | O: ETag, Last-Modified | 200, 202, 404, 410‡ |
-| vread | R | R: Resource | N/A | O: ETag, Last-Modified | 200, 202, 404, 410‡ |
-| update | R if body | O: Resource (Prefer) | N/A | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| update-conditional | R if body | O: Resource (Prefer) | N/A | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| patch | R if body | O: Resource (Prefer) | N/A | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| patch-conditional | R if body | O: Resource (Prefer) | N/A | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| delete | R if body | O: OperationOutcome | N/A | N/A | 200, 202, 204, 404, 405, 409, 412 |
-| delete-conditional-single | R if body | O: OperationOutcome | N/A | N/A | 200, 202, 204, 404, 405, 409, 412 |
-| delete-conditional-multiple | R if body | O: OperationOutcome | N/A | N/A | 200, 202, 204, 404, 405, 409, 412 |
-| delete-history | R if body | O: OperationOutcome | N/A | N/A | 200, 202, 204, 404, 405, 409, 412 |
-| delete-history-version | R if body | O: OperationOutcome | N/A | N/A | 200, 202, 204, 404, 405, 409, 412 |
-| create | R if body | O : Resource (Prefer) | R | O: ETag, Last-Modified | 201, 202, 400, 404, 405, 422 |
-| create-conditional | R if body | O : Resource (Prefer) | R | O: ETag, Last-Modified | 201, 202, 400, 404, 405, 422 |
-| search-type | R | R: Bundle | N/A | N/A | 200, 202, 401, 404, 405 |
-| search-system | R | R: Bundle | N/A | N/A | 200, 202, 401, 404, 405 |
-| search-compartment | R | R: Bundle | N/A | N/A | 200, 202, 401, 404, 405 |
-| capabilities | R | R: CapabilityStatement | N/A | N/A | 200, 202, 404 |
-| transaction | R | R: Bundle | N/A | N/A | 200, 202, 400, 404, 405, 409, 412, 422 |
-| batch | R | R: Bundle | N/A | N/A | 200, 202, 400, 404, 405, 409, 412, 422 |
-| history-instance | R | R: Bundle | N/A | N/A | 200, 202 |
-| history-type | R | R: Bundle | N/A | N/A | 200, 202 |
-| history-all | R | R: Bundle | N/A | N/A | 200, 202 |
-| (operation) | R | R: Parameters/Resource | N/A | N/A | 200, 202 + varies by operation type |
+| Interaction                 | Content-Type | Body                   | Location | Versioning             | Status Codes                                |
+|-----------------------------|--------------|------------------------|----------|------------------------|---------------------------------------------|
+| read                        | R            | R: Resource            | N/A      | O: ETag, Last-Modified | 200, 202, 404, 410‡                         |
+| vread                       | R            | R: Resource            | N/A      | O: ETag, Last-Modified | 200, 202, 404, 410‡                         |
+| update                      | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
+| update-conditional          | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
+| patch                       | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
+| patch-conditional           | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
+| delete                      | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
+| delete-conditional-single   | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
+| delete-conditional-multiple | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
+| delete-history              | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
+| delete-history-version      | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
+| create                      | R if body    | O : Resource (Prefer)  | R        | O: ETag, Last-Modified | 201, 202, 400, 404, 405, 422                |
+| create-conditional          | R if body    | O : Resource (Prefer)  | R        | O: ETag, Last-Modified | 201, 202, 400, 404, 405, 422                |
+| search-type                 | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 401, 404, 405                     |
+| search-system               | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 401, 404, 405                     |
+| search-compartment          | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 401, 404, 405                     |
+| capabilities                | R            | R: CapabilityStatement | N/A      | N/A                    | 200, 202, 404                               |
+| transaction                 | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 400, 404, 405, 409, 412, 422      |
+| batch                       | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 400, 404, 405, 409, 412, 422      |
+| history-instance            | R            | R: Bundle              | N/A      | N/A                    | 200, 202                                    |
+| history-type                | R            | R: Bundle              | N/A      | N/A                    | 200, 202                                    |
+| history-all                 | R            | R: Bundle              | N/A      | N/A                    | 200, 202                                    |
+| (operation)                 | R            | R: Parameters/Resource | N/A      | N/A                    | 200, 202 + varies by operation type         |

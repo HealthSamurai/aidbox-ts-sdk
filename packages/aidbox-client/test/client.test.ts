@@ -1,7 +1,8 @@
-import { describe, it, expect,  vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { makeClient } from "src/client.js";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
-import type { AidboxResponse, User } from "src/types.js";
+import type { User, ClientResponse } from "src/types";
+import type { Result } from "src/result";
 
 describe("AidboxClient", () => {
   describe("GET request", () => {
@@ -44,24 +45,28 @@ describe("AidboxClient", () => {
         baseurl: "http://localhost:8080",
       });
 
-      const result: AidboxResponse<Bundle | OperationOutcome> = await client.request<Bundle>({
+      const result: Result<ClientResponse<Bundle>, ClientResponse<OperationOutcome>> = await client.request<Bundle>({
         method: "GET",
         url: "/Bundle/foo",
       });
 
-      expect(result.response.status).toBe(200);
-      expect(result.responseBody).toEqual(mockResponse);
-      expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:8080/Bundle/foo",
-        expect.objectContaining({
-          method: "GET",
-          headers: expect.objectContaining({
-            "content-type": "application/json",
-            accept: "application/json",
-          }),
-          credentials: "include",
-        })
-      );
+			expect(result.isOk()).toBe(true);
+			if (result.isOk()) {
+				const { resource, response } = result.value;
+				expect(response.status).toBe(200);
+				expect(resource).toEqual(mockResponse);
+				expect(fetch).toHaveBeenCalledWith(
+					"http://localhost:8080/Bundle/foo",
+					expect.objectContaining({
+						method: "GET",
+						headers: expect.objectContaining({
+							"content-type": "application/json",
+							accept: "application/json",
+						}),
+						credentials: "include",
+					})
+				);
+			}
     });
   });
 });

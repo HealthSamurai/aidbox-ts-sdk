@@ -1,58 +1,72 @@
-import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
+import type { OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
+import { Err, Ok, type Result } from "./result";
 import type {
-	AidboxClientParams,
-	AidboxRawResponse,
-	AidboxRequestParams,
-	AidboxResponse,
-	User,
+	ClientParams,
+	ClientResponse,
+	CreateOptions,
+	FhirServerClient,
+	OperationOptions,
+	ReadOptions,
+	RequestParams,
+	ResponseWithMeta,
+	SearchOptions,
+	ValidateOptions,
 } from "./types";
-import { AidboxClientError, AidboxErrorResponse } from "./types";
+import { ErrorResponse, RequestError } from "./types";
 import { coerceBody } from "./utils";
-
-export type AidboxClient<
-	TBundle = Bundle,
-	TOperationOutcome = OperationOutcome,
-	TUser = User,
-> = {
-	getBaseURL: () => string;
-	rawRequest: (params: AidboxRequestParams) => Promise<AidboxRawResponse>;
-	request: <T>(
-		params: AidboxRequestParams,
-	) => Promise<AidboxResponse<T | TOperationOutcome>>;
-	fetchUIHistory: () => Promise<TBundle>;
-	performLogout: () => Promise<Response>;
-	fetchUserInfo: () => Promise<TUser>;
-};
 
 type InternalAidboxErrorResponse = {
 	error?: unknown;
 	duration: number;
-	request: AidboxRequestParams;
+	request: RequestParams;
 };
 
 const isInternalErrorResponse = (
-	resp: InternalAidboxErrorResponse | AidboxRawResponse,
+	resp: InternalAidboxErrorResponse | ResponseWithMeta,
 ): resp is InternalAidboxErrorResponse => {
 	return "error" in resp;
 };
 
+/**
+ * Create a client to the FHIR server.
+ *
+ * ```typescript
+ * const client = makeClient({ baseurl: "https://fhir-server.address" })
+ *
+ * // alternatively, specify different FHIR types:
+ * import type { Bundle, OperationOutcome } from "hl7-fhir-r5-core";
+ * const client = makeClient<Bundle, OperationOutcome>({ baseurl: "https://fhir-server.address" })
+ * ```
+ *
+ * Main client functions are `request` for typed interactions, and `rawRequest` for manual response processing.
+ *
+ * This client also provides a set of convenience methods for accessing FHIR operations:
+ *
+ * - `read`
+ * - `search`
+ * - `create`
+ * - `operation`
+ * - `validate`
+ *
+ */
 export function makeClient<TBundle, TOperationOutcome, TUser>({
 	baseurl,
 	onResponse = undefined,
-}: AidboxClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
+}: ClientParams): FhirServerClient<TBundle, TOperationOutcome, TUser> {
 	const getBaseURL = (): string => {
 		return baseurl;
 	};
 
+	// TODO: async response pattern
 	const internalRawRequest = async (
-		requestParams: AidboxRequestParams,
-	): Promise<AidboxRawResponse | InternalAidboxErrorResponse> => {
+		requestParams: RequestParams,
+	): Promise<ResponseWithMeta | InternalAidboxErrorResponse> => {
 		const startTime = Date.now();
 		const baseURL = getBaseURL();
 
 		if (!requestParams.url.startsWith("/"))
 			return {
-				error: new AidboxClientError("url must start with a forward slash", {
+				error: new RequestError("url must start with a forward slash", {
 					request: requestParams,
 				}),
 				duration: Date.now() - startTime,
@@ -85,7 +99,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		};
 
 		try {
-			const response = await fetch(urlObj.toString(), {
+			const response: Response = await fetch(urlObj.toString(), {
 				method,
 				headers: requestHeaders,
 				body: body || null,
@@ -104,7 +118,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			};
 		} catch (e) {
 			return {
-				error: new AidboxClientError(
+				error: new RequestError(
 					e && typeof e === "object" && "message" in e
 						? `error during request: ${e.message}`
 						: "unknown error during request",
@@ -120,8 +134,8 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	const rawRequest = async (
-		requestParams: AidboxRequestParams,
-	): Promise<AidboxRawResponse> => {
+		requestParams: RequestParams,
+	): Promise<ResponseWithMeta> => {
 		const result = await internalRawRequest(requestParams);
 
 		if (isInternalErrorResponse(result)) throw result.error;
@@ -129,7 +143,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		if (onResponse) onResponse(result.response.clone());
 
 		if (!result.response.ok)
-			throw new AidboxErrorResponse(
+			throw new ErrorResponse(
 				`HTTP ${result.response.status}: ${result.response.statusText}`,
 				result,
 			);
@@ -138,32 +152,27 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	};
 
 	const request = async <T>(
-		params: AidboxRequestParams,
-	): Promise<AidboxResponse<T | TOperationOutcome>> => {
-		const result = await internalRawRequest(params);
+		params: RequestParams,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		const response = await internalRawRequest(params);
 
-		if (isInternalErrorResponse(result)) throw result.error;
+		if (isInternalErrorResponse(response)) throw response.error;
 
-		if (onResponse) onResponse(result.response.clone());
+		if (onResponse) onResponse(response.response.clone());
 
-		const body = await coerceBody<T | TOperationOutcome>(result);
+		const body = await coerceBody<T | TOperationOutcome>(response);
 
-		const response = {
-			...result,
-			responseBody: body,
-		};
-
-		if (!result.response.ok) {
+		if (!response.response.ok) {
 			if ((body as OperationOutcome).resourceType === "OperationOutcome")
-				return response;
+				return Err({ resource: body as TOperationOutcome, ...response });
 
-			throw new AidboxErrorResponse(
-				`HTTP ${result.response.status}: ${result.response.statusText}`,
-				result,
+			throw new ErrorResponse(
+				`HTTP ${response.response.status}: ${response.response.statusText}`,
+				response,
 			);
 		}
 
-		return response;
+		return Ok({ resource: body as T, ...response });
 	};
 
 	const fetchUserInfo = async (): Promise<TUser> => {
@@ -192,26 +201,74 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		).response;
 	};
 
-	const fetchUIHistory = async (): Promise<TBundle> => {
-		const history = await rawRequest({
+	const read = async <T>(
+		opts: ReadOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request({
+			url: `/fhir/${opts.type}/${opts.id}`,
 			method: "GET",
-			url: "/fhir/ui_history",
-			params: [
-				[".type", "http"],
-				["_sort", "-_lastUpdated"],
-				["_count", "100"],
-			],
-		}).then((response) => coerceBody<TBundle>(response));
+		});
+	};
 
-		return history;
+	const search = async (
+		opts: SearchOptions,
+	): Promise<
+		Result<ClientResponse<TBundle>, ClientResponse<TOperationOutcome>>
+	> => {
+		return await request({
+			url: `/fhir/${opts.type}/_search`,
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: opts.query ? opts.query : "",
+		});
+	};
+
+	const create = async <T>(
+		opts: CreateOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/`,
+			method: "POST",
+			body: JSON.stringify(opts.resource),
+		});
+	};
+
+	const operation = async <T>(
+		opts: OperationOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request({
+			url: `/fhir/${opts.type}/${opts.operation}`,
+			method: "POST",
+			body: JSON.stringify(opts.resource),
+		});
+	};
+
+	const validate = async (
+		opts: ValidateOptions,
+	): Promise<
+		Result<ClientResponse<TOperationOutcome>, ClientResponse<TOperationOutcome>>
+	> => {
+		return await request({
+			url: opts.id
+				? `/fhir/${opts.type}/${opts.id}/$validate`
+				: `/fhir/${opts.type}/$valieate`,
+			method: "POST",
+			body: JSON.stringify(opts.resource),
+		});
 	};
 
 	return {
 		getBaseURL,
 		rawRequest,
 		request,
-		fetchUIHistory,
 		performLogout,
 		fetchUserInfo,
+		read,
+		search,
+		create,
+		operation,
+		validate,
 	};
 }

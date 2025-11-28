@@ -1,6 +1,6 @@
 import YAML from "yaml";
-import type { AidboxRawResponse } from "./types";
-import { AidboxErrorResponse } from "./types";
+import type { ResponseWithMeta } from "./types";
+import { ErrorResponse } from "./types";
 
 const normalizeContentType = (contentType: string) => {
 	const semicolon = contentType.indexOf(";");
@@ -11,15 +11,15 @@ const normalizeContentType = (contentType: string) => {
 	}
 };
 
-export const coerceBody = async <T>(resp: AidboxRawResponse): Promise<T> => {
-	const contentType = resp.responseHeaders["content-type"];
+export const coerceBody = async <T>(meta: ResponseWithMeta): Promise<T> => {
+	const contentType = meta.responseHeaders["content-type"];
 	if (!contentType)
-		throw new AidboxErrorResponse(
+		throw new ErrorResponse(
 			"can't coerce body to the specifyed type: server didn't specify response content-type",
-			resp,
+			meta,
 		);
 
-	const responseCopy = resp.response.clone();
+	const responseCopy = meta.response.clone();
 
 	try {
 		switch (normalizeContentType(contentType)) {
@@ -31,11 +31,11 @@ export const coerceBody = async <T>(resp: AidboxRawResponse): Promise<T> => {
 		}
 	} catch (e) {
 		const message: string = e instanceof Error ? e.message : "unknown error";
-		throw new AidboxErrorResponse(`failed to coerce body: ${message}`, resp);
+		throw new ErrorResponse(`failed to coerce body: ${message}`, meta);
 	}
 	// default:
-	throw new AidboxErrorResponse(
+	throw new ErrorResponse(
 		`failed to coerce body: unknown content-type ${contentType}`,
-		resp,
+		meta,
 	);
 };
