@@ -1,4 +1,6 @@
 import type {
+	CapabilitiesOptions,
+	ConditionalCreateOptions,
 	ConditionalPatchOptions,
 	ConditionalUpdateOptions,
 	CreateOptions,
@@ -142,6 +144,11 @@ export type FhirServerClient<
 	) => Promise<
 		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
 	>;
+	conditionalCreate: <T>(
+		opts: ConditionalCreateOptions,
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	update: <T>(
 		opts: UpdateOptions,
 	) => Promise<
@@ -177,10 +184,20 @@ export type FhirServerClient<
 	) => Promise<
 		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
 	>;
+	conditionalDelete: <T>(
+		opts: DeleteOptions,
+	) => Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	>;
 	history: (
 		opts: HistoryOptions,
 	) => Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
+	>;
+	capabilities: (
+		opts: CapabilitiesOptions,
+	) => Promise<
+		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
 	>;
 	operation: <T>(
 		opts: OperationOptions,

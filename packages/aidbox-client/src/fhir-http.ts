@@ -19,6 +19,10 @@ export type CreateOptions = {
 	resource: object;
 };
 
+export type ConditionalCreateOptions = CreateOptions & {
+	searchParameters: SearchParameters;
+};
+
 export type UpdateOptions = CreateOptions & {
 	id: string;
 };
@@ -57,3 +61,7 @@ export type OperationOptions = {
 };
 
 export type ValidateOptions = Omit<OperationOptions, "operation">;
+
+export type CapabilitiesOptions = {
+	mode: "full" | "normative" | "terminology";
+};

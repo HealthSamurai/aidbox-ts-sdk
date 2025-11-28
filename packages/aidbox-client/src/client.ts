@@ -1,4 +1,6 @@
 import type {
+	CapabilitiesOptions,
+	ConditionalCreateOptions,
 	ConditionalPatchOptions,
 	ConditionalUpdateOptions,
 	CreateOptions,
@@ -263,6 +265,23 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		});
 	};
 
+	const conditionalCreate = async <T>(
+		opts: ConditionalCreateOptions,
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/`,
+			method: "POST",
+			headers: {
+				"If-None-Exist": opts.searchParameters
+					.map(([name, param]) => `${name}=${param}`)
+					.join("&"),
+			},
+			body: JSON.stringify(opts.resource),
+		});
+	};
+
 	const update = async <T>(
 		opts: UpdateOptions,
 	): Promise<
@@ -349,6 +368,30 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		});
 	};
 
+	const conditionalDelete = async <T>(
+		opts: DeleteOptions,
+	): Promise<
+		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
+	> => {
+		const url = ["/fhir"];
+		if (opts.type) url.push(opts.type);
+		if (opts.id) url.push(opts.id);
+		url.push("_history");
+
+		const requestParams: RequestParams = {
+			url: url.join("/"),
+			method: "DELETE",
+			params: opts.searchParameters,
+		};
+
+		if (opts.id && !opts.type)
+			throw new RequestError(
+				"resource type must be specified if ID is provided",
+				{ request: requestParams },
+			);
+		return await request<T>(requestParams);
+	};
+
 	const history = async (
 		opts: HistoryOptions,
 	): Promise<
@@ -371,6 +414,21 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			);
 
 		return await request<TBundle>(requestParams);
+	};
+
+	const capabilities = async (
+		opts: CapabilitiesOptions,
+	): Promise<
+		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
+	> => {
+		return await request<TBundle>({
+			url: "/fhir/metadata",
+			method: "GET",
+			params: [
+				["mode", opts.mode],
+				["_format", "application/fhir+json"],
+			],
+		});
 	};
 
 	const operation = async <T>(
@@ -417,6 +475,7 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		vread,
 		search,
 		create,
+		conditionalCreate,
 		update,
 		conditionalUpdate,
 		patch,
@@ -424,7 +483,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		delete: deleteOp,
 		deleteHistory,
 		deleteHistoryVersion,
+		conditionalDelete,
 		history,
+		capabilities,
 		operation,
 		validate,
 	};

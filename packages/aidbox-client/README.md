@@ -87,15 +87,14 @@ Additional set of methods is provided to work with FHIR server in a more convini
   - [x] `deleteHistory` - Delete all historical versions of a resource
   - [x] `deleteHistoryVersion` - Delete a specific version of a resource
   - [x] `history` - Retrieve the change history for a particular resource
-- [ ] Type Level Interaction
+- [x] Type Level Interaction
   - [x] `create` - Create a new resource with a server assigned id
-  - [ ] `conditionalCreate` - Create a new resource with a server assigned id if an equivalent resource does not already exist
+  - [x] `conditionalCreate` - Create a new resource with a server assigned id if an equivalent resource does not already exist
   - [x] `search` - Search the resource type based on some filter criteria
-  - [ ] `conditionalDeleteSingle` - Conditional delete a single resource based on some identification criteria
-  - [ ] `conditionalDeleteMultiple` - Conditional delete one or more resources based on some identification criteria
+  - [x] `conditionalDelete` - Conditional delete a single or multiple resources based on some identification criteria
   - [x] `history` - Retrieve the change history for a particular resource type
 - [ ] Whole System Interaction
-  - [ ] `capabilities` - Get a capability statement for the system
+  - [x] `capabilities` - Get a capability statement for the system
   - [ ] `transaction` - Perform multiple interactions (e.g., create, read, update, delete, patch, and/or [extended operations]) in a single interaction
   - [x] `delete` - Conditional Delete across all resource types based on some filter criteria
   - [x] `history` - Retrieve the change history for all resources
