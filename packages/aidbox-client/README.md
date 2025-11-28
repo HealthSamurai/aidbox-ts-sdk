@@ -1,116 +1,116 @@
-# Typescript Aidbox client
+# Typescript FHIR client
 
-### decisions
+A typescript client for interacting with a FHIR server.
 
-- API method per each FHIR interaction https://build.fhir.org/codesystem-restful-interaction.html
-- Object argument (typed) for fixed set of params
-  - `ReadOptions`
-  - `SearchOptions`...
-- Search sring (searchParam) builder (typed or just string)
-  ``` typescript
-  ifMatch: buildSearch().Patient.identifier('1234567890'),
-  ```
-- `Result` type pattern for returned data:
-  ```typescript
-  type Ok<T>  = { ok: true;  value: T; /* ... */ };
-  type Err<E> = { ok: false; error: E; /* ... */ };
+## Usage
 
-  type Result<T, E> = Ok<T> | Err<E>;
-  ```
+The client is created with the `makeClient` function:
 
-## Options
+```typescript
+const client = makeClient({ baseurl: "https://fhir-server.address" });
+```
+
+This constructor accepts an additional `onResponse` option, which is a side-effect-only function, that recieves a copy of the Response from the server as is:
+
+```typescript
+const client = makeClient({
+  baseurl: "https://fhir-server.address"
+  onResponse: (response: Response) => {
+    /* analyze Response, use throw to interrupt request early */
+  }
+});
+```
+
+## Methods
+
+The client provides two basic methods of interaction:
+
+- `rawRequest` - send request to the FHIR server and recieve response in a raw format
+- `request<T>` - send request to the FHIR server and recieve response with its body parsed to the specified type `T`
+
+In successful case, the `rawRequest` returns an object with JavaScript Repsonse, and additional meta information.
+When server responds with an error code, this function throws an error:
+
+```typescript
+const result = await client.rawRequest({
+  method: "GET",
+  url: "/fhir/Patient/patient-id",
+  headers: {Accept: "application/json"},
+  params: [["some" "parameters"], ["if", "needed"]],
+}).then((result) => {
+  const patient: Patient = await result.response.json();
+  // ...
+}).catch ((error) => {
+  if (error instanceof ErrorResponse) {
+    const outcome = await error.responseWithMeta.response.json
+    // ...
+  }
+});
+```
+
+Alternatively, a `request` method can be used.
+It returns a `Result<T, OperationOutcome>`, which contains an already parsed result, coerced to the specified type `T`.
+
+```typescript
+const result: Result<Patient, OperationOutcome> = client.request<Patient>({
+  method: "GET",
+  url: "/fhir/Patient/patient-id",
+  headers: {Accept: "application/json"},
+  params: [["some" "parameters"], ["if", "needed"]],
+});
+
+if (result.isOk()) {
+  const patient: Patient = result.value.resource;
+  // work with patient
+}
+
+if (result.isErr()) {
+  const outcome: OperationOutcome = result.error.resource;
+  // process OperationOutcome
+}
+```
+
+Both methods can throw `RequestError` class, if the error happened before the request was actually made.
+
+### [FHIR HTTP](https://hl7.org/fhir/http.html) methods:
+
+Additional set of methods is provided to work with FHIR server in a more convinient way:
+
 - [ ] Instance Level Interaction
-  - [X] `read` - Read the current state of the resource
-  - [X] `vread` - Read the state of a specific version of the resource
-  - [X] `update` - Update an existing resource by its id (or create it if it is new)
+  - [x] `read` - Read the current state of the resource
+  - [x] `vread` - Read the state of a specific version of the resource
+  - [x] `update` - Update an existing resource by its id (or create it if it is new)
   - [ ] `conditionalUpdate` - Update an existing resource based on some identification criteria (or create it if it is new)
-  - [X] `patch` - Update an existing resource by posting a set of changes to it
+  - [x] `patch` - Update an existing resource by posting a set of changes to it
   - [ ] `caonditionalPatch` - Update an existing resource, based on some identification criteria, by posting a set of changes to it
-  - [X] `delete` - Delete a resource
+  - [x] `delete` - Delete a resource
   - [ ] `deleteHistory` - Delete all historical versions of a resource
   - [ ] `deleteHistoryVersion` - Delete a specific version of a resource
-  - [X] `history` - Retrieve the change history for a particular resource
+  - [x] `history` - Retrieve the change history for a particular resource
 - [ ] Type Level Interaction
-  - [ ] `create` - Create a new resource with a server assigned id
+  - [x] `create` - Create a new resource with a server assigned id
   - [ ] `conditionalCreate` - Create a new resource with a server assigned id if an equivalent resource does not already exist
-  - [ ] `search` - Search the resource type based on some filter criteria
+  - [x] `search` - Search the resource type based on some filter criteria
   - [ ] `conditionalDeleteSingle` - Conditional delete a single resource based on some identification criteria
   - [ ] `conditionalDeleteMultiple` - Conditional delete one or more resources based on some identification criteria
-  - [ ] `history` - Retrieve the change history for a particular resource type
+  - [x] `history` - Retrieve the change history for a particular resource type
 - [ ] Whole System Interaction
   - [ ] `capabilities` - Get a capability statement for the system
   - [ ] `transaction` - Perform multiple interactions (e.g., create, read, update, delete, patch, and/or [extended operations]) in a single interaction
   - [ ] `delete` - Conditional Delete across all resource types based on some filter criteria
-  - [ ] `history` - Retrieve the change history for all resources
-  - [ ] `search` - Search across all resource types based on some filter criteria
+  - [x] `history` - Retrieve the change history for all resources
+  - [x] `search` - Search across all resource types based on some filter criteria
 - [ ] Compartment Interaction
   - [ ] `search` - Search resources associated with a specific compartment instance (see [Search Contexts](https://build.fhir.org/search.html#searchcontexts) and [Compartments](https://build.fhir.org/compartmentdefinition.html))
 
+<!--
 TODO: Operations
 https://build.fhir.org/operations.html
-
-VERB [base]/[type]/[id] {?_format=[mime-type]}
-VERB corresponds to the HTTP verb used for the interaction
-Content surrounded by [] is mandatory, and will be replaced by the string literal identified. Possible insertion values:
-
-- `base` The Service Base URL
-- `mime-type` The Mime Type
-- `type` The name of a resource type (e.g., "Patient")
-- `id` The Logical Id of a resource
-- `vid` The Version Id of a resource
-- `compartment` The name of a compartment
-- `parameters` URL parameters as defined for the particular interaction
-
-Content surrounded by {} is optional
-
-## Examples
-
-``` typescript
-const patient = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
-const encounter = await client.read<Encounter>({type: 'Encounter', id: 'encounter-id'});
-
-const result = await client.update<Patient>({
-    type: 'Patient',
-    id: 'patient-id',
-    ifMatch: buildSearch().Patient.identifier('1234567890'),
-    resource: {
-        name: 'John Doe',
-    },
-})
-```
-
-### Discussed Alternatives
-
-- Generated methods for all types
-
-``` typescript
-const patient = await client.Patient.read('my-patient-id');
-```
-
-- FHIR like
-
-``` typescript
-const patient = await client.read<Patient>('Patient/my-patient-id');
-```
-
-- Sugar functions
-
-``` typescript
-const patient = await client.read<Patient>('Patient', 'my-patient-id');
-```
-
-- Method chaining
-
-``` typescript
-const patient: Patient  = await client
-  .read()
-  .type('Patient')
-  .id('my-patient-id')
-```
+-->
 
 ## Return data format
 
-Client returns a `Result<T, E>` object, with methods to check if the request was successful:
+Most client methods return a `Result<T, E>` object, with methods to check if the request was successful:
 
 ```typescript
 const result = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
@@ -136,130 +136,3 @@ return result
   });
   // result is still Result<Patient, OperationOutcome>
 ```
-
-### Discussed alternatives
-
-- Union type of <Patient> and <OperationOutcome>
-
-``` typescript
-const patient: Patient | OperationOutcome = await client.read({
-    type: 'Patient',
-    id: 'my-patient-id'
-})
-
-const bundle: Bundle | OperationOutcome = await client.search({
-    type: 'Patient',
-    search: client.searchBuilder('Patient').identifier('1234567890')
-})
-```
-
-- Tagged {data, outcome, error}
-
-``` typescript
-const { result: Patient, outcome: OperationOutcome} = await client.read({type: 'Patient', id: 'my-patient-id'})
-
-const { result, outcome } = await client.Patient.read({id: 'my-patient-id'})
-
-const {result: Bundle, error: OperationOutcome} = await client.Search({type: 'Patient', id: 'my-patient-id'})
-```
-
-### Functions as FHIR operations
-
-#### Required params
-
-#### Search modification params (_count, _page)
-
-#### Resource type SearchParams
-
-``` typescript
-// Supabse like client
-//  https://supabase.com/docs/reference/javascript/v1/introduction
-
-import { createClient } from '@health-samurai/aidbox-client'
-  // Create a single supabase client for interacting with your database
-const client = new createClient('https://your-aidbox-instance.com');
-
-const { patient: <Patient>, error: <OperationOutcome> } = await client
-  .read('Patient')
-  .id('my-patient-id');
-
-const { patient: <Patient>, error: <OperationOutcome> } = await client
-  .vread('Patient')
-  .id('my-patient-id')
-  .vid('my-patient-id-2020');
-
-const { result: <Bundle>, error: <OperationOutcome> } = await client
-  .search({type: 'Patient'})
-
-      .sp_family('John Doe')
-      .sp_address-city_exact('Belgrade')
-      .sp_address-city_contains('Nove Sad')
-      .sp_birthdate('gt:2020')
-
-  ._count(10)
-  ._page(3);
-
-//-----------
-
-const patient = await box.read<Patient>('Patient', 'my-patient-id'});
-
-const patient = await box.read<Patient>('Patient', 'my-patient-id');
-const patient = await box.delete<Patient>('Patient', 'my-patient-id');
-const patient = await box.vread<Patient>('Patient', 'my-patient-id', 'my-patient-vid');
-const patient = await box.update<Patient>('Patient', 'my-patient-id', {
-    name: 'John Doe',
-});
-const patient = await box.conditionalUpdate<Patient>( 'Patient', 'name=John%20Doe&gender=male', {
-    name: 'John Doe',
-});
-
-const patient = await box.patch<Patient>( 'Patient', 'my-patient-id',
-'application/json-patch+json',  // or 'application/xml-patch+xml'
-{
-    name: 'John Doe',
-});
-
-const patient = await box.request.Instance.Read<Patient>('Patient', 'my-patient-id');
-
-const patient = await box.Instance.Read<Patient>('Patient', 'my-patient-id');
-const patient = await box.Instance.VRead<Patient>('Patient', 'my-patient-id', 'my-patient-vid');
-
-const patient = await box.Instance.History<Patient>('Patient', 'my-patient-id');
-const patient = await box.Type.History<Patient>('Patient', 'name=foo');
-const patient = await box.System.History<Patient>('name=foo');
-
-const patient = await box.Instance.Delete<Patient>('Patient', 'my-patient-id');
-const patient = await box.Instance.Delete<Patient>('Patient', 'my-patient-id', 'my-patient-vid');
-const patient = await box.FHIR.Type.Delete<Patient>('Patient', 'name=foo');
-
-const patient = await box.Logout<Patient>('Patient', 'name=foo');
-const patient = await box.Validate<Patient>('Patient', 'name=foo');
-
-const patient = await box.Operation<Patient>('Patient', 'name=foo');
-```
-
-| Interaction                 | Content-Type | Body                   | Location | Versioning             | Status Codes                                |
-|-----------------------------|--------------|------------------------|----------|------------------------|---------------------------------------------|
-| read                        | R            | R: Resource            | N/A      | O: ETag, Last-Modified | 200, 202, 404, 410‡                         |
-| vread                       | R            | R: Resource            | N/A      | O: ETag, Last-Modified | 200, 202, 404, 410‡                         |
-| update                      | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| update-conditional          | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| patch                       | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| patch-conditional           | R if body    | O: Resource (Prefer)   | N/A      | O: ETag, Last-Modified | 200, 201, 202, 400, 404, 405, 409, 412, 422 |
-| delete                      | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
-| delete-conditional-single   | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
-| delete-conditional-multiple | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
-| delete-history              | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
-| delete-history-version      | R if body    | O: OperationOutcome    | N/A      | N/A                    | 200, 202, 204, 404, 405, 409, 412           |
-| create                      | R if body    | O : Resource (Prefer)  | R        | O: ETag, Last-Modified | 201, 202, 400, 404, 405, 422                |
-| create-conditional          | R if body    | O : Resource (Prefer)  | R        | O: ETag, Last-Modified | 201, 202, 400, 404, 405, 422                |
-| search-type                 | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 401, 404, 405                     |
-| search-system               | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 401, 404, 405                     |
-| search-compartment          | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 401, 404, 405                     |
-| capabilities                | R            | R: CapabilityStatement | N/A      | N/A                    | 200, 202, 404                               |
-| transaction                 | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 400, 404, 405, 409, 412, 422      |
-| batch                       | R            | R: Bundle              | N/A      | N/A                    | 200, 202, 400, 404, 405, 409, 412, 422      |
-| history-instance            | R            | R: Bundle              | N/A      | N/A                    | 200, 202                                    |
-| history-type                | R            | R: Bundle              | N/A      | N/A                    | 200, 202                                    |
-| history-all                 | R            | R: Bundle              | N/A      | N/A                    | 200, 202                                    |
-| (operation)                 | R            | R: Parameters/Resource | N/A      | N/A                    | 200, 202 + varies by operation type         |

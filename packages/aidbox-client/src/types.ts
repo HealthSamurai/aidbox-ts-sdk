@@ -42,7 +42,7 @@ export type ResponseWithMeta = {
 	request: RequestParams;
 };
 
-export type ClientResponse<T> = ResponseWithMeta & {
+export type ResourceResponse<T> = ResponseWithMeta & {
 	resource: T;
 };
 
@@ -61,11 +61,11 @@ export class RequestError extends Error {
 }
 
 export class ErrorResponse extends Error {
-	rawResponse: ResponseWithMeta;
+	responseWithMeta: ResponseWithMeta;
 
 	constructor(msg: string, cause: ResponseWithMeta) {
 		super(msg);
-		this.rawResponse = cause;
+		this.responseWithMeta = cause;
 		this.name = "ErrorResponse";
 	}
 }
@@ -111,7 +111,7 @@ export type FhirServerClient<
 	 */
 	request: <T>(
 		params: RequestParams,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	/** Performs a request to `/auth/logout`. */
 	performLogout: () => Promise<Response>;
 	/** Performs a request to `/auth/userinfo`. */
@@ -119,38 +119,38 @@ export type FhirServerClient<
 	// FHIR methods
 	read: <T>(
 		opts: ReadOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	vread: <T>(
 		opts: VReadOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	search: (
 		opts: SearchOptions,
 	) => Promise<
-		Result<ClientResponse<TBundle>, ClientResponse<TOperationOutcome>>
+		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
 	>;
 	create: <T>(
 		opts: CreateOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	update: <T>(
 		opts: UpdateOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	patch: <T>(
 		opts: PatchOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	delete: <T>(
 		opts: DeleteOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>;
 	history: (
 		opts: HistoryOptions,
 	) => Promise<
-		Result<ClientResponse<TBundle>, ClientResponse<TOperationOutcome>>
+		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
 	>;
 	operation: <T>(
 		opts: OperationOptions,
-	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>; // $run, $validate
+	) => Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>>; // $run, $validate
 	validate: (
 		opts: ValidateOptions,
 	) => Promise<
-		Result<ClientResponse<TOperationOutcome>, ClientResponse<TOperationOutcome>>
+		Result<ResourceResponse<TOperationOutcome>, ResourceResponse<TOperationOutcome>>
 	>;
 };

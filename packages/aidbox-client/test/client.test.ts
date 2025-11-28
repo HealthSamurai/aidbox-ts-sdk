@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { makeClient } from "src/client.js";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
-import type { User, ClientResponse } from "src/types";
+import type { User, ResourceResponse } from "src/types";
 import type { Result } from "src/result";
 
 describe("AidboxClient", () => {
@@ -45,7 +45,7 @@ describe("AidboxClient", () => {
         baseurl: "http://localhost:8080",
       });
 
-      const result: Result<ClientResponse<Bundle>, ClientResponse<OperationOutcome>> = await client.request<Bundle>({
+      const result: Result<ResourceResponse<Bundle>, ResourceResponse<OperationOutcome>> = await client.request<Bundle>({
         method: "GET",
         url: "/Bundle/foo",
       });

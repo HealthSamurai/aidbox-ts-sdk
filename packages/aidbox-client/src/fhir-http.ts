@@ -8,7 +8,7 @@ export type VReadOptions = ReadOptions & {
 };
 
 export type SearchOptions = {
-	type: string;
+	type?: string;
 	query?: string;
 };
 
