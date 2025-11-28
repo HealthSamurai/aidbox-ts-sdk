@@ -1,4 +1,16 @@
 import type {
+	CreateOptions,
+	DeleteOptions,
+	HistoryOptions,
+	OperationOptions,
+	PatchOptions,
+	ReadOptions,
+	SearchOptions,
+	UpdateOptions,
+	ValidateOptions,
+	VReadOptions,
+} from "./fhir-http";
+import type {
 	Bundle,
 	OperationOutcome,
 	Resource,
@@ -58,33 +70,6 @@ export class ErrorResponse extends Error {
 	}
 }
 
-export type ReadOptions = {
-	type: string;
-	id: string;
-};
-
-export type SearchOptions = {
-	type: string;
-	query?: string;
-};
-
-export type CreateOptions = {
-	type: string;
-	resource: object;
-};
-
-export type OperationOptions = {
-	type: string;
-	operation: "$run" | "$validate";
-	resource: object;
-};
-
-export type ValidateOptions = {
-	type: string;
-	resource: object;
-	id?: string;
-};
-
 export type FhirServerClient<
 	TBundle = Bundle,
 	TOperationOutcome = OperationOutcome,
@@ -135,6 +120,9 @@ export type FhirServerClient<
 	read: <T>(
 		opts: ReadOptions,
 	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	vread: <T>(
+		opts: VReadOptions,
+	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
 	search: (
 		opts: SearchOptions,
 	) => Promise<
@@ -143,6 +131,20 @@ export type FhirServerClient<
 	create: <T>(
 		opts: CreateOptions,
 	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	update: <T>(
+		opts: UpdateOptions,
+	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	patch: <T>(
+		opts: PatchOptions,
+	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	delete: <T>(
+		opts: DeleteOptions,
+	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>;
+	history: (
+		opts: HistoryOptions,
+	) => Promise<
+		Result<ClientResponse<TBundle>, ClientResponse<TOperationOutcome>>
+	>;
 	operation: <T>(
 		opts: OperationOptions,
 	) => Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>>; // $run, $validate

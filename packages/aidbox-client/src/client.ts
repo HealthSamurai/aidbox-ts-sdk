@@ -1,16 +1,23 @@
+import type {
+	CreateOptions,
+	DeleteOptions,
+	HistoryOptions,
+	OperationOptions,
+	PatchOptions,
+	ReadOptions,
+	SearchOptions,
+	UpdateOptions,
+	ValidateOptions,
+	VReadOptions,
+} from "./fhir-http";
 import type { OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import { Err, Ok, type Result } from "./result";
 import type {
 	ClientParams,
 	ClientResponse,
-	CreateOptions,
 	FhirServerClient,
-	OperationOptions,
-	ReadOptions,
 	RequestParams,
 	ResponseWithMeta,
-	SearchOptions,
-	ValidateOptions,
 } from "./types";
 import { ErrorResponse, RequestError } from "./types";
 import { coerceBody } from "./utils";
@@ -201,11 +208,21 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		).response;
 	};
 
+	/// FHIR HTTP methods
 	const read = async <T>(
 		opts: ReadOptions,
 	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
 		return await request({
 			url: `/fhir/${opts.type}/${opts.id}`,
+			method: "GET",
+		});
+	};
+
+	const vread = async <T>(
+		opts: VReadOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request({
+			url: `/fhir/${opts.type}/${opts.id}/_history/${opts.vid}`,
 			method: "GET",
 		});
 	};
@@ -235,14 +252,73 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		});
 	};
 
+	const update = async <T>(
+		opts: UpdateOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/${opts.id}`,
+			method: "PUT",
+			body: JSON.stringify(opts.resource),
+		});
+	};
+
+	const patch = async <T>(
+		opts: PatchOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/${opts.id}`,
+			method: "PATCH",
+			headers: { "Content-Type": "application/json-patch+json" },
+			body: JSON.stringify(opts.patch),
+		});
+	};
+
+	const deleteOp = async <T>(
+		opts: DeleteOptions,
+	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
+		return await request<T>({
+			url: `/fhir/${opts.type}/${opts.id}`,
+			method: "DELETE",
+		});
+	};
+
+	const history = async (
+		opts: HistoryOptions,
+	): Promise<
+		Result<ClientResponse<TBundle>, ClientResponse<TOperationOutcome>>
+	> => {
+		const url = ["/fhir"];
+		if (opts.type) url.push(opts.type);
+		if (opts.id) url.push(opts.id);
+		url.push("_history");
+
+		const requestParams: RequestParams = {
+			url: url.join("/"),
+			method: "GET",
+		};
+
+		if (opts.id && !opts.type)
+			throw new RequestError("must specify", { request: requestParams });
+
+		return await request<TBundle>(requestParams);
+	};
+
 	const operation = async <T>(
 		opts: OperationOptions,
 	): Promise<Result<ClientResponse<T>, ClientResponse<TOperationOutcome>>> => {
-		return await request({
-			url: `/fhir/${opts.type}/${opts.operation}`,
+		const url = ["/fhir"];
+		if (opts.type) url.push(opts.type);
+		if (opts.id) url.push(opts.id);
+		url.push(opts.operation);
+
+		const requestParams: RequestParams = {
+			url: url.join("/"),
 			method: "POST",
-			body: JSON.stringify(opts.resource),
-		});
+		};
+
+		if (opts.resource) requestParams.body = JSON.stringify(opts.resource);
+
+		return await request(requestParams);
 	};
 
 	const validate = async (
@@ -250,12 +326,9 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 	): Promise<
 		Result<ClientResponse<TOperationOutcome>, ClientResponse<TOperationOutcome>>
 	> => {
-		return await request({
-			url: opts.id
-				? `/fhir/${opts.type}/${opts.id}/$validate`
-				: `/fhir/${opts.type}/$valieate`,
-			method: "POST",
-			body: JSON.stringify(opts.resource),
+		return await operation<TOperationOutcome>({
+			operation: "$validate",
+			...opts,
 		});
 	};
 
@@ -266,8 +339,13 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		performLogout,
 		fetchUserInfo,
 		read,
+		vread,
 		search,
 		create,
+		update,
+		patch,
+		delete: deleteOp,
+		history,
 		operation,
 		validate,
 	};
