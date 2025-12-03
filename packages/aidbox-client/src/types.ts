@@ -92,7 +92,7 @@ export class ErrorResponse extends Error {
 	}
 }
 
-export type FhirServerClient<
+export type AidboxClient<
 	TBundle = Bundle,
 	TOperationOutcome = OperationOutcome,
 	TUser = User,

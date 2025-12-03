@@ -25,8 +25,8 @@ import type {
 import type { OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
 import { Err, Ok, type Result } from "./result";
 import type {
+	AidboxClient,
 	ClientParams,
-	FhirServerClient,
 	RequestParams,
 	ResourceResponse,
 	ResponseWithMeta,
@@ -101,7 +101,7 @@ const basePath = "fhir";
 export function makeClient<TBundle, TOperationOutcome, TUser>({
 	baseUrl,
 	authProvider,
-}: ClientParams): FhirServerClient<TBundle, TOperationOutcome, TUser> {
+}: ClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
 	const getBaseUrl = (): string => {
 		return baseUrl;
 	};
