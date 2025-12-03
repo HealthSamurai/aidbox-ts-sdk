@@ -59,14 +59,14 @@ const basePath = "fhir";
  * const baseUrl = "https://fhir-server.address";
  * const client = makeClient({
  *   baseUrl,
- *   authProvider: new BrowserAuthProvider(baseurl);
+ *   authProvider: new BrowserAuthProvider(baseUrl);
  * });
  *
  * // alternatively, specify different FHIR types:
  * import type { Bundle, OperationOutcome } from "hl7-fhir-r5-core";
- * const client = makeClient<Bundle, OperationOutcome>({
+ * const client = makeClient<Bundle, OperationOutcome, User>({
  *   baseUrl,
- *   authProvider: new BrowserAuthProvider(baseurl);
+ *   authProvider: new BrowserAuthProvider(baseUrl);
  * });
  * ```
  *
