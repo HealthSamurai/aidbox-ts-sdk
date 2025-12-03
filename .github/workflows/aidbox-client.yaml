@@ -1,0 +1,42 @@
+name: Test Aidbox Client
+
+on:
+  push:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: packages/aidbox-client
+
+      - name: Activate Aidbox
+        run: |
+          cat > docker-compose.override.yml << EOF
+          services:
+            aidbox:
+              environment:
+                BOX_LICENSE: ${{ secrets.BOX_LICENSE }}
+          EOF
+        working-directory: packages/aidbox-client
+
+      - name: Run aidbox
+        run: docker compose up --wait
+        working-directory: packages/aidbox-client
+
+      - name: Run tests
+        run: pnpm test
+        working-directory: packages/aidbox-client
