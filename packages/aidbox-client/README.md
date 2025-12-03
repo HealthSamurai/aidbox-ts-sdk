@@ -7,17 +7,10 @@ A typescript client for interacting with a FHIR server.
 The client is created with the `makeClient` function:
 
 ```typescript
-const client = makeClient({ baseurl: "https://fhir-server.address" });
-```
-
-This constructor accepts an additional `onResponse` option, which is a side-effect-only function, that recieves a copy of the Response from the server as is:
-
-```typescript
+const baseUrl = "https://fhir-server.address";
 const client = makeClient({
-  baseurl: "https://fhir-server.address"
-  onResponse: (response: Response) => {
-    /* analyze Response, use throw to interrupt request early */
-  }
+  baseUrl,
+  authProvider: new BrowserAuthProvider(baseUrl);
 });
 ```
 
@@ -65,7 +58,7 @@ if (result.isOk()) {
 }
 
 if (result.isErr()) {
-  const outcome: OperationOutcome = result.error.resource;
+  const outcome: OperationOutcome = result.value.resource;
   // process OperationOutcome
 }
 ```
@@ -114,14 +107,14 @@ Most client methods return a `Result<T, E>` object, with methods to check if the
 ```typescript
 const result = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
 if (result.isErr())
-    throw new Error("error reading Patient", { cause: result.error })
+    throw new Error("error reading Patient", { cause: result.value })
 
 const { resource: patient } = result.value;
 
 // work with patient.
 ```
 
-Unwrapping is not required to modify the data in the result:
+Unwrapping is not required to modify the data in the `Result`:
 
 ```typescript
 const result = await client.read<Patient>({type: 'Patient', id: 'patient-id'});
