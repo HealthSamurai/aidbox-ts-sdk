@@ -10,6 +10,16 @@ const builder = new APIBuilder()
 	.outputTo("./src/fhir-types")
 	.treeShake({
 		"hl7.fhir.r4.core": {
+			"http://hl7.org/fhir/StructureDefinition/Patient": {
+				ignoreFields: [
+					"contact",
+					"communication",
+					"photo",
+					"telecom",
+					"address",
+					"link",
+				],
+			},
 			"http://hl7.org/fhir/StructureDefinition/Resource": {},
 			"http://hl7.org/fhir/StructureDefinition/Bundle": {},
 			"http://hl7.org/fhir/StructureDefinition/OperationOutcome": {},

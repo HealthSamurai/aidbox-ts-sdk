@@ -28,6 +28,7 @@
 		"doc": "typedoc"
 	},
 	"dependencies": {
+		"@types/json-patch": "^0.0.33",
 		"yaml": "^2.8.1"
 	},
 	"publishConfig": {

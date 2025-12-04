@@ -1,15 +1,19 @@
 import { BrowserAuthProvider } from "src/auth-providers";
-import { makeClient } from "src/client.js";
-import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
+import { AidboxClient } from "src/client.js";
+import type {
+	Bundle,
+	OperationOutcome,
+	Patient,
+} from "src/fhir-types/hl7-fhir-r4-core";
 import type { User } from "src/types";
 import { describe, expect, it } from "vitest";
 
 const baseUrl = "http://localhost:8080";
 
-const client = makeClient<Bundle, OperationOutcome, User>({
+const client = new AidboxClient<Bundle, OperationOutcome, User>(
 	baseUrl,
-	authProvider: new BrowserAuthProvider(baseUrl),
-});
+	new BrowserAuthProvider(baseUrl),
+);
 
 const patientId = "pt-test-id";
 
@@ -535,7 +539,7 @@ describe("Whole System Interaction", () => {
 								],
 								gender: "male",
 								birthDate: "1980-01-01",
-							},
+							} as Patient,
 						},
 						{
 							request: {
@@ -596,7 +600,7 @@ describe("Whole System Interaction", () => {
 								],
 								gender: "male",
 								birthDate: "1980-01-01",
-							},
+							} as Patient,
 						},
 						{
 							request: {

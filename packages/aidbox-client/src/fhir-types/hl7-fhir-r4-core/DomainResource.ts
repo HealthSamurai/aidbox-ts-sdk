@@ -9,7 +9,7 @@ export type { Narrative } from "../hl7-fhir-r4-core/Narrative";
 
 // CanonicalURL: http://hl7.org/fhir/StructureDefinition/DomainResource
 export interface DomainResource extends Resource {
-    resourceType: "DomainResource" | "OperationOutcome";
+    resourceType: "DomainResource" | "OperationOutcome" | "Patient";
 
     contained?: Resource[];
     text?: Narrative;
