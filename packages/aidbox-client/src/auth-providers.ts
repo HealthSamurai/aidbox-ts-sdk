@@ -1,6 +1,7 @@
 import type { AuthProvider } from "./types";
 
 export class BrowserAuthProvider implements AuthProvider {
+	/** @ignore */
 	public baseUrl: string;
 
 	constructor(baseUrl: string) {
@@ -19,6 +20,9 @@ export class BrowserAuthProvider implements AuthProvider {
 		return response.status !== 401;
 	}
 
+	/**
+	 * Checks if the session is already authenticated, and if not, redirects to the login page.
+	 */
 	public async establishSession() {
 		if (!(await this.#checkSession())) {
 			const encodedLocation = encodeURIComponent(btoa(window.location.href));
@@ -27,6 +31,9 @@ export class BrowserAuthProvider implements AuthProvider {
 		}
 	}
 
+	/**
+	 * Sends a POST request to `baseurl/auth/logout`.
+	 */
 	public async revokeSession() {
 		await fetch(new URL("/auth/logout", this.baseUrl), {
 			method: "POST",
@@ -38,6 +45,12 @@ export class BrowserAuthProvider implements AuthProvider {
 		});
 	}
 
+	/**
+	 * A thin wrapper around `fetch` function.
+	 * Checks if the client is authorized to perform a request, and redirects to a login page if not.
+	 *
+	 * Accepts the same arguments as `fetch`.
+	 */
 	public async fetch(
 		input: RequestInfo | URL,
 		init?: RequestInit,

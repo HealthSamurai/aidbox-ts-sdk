@@ -1,33 +1,12 @@
 import type {
-	BatchOptions,
-	CapabilitiesOptions,
-	ConditionalCreateOptions,
-	ConditionalDeleteOptions,
-	ConditionalPatchOptions,
-	ConditionalUpdateOptions,
-	CreateOptions,
-	DeleteHistoryVersionOptions,
-	DeleteOptions,
-	HistoryInstanceOptions,
-	HistorySystemOptions,
-	HistoryTypeOptions,
-	OperationOptions,
-	PatchOptions,
-	ReadOptions,
-	SearchCompartmentOptions,
-	SearchSystemOptions,
-	SearchTypeOptions,
-	TransactionOptions,
-	UpdateOptions,
-	ValidateOptions,
-	VReadOptions,
-} from "./fhir-http";
-import type {
-	Bundle,
-	OperationOutcome,
-	Resource,
-} from "./fhir-types/hl7-fhir-r4-core";
-import type { Result } from "./result";
+	AddPatch,
+	CopyPatch,
+	MovePatch,
+	RemovePatch,
+	ReplacePatch,
+	TestPatch,
+} from "json-patch";
+import type { Resource } from "./fhir-types/hl7-fhir-r4-core";
 
 export type Parameters = [string, string][];
 export type Headers = Record<string, string>;
@@ -37,11 +16,6 @@ export type AuthProvider = {
 	baseUrl: string;
 	revokeSession: () => void;
 	establishSession: () => void;
-};
-
-export type ClientParams = {
-	baseUrl: string;
-	authProvider: AuthProvider;
 };
 
 // FIXME: sansara#6557 Generate from IG
@@ -68,6 +42,9 @@ export type ResourceResponse<T> = ResponseWithMeta & {
 	resource: T;
 };
 
+/**
+ * An error indicating that request didn't met client's expectations and was not sent as a result.
+ */
 export class RequestError extends Error {
 	request: RequestParams;
 
@@ -82,6 +59,13 @@ export class RequestError extends Error {
 	}
 }
 
+/**
+ * An error indicating an unknown errornous response from the server.
+ *
+ * Thrown from `client.rawRequest` on any non-successful response code.
+ *
+ * Only thrown from `client.request` on any non-success code if response body isn't an `OperationOutcome`.
+ */
 export class ErrorResponse extends Error {
 	responseWithMeta: ResponseWithMeta;
 
@@ -92,171 +76,134 @@ export class ErrorResponse extends Error {
 	}
 }
 
-export type AidboxClient<
-	TBundle = Bundle,
-	TOperationOutcome = OperationOutcome,
-	TUser = User,
-> = {
-	getBaseUrl: () => string;
-	/**
-	 * Untyped request.
-	 *
-	 * Example usage:
-	 *
-	 * ```typescript
-	 * const result = client.rawRequest({
-	 *   method: "GET",
-	 *   url: "/fhir/Patient/pt-1",
-	 * })
-	 * ```
-	 */
-	rawRequest: (params: RequestParams) => Promise<ResponseWithMeta>;
-	/**
-	 * Typed request
-	 *
-	 * Example usage:
-	 *
-	 * ```typescript
-	 * const result = client.request<Patient>({
-	 *   method: "GET",
-	 *   url: "/fhir/Patient/pt-1",
-	 * })
-	 *
-	 * if (isOk(result)) {
-	 *   const { value } = result;
-	 *   // work with value as a Patient type
-	 * } else {
-	 *   const { error } = result;
-	 *   // work with error as an OperationOutcome type.
-	 * }
-	 * ```
-	 */
-	request: <T>(
-		params: RequestParams,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	/** Performs a request to `/auth/logout`. */
-	performLogout: () => Promise<Response>;
-	/** Performs a request to `/auth/userinfo`. */
-	fetchUserInfo: () => Promise<TUser>;
-	// FHIR methods
-	read: <T>(
-		opts: ReadOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	vread: <T>(
-		opts: VReadOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	searchType: (
-		opts: SearchTypeOptions,
-	) => Promise<
-		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	>;
-	searchSystem: (
-		opts: SearchSystemOptions,
-	) => Promise<
-		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	>;
-	searchCompartment: (
-		opts: SearchCompartmentOptions,
-	) => Promise<
-		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	>;
-	create: <T>(
-		opts: CreateOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	conditionalCreate: <T>(
-		opts: ConditionalCreateOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	update: <T>(
-		opts: UpdateOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	conditionalUpdate: <T>(
-		opts: ConditionalUpdateOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	patch: <T>(
-		opts: PatchOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	conditionalPatch: <T>(
-		opts: ConditionalPatchOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	delete: <T>(
-		opts: DeleteOptions,
-	) => Promise<
-		Result<ResourceResponse<T | undefined>, ResourceResponse<TOperationOutcome>>
-	>;
-	deleteHistory: <T>(
-		opts: DeleteOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	deleteHistoryVersion: <T>(
-		opts: DeleteHistoryVersionOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	conditionalDelete: <T>(
-		opts: ConditionalDeleteOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>;
-	historyInstance: (
-		opts: HistoryInstanceOptions,
-	) => Promise<
-		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	>;
-	historyType: (
-		opts: HistoryTypeOptions,
-	) => Promise<
-		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	>;
-	historySystem: (
-		opts: HistorySystemOptions,
-	) => Promise<
-		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	>;
-	capabilities: (
-		opts: CapabilitiesOptions,
-	) => Promise<
-		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
-	>;
-	batch: (
-		opts: BatchOptions,
-	) => Promise<
-		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
-	>;
-	transaction: (
-		opts: TransactionOptions,
-	) => Promise<
-		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
-	>;
-	operation: <T>(
-		opts: OperationOptions,
-	) => Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	>; // $run, $validate
-	validate: (
-		opts: ValidateOptions,
-	) => Promise<
-		Result<
-			ResourceResponse<TOperationOutcome>,
-			ResourceResponse<TOperationOutcome>
-		>
-	>;
+/// FHIR HTTP method params
+
+export type ReadOptions = {
+	type: string;
+	id: string;
+	mimeType?: string;
+};
+
+export type VReadOptions = ReadOptions & {
+	vid: string;
+};
+
+export type SearchTypeOptions = {
+	type: string;
+	query: Parameters;
+};
+
+export type SearchSystemOptions = {
+	query: Parameters;
+};
+
+export type SearchCompartmentOptions = {
+	query: Parameters;
+	type: string;
+	compartment: string;
+	compartmentId: string;
+};
+
+export type CreateOptions<T> = {
+	type: string;
+	resource: T;
+};
+
+export type ConditionalCreateOptions<T> = {
+	type: string;
+	resource: T;
+	searchParameters: Parameters;
+};
+
+export type UpdateOptions<T> = {
+	type: string;
+	resource: T;
+	id: string;
+};
+
+export type ConditionalUpdateOptions<T> = {
+	type: string;
+	resource: T;
+	searchParameters: Parameters;
+};
+
+export type PatchOptions = {
+	type: string;
+	id: string;
+	patch: (
+		| AddPatch
+		| RemovePatch
+		| ReplacePatch
+		| MovePatch
+		| CopyPatch
+		| TestPatch
+	)[];
+};
+
+export type ConditionalPatchOptions = {
+	type: string;
+	searchParameters: Parameters;
+	patch: (
+		| AddPatch
+		| RemovePatch
+		| ReplacePatch
+		| MovePatch
+		| CopyPatch
+		| TestPatch
+	)[];
+};
+
+export type DeleteOptions = {
+	type: string;
+	id: string;
+};
+
+export type ConditionalDeleteOptions = {
+	type?: string;
+	searchParameters: Parameters;
+};
+
+export type DeleteHistoryVersionOptions = {
+	type: string;
+	id: string;
+	vid: string;
+};
+
+export type HistoryInstanceOptions = {
+	type: string;
+	id: string;
+};
+
+export type HistoryTypeOptions = {
+	type: string;
+};
+
+export type HistorySystemOptions = Record<string, never>;
+
+// FIXME: resource -> params
+export type OperationOptions<T> = {
+	type: string;
+	id?: string;
+	operation: "$run" | "$validate";
+	resource: T;
+};
+
+export type ValidateOptions<T> = Omit<OperationOptions<T>, "operation">;
+
+export type CapabilitiesOptions = {
+	mode: "full" | "normative" | "terminology";
+};
+
+export type BatchOptions<TBundle> = {
+	format: string;
+	bundle: TBundle & {
+		type: "batch";
+	};
+};
+
+export type TransactionOptions<TBundle> = {
+	format: string;
+	bundle: TBundle & {
+		type: "transaction";
+	};
 };

@@ -1,0 +1,15 @@
+{
+  "sort": [
+    "kind",
+    "instance-first",
+    "source-order"
+  ],
+	"groupOrder": [
+		"Instance Level Interactions",
+		"Type Level Interactions",
+		"Whole System Interactions",
+		"Compartment Interactions",
+		"Operations",
+		"*"
+	],
+}

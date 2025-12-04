@@ -1,4 +1,7 @@
+import type { Bundle, OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
+import { Err, Ok, type Result } from "./result";
 import type {
+	AuthProvider,
 	BatchOptions,
 	CapabilitiesOptions,
 	ConditionalCreateOptions,
@@ -14,22 +17,17 @@ import type {
 	OperationOptions,
 	PatchOptions,
 	ReadOptions,
+	RequestParams,
+	ResourceResponse,
+	ResponseWithMeta,
 	SearchCompartmentOptions,
 	SearchSystemOptions,
 	SearchTypeOptions,
 	TransactionOptions,
 	UpdateOptions,
+	User,
 	ValidateOptions,
 	VReadOptions,
-} from "./fhir-http";
-import type { OperationOutcome } from "./fhir-types/hl7-fhir-r4-core";
-import { Err, Ok, type Result } from "./result";
-import type {
-	AidboxClient,
-	ClientParams,
-	RequestParams,
-	ResourceResponse,
-	ResponseWithMeta,
 } from "./types";
 import { ErrorResponse, RequestError } from "./types";
 import { coerceBody } from "./utils";
@@ -52,66 +50,56 @@ const makeUrl = (parts: string[]): string => {
 
 const basePath = "fhir";
 
+/// IMPORTANT:
+///
+/// PLEASE, use one sentence per line approach in the docstrings.
+/// Don't use hard-wrapping, it makes git-diff a painfull experience.
+
 /**
  * Create a client to the FHIR server.
  *
  * ```typescript
+ * import type { User } from "@health-samurai/aidbox-client";
+ *
  * const baseUrl = "https://fhir-server.address";
- * const client = makeClient({
+ * const client = new AidboxClient(
  *   baseUrl,
- *   authProvider: new BrowserAuthProvider(baseUrl);
- * });
+ *   new BrowserAuthProvider(baseUrl);
+ * );
  *
  * // alternatively, specify different FHIR types:
  * import type { Bundle, OperationOutcome } from "hl7-fhir-r5-core";
- * const client = makeClient<Bundle, OperationOutcome, User>({
+ * const client = new AidboxClient<Bundle, OperationOutcome, User>(
  *   baseUrl,
  *   authProvider: new BrowserAuthProvider(baseUrl);
- * });
+ * );
  * ```
  *
  * Main client functions are `request` for typed interactions, and `rawRequest` for manual response processing.
  *
- * This client also provides a set of convenience methods for accessing FHIR operations:
+ * This client also provides a set of convenience methods for accessing FHIR operations, provided below.
  *
- * - `read`
- * - `vread`
- * - `searchType`
- * - `searchSystem`
- * - `searchCompartment`
- * - `create`
- * - `conditionalCreate`
- * - `update`
- * - `conditionalUpdate`
- * - `patch`
- * - `conditionalPatch`
- * - `delete: deleteOp`
- * - `deleteHistory`
- * - `deleteHistoryVersion`
- * - `conditionalDelete`
- * - `historyInstance`
- * - `historyType`
- * - `historySystem`
- * - `capabilities`
- * - `batch`
- * - `transaction`
- * - `operation`
- * - `validate`
+ * @showGroups
  */
-export function makeClient<TBundle, TOperationOutcome, TUser>({
-	baseUrl,
-	authProvider,
-}: ClientParams): AidboxClient<TBundle, TOperationOutcome, TUser> {
-	const getBaseUrl = (): string => {
-		return baseUrl;
-	};
+export class AidboxClient<
+	TBundle = Bundle,
+	TOperationOutcome = OperationOutcome,
+	TUser = User,
+> {
+	public baseUrl: string;
+	public authProvider: AuthProvider;
+
+	constructor(baseUrl: string, authProvider: AuthProvider) {
+		this.baseUrl = baseUrl;
+		this.authProvider = authProvider;
+	}
 
 	// TODO: async response pattern
-	const internalRawRequest = async (
+	async #internalRawRequest(
 		requestParams: RequestParams,
-	): Promise<ResponseWithMeta | InternalAidboxErrorResponse> => {
+	): Promise<ResponseWithMeta | InternalAidboxErrorResponse> {
 		const startTime = performance.now();
-		const baseUrl = getBaseUrl();
+		const baseUrl = this.getBaseUrl();
 
 		if (!requestParams.url.startsWith("/"))
 			return {
@@ -148,12 +136,15 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		};
 
 		try {
-			const response: Response = await authProvider.fetch(urlObj.toString(), {
-				method,
-				headers: requestHeaders,
-				body: body || null,
-				cache: "no-store",
-			});
+			const response: Response = await this.authProvider.fetch(
+				urlObj.toString(),
+				{
+					method,
+					headers: requestHeaders,
+					body: body || null,
+					cache: "no-store",
+				},
+			);
 			const responseHeaders: Record<string, string> = {};
 			response.headers.forEach((value, key) => {
 				responseHeaders[key] = value;
@@ -179,102 +170,111 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 				request,
 			};
 		}
-	};
-
-	const rawRequest = async (
-		requestParams: RequestParams,
-	): Promise<ResponseWithMeta> => {
-		const result = await internalRawRequest(requestParams);
-
-		if (isInternalErrorResponse(result)) throw result.error;
-
-		if (!result.response.ok)
-			throw new ErrorResponse(
-				`HTTP ${result.response.status}: ${result.response.statusText}`,
-				result,
-			);
-
-		return result;
-	};
-
-	const request = async <T>(
-		params: RequestParams,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		const response = await internalRawRequest(params);
-
-		if (isInternalErrorResponse(response)) throw response.error;
-
-		const body = await coerceBody<T | TOperationOutcome>(response);
-
-		if (!response.response.ok) {
-			if ((body as OperationOutcome).resourceType === "OperationOutcome")
-				return Err({ resource: body as TOperationOutcome, ...response });
-
-			throw new ErrorResponse(
-				`HTTP ${response.response.status}: ${response.response.statusText}`,
-				response,
-			);
-		}
-
-		return Ok({ resource: body as T, ...response });
-	};
-
-	const fetchUserInfo = async (): Promise<TUser> => {
-		const user = await rawRequest({
-			url: "/auth/userinfo",
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-			},
-		}).then((response) => coerceBody<TUser>(response));
-
-		return user;
-	};
-
-	const performLogout = async () => {
-		return (
-			await rawRequest({
-				url: "/auth/logout",
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Accept: "application/json",
-				},
-			})
-		).response;
-	};
+	}
 
 	/// FHIR HTTP methods
-	const read = async <T>(
+
+	/**
+	 *
+	 * Read the current state of the resource
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/[type]/[id] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#read
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const patient = await client.read<Patient>({
+	 *   type: "Patient",
+	 *   id: "patient-id",
+	 * });
+	 * ```
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async read<T>(
 		opts: ReadOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request({
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		const requestParams: RequestParams = {
 			url: makeUrl([basePath, opts.type, opts.id]),
 			method: "GET",
-		});
-	};
+		};
+		if (opts.mimeType)
+			requestParams.headers = {
+				accept: opts.mimeType,
+			};
+		return await this.request(requestParams);
+	}
 
-	const vread = async <T>(
+	/**
+	 * Read the state of a specific version of the resource
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/[type]/[id]/_history/[vid] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#vread
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const patient = await client.vread<Patient>({
+	 *   type: "Patient",
+	 *   id: "patient-id",
+	 *   vid: "version-id",
+	 * });
+	 * ```
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async vread<T>(
 		opts: VReadOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request({
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		const requestParams: RequestParams = {
 			url: makeUrl([basePath, opts.type, opts.id, "_history", opts.vid]),
 			method: "GET",
-		});
-	};
+		};
+		if (opts.mimeType)
+			requestParams.headers = {
+				accept: opts.mimeType,
+			};
+		return await this.request(requestParams);
+	}
 
-	const searchType = async (
+	/**
+	 * Search the resource type based on some filter criteria.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/[resource-type]/?param1=value&...{&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#search-get
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const searchset: Bundle = await client.searchType({
+	 *   type: "Patient",
+	 *   query: [["family", "Unknown"]],
+	 * });
+	 * ```
+	 *
+	 * @group Type Level Interactions
+	 */
+	public async searchType(
 		opts: SearchTypeOptions,
 	): Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	> => {
+	> {
 		const url = [basePath, opts.type];
 
 		const requestParams: RequestParams = {
@@ -286,14 +286,35 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			params: opts.query,
 		};
 
-		return await request<TBundle>(requestParams);
-	};
+		return await this.request<TBundle>(requestParams);
+	}
 
-	const searchSystem = async (
+	/**
+	 * Search the system based on some filter criteria.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]?param1=value&...{&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#search-get
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const searchset: Bundle = await client.searchSystem({
+	 *   query: [["family", "Unknown"]]
+	 * });
+	 * ```
+	 *
+	 * @group Whole System Interactions
+	 */
+	public async searchSystem(
 		opts: SearchSystemOptions,
 	): Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	> => {
+	> {
 		const url = [basePath];
 		const requestParams: RequestParams = {
 			url: makeUrl(url),
@@ -304,14 +325,38 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			params: opts.query,
 		};
 
-		return await request<TBundle>(requestParams);
-	};
+		return await this.request<TBundle>(requestParams);
+	}
 
-	const searchCompartment = async (
+	/**
+	 * Search the resource type across the compartment based on some filter criteria.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/[compartment-type]/[compartment-id]/[resource-type]?param1=value&...{&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#search-get
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result: Bundle = await client.searchCompartment({
+	 *   compartment: "Patient",
+	 *   compartmentId: "patient-id",
+	 *   type: "Observation",
+	 *   query: [["status", "final"]],
+	 * });
+	 * ```
+	 *
+	 * @group Compartment Interactions
+	 */
+	public async searchCompartment(
 		opts: SearchCompartmentOptions,
 	): Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	> => {
+	> {
 		const url = [basePath, opts.compartment, opts.compartmentId, opts.type];
 
 		const requestParams: RequestParams = {
@@ -323,27 +368,65 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			params: opts.query,
 		};
 
-		return await request<TBundle>(requestParams);
-	};
+		return await this.request<TBundle>(requestParams);
+	}
 
-	const create = async <T>(
-		opts: CreateOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	/**
+	 * Create a new resource with a server assigned id.
+	 *
+	 * The `create` interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/[type] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#create
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const patient = await client.create<Patient>({
+	 *   type: "Patient",
+	 *   resource: {
+	 *     id: "patient-id",
+	 *     name: [{
+	 *       family: "Test",
+	 *       given: ["Patient"],
+	 *     }],
+	 *   },
+	 * });
+	 * ```
+	 *
+	 * @group Type Level Interactions
+	 */
+	public async create<T>(
+		opts: CreateOptions<T>,
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type]),
 			method: "POST",
 			body: JSON.stringify(opts.resource),
 		});
-	};
+	}
 
-	const conditionalCreate = async <T>(
-		opts: ConditionalCreateOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	/**
+	 * The conditional create interaction allows a client to create a new resource only if some equivalent resource does not already exist on the server.
+	 * The client defines what equivalence means in this case by supplying a FHIR search query using an HL7 defined extension header `If-None-Exist`.
+	 *
+	 * The conditional `create` interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/[type]?param1=value&...{&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#ccreate
+	 *
+	 * @group Type Level Interactions
+	 */
+	public async conditionalCreate<T>(
+		opts: ConditionalCreateOptions<T>,
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type]),
 			method: "POST",
 			headers: {
@@ -351,66 +434,153 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			},
 			body: JSON.stringify(opts.resource),
 		});
-	};
+	}
 
-	const update = async <T>(
-		opts: UpdateOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	/**
+	 * Update an existing resource by its id (or create it if it is new)
+	 *
+	 * The `update` interaction is performed by an HTTP PUT command as shown:
+	 *
+	 * ```
+	 * PUT [base]/[type]/[id] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#update
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = await client.update<Patient>({
+	 *   type: "Patient",
+	 *   id: patientId,
+	 *   resource: {
+	 *     resourceType: "Patient",
+	 *     name: [{
+	 *       family: "Smith",
+	 *       given: ["John"],
+	 *     }],
+	 *   },
+	 * });
+	 * ```
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async update<T>(
+		opts: UpdateOptions<T>,
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type, opts.id]),
 			method: "PUT",
 			body: JSON.stringify(opts.resource),
 		});
-	};
+	}
 
-	const conditionalUpdate = async <T>(
-		opts: ConditionalUpdateOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	/**
+	 * Conditional Update allows a client to update an existing resource based on some identification criteria, rather than by logical id.
+	 *
+	 * The conditional `update` interaction is performed by an HTTP PUT command as shown:
+	 *
+	 * ```
+	 * PUT [base]/[type]?[search parameters]
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#cond-update
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async conditionalUpdate<T>(
+		opts: ConditionalUpdateOptions<T>,
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type]),
 			method: "PUT",
 			body: JSON.stringify(opts.resource),
 			params: opts.searchParameters,
 		});
-	};
+	}
 
-	const patch = async <T>(
+	/**
+	 * Update an existing resource by posting a set of changes to it.
+	 *
+	 * The `patch` interaction is performed by an HTTP PATCH command as shown:
+	 *
+	 * ```
+	 * PATCH [base]/[type]/[id] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * The body of a PATCH interaction is a JSON Patch icon document with a content type of `application/json-patch+json`.
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#patch
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async patch<T>(
 		opts: PatchOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type, opts.id]),
 			method: "PATCH",
 			headers: { "Content-Type": "application/json-patch+json" },
 			body: JSON.stringify(opts.patch),
 		});
-	};
+	}
 
-	const conditionalPatch = async <T>(
+	/**
+	 * Conditional Patch performs a search using the standard search facilities for the resource type, with the goal of resolving a single logical id for this request.
+	 * The action it takes depends on how many matches are found.
+	 *
+	 * The conditional `patch` interaction is performed by an HTTP PATCH command as shown:
+	 *
+	 * ```
+	 * PATCH [base]/[type]?param1=value&...{&_format=[mime-type]}
+	 * ```
+	 *
+	 * The body of a PATCH interaction is a JSON Patch icon document with a content type of `application/json-patch+json`.
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#cond-patch
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async conditionalPatch<T>(
 		opts: ConditionalPatchOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type]),
 			method: "PATCH",
 			headers: { "Content-Type": "application/json-patch+json" },
 			params: opts.searchParameters,
 			body: JSON.stringify(opts.patch),
 		});
-	};
+	}
 
-	const deleteOp = async <T>(
+	/**
+	 * Delete a resource.
+	 *
+	 * The interaction is performed by an HTTP DELETE command as shown:
+	 *
+	 * ```
+	 * DELETE [base]/[type]/[id]
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#delete
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const patient = await client.delete<Patient>({
+	 *   type: "Patient",
+	 *   id: "patient-id",
+	 * });
+	 * ```
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async delete<T>(
 		opts: DeleteOptions,
 	): Promise<
 		Result<ResourceResponse<T | undefined>, ResourceResponse<TOperationOutcome>>
-	> => {
-		const response = await internalRawRequest({
+	> {
+		const response = await this.#internalRawRequest({
 			url: makeUrl([basePath, opts.type, opts.id]),
 			method: "DELETE",
 		});
@@ -433,35 +603,72 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 		}
 
 		return Ok({ resource: body as T, ...response });
-	};
+	}
 
-	const deleteHistory = async <T>(
+	/**
+	 * Delete all historical versions of a resource.
+	 *
+	 * The interaction is performed by an HTTP DELETE command as shown:
+	 *
+	 * ```
+	 * DELETE [base]/[type]/[id]/_history
+	 * ```
+	 *
+	 * FHIR Reference: https://build.fhir.org/http.html#delete-history
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async deleteHistory<T>(
 		opts: DeleteOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type, opts.id, "_history"]),
 			method: "DELETE",
 		});
-	};
+	}
 
-	const deleteHistoryVersion = async <T>(
+	/**
+	 * Delete a specific version of a resource.
+	 *
+	 * The interaction is performed by an HTTP DELETE command as shown:
+	 *
+	 * ```
+	 * DELETE [base]/[type]/[id]/_history/[vid]
+	 * ```
+	 *
+	 * FHIR Reference: https://build.fhir.org/http.html#delete-history-version
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async deleteHistoryVersion<T>(
 		opts: DeleteHistoryVersionOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<T>({
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<T>({
 			url: makeUrl([basePath, opts.type, opts.id, "_history", opts.vid]),
 			method: "DELETE",
 		});
-	};
+	}
 
-	const conditionalDelete = async <T>(
+	/**
+	 * Conditional Delete across all resource types based on some filter criteria
+	 *
+	 * If type is provided, performs conditional delete across a particular resource type based on some filter criteria.
+	 *
+	 * To accomplish this, the client issues an HTTP DELETE as shown:
+	 *
+	 * ```
+	 * DELETE [base]/[type]?[search parameters]
+	 * DELETE [base]?[search parameters]
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#cdelete
+	 *
+	 * @group Type Level Interactions
+	 * @group Whole System Interactions
+	 */
+	public async conditionalDelete<T>(
 		opts: ConditionalDeleteOptions,
-	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
 		const url = [basePath];
 		if (opts.type) url.push(opts.type);
 
@@ -471,14 +678,27 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			params: opts.searchParameters,
 		};
 
-		return await request<T>(requestParams);
-	};
+		return await this.request<T>(requestParams);
+	}
 
-	const historyInstance = async (
+	/**
+	 * Retrieve the change history for a particular resource.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/[type]/[id]/_history{?[parameters]&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#history
+	 *
+	 * @group Instance Level Interactions
+	 */
+	public async historyInstance(
 		opts: HistoryInstanceOptions,
 	): Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	> => {
+	> {
 		const url = [basePath, opts.type, opts.id, "_history"];
 
 		const requestParams: RequestParams = {
@@ -486,14 +706,27 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			method: "GET",
 		};
 
-		return await request<TBundle>(requestParams);
-	};
+		return await this.request<TBundle>(requestParams);
+	}
 
-	const historySystem = async (
+	/**
+	 * Retrieve the change history for a particular resource type.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/[type]/_history{?[parameters]&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#history
+	 *
+	 * @group Whole System Interactions
+	 */
+	public async historySystem(
 		_: HistorySystemOptions,
 	): Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	> => {
+	> {
 		const url = [basePath, "_history"];
 
 		const requestParams: RequestParams = {
@@ -501,14 +734,27 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			method: "GET",
 		};
 
-		return await request<TBundle>(requestParams);
-	};
+		return await this.request<TBundle>(requestParams);
+	}
 
-	const historyType = async (
+	/**
+	 * Retrieve the change history for all resources.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/_history{?[parameters]&_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#history
+	 *
+	 * @group Type Level Interactions
+	 */
+	public async historyType(
 		opts: HistoryTypeOptions,
 	): Promise<
 		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
-	> => {
+	> {
 		const url = [basePath, opts.type, "_history"];
 
 		const requestParams: RequestParams = {
@@ -516,15 +762,36 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 			method: "GET",
 		};
 
-		return await request<TBundle>(requestParams);
-	};
+		return await this.request<TBundle>(requestParams);
+	}
 
-	const capabilities = async (
+	/**
+	 * Get a capability statement for the system.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/metadata{?mode=[mode]} {&_format=[mime-type]}
+	 * ```
+	 *
+	 * The `mode` can be:
+	 *
+	 * | Mode          | Description                                                                                                                  |
+	 * |---------------|------------------------------------------------------------------------------------------------------------------------------|
+	 * | `full`        | A `CapabilityStatement` that specifies which resource types and interactions are supported                                   |
+	 * | `normative`   | As above, but only the normative portions of the Capability Statement                                                        |
+	 * | `terminology` | A `TerminologyCapabilities` resource that provides further information about terminologies which are supported by the server |
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#capabilities
+	 *
+	 * @group Whole System Interactions
+	 */
+	public async capabilities(
 		opts: CapabilitiesOptions,
 	): Promise<
 		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<TBundle>({
+	> {
+		return await this.request<TBundle>({
 			url: makeUrl([basePath, "metadata"]),
 			method: "GET",
 			headers: {
@@ -535,41 +802,80 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 				["_format", "application/fhir+json"],
 			],
 		});
-	};
+	}
 
-	const batch = async (
-		opts: BatchOptions,
+	/**
+	 * Perform multiple operations in a batch request (e.g. create, read, update, delete, patch, and/or [extended operations])
+	 *
+	 * A batch interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#transaction
+	 *
+	 * @group Whole System Interactions
+	 */
+	public async batch(
+		opts: BatchOptions<TBundle>,
 	): Promise<
 		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<TBundle>({
+	> {
+		return await this.request<unknown>({
 			url: makeUrl([basePath]),
 			method: "POST",
 			params: [["_format", opts.format]],
 			body: JSON.stringify(opts.bundle),
 		});
-	};
+	}
 
-	const transaction = async (
-		opts: TransactionOptions,
+	/**
+	 * Perform multiple operations as a transaction (e.g. create, read, update, delete, patch, and/or [extended operations])
+	 *
+	 * A transaction interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#transaction
+	 *
+	 * @group Whole System Interactions
+	 */
+	public async transaction(
+		opts: TransactionOptions<TBundle>,
 	): Promise<
 		Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>
-	> => {
-		return await request<TBundle>({
+	> {
+		return await this.request<unknown>({
 			url: makeUrl([basePath]),
 			method: "POST",
 			params: [["_format", opts.format]],
 			body: JSON.stringify(opts.bundle),
 		});
-	};
+	}
 
-	const operation = async <T>(
-		opts: OperationOptions,
+	/**
+	 * Perform an operation as defined by an `OperationDefinition`.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/[type]/[operation] {?_format=[mime-type]}
+	 * POST [base]/[type]/[id]/[operation] {?_format=[mime-type]}
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/operations.html
+	 *
+	 * @group Operations
+	 */
+	public async operation<TResource, TResult>(
+		opts: OperationOptions<TResource>,
 	): Promise<
-		Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>
-	> => {
-		const url = [basePath];
-		if (opts.type) url.push(opts.type);
+		Result<ResourceResponse<TResult>, ResourceResponse<TOperationOutcome>>
+	> {
+		const url = [basePath, opts.type];
 		if (opts.id) url.push(opts.id);
 		url.push(opts.operation);
 
@@ -580,54 +886,153 @@ export function makeClient<TBundle, TOperationOutcome, TUser>({
 
 		if (opts.resource) requestParams.body = JSON.stringify(opts.resource);
 
-		return await request(requestParams);
-	};
+		return await this.request(requestParams);
+	}
 
-	const validate = async (
-		opts: ValidateOptions,
+	/**
+	 * Perform the Validate Operation.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * [base]/[type]/$validate
+	 * [base]/[type]/[id]/$validate
+	 * ```
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/operation-resource-validate.html
+	 *
+	 * @group Operations
+	 */
+	public async validate<T>(
+		opts: ValidateOptions<T>,
 	): Promise<
 		Result<
 			ResourceResponse<TOperationOutcome>,
 			ResourceResponse<TOperationOutcome>
 		>
-	> => {
-		return await operation<TOperationOutcome>({
+	> {
+		return await this.operation<T, TOperationOutcome>({
 			operation: "$validate",
 			...opts,
 		});
-	};
+	}
 
-	return {
-		// General
-		getBaseUrl,
-		rawRequest,
-		request,
-		// Aidbox
-		performLogout,
-		fetchUserInfo,
-		// FHIR HTTP
-		read,
-		vread,
-		searchType,
-		searchSystem,
-		searchCompartment,
-		create,
-		conditionalCreate,
-		update,
-		conditionalUpdate,
-		patch,
-		conditionalPatch,
-		delete: deleteOp,
-		deleteHistory,
-		deleteHistoryVersion,
-		conditionalDelete,
-		historyInstance,
-		historyType,
-		historySystem,
-		capabilities,
-		batch,
-		transaction,
-		operation,
-		validate,
-	};
+	/**
+	 * Performs a request to `/auth/userinfo`.
+	 *
+	 * @group Aidbox methods
+	 */
+	public async userinfo(): Promise<TUser> {
+		const user = await this.rawRequest({
+			url: "/auth/userinfo",
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+		}).then((response) => coerceBody<TUser>(response));
+
+		return user;
+	}
+
+	/**
+	 * Performs a request to `/auth/logout`.
+	 *
+	 * @group Aidbox methods
+	 */
+	public async logout() {
+		return (
+			await this.rawRequest({
+				url: "/auth/logout",
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Accept: "application/json",
+				},
+			})
+		).response;
+	}
+
+	/**
+	 * Typed request
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = client.request<Patient>({
+	 *   method: "GET",
+	 *   url: "/fhir/Patient/pt-1",
+	 * })
+	 *
+	 * if (isOk(result)) {
+	 *   const { value } = result;
+	 *   // work with value as a Patient type
+	 * } else {
+	 *   const { error } = result;
+	 *   // work with error as an OperationOutcome type.
+	 * }
+	 * ```
+	 *
+	 * @group Client methods
+	 */
+	public async request<T>(
+		params: RequestParams,
+	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+		const response = await this.#internalRawRequest(params);
+
+		if (isInternalErrorResponse(response)) throw response.error;
+
+		const body = await coerceBody<T | TOperationOutcome>(response);
+
+		if (!response.response.ok) {
+			if ((body as OperationOutcome).resourceType === "OperationOutcome")
+				return Err({ resource: body as TOperationOutcome, ...response });
+
+			throw new ErrorResponse(
+				`HTTP ${response.response.status}: ${response.response.statusText}`,
+				response,
+			);
+		}
+
+		return Ok({ resource: body as T, ...response });
+	}
+
+	/**
+	 * Untyped request.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = client.rawRequest({
+	 *   method: "GET",
+	 *   url: "/fhir/Patient/pt-1",
+	 * })
+	 * ```
+	 *
+	 * @group Client methods
+	 */
+	public async rawRequest(
+		requestParams: RequestParams,
+	): Promise<ResponseWithMeta> {
+		const result = await this.#internalRawRequest(requestParams);
+
+		if (isInternalErrorResponse(result)) throw result.error;
+
+		if (!result.response.ok)
+			throw new ErrorResponse(
+				`HTTP ${result.response.status}: ${result.response.statusText}`,
+				result,
+			);
+
+		return result;
+	}
+
+	/**
+	 * Obtain server's base URL.
+	 *
+	 * @group Client methods
+	 */
+	public getBaseUrl(): string {
+		return this.baseUrl;
+	}
 }

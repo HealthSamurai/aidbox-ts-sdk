@@ -20,6 +20,9 @@ importers:
 
   packages/aidbox-client:
     dependencies:
+      '@types/json-patch':
+        specifier: ^0.0.33
+        version: 0.0.33
       yaml:
         specifier: ^2.8.1
         version: 2.8.1
@@ -2638,6 +2641,9 @@ packages:
 
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
+
+  '@types/json-patch@0.0.33':
+    resolution: {integrity: sha512-XQ9hIoJCtnvTCnIV+p+SWQbY8Bt1pe+RuTkPG7lQeRCa9sPwYbhb0aYzM2paVPk0SGvV70R33rxjPjBcJ4Kdxw==}
 
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
@@ -6670,6 +6676,8 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/http-cache-semantics@4.0.4': {}
+
+  '@types/json-patch@0.0.33': {}
 
   '@types/mdx@2.0.13': {}
 

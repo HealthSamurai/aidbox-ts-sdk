@@ -1,5 +1,5 @@
 import { BrowserAuthProvider } from "src/auth-providers";
-import { makeClient } from "src/client";
+import { AidboxClient } from "src/client";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
 import type { Result } from "src/result";
 import type { ResourceResponse, User } from "src/types";
@@ -44,10 +44,10 @@ describe("AidboxClient", () => {
 
 			const baseUrl = "http://localhost:8080";
 
-			const client = makeClient<Bundle, OperationOutcome, User>({
+			const client = new AidboxClient<Bundle, OperationOutcome, User>(
 				baseUrl,
-				authProvider: new BrowserAuthProvider(baseUrl),
-			});
+				new BrowserAuthProvider(baseUrl),
+			);
 
 			const result: Result<
 				ResourceResponse<Bundle>,
