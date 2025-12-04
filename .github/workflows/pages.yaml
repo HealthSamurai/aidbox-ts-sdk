@@ -1,0 +1,57 @@
+name: Pages
+on:
+  push:
+
+jobs:
+  build-sites:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook (react-components)
+        run: |
+          pnpm --filter @health-samurai/react-components run build-storybook
+          mkdir -p site-out/react-components
+          cp -a packages/react-components/storybook-static/. site-out/react-components/
+
+      - name: Build TypeDoc (aidbox-client)
+        run: |
+          pnpm --filter @health-samurai/aidbox-client run doc
+          mkdir -p site-out/aidbox-client
+          cp -a packages/aidbox-client/docs/. site-out/aidbox-client/
+
+      - name: Upload Pages artifact
+        if: success() && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site-out
+
+  deploy-pages:
+    if: success() && github.ref == 'refs/heads/master'
+    needs: build-sites
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
