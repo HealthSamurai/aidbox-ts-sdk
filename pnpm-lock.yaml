@@ -308,6 +308,12 @@ importers:
         specifier: ^4.0.17
         version: 4.0.17
     devDependencies:
+      '@health-samurai/aidbox-client':
+        specifier: workspace:*
+        version: link:../aidbox-client
+      '@health-samurai/aidbox-fhirpath-lsp':
+        specifier: workspace:*
+        version: link:../aidbox-fhirpath-lsp
       '@lezer/generator':
         specifier: ^1.8.0
         version: 1.8.0
