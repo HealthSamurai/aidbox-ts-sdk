@@ -444,3 +444,63 @@ export function CodeEditor({
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
+
+
+const editorInputTheme = EditorView.theme({
+	".cm-content:hover": {
+		backgroundColor: "red"
+	},
+});
+
+export function EditorInput({
+	additionalExtensions,
+	id
+}: {
+	additionalExtensions?: Extension[];
+	id: string;
+}) {
+	const domRef = React.useRef(null);
+	const [view, setView] = React.useState<EditorView | null>(null);
+	const additionalExtensionsCompartment = React.useRef(new Compartment());
+
+	React.useEffect(() => {
+		if (!domRef.current) {
+			return;
+		}
+
+		const view = new EditorView({
+			parent: domRef.current,
+			state: EditorState.create({
+				doc: "",
+				extensions: [
+					editorInputTheme,
+					EditorView.contentAttributes.of({ "data-gramm": "false" }),
+					EditorView.editorAttributes.of({ "class": "foo bar" }),
+					additionalExtensionsCompartment.current.of([]),
+				],
+			}),
+		});
+
+		setView(() => view);
+
+		return () => {
+			view.destroy();
+			setView(() => null);
+		};
+	}, []);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: [
+				additionalExtensionsCompartment.current.reconfigure(
+					additionalExtensions ?? [],
+				),
+			],
+		});
+	}, [additionalExtensions, view]);
+
+	return <div className="h-full w-full" ref={domRef} id={id} />;
+} 
