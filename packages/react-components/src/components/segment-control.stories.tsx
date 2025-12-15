@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 
-import { SegmentControl, SegmentControlItem } from "./segment-control";
+import { SegmentControl } from "./segment-control";
 
 const meta = {
 	title: "Component/SegmentControl",
@@ -15,15 +16,23 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	render: () => {
+	args: {
+		value: "yaml",
+		onValueChange: () => {},
+		items: [
+			{ value: "yaml", label: "YAML" },
+			{ value: "json", label: "JSON" },
+		],
+	},
+	render: (args) => {
+		const [value, setValue] = useState(args.value);
+
 		return (
 			<SegmentControl
-				defaultValue="yaml"
-				onValueChange={(value) => console.log("Selected:", value)}
-			>
-				<SegmentControlItem value="yaml">YAML</SegmentControlItem>
-				<SegmentControlItem value="json">JSON</SegmentControlItem>
-			</SegmentControl>
+				value={value}
+				onValueChange={setValue}
+				items={args.items}
+			/>
 		);
 	},
 };

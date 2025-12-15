@@ -1,27 +1,16 @@
-import { createContext, type ReactNode, useContext } from "react";
+import type { ReactNode } from "react";
 import { cn } from "#shadcn/lib/utils.js";
 
-interface SegmentControlContextType {
-	defaultValue?: string;
-	onValueChange?: (value: string) => void;
-	name?: string;
-}
-
-const SegmentControlContext = createContext<SegmentControlContextType>({});
-
-export interface SegmentControlProps {
-	defaultValue?: string;
-	onValueChange?: (value: string) => void;
-	name?: string;
-}
-
-interface SegmentControlItemProps {
-	children: ReactNode;
-	value: string;
-}
-
 // Styles
-const segmentControlItemClass = cn(
+const containerClass = cn(
+	"inline-flex",
+	"bg-bg-dark_tertiary",
+	"p-0.5",
+	"gap-0",
+	"rounded-full",
+);
+
+const itemBaseClass = cn(
 	"flex",
 	"items-center",
 	"justify-center",
@@ -30,70 +19,48 @@ const segmentControlItemClass = cn(
 	"text-sm",
 	"cursor-pointer",
 	"rounded-2xl",
-	"text-white/80",
-	"peer-checked:bg-bg-primary",
-	"peer-checked:text-text-primary",
 	"select-none",
 );
 
-const segmentControlContainerClass = cn(
-	"inline-flex",
-	"bg-bg-dark_tertiary",
-	"p-0.5",
-	"gap-0",
-	"rounded-full",
-);
+const itemInactiveClass = "text-white/80";
+const itemActiveClass = "bg-bg-primary text-text-primary";
 
-function SegmentControlItem({ children, value }: SegmentControlItemProps) {
-	const { defaultValue, onValueChange, name } = useContext(
-		SegmentControlContext,
-	);
-
-	return (
-		<div className="relative">
-			<input
-				type="radio"
-				id={`${name}-${value}`}
-				name={name}
-				value={value}
-				defaultChecked={value === defaultValue}
-				onChange={(e) => onValueChange?.(e.target.value)}
-				className="sr-only peer"
-			/>
-			<label
-				htmlFor={`${name}-${value}`}
-				className={segmentControlItemClass}
-				onClick={() => onValueChange?.(value)}
-				onKeyDown={(e) => {
-					if (e.key === "Enter" || e.key === " ") {
-						e.preventDefault();
-						onValueChange?.(value);
-					}
-				}}
-			>
-				{children}
-			</label>
-		</div>
-	);
+interface SegmentControlProps<T extends string> {
+	value: T;
+	onValueChange: (value: T) => void;
+	items: { value: T; label: ReactNode }[];
 }
 
-function SegmentControl({
-	children,
-	defaultValue,
+function SegmentControl<T extends string>({
+	value,
 	onValueChange,
-	name,
-}: SegmentControlProps & { children?: ReactNode }) {
-	const contextValue: SegmentControlContextType = {
-		...(defaultValue !== undefined && { defaultValue }),
-		...(onValueChange !== undefined && { onValueChange }),
-		name: name || "react-components-segment-control",
+	items,
+}: SegmentControlProps<T>) {
+	const toggle = () => {
+		const currentIndex = items.findIndex((item) => item.value === value);
+		const nextIndex = (currentIndex + 1) % items.length;
+		const nextItem = items[nextIndex];
+		if (nextItem) {
+			onValueChange(nextItem.value);
+		}
 	};
 
 	return (
-		<SegmentControlContext.Provider value={contextValue}>
-			<div className={segmentControlContainerClass}>{children}</div>
-		</SegmentControlContext.Provider>
+		<button type="button" className={containerClass} onClick={toggle}>
+			{items.map((item) => (
+				<span
+					key={item.value}
+					className={cn(
+						itemBaseClass,
+						item.value === value ? itemActiveClass : itemInactiveClass,
+					)}
+				>
+					{item.label}
+				</span>
+			))}
+		</button>
 	);
 }
 
-export { SegmentControl, SegmentControlItem };
+export { SegmentControl };
+export type { SegmentControlProps };
