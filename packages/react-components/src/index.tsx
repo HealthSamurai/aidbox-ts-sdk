@@ -8,6 +8,7 @@ export * from "./components/fhir-structure-view";
 export * from "./components/request-line-editor";
 export * from "./components/segment-control";
 export * from "./components/split-button";
+export * from "./components/toolbar";
 export * from "./components/tree-view";
 export * from "./icons";
 export * from "./shadcn/components/ui/accordion";
