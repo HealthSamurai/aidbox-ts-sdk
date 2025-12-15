@@ -2,7 +2,9 @@ import type { EditorView } from "@codemirror/view";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import React from "react";
 import { Input } from "#shadcn/components/ui/input.js";
-import { CodeEditor } from "./code-editor";
+import { CodeEditor, EditorInput } from "./code-editor";
+import { AidboxClient, BrowserAuthProvider } from "@health-samurai/aidbox-client";
+import { createCodeMirrorLsp } from "@health-samurai/aidbox-fhirpath-lsp";
 
 const meta: Meta<typeof CodeEditor> = {
 	title: "Component/Editor",
@@ -325,4 +327,21 @@ function ComplexComp() {
 
 export const Complex: Story = {
 	render: () => ComplexComp(),
+};
+
+const client = new AidboxClient( "http://localhost:8765", new BrowserAuthProvider("http://localhost:8765") );
+
+const { extension: lspExtension } = createCodeMirrorLsp(client, {
+	debug: true,
+});
+
+function FhirpathComp() {
+	return (
+		<div className="h-[500px] w-[500px]">
+			<EditorInput id="fhirpath-editor-input" additionalExtensions={[lspExtension]} />
+		</div>
+	);
+}
+export const FhirpathExtension: Story = {
+	render: () => <FhirpathComp />,
 };

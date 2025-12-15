@@ -1,4 +1,5 @@
 import {
+	acceptCompletion,
 	autocompletion,
 	closeBrackets,
 	closeBracketsKeymap,
@@ -444,3 +445,123 @@ export function CodeEditor({
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
+
+
+const editorInputTheme = EditorView.theme({
+	".cm-content": {
+		backgroundColor: "var(--color-bg-primary)",
+		border: "1px solid var(--color-border-primary)",
+		borderRadius: "var(--radius-md)",
+		fontFamily: "var(--font-family-sans)",
+		fontWeight: "var(--font-weight-normal)",
+		height: "36px",
+		padding: "8px 12px 8px 12px",
+		fontSize: "14px",
+	},
+	".cm-editor": {
+		fontSize: "var(--font-size-sm)",
+		color: "var(--color-text-primary)",
+	},
+	"&.cm-editor.cm-focused": {
+		outline: "none",
+	},
+	"&.cm-editor.cm-focused .cm-content": {
+		border: "1px solid var(--color-border-link)",
+		borderRadius: "var(--radius-md)",
+	},
+	".cm-line": {
+		padding: "0"
+	},
+	".cm-completionInfo": {
+		display: "none",
+		fontFamily: "var(--font-family-sans)",
+	},
+	".cm-completionLabel": {
+		color: "var(--color-text-link)",
+		fontSize: "14px",
+	},
+	".cm-completionDetail": {
+		color: "var(--color-text-secondary)",
+		fontSize: "14px",
+	},
+});
+
+export function EditorInput({
+	additionalExtensions,
+	id
+}: {
+	additionalExtensions?: Extension[];
+	id: string;
+}) {
+	const domRef = React.useRef(null);
+	const [view, setView] = React.useState<EditorView | null>(null);
+	const additionalExtensionsCompartment = React.useRef(new Compartment());
+
+	React.useEffect(() => {
+		if (!domRef.current) {
+			return;
+		}
+
+		const view = new EditorView({
+			parent: domRef.current,
+			state: EditorState.create({
+				doc: "Patient.",
+				extensions: [
+					autocompletion({
+						icons: false,
+						maxRenderedOptions: 1000,
+						closeOnBlur: false,
+						optionClass: (_completion) =>
+							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary grid grid-cols-2 gap-2",
+						tooltipClass: (_state) =>
+							"!bg-bg-primary rounded-md p-2 shadow-md !border-border-primary !typo-body",
+						compareCompletions: (a, _b) => {
+							if (a.type === "property") {
+								return -1;
+							} else {
+								return 1;
+							}
+						},
+					}),
+					closeBrackets(),
+					indentOnInput(),
+					editorInputTheme,
+					EditorView.contentAttributes.of({ "data-gramm": "false" }),
+					additionalExtensionsCompartment.current.of([]),
+					keymap.of([
+						{ key: "Tab", preventDefault: true, run: acceptCompletion },
+						...closeBracketsKeymap,
+						...defaultKeymap,
+						...searchKeymap,
+						...historyKeymap,
+						...foldKeymap,
+						...completionKeymap,
+						...lintKeymap,
+					]),
+				],
+			}),
+		});
+
+		setView(() => view);
+
+		return () => {
+			view.destroy();
+			setView(() => null);
+		};
+	}, []);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: [
+				additionalExtensionsCompartment.current.reconfigure(
+					additionalExtensions ?? [],
+				),
+			],
+		});
+	}, [additionalExtensions, view]);
+
+	return <div className="h-full w-full" ref={domRef} id={id} />;
+} 
