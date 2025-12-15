@@ -19,6 +19,8 @@ interface SegmentControlItemProps {
 	children: ReactNode;
 	value: string;
 }
+
+// Styles
 const segmentControlItemClass = cn(
 	"flex",
 	"items-center",
@@ -32,6 +34,14 @@ const segmentControlItemClass = cn(
 	"peer-checked:bg-bg-primary",
 	"peer-checked:text-text-primary",
 	"select-none",
+);
+
+const segmentControlContainerClass = cn(
+	"inline-flex",
+	"bg-bg-dark_tertiary",
+	"p-0.5",
+	"gap-0",
+	"rounded-full",
 );
 
 function SegmentControlItem({ children, value }: SegmentControlItemProps) {
@@ -50,7 +60,17 @@ function SegmentControlItem({ children, value }: SegmentControlItemProps) {
 				onChange={(e) => onValueChange?.(e.target.value)}
 				className="sr-only peer"
 			/>
-			<label htmlFor={`${name}-${value}`} className={segmentControlItemClass}>
+			<label
+				htmlFor={`${name}-${value}`}
+				className={segmentControlItemClass}
+				onClick={() => onValueChange?.(value)}
+				onKeyDown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						onValueChange?.(value);
+					}
+				}}
+			>
 				{children}
 			</label>
 		</div>
@@ -71,9 +91,7 @@ function SegmentControl({
 
 	return (
 		<SegmentControlContext.Provider value={contextValue}>
-			<div className="inline-flex bg-gray-500 p-0.5 gap-0 rounded-full">
-				{children}
-			</div>
+			<div className={segmentControlContainerClass}>{children}</div>
 		</SegmentControlContext.Provider>
 	);
 }
