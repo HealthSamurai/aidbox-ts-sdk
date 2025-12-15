@@ -3,12 +3,124 @@ import { ChevronDownIcon, MoreHorizontal } from "lucide-react";
 import type * as React from "react";
 import { createContext, useContext } from "react";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "#shadcn/components/ui/popover";
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from "#shadcn/components/ui/dropdown-menu";
 import { cn } from "#shadcn/lib/utils";
 import { IconButton } from "../../../components/icon-button";
+
+// Styles
+const breadcrumbListStyles = cn(
+	// Typography
+	"typo-body",
+	"text-text-tertiary",
+	// Layout
+	"flex",
+	"flex-wrap",
+	"items-center",
+	"break-words",
+	// Spacing
+	"gap-2",
+);
+
+const breadcrumbItemStyles = cn(
+	// Layout
+	"inline-flex",
+	"items-center",
+);
+
+const breadcrumbLinkBaseStyles = cn(
+	// Typography
+	"typo-body",
+	// Layout
+	"px-2",
+	"py-1",
+	// Colors
+	"bg-bg-tertiary",
+	"text-text-tertiary",
+	"hover:text-text-secondary",
+	// Shape
+	"rounded-md",
+	// Interaction
+	"transition-colors",
+	"focus-visible:outline-none",
+	"focus-visible:ring-2",
+	"focus-visible:ring-utility-blue/70",
+);
+
+const breadcrumbLinkWithDropdownStyles = cn(
+	// Shape
+	"rounded-l-md",
+	"rounded-r-none",
+);
+
+const breadcrumbSeparatorStyles = cn(
+	// Size
+	"h-4",
+	"w-px",
+	"shrink-0",
+	// Colors
+	"bg-border-separator",
+);
+
+const breadcrumbTriggerContainerStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"gap-2",
+	"h-7",
+	"pl-0",
+	"pr-2",
+	"py-1",
+	// Colors
+	"bg-bg-tertiary",
+	// Shape
+	"rounded-r-md",
+	"rounded-l-none",
+);
+
+const breadcrumbIconButtonStyles = cn(
+	// Size
+	"size-auto",
+	"p-0",
+	// Colors
+	"bg-transparent",
+	"hover:bg-transparent",
+	"text-text-tertiary",
+	"hover:text-text-secondary",
+);
+
+const breadcrumbPageBaseStyles = cn(
+	// Typography
+	"typo-page-header",
+	// Layout
+	"px-0",
+	"py-0.5",
+	// Colors
+	"text-text-primary",
+);
+
+const breadcrumbPageWhiteStyles = cn(
+	// Colors
+	"text-white",
+);
+
+const breadcrumbSeparatorBaseStyles = cn(
+	// Typography
+	"text-xs",
+	"text-text-tertiary",
+	// SVG
+	"[&>svg]:size-3.5",
+);
+
+const breadcrumbEllipsisStyles = cn(
+	// Layout
+	"flex",
+	"size-9",
+	"items-center",
+	"justify-center",
+);
 
 const BreadcrumbContext = createContext<{ isWhite?: boolean }>({});
 
@@ -29,16 +141,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
 	return (
 		<ol
 			data-slot="breadcrumb-list"
-			className={cn(
-				"text-text-tertiary",
-				"typo-body",
-				"flex",
-				"flex-wrap",
-				"items-center",
-				"break-words",
-				"gap-2",
-				className,
-			)}
+			className={cn(breadcrumbListStyles, className)}
 			{...props}
 		/>
 	);
@@ -48,7 +151,7 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 	return (
 		<li
 			data-slot="breadcrumb-item"
-			className={cn("inline-flex", "items-center", className)}
+			className={cn(breadcrumbItemStyles, className)}
 			{...props}
 		/>
 	);
@@ -57,76 +160,38 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 function BreadcrumbLink({
 	asChild,
 	className,
-	popoverContent,
+	dropdownContent,
 	...props
 }: React.ComponentProps<"a"> & {
 	asChild?: boolean;
-	popoverContent?: React.ReactNode;
+	dropdownContent?: React.ReactNode;
 }) {
-	const { isWhite } = useContext(BreadcrumbContext);
 	const Comp = asChild ? Slot : "a";
 
 	const linkStyles = cn(
-		"typo-body",
-		"bg-bg-tertiary",
-		"px-2",
-		"py-1",
-		"transition-colors",
-		"focus-visible:outline-none",
-		"focus-visible:ring-2",
-		"focus-visible:ring-utility-blue/70",
-		isWhite
-			? ["text-text-tertiary", "hover:text-text-secondary"]
-			: ["text-text-tertiary", "hover:text-text-secondary"],
-		popoverContent ? "rounded-l-md rounded-r-none" : "rounded-md",
+		breadcrumbLinkBaseStyles,
+		dropdownContent && breadcrumbLinkWithDropdownStyles,
 		className,
 	);
 
-	const separatorStyles = cn("h-4", "w-px", "bg-border-separator", "shrink-0");
-
-	const triggerContainerStyles = cn(
-		"bg-bg-tertiary",
-		"h-7",
-		"flex",
-		"items-center",
-		"gap-2",
-		"pl-0",
-		"pr-2",
-		"py-1",
-		"rounded-r-md",
-		"rounded-l-none",
-	);
-
-	const iconButtonStyles = cn(
-		"size-auto",
-		"p-0",
-		"bg-transparent",
-		"hover:bg-transparent",
-		"text-text-tertiary",
-		"hover:text-text-secondary",
-	);
-
-	if (popoverContent) {
+	if (dropdownContent) {
 		return (
 			<div className="inline-flex items-center">
 				<Comp data-slot="breadcrumb-link" className={linkStyles} {...props} />
-				<div className={triggerContainerStyles}>
-					<div className={separatorStyles} />
-					<Popover>
-						<PopoverTrigger asChild>
+				<div className={breadcrumbTriggerContainerStyles}>
+					<div className={breadcrumbSeparatorStyles} />
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
 							<IconButton
 								icon={<ChevronDownIcon className="size-4" />}
 								aria-label="Toggle menu"
-								className={iconButtonStyles}
+								className={breadcrumbIconButtonStyles}
 							/>
-						</PopoverTrigger>
-						<PopoverContent
-							align="start"
-							className="min-w-[8rem] p-2 flex flex-col gap-1"
-						>
-							{popoverContent}
-						</PopoverContent>
-					</Popover>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="start">
+							{dropdownContent}
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 		);
@@ -147,10 +212,8 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
 			aria-disabled="true"
 			aria-current="page"
 			className={cn(
-				"typo-page-header",
-				"px-0",
-				"py-0.5",
-				isWhite ? "text-white" : "text-text-primary",
+				breadcrumbPageBaseStyles,
+				isWhite && breadcrumbPageWhiteStyles,
 				className,
 			)}
 			{...props}
@@ -168,12 +231,7 @@ function BreadcrumbSeparator({
 			data-slot="breadcrumb-separator"
 			role="presentation"
 			aria-hidden="true"
-			className={cn(
-				"[&>svg]:size-3.5",
-				"text-text-tertiary",
-				"text-xs",
-				className,
-			)}
+			className={cn(breadcrumbSeparatorBaseStyles, className)}
 			{...props}
 		>
 			{children ?? "/"}
@@ -190,13 +248,7 @@ function BreadcrumbEllipsis({
 			data-slot="breadcrumb-ellipsis"
 			role="presentation"
 			aria-hidden="true"
-			className={cn(
-				"flex",
-				"size-9",
-				"items-center",
-				"justify-center",
-				className,
-			)}
+			className={cn(breadcrumbEllipsisStyles, className)}
 			{...props}
 		>
 			<MoreHorizontal className="size-4" />
