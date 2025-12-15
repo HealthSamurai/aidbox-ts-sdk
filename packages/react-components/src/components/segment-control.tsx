@@ -30,7 +30,7 @@ const segmentControlItemClass = cn(
 	"rounded-2xl",
 	"text-white/80",
 	"peer-checked:bg-bg-primary",
-	"peer-checked:text-text-secondary",
+	"peer-checked:text-text-primary",
 	"select-none",
 );
 
