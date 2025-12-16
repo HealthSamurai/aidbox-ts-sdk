@@ -25,14 +25,13 @@ const textareaStyles = cn(
 	// Placeholder
 	"placeholder:text-text-tertiary",
 	// Transitions
-	"transition-[color,box-shadow]",
+	"transition-all",
+	"duration-300",
 	"outline-none",
 	// Hover
 	"hover:border-border-primary_hover",
 	// Focus
 	"focus-visible:border-border-link",
-	"focus-visible:ring-2",
-	"focus-visible:ring-utility-blue/70",
 	// Invalid
 	"aria-invalid:border-border-error",
 	"aria-invalid:ring-2",
