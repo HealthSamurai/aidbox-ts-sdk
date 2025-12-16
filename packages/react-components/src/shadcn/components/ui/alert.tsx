@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+import * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
@@ -7,38 +7,56 @@ const baseAlertStyles = cn(
 	// Layout
 	"relative",
 	"w-full",
-	"grid",
+	"flex",
 	"items-start",
-	"grid-cols-[0_1fr]",
-	"has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr]",
-	"gap-y-0.5",
-	"has-[>svg]:gap-x-3",
+	"gap-[var(--spacing-x2,16px)]",
 	// Shape
-	"rounded-lg",
-	// Borders
-	"border",
-	"border-border-primary",
+	"rounded-[var(--corner-corner-m,6px)]",
 	// Spacing
-	"px-4",
-	"py-3",
+	"p-[var(--spacing-x2,16px)]",
 	// Typography
-	"text-sm",
+	"typo-body",
 	// SVG styles
-	"[&>svg]:size-4",
-	"[&>svg]:translate-y-0.5",
+	"[&>svg]:size-5",
+	"[&>svg]:shrink-0",
 	"[&>svg]:text-current",
+);
+
+const alertContentStyles = cn(
+	// Layout
+	"flex",
+	"flex-col",
+	"gap-[var(--spacing-x1,8px)]",
+	"flex-1",
+	"min-w-0",
 );
 
 const alertVariants = cva(baseAlertStyles, {
 	variants: {
 		variant: {
-			default: cn("bg-bg-primary", "text-text-primary"),
+			default: cn(
+				"bg-bg-primary",
+				"text-text-primary",
+				"border",
+				"border-border-primary",
+			),
 			destructive: cn(
-				"text-text-error-primary",
-				"bg-bg-error-primary",
-				"border-border-error",
+				"text-[var(--color-text-error-primary)]",
+				"bg-[var(--color-red-100)]",
 				"[&>svg]:text-current",
-				"*:data-[slot=alert-description]:text-fg-error-secondary",
+				"[&_[data-slot=alert-description]]:text-[var(--color-text-error-primary)]",
+			),
+			warning: cn(
+				"text-[var(--color-yellow-700)]",
+				"bg-[var(--color-yellow-100)]",
+				"[&>svg]:text-current",
+				"[&_[data-slot=alert-description]]:text-[var(--color-yellow-700)]",
+			),
+			info: cn(
+				"text-[var(--color-blue-600)]",
+				"bg-[var(--color-blue-100)]",
+				"[&>svg]:text-current",
+				"[&_[data-slot=alert-description]]:text-[var(--color-blue-600)]",
 			),
 		},
 	},
@@ -50,15 +68,36 @@ const alertVariants = cva(baseAlertStyles, {
 function Alert({
 	className,
 	variant,
+	children,
 	...props
 }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+	const childrenArray = React.Children.toArray(children);
+
+	// Find first child that is not AlertTitle or AlertDescription (assumed to be icon)
+	const iconIndex = childrenArray.findIndex(
+		(child) =>
+			React.isValidElement(child) &&
+			(child.type as { displayName?: string })?.displayName !== "AlertTitle" &&
+			(child.type as { displayName?: string })?.displayName !==
+				"AlertDescription",
+	);
+
+	const hasIcon = iconIndex !== -1;
+	const icon = hasIcon ? childrenArray[iconIndex] : null;
+	const content = hasIcon
+		? childrenArray.filter((_, index) => index !== iconIndex)
+		: childrenArray;
+
 	return (
 		<div
 			data-slot="alert"
 			role="alert"
 			className={cn(alertVariants({ variant }), className)}
 			{...props}
-		/>
+		>
+			{icon && <div className="shrink-0">{icon}</div>}
+			<div className={alertContentStyles}>{content}</div>
+		</div>
 	);
 }
 
@@ -66,14 +105,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			data-slot="alert-title"
-			className={cn(
-				"col-start-2",
-				"line-clamp-1",
-				"min-h-4",
-				"font-medium",
-				"tracking-tight",
-				className,
-			)}
+			className={cn("typo-body", "font-medium", className)}
 			{...props}
 		/>
 	);
@@ -86,16 +118,7 @@ function AlertDescription({
 	return (
 		<div
 			data-slot="alert-description"
-			className={cn(
-				"text-text-secondary",
-				"col-start-2",
-				"grid",
-				"justify-items-start",
-				"gap-1",
-				"text-sm",
-				"[&_p]:leading-relaxed",
-				className,
-			)}
+			className={cn("typo-body", className)}
 			{...props}
 		/>
 	);

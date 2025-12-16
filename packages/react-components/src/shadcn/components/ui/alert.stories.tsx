@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { AlertCircleIcon, CheckCircle2Icon, PopcornIcon } from "lucide-react";
+import {
+	AlertCircleIcon,
+	AlertTriangleIcon,
+	CheckCircle2Icon,
+	InfoIcon,
+	PopcornIcon,
+} from "lucide-react";
 import {
 	Alert,
 	AlertDescription,
@@ -16,6 +22,40 @@ type Story = StoryObj<typeof meta>;
 export const Demo = {
 	render: () => (
 		<div className="grid w-full max-w-xl items-start gap-4">
+			<Alert variant="destructive">
+				<AlertTriangleIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+					minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+					aliquip ex ea commodo consequat.{" "}
+					<a href="https://example.com" className="underline">
+						Learn more
+					</a>
+				</AlertDescription>
+			</Alert>
+			<Alert variant="warning">
+				<AlertCircleIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+					minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+					aliquip ex ea commodo consequat.{" "}
+					<a href="https://example.com" className="underline">
+						Learn more
+					</a>
+				</AlertDescription>
+			</Alert>
+			<Alert variant="info">
+				<InfoIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua.{" "}
+					<a href="https://example.com" className="underline">
+						Learn more
+					</a>
+				</AlertDescription>
+			</Alert>
 			<Alert>
 				<CheckCircle2Icon />
 				<AlertTitle>Success! Your changes have been saved</AlertTitle>
