@@ -16,6 +16,8 @@ const baseToggleStyles = cn(
 	"rounded",
 	"h-6",
 	"px-2",
+	"border",
+	"border-transparent",
 	// Typography
 	"typo-body",
 	// Colors
@@ -48,10 +50,7 @@ const toggleVariants = cva(baseToggleStyles, {
 	variants: {
 		variant: {
 			filled: cn("data-[state=on]:bg-bg-tertiary"),
-			outline: cn(
-				"data-[state=on]:border",
-				"data-[state=on]:border-border-separator",
-			),
+			outline: cn("data-[state=on]:border-border-separator"),
 		},
 	},
 	defaultVariants: {
