@@ -90,26 +90,52 @@ const tabsVariants = cva("", {
 		variant: {
 			browser: cn(
 				// Tabs
-				`flex-row
-				 items-center
-				 h-10
-				 `,
+				"flex-row",
+				"items-center",
+				"h-10",
 				// TabsList
-				`**:data-[slot=tabs-list]:overflow-x-auto
-				 **:data-[slot=tabs-list]:divide-x`,
+				"**:data-[slot=tabs-list]:overflow-x-auto",
+				"**:data-[slot=tabs-list]:divide-x",
 				// TabsTrigger
-				`**:data-[slot=tabs-trigger]:max-w-80
-				 **:data-[slot=tabs-trigger]:w-60
-				 **:data-[slot=tabs-trigger]:min-w-40
-				 **:data-[slot=tabs-trigger]:data-[state=inactive]:text-text-secondary
-				 **:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-1
-				 **:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-border-secondary
-				 **:data-[slot=tabs-trigger]:data-[state=inactive]:pt-[9px]
-				 `, // TODO: Try to implement this without using pt-[9px].
+				"**:data-[slot=tabs-trigger]:max-w-80",
+				"**:data-[slot=tabs-trigger]:w-60",
+				"**:data-[slot=tabs-trigger]:min-w-40",
+				"**:data-[slot=tabs-trigger]:data-[state=inactive]:text-text-secondary",
+				"**:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-1",
+				"**:data-[slot=tabs-trigger]:data-[state=inactive]:border-b-border-secondary",
+				"**:data-[slot=tabs-trigger]:data-[state=inactive]:pt-[9px]", // TODO: Try to implement this without using pt-[9px].
+			),
+			secondary: cn(
+				// TabsList
+				"**:data-[slot=tabs-list]:bg-bg-secondary",
+				"**:data-[slot=tabs-list]:border-b",
+				"**:data-[slot=tabs-list]:border-b-border-separator",
+				"**:data-[slot=tabs-list]:gap-2",
+				"**:data-[slot=tabs-list]:px-4",
+				"**:data-[slot=tabs-list]:py-2",
+				// TabsTrigger
+				"**:data-[slot=tabs-trigger]:h-7",
+				"**:data-[slot=tabs-trigger]:px-3",
+				"**:data-[slot=tabs-trigger]:rounded",
+				"**:data-[slot=tabs-trigger]:border-b-0",
+				"**:data-[slot=tabs-trigger]:pb-2",
+				"**:data-[slot=tabs-trigger]:pt-2",
+				"**:data-[slot=tabs-trigger]:border",
+				"**:data-[slot=tabs-trigger]:border-transparent",
+				"**:data-[slot=tabs-trigger]:text-text-secondary",
+				"**:data-[slot=tabs-trigger]:hover:text-text-primary",
+				"**:data-[slot=tabs-trigger]:data-[state=active]:bg-bg-primary",
+				"**:data-[slot=tabs-trigger]:data-[state=active]:border-border-secondary",
+				"**:data-[slot=tabs-trigger]:data-[state=active]:text-text-primary",
 			),
 		},
 	},
 });
+
+// Context for variant
+const TabsVariantContext = React.createContext<
+	VariantProps<typeof tabsVariants>["variant"] | undefined
+>(undefined);
 
 type TabsProps<T extends string> = Omit<
 	React.ComponentProps<typeof TabsPrimitive.Root> &
@@ -132,7 +158,11 @@ function Tabs<T extends string = string>({
 		...props,
 		onValueChange: (value: string) => props.onValueChange?.(value as T),
 	};
-	return <TabsPrimitive.Root {...tabProps} />;
+	return (
+		<TabsVariantContext.Provider value={variant}>
+			<TabsPrimitive.Root {...tabProps} />
+		</TabsVariantContext.Provider>
+	);
 }
 
 export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
@@ -535,12 +565,16 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
 	onClose?: (value: string) => void;
 }) {
+	const variant = React.useContext(TabsVariantContext);
+	const isSecondary = variant === "secondary";
+
 	return (
 		<TabsPrimitive.Trigger
 			data-slot="tabs-trigger"
 			className={cn(
 				baseTabsTriggerStyles,
 				onClose ? "justify-between" : "justify-start",
+				isSecondary && ["typo-body", "data-[state=active]:typo-label"],
 				className,
 			)}
 			{...props}

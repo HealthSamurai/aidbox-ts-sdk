@@ -24,7 +24,7 @@ const meta = {
 	title: "Component/Tabs",
 	argTypes: {
 		variant: {
-			options: ["button", "dashed"],
+			options: ["button", "dashed", "browser", "secondary"],
 			control: { type: "select" },
 		},
 	},
@@ -177,5 +177,52 @@ export const Browser = {
 				]}
 			/>
 		</Tabs>
+	),
+} satisfies Story;
+
+export const Secondary = {
+	render: (props) => (
+		<div className="flex w-full max-w-md flex-col gap-6">
+			<Tabs defaultValue="json" variant="secondary" {...props}>
+				<TabsList>
+					<TabsTrigger value="json">JSON</TabsTrigger>
+					<TabsTrigger value="yaml">YAML</TabsTrigger>
+					<TabsTrigger value="xml">XML</TabsTrigger>
+				</TabsList>
+				<TabsContent value="json">
+					<Card>
+						<CardHeader>
+							<CardTitle>JSON Content</CardTitle>
+							<CardDescription>JSON format content here</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<pre className="text-sm">{'{\n  "key": "value"\n}'}</pre>
+						</CardContent>
+					</Card>
+				</TabsContent>
+				<TabsContent value="yaml">
+					<Card>
+						<CardHeader>
+							<CardTitle>YAML Content</CardTitle>
+							<CardDescription>YAML format content here</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<pre className="text-sm">{"key: value"}</pre>
+						</CardContent>
+					</Card>
+				</TabsContent>
+				<TabsContent value="xml">
+					<Card>
+						<CardHeader>
+							<CardTitle>XML Content</CardTitle>
+							<CardDescription>XML format content here</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<pre className="text-sm">{"<key>value</key>"}</pre>
+						</CardContent>
+					</Card>
+				</TabsContent>
+			</Tabs>
+		</div>
 	),
 } satisfies Story;
