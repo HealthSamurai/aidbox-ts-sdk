@@ -1,6 +1,6 @@
 import * as TogglePrimitive from "@radix-ui/react-toggle";
 import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+import * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
@@ -13,73 +13,103 @@ const baseToggleStyles = cn(
 	"gap-2",
 	"whitespace-nowrap",
 	// Shape
-	"rounded-md",
+	"rounded",
+	"h-6",
+	"px-2",
 	// Typography
-	"text-sm",
-	"font-medium",
+	"typo-body",
+	// Colors
+	"bg-bg-primary",
+	"text-text-secondary",
 	// Interaction
 	"outline-none",
-	"transition-[color,box-shadow]",
+	"transition-colors",
+	"cursor-pointer",
 	// Hover
-	"hover:bg-bg-tertiary",
-	"hover:text-text-secondary",
-	// Pressed/On state
-	"data-[state=on]:bg-bg-secondary",
-	"data-[state=on]:text-text-primary",
-	// Disabled
-	"disabled:pointer-events-none",
-	"disabled:opacity-50",
+	"hover:bg-bg-secondary",
 	// SVG icons
 	"[&_svg]:pointer-events-none",
 	"[&_svg:not([class*='size-'])]:size-4",
 	"[&_svg]:shrink-0",
+	"[&_svg]:text-text-secondary",
+	"data-[state=on]:[&_svg]:text-text-primary",
+	// Disabled
+	"disabled:pointer-events-none",
+	"disabled:opacity-50",
 	// Focus
 	"focus-visible:ring-2",
 	"focus-visible:ring-utility-blue/70",
 	// Invalid
 	"aria-invalid:ring-2",
 	"aria-invalid:ring-utility-red/70",
-	"aria-invalid:border-border-error",
 );
 
 const toggleVariants = cva(baseToggleStyles, {
 	variants: {
 		variant: {
-			default: cn("bg-transparent"),
+			filled: cn("data-[state=on]:bg-bg-tertiary"),
 			outline: cn(
-				"border",
-				"border-border-primary",
-				"bg-transparent",
-				"shadow-xs",
-				"hover:bg-bg-secondary",
-				"hover:text-text-primary",
+				"data-[state=on]:border",
+				"data-[state=on]:border-border-separator",
 			),
-		},
-		size: {
-			default: cn("h-9", "px-2", "min-w-9"),
-			sm: cn("h-8", "px-1.5", "min-w-8"),
-			lg: cn("h-10", "px-2.5", "min-w-10"),
 		},
 	},
 	defaultVariants: {
-		variant: "default",
-		size: "default",
+		variant: "filled",
 	},
 });
+
+// Рекурсивно проверяем наличие текста в children
+function hasTextContent(children: React.ReactNode): boolean {
+	const childArray = React.Children.toArray(children);
+
+	for (const child of childArray) {
+		// Проверяем строки и числа
+		if (typeof child === "string" || typeof child === "number") {
+			// Игнорируем пустые строки и пробелы
+			if (String(child).trim()) {
+				return true;
+			}
+		}
+
+		// Проверяем React элементы (включая фрагменты)
+		if (
+			React.isValidElement(child) &&
+			child.props &&
+			typeof child.props === "object" &&
+			"children" in child.props
+		) {
+			if (hasTextContent(child.props.children as React.ReactNode)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
 
 function Toggle({
 	className,
 	variant,
-	size,
+	children,
 	...props
 }: React.ComponentProps<typeof TogglePrimitive.Root> &
 	VariantProps<typeof toggleVariants>) {
+	// Автоматически определяем, есть ли текст помимо иконки
+	const hasText = hasTextContent(children);
+
 	return (
 		<TogglePrimitive.Root
 			data-slot="toggle"
-			className={cn(toggleVariants({ variant, size, className }))}
+			className={cn(
+				toggleVariants({ variant }),
+				!hasText && "w-6 p-1",
+				className,
+			)}
 			{...props}
-		/>
+		>
+			{children}
+		</TogglePrimitive.Root>
 	);
 }
 
