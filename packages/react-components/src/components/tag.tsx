@@ -9,7 +9,7 @@ const baseChipStyles = cn(
 	"gap-1",
 	"whitespace-nowrap",
 	"shrink-0",
-	"px-2",
+	"px-3",
 	"py-1",
 	"typo-body",
 	"[&>svg]:size-4",
@@ -50,36 +50,40 @@ const tagVariants = cva(baseChipStyles, {
 		},
 	},
 	compoundVariants: [
+		// Green variants
 		{
 			color: "green",
 			subtle: false,
-			class: "bg-bg-success-primary_inverse text-text-primary_on-brand",
+			class: "bg-[var(--color-green-500)] text-text-primary_on-brand",
 		},
 		{
 			color: "green",
 			subtle: true,
-			class: "bg-bg-success-secondary text-text-success-primary",
+			class: "bg-[var(--color-green-300)] text-[var(--color-green-700)]",
 		},
+		// Gray variants
 		{
 			color: "gray",
 			subtle: false,
-			class: "bg-fg-secondary text-text-primary_on-brand",
+			class: "bg-[var(--color-grey-500)] text-text-primary_on-brand",
 		},
 		{
 			color: "gray",
 			subtle: true,
-			class: "bg-bg-tertiary text-text-secondary",
+			class: "bg-[var(--color-grey-100)] text-text-primary",
 		},
+		// Red variants
 		{
 			color: "red",
 			subtle: false,
-			class: "bg-bg-error-primary_inverse text-text-primary_on-brand",
+			class: "bg-[var(--color-red-500)] text-text-primary_on-brand",
 		},
 		{
 			color: "red",
 			subtle: true,
-			class: "bg-bg-error-tertiary text-text-error-primary",
+			class: "bg-[var(--color-red-200)] text-[var(--color-red-700)]",
 		},
+		// Bright variants (removed, not in Figma)
 		{
 			color: "bright",
 			subtle: false,
@@ -90,26 +94,27 @@ const tagVariants = cva(baseChipStyles, {
 			subtle: true,
 			class: "bg-bg-tertiary text-text-tertiary",
 		},
+		// Blue variants
 		{
 			color: "blue",
 			subtle: false,
-			class: "bg-bg-link text-text-primary_on-brand",
+			class: "bg-[var(--color-blue-500)] text-text-primary_on-brand",
 		},
 		{
 			color: "blue",
 			subtle: true,
-			class: "bg-bg-brand-secondary text-text-link",
+			class: "bg-[var(--color-blue-300)] text-[var(--color-blue-600)]",
 		},
 		// Yellow variants
 		{
 			color: "yellow",
 			subtle: false,
-			class: "bg-bg-warning-primary_inverse text-text-primary_on-brand",
+			class: "bg-[var(--color-yellow-500)] text-[var(--color-yellow-900)]",
 		},
 		{
 			color: "yellow",
 			subtle: true,
-			class: "bg-bg-warning-secondary text-text-warning-primary",
+			class: "bg-[var(--color-yellow-300)] text-[var(--color-yellow-800)]",
 		},
 	],
 	defaultVariants: {
