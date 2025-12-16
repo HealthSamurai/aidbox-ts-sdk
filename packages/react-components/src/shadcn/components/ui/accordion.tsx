@@ -5,32 +5,24 @@ import type * as React from "react";
 import { cn } from "#shadcn/lib/utils";
 
 // Accordion item styles
-const accordionItemStyles = cn(
-	"border-b",
-	"border-border-primary",
-	"last:border-b-0",
-);
+const accordionItemStyles = cn("flex", "flex-col");
 
 // Accordion trigger styles
 const accordionTriggerStyles = cn(
 	// Layout
 	"flex",
 	"flex-1",
-	"items-start",
+	"items-center",
 	"justify-between",
-	"gap-4",
-	// Shape
-	"rounded-md",
-	// Spacing
-	"py-4",
+	"gap-2",
 	// Typography
-	"text-left",
-	"text-sm",
-	"font-medium",
+	"body16bold",
+	"tracking-tight",
+	"text-text-primary",
 	// Interaction
+	"cursor-pointer",
 	"transition-all",
 	"outline-none",
-	"hover:underline",
 	// Focus
 	"focus-visible:ring-2",
 	"focus-visible:ring-utility-blue/70",
@@ -46,11 +38,23 @@ const accordionContentStyles = cn(
 	"data-[state=closed]:animate-accordion-up",
 	"data-[state=open]:animate-accordion-down",
 	"overflow-hidden",
-	"text-sm",
 );
 
 // Accordion content inner styles
-const accordionContentInnerStyles = cn("pt-0", "pb-4");
+const accordionContentInnerStyles = cn(
+	"body14",
+	"text-text-secondary_hover",
+	"pt-3",
+	"pb-0",
+);
+
+// Accordion separator styles
+const accordionSeparatorStyles = cn(
+	"h-px",
+	"border-t",
+	"border-border-separator",
+	"mt-2",
+);
 
 // Accordion chevron styles
 const accordionChevronStyles = cn(
@@ -58,19 +62,32 @@ const accordionChevronStyles = cn(
 	"pointer-events-none",
 	"size-4",
 	"shrink-0",
-	"translate-y-0.5",
 	"transition-transform",
 	"duration-200",
 );
 
 function Accordion({
+	className,
 	...props
 }: React.ComponentProps<typeof AccordionPrimitive.Root>) {
-	return <AccordionPrimitive.Root data-slot="accordion" {...props} />;
+	return (
+		<AccordionPrimitive.Root
+			data-slot="accordion"
+			className={cn(
+				"flex",
+				"flex-col",
+				"gap-2",
+				"[&>[data-slot=accordion-item]:last-child>[data-slot=accordion-separator]]:hidden",
+				className,
+			)}
+			{...props}
+		/>
+	);
 }
 
 function AccordionItem({
 	className,
+	children,
 	...props
 }: React.ComponentProps<typeof AccordionPrimitive.Item>) {
 	return (
@@ -78,7 +95,13 @@ function AccordionItem({
 			data-slot="accordion-item"
 			className={cn(accordionItemStyles, className)}
 			{...props}
-		/>
+		>
+			{children}
+			<div
+				data-slot="accordion-separator"
+				className={accordionSeparatorStyles}
+			/>
+		</AccordionPrimitive.Item>
 	);
 }
 
