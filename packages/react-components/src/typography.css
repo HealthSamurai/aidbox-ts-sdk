@@ -55,6 +55,15 @@ body {
 	line-height: var(--font-leading-3);
 }
 
+.typo-label-tiny {
+	font-size: var(--font-size-xxs);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-4);
+	letter-spacing: var(--font-tracking-wide);
+	text-transform: uppercase;
+}
+
 .h1 {
 	font-size: var(--font-size-5xl);
 	font-family: var(--font-family-sans);

@@ -92,3 +92,36 @@ export const White = {
 		</div>
 	),
 } satisfies Story;
+
+export const WithDropdown = {
+	render: () => (
+		<Breadcrumb>
+			<BreadcrumbList>
+				<BreadcrumbItem>
+					<BreadcrumbLink asChild>
+						<a href="/">Home</a>
+					</BreadcrumbLink>
+				</BreadcrumbItem>
+				<BreadcrumbSeparator />
+				<BreadcrumbItem>
+					<BreadcrumbLink
+						asChild
+						dropdownContent={
+							<>
+								<DropdownMenuItem>Level 1</DropdownMenuItem>
+								<DropdownMenuItem>Level 2</DropdownMenuItem>
+								<DropdownMenuItem>Level 3</DropdownMenuItem>
+							</>
+						}
+					>
+						<a href="/docs">Documentation</a>
+					</BreadcrumbLink>
+				</BreadcrumbItem>
+				<BreadcrumbSeparator />
+				<BreadcrumbItem>
+					<BreadcrumbPage>Components</BreadcrumbPage>
+				</BreadcrumbItem>
+			</BreadcrumbList>
+		</Breadcrumb>
+	),
+} satisfies Story;

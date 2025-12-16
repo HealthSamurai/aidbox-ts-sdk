@@ -156,19 +156,20 @@ const commandItemStyles = cn(
 	"cursor-pointer",
 	"items-center",
 	"gap-2",
-	"rounded-md",
+	"rounded",
 	"px-2",
 	"py-1.5",
 	"select-none",
 	// Typography
 	"typo-body",
 	// Colors
-	"text-text-primary",
+	"text-text-secondary",
 	// States
 	"outline-hidden",
 	"data-[state=checked]:bg-bg-tertiary",
 	"group-hover:data-[state=checked]:bg-transparent",
 	"hover:bg-bg-tertiary",
+	"hover:text-text-primary",
 	"data-[state=checked]:text-text-primary",
 	"data-[disabled=true]:pointer-events-none",
 	"data-[disabled=true]:opacity-50",

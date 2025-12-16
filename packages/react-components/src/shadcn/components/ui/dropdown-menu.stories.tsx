@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Edit, Trash2 } from "lucide-react";
 import { Button } from "#shadcn/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuGroup,
+	DropdownMenuIcon,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuPortal,
@@ -30,6 +32,7 @@ export const Demo = {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-56" align="start">
 				<DropdownMenuLabel>My Account</DropdownMenuLabel>
+				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem>
 						Profile
@@ -37,7 +40,9 @@ export const Demo = {
 					</DropdownMenuItem>
 					<DropdownMenuItem>
 						Billing
-						<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+						<div>
+							<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+						</div>
 					</DropdownMenuItem>
 					<DropdownMenuItem>
 						Settings
@@ -68,7 +73,18 @@ export const Demo = {
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>GitHub</DropdownMenuItem>
+				<DropdownMenuItem>
+					GitHub
+					<div className="ml-auto flex items-center gap-0.5">
+						<DropdownMenuIcon>
+							<Edit />
+						</DropdownMenuIcon>
+						<DropdownMenuIcon>
+							<Trash2 />
+						</DropdownMenuIcon>
+					</div>
+				</DropdownMenuItem>
+
 				<DropdownMenuItem>Support</DropdownMenuItem>
 				<DropdownMenuItem disabled>API</DropdownMenuItem>
 				<DropdownMenuSeparator />

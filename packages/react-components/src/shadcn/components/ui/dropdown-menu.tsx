@@ -1,11 +1,12 @@
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { cva, type VariantProps } from "class-variance-authority";
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
-// Dropdown menu content styles
-const dropdownMenuContentStyles = cn(
+// Styles
+const dropdownMenuContentBaseStyles = cn(
 	// Background
 	"bg-bg-primary",
 	// Layout
@@ -17,14 +18,16 @@ const dropdownMenuContentStyles = cn(
 	"overflow-y-auto",
 	// Shape
 	"rounded-md",
-	// Borders
+	// Border
 	"border",
 	"border-border-separator",
 	// Spacing
 	"p-2",
-	"space-y-0.5",
+	"gap-1",
+	"flex",
+	"flex-col",
 	// Shadow
-	"shadow-lg",
+	"dropdown-menu-shadow",
 	// Animations - open
 	"data-[state=open]:animate-in",
 	"data-[state=open]:fade-in-0",
@@ -40,6 +43,265 @@ const dropdownMenuContentStyles = cn(
 	"data-[side=top]:slide-in-from-bottom-2",
 );
 
+const dropdownMenuItemBaseStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"justify-between",
+	"gap-2",
+	"h-7",
+	// Spacing
+	"px-3",
+	"py-0",
+	// Shape
+	"rounded",
+	// Typography
+	"typo-body",
+	// Colors
+	"text-text-secondary",
+	// Interaction
+	"cursor-pointer",
+	"outline-hidden",
+	"select-none",
+	// Focus states
+	"focus:bg-bg-tertiary",
+	"focus:text-text-primary",
+	"focus:rounded",
+	// Disabled states
+	"data-[disabled]:pointer-events-none",
+	"data-[disabled]:opacity-50",
+	// Inset spacing
+	"data-[inset]:pl-8",
+	// SVG
+	"[&_svg]:pointer-events-none",
+	"[&_svg]:shrink-0",
+	"[&_svg:not([class*='size-'])]:size-4",
+	"[&_svg:not([class*='text-'])]:text-fg-secondary",
+);
+
+const dropdownMenuItemVariants = cva(dropdownMenuItemBaseStyles, {
+	variants: {
+		variant: {
+			default: "",
+			destructive: cn(
+				"data-[variant=destructive]:text-text-error-primary",
+				"data-[variant=destructive]:focus:bg-bg-error-tertiary",
+				"data-[variant=destructive]:focus:text-text-error-primary",
+				"data-[variant=destructive]:*:[svg]:!text-text-error-primary",
+			),
+		},
+	},
+	defaultVariants: {
+		variant: "default",
+	},
+});
+
+const dropdownMenuCheckboxItemBaseStyles = cn(
+	// Layout
+	"relative",
+	"flex",
+	"items-center",
+	"gap-2",
+	"h-7",
+	// Spacing
+	"py-0",
+	"pr-2",
+	"pl-9",
+	// Shape
+	"rounded",
+	// Typography
+	"typo-body",
+	// Colors
+	"text-text-secondary",
+	// Interaction
+	"cursor-default",
+	"outline-hidden",
+	"select-none",
+	// Focus states
+	"focus:bg-bg-secondary",
+	"focus:text-text-primary",
+	// Disabled states
+	"data-[disabled]:pointer-events-none",
+	"data-[disabled]:opacity-50",
+	// SVG
+	"[&_svg]:pointer-events-none",
+	"[&_svg]:shrink-0",
+	"[&_svg:not([class*='size-'])]:size-4",
+	"[&_svg]:text-text-link",
+);
+
+const dropdownMenuCheckboxIndicatorStyles = cn(
+	// Layout
+	"pointer-events-none",
+	"absolute",
+	"left-3",
+	"flex",
+	"size-3.5",
+	"items-center",
+	"justify-center",
+);
+
+const dropdownMenuRadioItemBaseStyles = cn(
+	// Layout
+	"relative",
+	"flex",
+	"items-center",
+	"gap-2",
+	"h-7",
+	// Spacing
+	"py-0",
+	"pr-2",
+	// Shape
+	"rounded",
+	// Typography
+	"typo-body",
+	// Colors
+	"text-text-secondary",
+	// Interaction
+	"cursor-pointer",
+	"outline-hidden",
+	"select-none",
+	// Focus states
+	"focus:bg-bg-secondary",
+	"focus:text-text-primary",
+	// Disabled states
+	"data-[disabled]:pointer-events-none",
+	"data-[disabled]:opacity-50",
+	// SVG
+	"[&_svg]:pointer-events-none",
+	"[&_svg]:shrink-0",
+	"[&_svg:not([class*='size-'])]:size-4",
+);
+
+const dropdownMenuRadioIndicatorStyles = cn(
+	// Layout
+	"pointer-events-none",
+	"absolute",
+	"left-2",
+	"flex",
+	"size-3.5",
+	"items-center",
+	"justify-center",
+);
+
+const dropdownMenuLabelBaseStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"h-7",
+	// Spacing
+	"px-3",
+	"py-0",
+	"data-[inset]:pl-10",
+	// Typography
+	"typo-label-tiny",
+	// Colors
+	"text-text-secondary",
+);
+
+const dropdownMenuSeparatorBaseStyles = cn(
+	// Border
+	"border-t",
+	"border-border-separator",
+	// Spacing
+	"-mx-1",
+	"my-1",
+	// Size
+	"h-1",
+);
+
+const dropdownMenuShortcutBaseStyles = cn(
+	// Typography
+	"text-xs",
+	"tracking-widest",
+	// Colors
+	"text-text-secondary",
+	// Spacing
+	"ml-auto",
+);
+
+const dropdownMenuIconBaseStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"justify-center",
+	// Size
+	"size-6",
+	// Spacing
+	"p-1",
+	// SVG
+	"[&_svg]:pointer-events-none",
+	"[&_svg]:shrink-0",
+	"[&_svg:not([class*='size-'])]:size-4",
+	"[&_svg:not([class*='text-'])]:text-fg-tertiary",
+	// Hover states
+	"hover:[&_svg:not([class*='text-'])]:text-fg-tertiary_hover",
+);
+
+const dropdownMenuSubTriggerBaseStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"h-7",
+	// Spacing
+	"px-3",
+	"py-0",
+	"data-[inset]:pl-8",
+	// Shape
+	"rounded",
+	// Typography
+	"typo-body",
+	// Colors
+	"text-text-secondary",
+	// Interaction
+	"cursor-default",
+	"outline-hidden",
+	"select-none",
+	// Focus states
+	"focus:bg-bg-secondary",
+	"focus:text-text-primary",
+	"data-[state=open]:bg-accent",
+	"data-[state=open]:text-accent-foreground",
+);
+
+const dropdownMenuSubContentBaseStyles = cn(
+	// Background
+	"bg-bg-primary",
+	// Layout
+	"z-50",
+	"min-w-[8rem]",
+	"origin-(--radix-dropdown-menu-content-transform-origin)",
+	"overflow-hidden",
+	// Shape
+	"rounded-md",
+	// Border
+	"border",
+	"border-border-separator",
+	// Spacing
+	"p-2",
+	"gap-1",
+	"flex",
+	"flex-col",
+	// Colors
+	"text-text-primary",
+	// Shadow
+	"dropdown-menu-shadow",
+	// Animations - open
+	"data-[state=open]:animate-in",
+	"data-[state=open]:fade-in-0",
+	"data-[state=open]:zoom-in-95",
+	// Animations - closed
+	"data-[state=closed]:animate-out",
+	"data-[state=closed]:fade-out-0",
+	"data-[state=closed]:zoom-out-95",
+	// Slide animations
+	"data-[side=bottom]:slide-in-from-top-2",
+	"data-[side=left]:slide-in-from-right-2",
+	"data-[side=right]:slide-in-from-left-2",
+	"data-[side=top]:slide-in-from-bottom-2",
+);
+
+// Components
 function DropdownMenu({
 	...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -75,7 +337,7 @@ function DropdownMenuContent({
 			<DropdownMenuPrimitive.Content
 				data-slot="dropdown-menu-content"
 				sideOffset={sideOffset}
-				className={cn(dropdownMenuContentStyles, className)}
+				className={cn(dropdownMenuContentBaseStyles, className)}
 				{...props}
 			/>
 		</DropdownMenuPrimitive.Portal>
@@ -95,33 +357,16 @@ function DropdownMenuItem({
 	inset,
 	variant = "default",
 	...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
-	inset?: boolean;
-	variant?: "default" | "destructive";
-}) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> &
+	VariantProps<typeof dropdownMenuItemVariants> & {
+		inset?: boolean;
+	}) {
 	return (
 		<DropdownMenuPrimitive.Item
 			data-slot="dropdown-menu-item"
 			data-inset={inset}
 			data-variant={variant}
-			className={cn(
-				"cursor-pointer items-center flex gap-2 h-8 px-3 py-1.5 relativerounded-md",
-				"outline-hidden select-none typo-body text-text-secondary",
-				"focus:bg-bg-secondary focus:text-text-primary",
-				"data-[variant=destructive]:text-text-error-primary",
-				"data-[variant=destructive]:focus:bg-bg-error-tertiary",
-				"dark:data-[variant=destructive]:focus:bg-bg-error-tertiary",
-				"data-[variant=destructive]:focus:text-text-error-primary",
-				"data-[variant=destructive]:*:[svg]:!text-text-error-primary",
-				"[&_svg:not([class*='text-'])]:fg-fg-secondary",
-				"data-[disabled]:pointer-events-none",
-				"data-[disabled]:opacity-50",
-				"data-[inset]:pl-8",
-				"[&_svg]:pointer-events-none",
-				"[&_svg]:shrink-0",
-				"[&_svg:not([class*='size-'])]:size-4",
-				className,
-			)}
+			className={cn(dropdownMenuItemVariants({ variant }), className)}
 			{...props}
 		/>
 	);
@@ -135,15 +380,10 @@ function DropdownMenuCheckboxItem({
 	return (
 		<DropdownMenuPrimitive.CheckboxItem
 			data-slot="dropdown-menu-checkbox-item"
-			className={cn(
-				"focus:bg-bg-secondary focus:text-text-primary relative flex cursor-default items-center gap-2 rounded-lg py-1 pr-2 pl-9",
-				"outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none",
-				"[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:text-text-link h-8 typo-body text-text-secondary",
-				className,
-			)}
+			className={cn(dropdownMenuCheckboxItemBaseStyles, className)}
 			{...props}
 		>
-			<span className="pointer-events-none absolute left-3 flex size-3.5 items-center justify-center">
+			<span className={dropdownMenuCheckboxIndicatorStyles}>
 				<DropdownMenuPrimitive.ItemIndicator>
 					<CheckIcon className="size-4" />
 				</DropdownMenuPrimitive.ItemIndicator>
@@ -172,15 +412,10 @@ function DropdownMenuRadioItem({
 	return (
 		<DropdownMenuPrimitive.RadioItem
 			data-slot="dropdown-menu-radio-item"
-			className={cn(
-				"focus:bg-bg-secondary focus:text-text-primary relative flex cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2",
-				"outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none",
-				"[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 h-8 typo-body text-text-secondary",
-				className,
-			)}
+			className={cn(dropdownMenuRadioItemBaseStyles, className)}
 			{...props}
 		>
-			<span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+			<span className={dropdownMenuRadioIndicatorStyles}>
 				<DropdownMenuPrimitive.ItemIndicator>
 					<CircleIcon className="size-2 fill-current" />
 				</DropdownMenuPrimitive.ItemIndicator>
@@ -201,10 +436,7 @@ function DropdownMenuLabel({
 		<DropdownMenuPrimitive.Label
 			data-slot="dropdown-menu-label"
 			data-inset={inset}
-			className={cn(
-				"px-3 py-1.5 data-[inset]:pl-10 typo-body text-text-secondary",
-				className,
-			)}
+			className={cn(dropdownMenuLabelBaseStyles, className)}
 			{...props}
 		/>
 	);
@@ -217,7 +449,7 @@ function DropdownMenuSeparator({
 	return (
 		<DropdownMenuPrimitive.Separator
 			data-slot="dropdown-menu-separator"
-			className={cn("bg-bg-quaternary -mx-1 my-1 h-px", className)}
+			className={cn(dropdownMenuSeparatorBaseStyles, className)}
 			{...props}
 		/>
 	);
@@ -230,12 +462,25 @@ function DropdownMenuShortcut({
 	return (
 		<span
 			data-slot="dropdown-menu-shortcut"
-			className={cn(
-				"text-text-secondary ml-auto text-xs tracking-widest",
-				className,
-			)}
+			className={cn(dropdownMenuShortcutBaseStyles, className)}
 			{...props}
 		/>
+	);
+}
+
+function DropdownMenuIcon({
+	className,
+	children,
+	...props
+}: React.ComponentProps<"span">) {
+	return (
+		<span
+			data-slot="dropdown-menu-icon"
+			className={cn(dropdownMenuIconBaseStyles, className)}
+			{...props}
+		>
+			{children}
+		</span>
 	);
 }
 
@@ -257,11 +502,7 @@ function DropdownMenuSubTrigger({
 		<DropdownMenuPrimitive.SubTrigger
 			data-slot="dropdown-menu-sub-trigger"
 			data-inset={inset}
-			className={cn(
-				"focus:bg-bg-secondary focus:text-text-primary data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex",
-				"cursor-default items-center rounded-md px-3 py-1.5 outline-hidden select-none data-[inset]:pl-8 h-8 typo-body text-text-secondary",
-				className,
-			)}
+			className={cn(dropdownMenuSubTriggerBaseStyles, className)}
 			{...props}
 		>
 			{children}
@@ -277,14 +518,7 @@ function DropdownMenuSubContent({
 	return (
 		<DropdownMenuPrimitive.SubContent
 			data-slot="dropdown-menu-sub-content"
-			className={cn(
-				"bg-bg-primary text-text-primary data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-				"data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2",
-				"data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50",
-				"min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-md border border-border-separator",
-				"p-2 shadow-lg",
-				className,
-			)}
+			className={cn(dropdownMenuSubContentBaseStyles, className)}
 			{...props}
 		/>
 	);
@@ -298,11 +532,13 @@ export {
 	DropdownMenuGroup,
 	DropdownMenuLabel,
 	DropdownMenuItem,
+	dropdownMenuItemVariants,
 	DropdownMenuCheckboxItem,
 	DropdownMenuRadioGroup,
 	DropdownMenuRadioItem,
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
+	DropdownMenuIcon,
 	DropdownMenuSub,
 	DropdownMenuSubTrigger,
 	DropdownMenuSubContent,

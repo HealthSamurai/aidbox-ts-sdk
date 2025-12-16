@@ -15,7 +15,7 @@ const popoverContentStyles = cn(
 	"rounded-md",
 	// Borders
 	"border",
-	"border-border-primary",
+	"border-border-separator",
 	// Background & Colors
 	"bg-bg-primary",
 	"text-text-primary",
