@@ -1,6 +1,7 @@
 import { AlignLeft, Copy, Download } from "lucide-react";
 import type React from "react";
 import { cn } from "#shadcn/lib/utils";
+import { IconButton } from "./icon-button";
 import { SegmentControl } from "./segment-control";
 
 // Styles
@@ -29,31 +30,6 @@ const iconsContainerStyles = cn(
 	"flex",
 	"items-center",
 	"gap-0",
-);
-
-const iconButtonStyles = cn(
-	// Layout
-	"flex",
-	"items-center",
-	"justify-center",
-	// Spacing
-	"p-1",
-	// Size
-	"size-8",
-	// Shape
-	"rounded",
-	// Interaction
-	"cursor-pointer",
-	"transition-colors",
-	"duration-200",
-	// Colors
-	"text-text-tertiary",
-	"hover:text-text-secondary",
-	"hover:bg-bg-secondary",
-	// SVG
-	"[&>svg]:size-4",
-	"[&>svg]:pointer-events-none",
-	"[&>svg]:shrink-0",
 );
 
 export interface ToolbarProps
@@ -98,34 +74,21 @@ function Toolbar({
 			/>
 			<div className={iconsContainerStyles}>
 				{showCopy && (
-					<button
-						type="button"
-						className={iconButtonStyles}
-						onClick={onCopyClick}
-						aria-label="Copy"
-					>
-						<Copy />
-					</button>
+					<IconButton icon={<Copy />} aria-label="Copy" onClick={onCopyClick} />
 				)}
 				{showAlignLeft && (
-					<button
-						type="button"
-						className={iconButtonStyles}
-						onClick={onAlignLeftClick}
+					<IconButton
+						icon={<AlignLeft />}
 						aria-label="Align left"
-					>
-						<AlignLeft />
-					</button>
+						onClick={onAlignLeftClick}
+					/>
 				)}
 				{showDownload && (
-					<button
-						type="button"
-						className={iconButtonStyles}
-						onClick={onDownloadClick}
+					<IconButton
+						icon={<Download />}
 						aria-label="Download"
-					>
-						<Download />
-					</button>
+						onClick={onDownloadClick}
+					/>
 				)}
 			</div>
 		</div>

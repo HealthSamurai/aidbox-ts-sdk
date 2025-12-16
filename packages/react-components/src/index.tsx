@@ -5,6 +5,7 @@ export * from "./components/code-editor";
 export * from "./components/copy-icon";
 export * from "./components/data-table";
 export * from "./components/fhir-structure-view";
+export * from "./components/icon-button";
 export * from "./components/request-line-editor";
 export * from "./components/segment-control";
 export * from "./components/split-button";

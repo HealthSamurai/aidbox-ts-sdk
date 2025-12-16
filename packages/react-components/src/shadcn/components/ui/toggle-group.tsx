@@ -33,14 +33,12 @@ const toggleGroupItemStyles = cn(
 const ToggleGroupContext = React.createContext<
 	VariantProps<typeof toggleVariants>
 >({
-	size: "default",
-	variant: "default",
+	variant: "filled",
 });
 
 function ToggleGroup({
 	className,
 	variant,
-	size,
 	children,
 	...props
 }: React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
@@ -49,11 +47,10 @@ function ToggleGroup({
 		<ToggleGroupPrimitive.Root
 			data-slot="toggle-group"
 			data-variant={variant}
-			data-size={size}
 			className={cn(toggleGroupStyles, className)}
 			{...props}
 		>
-			<ToggleGroupContext.Provider value={{ variant, size }}>
+			<ToggleGroupContext.Provider value={{ variant }}>
 				{children}
 			</ToggleGroupContext.Provider>
 		</ToggleGroupPrimitive.Root>
@@ -64,7 +61,6 @@ function ToggleGroupItem({
 	className,
 	children,
 	variant,
-	size,
 	...props
 }: React.ComponentProps<typeof ToggleGroupPrimitive.Item> &
 	VariantProps<typeof toggleVariants>) {
@@ -74,11 +70,9 @@ function ToggleGroupItem({
 		<ToggleGroupPrimitive.Item
 			data-slot="toggle-group-item"
 			data-variant={context.variant || variant}
-			data-size={context.size || size}
 			className={cn(
 				toggleVariants({
 					variant: context.variant || variant,
-					size: context.size || size,
 				}),
 				toggleGroupItemStyles,
 				className,

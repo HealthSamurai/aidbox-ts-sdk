@@ -85,6 +85,7 @@
 	--color-yellow-900: #341900;
 	--color-yellow-950: #200900;
 
+	--font-size-xxs: 10px;
 	--font-size-xs: 12px;
 	--font-size-sm: 14px;
 	--font-size-base: 16px;
@@ -115,12 +116,12 @@
 	--font-weight-extrabold: 800;
 	--font-weight-black: 900;
 
-	--font-tracking-tighter: -0.8;
-	--font-tracking-tight: -0.4;
+	--font-tracking-tighter: -0.8px;
+	--font-tracking-tight: -0.4px;
 	--font-tracking-normal: 0px;
-	--font-tracking-wide: 0.4;
-	--font-tracking-wider: 0.8;
-	--font-tracking-widest: 1.6;
+	--font-tracking-wide: 0.4px;
+	--font-tracking-wider: 0.8px;
+	--font-tracking-widest: 1.6px;
 
 	--font-leading-3: 12px;
 	--font-leading-4: 16px;

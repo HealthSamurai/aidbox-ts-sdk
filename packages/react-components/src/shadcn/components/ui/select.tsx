@@ -144,14 +144,14 @@ function SelectContent({
 					"rounded-md",
 					// Borders
 					"border",
-					"border-border-primary",
+					"border-border-separator",
 					// Background & Colors
 					"bg-bg-primary",
 					"text-text-primary",
 					// Spacing
 					"py-1",
 					// Shadow
-					"shadow-lg",
+					"dropdown-menu-shadow",
 					// Animations - open
 					"data-[state=open]:animate-in",
 					"data-[state=open]:fade-in-0",
