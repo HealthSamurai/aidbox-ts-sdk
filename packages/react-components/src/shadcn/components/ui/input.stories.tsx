@@ -43,7 +43,7 @@ function InputWithLabel({
 					invalid={invalid}
 					disabled={disabled}
 				/>
-				<p className={`typo-body ${descriptionColor}`}>{description}</p>
+				<p className={`typo-body-xs ${descriptionColor}`}>{description}</p>
 			</div>
 		</div>
 	);
@@ -182,8 +182,14 @@ export const Demo = {
 										{variant === "left-double-right" && (
 											<Input
 												placeholder="Placeholder"
+												className="pr-15"
 												leftSlot={<Mail />}
-												rightSlot={<CircleX />}
+												rightSlot={
+													<div className="flex items-center gap-2">
+														<CircleX />
+														<Copy />
+													</div>
+												}
 												suffix="milliseconds"
 												invalid
 											/>
@@ -220,8 +226,14 @@ export const Demo = {
 										{variant === "left-double-right" && (
 											<Input
 												placeholder="Aidbox"
+												className="pr-15"
 												leftSlot={<Mail />}
-												rightSlot={<CircleX />}
+												rightSlot={
+													<div className="flex items-center gap-2">
+														<CircleX />
+														<Copy />
+													</div>
+												}
 												suffix="milliseconds"
 												disabled
 											/>
@@ -302,7 +314,12 @@ export const Demo = {
 										<InputWithLabel
 											placeholder="Placeholder"
 											leftSlot={<Mail />}
-											rightSlot={<CircleX />}
+											rightSlot={
+												<div className="flex items-center gap-2">
+													<CircleX />
+													<Copy />
+												</div>
+											}
 											suffix="milliseconds"
 										/>
 									)}
@@ -339,7 +356,12 @@ export const Demo = {
 										<InputWithLabel
 											placeholder="Placeholder"
 											leftSlot={<Mail />}
-											rightSlot={<CircleX />}
+											rightSlot={
+												<div className="flex items-center gap-2">
+													<CircleX />
+													<Copy />
+												</div>
+											}
 											suffix="milliseconds"
 											invalid
 										/>
@@ -377,7 +399,12 @@ export const Demo = {
 										<InputWithLabel
 											placeholder="Aidbox"
 											leftSlot={<Mail />}
-											rightSlot={<CircleX />}
+											rightSlot={
+												<div className="flex items-center gap-2">
+													<CircleX />
+													<Copy />
+												</div>
+											}
 											suffix="milliseconds"
 											disabled
 										/>
