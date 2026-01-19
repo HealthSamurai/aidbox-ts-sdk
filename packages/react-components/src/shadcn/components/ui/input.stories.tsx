@@ -3,6 +3,7 @@ import { CircleX, Copy, Mail } from "lucide-react";
 import { Badge } from "#shadcn/components/ui/badge";
 import { Input } from "#shadcn/components/ui/input";
 import { Label } from "#shadcn/components/ui/label";
+import { IconButton } from "../../../components/icon-button";
 
 interface InputWithLabelProps {
 	label?: string;
@@ -126,14 +127,26 @@ export const Demo = {
 										{variant === "right" && (
 											<Input
 												placeholder="Placeholder"
-												rightSlot={<CircleX />}
+												rightSlot={
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+												}
 											/>
 										)}
 										{variant === "both" && (
 											<Input
 												placeholder="Placeholder"
 												leftSlot={<Mail />}
-												rightSlot={<CircleX />}
+												rightSlot={
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+												}
 											/>
 										)}
 										{variant === "left-double-right" && (
@@ -142,10 +155,18 @@ export const Demo = {
 												className="pr-15"
 												leftSlot={<Mail />}
 												rightSlot={
-													<div className="flex items-center gap-2">
-														<CircleX />
-														<Copy />
-													</div>
+													<>
+														<IconButton
+															icon={<CircleX />}
+															aria-label="Clear"
+															variant="link"
+														/>
+														<IconButton
+															icon={<Copy />}
+															aria-label="Copy"
+															variant="link"
+														/>
+													</>
 												}
 												suffix="milliseconds"
 											/>
@@ -167,7 +188,13 @@ export const Demo = {
 										{variant === "right" && (
 											<Input
 												placeholder="Placeholder"
-												rightSlot={<CircleX />}
+												rightSlot={
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+												}
 												invalid
 											/>
 										)}
@@ -175,7 +202,13 @@ export const Demo = {
 											<Input
 												placeholder="Placeholder"
 												leftSlot={<Mail />}
-												rightSlot={<CircleX />}
+												rightSlot={
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+												}
 												invalid
 											/>
 										)}
@@ -185,10 +218,18 @@ export const Demo = {
 												className="pr-15"
 												leftSlot={<Mail />}
 												rightSlot={
-													<div className="flex items-center gap-2">
-														<CircleX />
-														<Copy />
-													</div>
+													<>
+														<IconButton
+															icon={<CircleX />}
+															aria-label="Clear"
+															variant="link"
+														/>
+														<IconButton
+															icon={<Copy />}
+															aria-label="Copy"
+															variant="link"
+														/>
+													</>
 												}
 												suffix="milliseconds"
 												invalid
@@ -211,7 +252,13 @@ export const Demo = {
 										{variant === "right" && (
 											<Input
 												placeholder="Aidbox"
-												rightSlot={<CircleX />}
+												rightSlot={
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+												}
 												disabled
 											/>
 										)}
@@ -219,7 +266,13 @@ export const Demo = {
 											<Input
 												placeholder="Aidbox"
 												leftSlot={<Mail />}
-												rightSlot={<CircleX />}
+												rightSlot={
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+												}
 												disabled
 											/>
 										)}
@@ -229,10 +282,18 @@ export const Demo = {
 												className="pr-15"
 												leftSlot={<Mail />}
 												rightSlot={
-													<div className="flex items-center gap-2">
-														<CircleX />
-														<Copy />
-													</div>
+													<>
+														<IconButton
+															icon={<CircleX />}
+															aria-label="Clear"
+															variant="link"
+														/>
+														<IconButton
+															icon={<Copy />}
+															aria-label="Copy"
+															variant="link"
+														/>
+													</>
 												}
 												suffix="milliseconds"
 												disabled
@@ -300,14 +361,26 @@ export const Demo = {
 									{variant === "right" && (
 										<InputWithLabel
 											placeholder="Placeholder"
-											rightSlot={<CircleX />}
+											rightSlot={
+												<IconButton
+													icon={<CircleX />}
+													aria-label="Clear"
+													variant="link"
+												/>
+											}
 										/>
 									)}
 									{variant === "both" && (
 										<InputWithLabel
 											placeholder="Placeholder"
 											leftSlot={<Mail />}
-											rightSlot={<CircleX />}
+											rightSlot={
+												<IconButton
+													icon={<CircleX />}
+													aria-label="Clear"
+													variant="link"
+												/>
+											}
 										/>
 									)}
 									{variant === "left-double-right" && (
@@ -315,10 +388,18 @@ export const Demo = {
 											placeholder="Placeholder"
 											leftSlot={<Mail />}
 											rightSlot={
-												<div className="flex items-center gap-2">
-													<CircleX />
-													<Copy />
-												</div>
+												<>
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+													<IconButton
+														icon={<Copy />}
+														aria-label="Copy"
+														variant="link"
+													/>
+												</>
 											}
 											suffix="milliseconds"
 										/>
@@ -340,7 +421,13 @@ export const Demo = {
 									{variant === "right" && (
 										<InputWithLabel
 											placeholder="Placeholder"
-											rightSlot={<CircleX />}
+											rightSlot={
+												<IconButton
+													icon={<CircleX />}
+													aria-label="Clear"
+													variant="link"
+												/>
+											}
 											invalid
 										/>
 									)}
@@ -348,7 +435,13 @@ export const Demo = {
 										<InputWithLabel
 											placeholder="Placeholder"
 											leftSlot={<Mail />}
-											rightSlot={<CircleX />}
+											rightSlot={
+												<IconButton
+													icon={<CircleX />}
+													aria-label="Clear"
+													variant="link"
+												/>
+											}
 											invalid
 										/>
 									)}
@@ -357,10 +450,18 @@ export const Demo = {
 											placeholder="Placeholder"
 											leftSlot={<Mail />}
 											rightSlot={
-												<div className="flex items-center gap-2">
-													<CircleX />
-													<Copy />
-												</div>
+												<>
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+													<IconButton
+														icon={<Copy />}
+														aria-label="Copy"
+														variant="link"
+													/>
+												</>
 											}
 											suffix="milliseconds"
 											invalid
@@ -383,7 +484,13 @@ export const Demo = {
 									{variant === "right" && (
 										<InputWithLabel
 											placeholder="Aidbox"
-											rightSlot={<CircleX />}
+											rightSlot={
+												<IconButton
+													icon={<CircleX />}
+													aria-label="Clear"
+													variant="link"
+												/>
+											}
 											disabled
 										/>
 									)}
@@ -391,7 +498,13 @@ export const Demo = {
 										<InputWithLabel
 											placeholder="Aidbox"
 											leftSlot={<Mail />}
-											rightSlot={<CircleX />}
+											rightSlot={
+												<IconButton
+													icon={<CircleX />}
+													aria-label="Clear"
+													variant="link"
+												/>
+											}
 											disabled
 										/>
 									)}
@@ -400,10 +513,18 @@ export const Demo = {
 											placeholder="Aidbox"
 											leftSlot={<Mail />}
 											rightSlot={
-												<div className="flex items-center gap-2">
-													<CircleX />
-													<Copy />
-												</div>
+												<>
+													<IconButton
+														icon={<CircleX />}
+														aria-label="Clear"
+														variant="link"
+													/>
+													<IconButton
+														icon={<Copy />}
+														aria-label="Copy"
+														variant="link"
+													/>
+												</>
 											}
 											suffix="milliseconds"
 											disabled

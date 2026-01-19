@@ -28,6 +28,45 @@ export const Default: Story = {
 	},
 };
 
+export const Ghost: Story = {
+	args: {
+		icon: <Copy />,
+		"aria-label": "Copy",
+		variant: "ghost",
+	},
+};
+
+export const Link: Story = {
+	args: {
+		icon: <Copy />,
+		"aria-label": "Copy",
+		variant: "link",
+	},
+};
+
+export const Variants: Story = {
+	args: {
+		icon: <Copy />,
+		"aria-label": "Copy",
+	},
+	render: () => (
+		<div className="flex flex-col gap-4">
+			<div className="flex items-center gap-4">
+				<span className="w-16 text-sm text-text-secondary">Ghost:</span>
+				<IconButton icon={<Copy />} aria-label="Copy" variant="ghost" />
+				<IconButton icon={<Edit />} aria-label="Edit" variant="ghost" />
+				<IconButton icon={<Trash2 />} aria-label="Delete" variant="ghost" />
+			</div>
+			<div className="flex items-center gap-4">
+				<span className="w-16 text-sm text-text-secondary">Link:</span>
+				<IconButton icon={<Copy />} aria-label="Copy" variant="link" />
+				<IconButton icon={<Edit />} aria-label="Edit" variant="link" />
+				<IconButton icon={<Trash2 />} aria-label="Delete" variant="link" />
+			</div>
+		</div>
+	),
+};
+
 export const WithDifferentIcons: Story = {
 	args: {
 		icon: <Copy />,
