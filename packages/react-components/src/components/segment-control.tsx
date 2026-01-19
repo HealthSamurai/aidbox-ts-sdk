@@ -4,10 +4,17 @@ import { cn } from "#shadcn/lib/utils.js";
 // Styles
 const containerClass = cn(
 	"inline-flex",
-	"bg-bg-dark_tertiary",
+	"bg-bg-secondary_inverse",
 	"p-0.5",
 	"gap-0",
 	"rounded-full",
+	"border-1",
+	"border-transparent",
+	"outline-none",
+	"transition-all",
+	"focus-visible:border-border-link",
+	"focus-visible:ring-4",
+	"focus-visible:ring-ring-blue",
 );
 
 const itemBaseClass = cn(
