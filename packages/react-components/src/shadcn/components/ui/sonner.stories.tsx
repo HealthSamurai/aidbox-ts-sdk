@@ -1,100 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useEffect } from "react";
+import { Bug, Play } from "lucide-react";
 import { Button } from "#shadcn/components/ui/button";
 import { Toaster, toast } from "#shadcn/components/ui/sonner";
-
-/* ==========================================================================
-   Demo Component for Storybook Controls
-   ========================================================================== */
-
-interface ToastDemoProps {
-	variant: "info" | "error";
-	title: string;
-	description: string;
-	showCloseButton: boolean;
-	showAction: boolean;
-	actionLabel: string;
-}
-
-function ToastDemo({
-	variant,
-	title,
-	description,
-	showCloseButton,
-	showAction,
-	actionLabel,
-}: ToastDemoProps) {
-	// Показываем toast при изменении параметров
-	useEffect(() => {
-		toast.dismiss();
-
-		const toastFn = variant === "error" ? toast.error : toast.info;
-
-		const toastOptions: Parameters<typeof toastFn>[1] = {
-			description,
-			duration: Number.POSITIVE_INFINITY, // Не закрывать автоматически в docs
-		};
-
-		// Если showAction true, то показываем action, иначе показываем closeButton если он включен
-		if (showAction && actionLabel) {
-			toastOptions.action = {
-				label: actionLabel,
-				onClick: () => console.log("Action clicked"),
-			};
-		} else {
-			toastOptions.closeButton = showCloseButton;
-		}
-
-		toastFn(title, toastOptions);
-	}, [variant, title, description, showCloseButton, showAction, actionLabel]);
-
-	return (
-		<div className="min-h-[200px]">
-			<Toaster position="top-center" />
-		</div>
-	);
-}
 
 /* ==========================================================================
    Meta
    ========================================================================== */
 
-const meta: Meta<typeof ToastDemo> = {
+const meta = {
 	title: "Component/Sonner",
-	component: ToastDemo,
 	parameters: {
 		layout: "centered",
 	},
 	tags: ["autodocs"],
-	argTypes: {
-		variant: {
-			control: "select",
-			options: ["info", "error"],
-			description: "Toast variant",
-		},
-		title: {
-			control: "text",
-			description: "Toast title",
-		},
-		description: {
-			control: "text",
-			description: "Toast description",
-		},
-		showCloseButton: {
-			control: "boolean",
-			description: "Show close button (ignored when action is shown)",
-		},
-		showAction: {
-			control: "boolean",
-			description: "Show action button (hides close button)",
-			defaultValue: true,
-		},
-		actionLabel: {
-			control: "text",
-			description: "Action button label",
-		},
-	},
-};
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -102,41 +21,6 @@ type Story = StoryObj<typeof meta>;
 /* ==========================================================================
    Stories
    ========================================================================== */
-
-export const Default: Story = {
-	args: {
-		variant: "info",
-		title: "Event has been created",
-		description:
-			"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.",
-		showCloseButton: false,
-		showAction: true,
-		actionLabel: "Undo",
-	},
-};
-
-export const ErrorVariant: Story = {
-	args: {
-		variant: "error",
-		title: "Something went wrong",
-		description:
-			"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.",
-		showCloseButton: false,
-		showAction: true,
-		actionLabel: "Retry",
-	},
-};
-
-export const WithAction: Story = {
-	args: {
-		variant: "info",
-		title: "Event has been created",
-		description: "You can undo this action.",
-		showCloseButton: false,
-		showAction: true,
-		actionLabel: "Undo",
-	},
-};
 
 export const AllVariants: Story = {
 	render: () => (
@@ -147,11 +31,23 @@ export const AllVariants: Story = {
 					onClick={() => {
 						toast.info("Info notification", {
 							description: "This is an informational message.",
+							closeButton: false,
+						});
+					}}
+				>
+					Info without buttons
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.info("Info notification", {
+							description: "This is an informational message.",
 							closeButton: true,
 						});
 					}}
 				>
-					Info with close
+					Info with close button
 				</Button>
 
 				<Button
@@ -159,14 +55,97 @@ export const AllVariants: Story = {
 					onClick={() => {
 						toast.info("Info with action", {
 							description: "Click the button to undo.",
-							action: {
-								label: "Undo",
-								onClick: () => console.log("Undo clicked"),
-							},
+							actionSlot: (
+								<Button variant="primary" size="small">
+									<Play className="size-4" />
+									Button
+								</Button>
+							),
+							closeButton: false,
 						});
 					}}
 				>
-					Info with action
+					Info with one button
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.info("Info with action", {
+							description: "Click the button to undo.",
+							actionSlot: (
+								<Button variant="primary" size="small">
+									<Play className="size-4" />
+									Button
+								</Button>
+							),
+							closeButton: true,
+						});
+					}}
+				>
+					Info with button and close
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.info("Info with actions", {
+							description:
+								"Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+							actionSlot: (
+								<Button variant="primary" size="small">
+									<Play className="size-4" />
+									Button
+								</Button>
+							),
+							secondaryActionSlot: (
+								<Button variant="ghost" size="small">
+									<Bug className="size-4" />
+									Report a bug
+								</Button>
+							),
+							closeButton: false,
+						});
+					}}
+				>
+					Info with two buttons
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.info("Info with actions", {
+							description:
+								"Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+							actionSlot: (
+								<Button variant="primary" size="small">
+									<Play className="size-4" />
+									Button
+								</Button>
+							),
+							secondaryActionSlot: (
+								<Button variant="ghost" size="small">
+									<Bug className="size-4" />
+									Report a bug
+								</Button>
+							),
+							closeButton: true,
+						});
+					}}
+				>
+					Info with two buttons and close
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.error("Error notification", {
+							description: "This is an error message.",
+							closeButton: false,
+						});
+					}}
+				>
+					Error without buttons
 				</Button>
 
 				<Button
@@ -178,7 +157,7 @@ export const AllVariants: Story = {
 						});
 					}}
 				>
-					Error with close
+					Error with close button
 				</Button>
 
 				<Button
@@ -186,14 +165,81 @@ export const AllVariants: Story = {
 					onClick={() => {
 						toast.error("Error with action", {
 							description: "Click the button to retry.",
-							action: {
-								label: "Retry",
-								onClick: () => console.log("Retry clicked"),
-							},
+							actionSlot: (
+								<Button variant="primary" size="small" danger>
+									Retry
+								</Button>
+							),
+							closeButton: false,
 						});
 					}}
 				>
-					Error with action
+					Error with one button
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.error("Error with action", {
+							description: "Click the button to retry.",
+							actionSlot: (
+								<Button variant="primary" size="small" danger>
+									Retry
+								</Button>
+							),
+							closeButton: true,
+						});
+					}}
+				>
+					Error with button and close
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.error("Error with actions", {
+							description:
+								"Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+							actionSlot: (
+								<Button variant="primary" size="small" danger>
+									Retry
+								</Button>
+							),
+							secondaryActionSlot: (
+								<Button variant="ghost" size="small" danger>
+									<Bug className="size-4" />
+									Report a bug
+								</Button>
+							),
+							closeButton: false,
+						});
+					}}
+				>
+					Error with two buttons
+				</Button>
+
+				<Button
+					variant="secondary"
+					onClick={() => {
+						toast.error("Error with actions", {
+							description:
+								"Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+							actionSlot: (
+								<Button variant="primary" size="small" danger>
+									Retry
+								</Button>
+							),
+							secondaryActionSlot: (
+								<Button variant="ghost" size="small" danger>
+									<Bug className="size-4" />
+									Report a bug
+								</Button>
+							),
+							closeButton: true,
+						});
+					}}
+				>
+					Error with two buttons and close
 				</Button>
 			</div>
 			<Toaster position="top-center" />
