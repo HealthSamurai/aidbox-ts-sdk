@@ -257,6 +257,7 @@ export const Demo = {
 														icon={<CircleX />}
 														aria-label="Clear"
 														variant="link"
+														disabled
 													/>
 												}
 												disabled
@@ -271,6 +272,7 @@ export const Demo = {
 														icon={<CircleX />}
 														aria-label="Clear"
 														variant="link"
+														disabled
 													/>
 												}
 												disabled
@@ -287,11 +289,13 @@ export const Demo = {
 															icon={<CircleX />}
 															aria-label="Clear"
 															variant="link"
+															disabled
 														/>
 														<IconButton
 															icon={<Copy />}
 															aria-label="Copy"
 															variant="link"
+															disabled
 														/>
 													</>
 												}
@@ -489,6 +493,7 @@ export const Demo = {
 													icon={<CircleX />}
 													aria-label="Clear"
 													variant="link"
+													disabled
 												/>
 											}
 											disabled
@@ -503,6 +508,7 @@ export const Demo = {
 													icon={<CircleX />}
 													aria-label="Clear"
 													variant="link"
+													disabled
 												/>
 											}
 											disabled
@@ -518,11 +524,13 @@ export const Demo = {
 														icon={<CircleX />}
 														aria-label="Clear"
 														variant="link"
+														disabled
 													/>
 													<IconButton
 														icon={<Copy />}
 														aria-label="Copy"
 														variant="link"
+														disabled
 													/>
 												</>
 											}
