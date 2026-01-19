@@ -1,15 +1,14 @@
 "use client";
 
-import type { VariantProps } from "class-variance-authority";
 import { Info, TriangleAlert, X } from "lucide-react";
 import { useTheme } from "next-themes";
+import type * as React from "react";
 import {
 	Toaster as Sonner,
 	toast as sonnerToast,
 	type ToasterProps,
 } from "sonner";
 import { cn } from "#shadcn/lib/utils";
-import { Button, type buttonVariants } from "./button";
 
 /* ==========================================================================
    Styles
@@ -117,13 +116,8 @@ interface ToastContentProps {
 	description?: string | undefined;
 	variant?: ToastVariant;
 	showCloseButton?: boolean;
-	action?:
-		| {
-				label: string;
-				onClick: () => void;
-				variant?: VariantProps<typeof buttonVariants>["variant"];
-		  }
-		| undefined;
+	actionSlot?: React.ReactNode;
+	secondaryActionSlot?: React.ReactNode;
 }
 
 function ToastContent({
@@ -132,12 +126,15 @@ function ToastContent({
 	description,
 	variant = "default",
 	showCloseButton = false,
-	action,
+	actionSlot,
+	secondaryActionSlot,
 }: ToastContentProps) {
 	const isError = variant === "error";
 
 	const Icon = isError ? TriangleAlert : Info;
 	const iconColor = isError ? "text-text-error-primary" : "text-text-primary";
+
+	const hasActions = actionSlot || secondaryActionSlot;
 
 	return (
 		<div className={isError ? toastErrorStyles : toastDefaultStyles}>
@@ -160,20 +157,15 @@ function ToastContent({
 						{description}
 					</div>
 				)}
-				{action ? (
-					<div className="mt-1">
-						<Button
-							variant={action.variant || "secondary"}
-							size="small"
-							onClick={action.onClick}
-						>
-							{action.label}
-						</Button>
+				{hasActions && (
+					<div className="mt-1 flex items-center gap-2 flex-wrap">
+						{actionSlot && <div>{actionSlot}</div>}
+						{secondaryActionSlot && <div>{secondaryActionSlot}</div>}
 					</div>
-				) : null}
+				)}
 			</div>
 
-			{/* Close button - only shown if no action */}
+			{/* Close button - always shown if showCloseButton is true */}
 			{showCloseButton && (
 				<button
 					type="button"
@@ -220,13 +212,8 @@ function Toaster({ ...props }: ToasterProps) {
 
 interface ToastOptions {
 	description?: string;
-	action?:
-		| {
-				label: string;
-				onClick: () => void;
-				variant?: VariantProps<typeof buttonVariants>["variant"];
-		  }
-		| undefined;
+	actionSlot?: React.ReactNode;
+	secondaryActionSlot?: React.ReactNode;
 	closeButton?: boolean;
 	duration?: number;
 }
@@ -236,9 +223,7 @@ function createToast(
 	variant: ToastVariant,
 	options?: ToastOptions,
 ) {
-	// If action exists, no close button; otherwise respect closeButton option
-	const hasAction = options?.action !== undefined && options?.action !== null;
-	const showCloseButton = hasAction ? false : (options?.closeButton ?? false);
+	const showCloseButton = options?.closeButton ?? false;
 
 	return sonnerToast.custom(
 		(id) => {
@@ -247,12 +232,9 @@ function createToast(
 				description: options?.description,
 				variant,
 				showCloseButton,
+				actionSlot: options?.actionSlot,
+				secondaryActionSlot: options?.secondaryActionSlot,
 			};
-
-			// Добавляем action только если оно действительно есть
-			if (hasAction && options.action) {
-				contentProps.action = options.action;
-			}
 
 			return <ToastContent id={id} {...contentProps} />;
 		},
