@@ -46,3 +46,15 @@ export const Demo = {
 		</div>
 	),
 } satisfies Story;
+
+export const TwoLetterAvatars = {
+	render: () => (
+		<div className="flex flex-col items-center gap-8">
+			<div className="flex flex-row flex-wrap items-center gap-12">
+				<Avatar>
+					<AvatarFallback>KB</AvatarFallback>
+				</Avatar>
+			</div>
+		</div>
+	),
+} satisfies Story;

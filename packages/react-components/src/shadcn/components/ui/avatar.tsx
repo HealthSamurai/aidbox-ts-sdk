@@ -47,11 +47,16 @@ function AvatarFallback({
 			data-slot="avatar-fallback"
 			className={cn(
 				"bg-bg-tertiary",
+				"text-text-secondary",
 				"flex",
 				"size-full",
 				"items-center",
 				"justify-center",
 				"rounded-full",
+				"transition-colors",
+				"cursor-pointer",
+				"hover:bg-bg-dark_tertiary",
+				"hover:text-text-primary_on-brand",
 				className,
 			)}
 			{...props}
