@@ -12,7 +12,9 @@ const toggleGroupStyles = cn(
 	"w-fit",
 	"items-center",
 	"rounded-md",
-	"data-[variant=outline]:shadow-xs",
+	"bg-bg-primary",
+	"border",
+	"border-border-primary",
 );
 
 // Toggle group item styles
@@ -26,8 +28,11 @@ const toggleGroupItemStyles = cn(
 	"last:rounded-r-md",
 	"focus:z-10",
 	"focus-visible:z-10",
-	"data-[variant=outline]:border-l-0",
-	"data-[variant=outline]:first:border-l",
+	// Убираем все границы у элементов внутри группы
+	"data-[variant=outline]:border-0",
+	// Добавляем правую границу как разделитель (кроме последнего элемента)
+	"data-[variant=outline]:[&:not(:last-child)]:border-r",
+	"data-[variant=outline]:[&:not(:last-child)]:border-r-border-primary",
 );
 
 const ToggleGroupContext = React.createContext<
