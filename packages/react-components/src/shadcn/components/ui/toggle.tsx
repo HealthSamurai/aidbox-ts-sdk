@@ -50,7 +50,10 @@ const toggleVariants = cva(baseToggleStyles, {
 	variants: {
 		variant: {
 			filled: cn("data-[state=on]:bg-bg-tertiary"),
-			outline: cn("data-[state=on]:border-border-separator"),
+			outline: cn(
+				"data-[state=on]:border-border-separator",
+				"data-[state=on]:bg-bg-secondary",
+			),
 		},
 	},
 	defaultVariants: {
