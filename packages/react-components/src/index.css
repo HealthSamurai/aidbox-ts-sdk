@@ -105,6 +105,24 @@
 	--color-utility-blue: var(--color-blue-500);
 	--color-utility-violet: var(--color-violet-500);
 	--color-utility-red: var(--color-red-500);
+
+	/* Tag colors */
+	--color-tag-green-vivid-bg: var(--color-green-500);
+	--color-tag-green-subtle-bg: var(--color-green-300);
+	--color-tag-green-subtle-text: var(--color-green-700);
+	--color-tag-gray-vivid-bg: var(--color-grey-500);
+	--color-tag-gray-subtle-bg: var(--color-grey-100);
+	--color-tag-red-vivid-bg: var(--color-red-500);
+	--color-tag-red-subtle-bg: var(--color-red-200);
+	--color-tag-red-subtle-text: var(--color-red-700);
+	--color-tag-blue-vivid-bg: var(--color-blue-500);
+	--color-tag-blue-subtle-bg: var(--color-blue-300);
+	--color-tag-blue-subtle-text: var(--color-blue-600);
+	--color-tag-yellow-vivid-bg: var(--color-yellow-500);
+	--color-tag-yellow-vivid-text: var(--color-yellow-900);
+	--color-tag-yellow-subtle-bg: var(--color-yellow-300);
+	--color-tag-yellow-subtle-text: var(--color-yellow-800);
+
 	--font-leading-14: 56px;
 }
 

@@ -21,16 +21,21 @@ const meta: Meta<typeof Tag> = {
 	},
 	tags: ["autodocs"],
 	argTypes: {
-		type: {
+		shape: {
 			control: "select",
-			options: ["square", "round"],
+			options: ["round", "square"],
+		},
+		size: {
+			control: "select",
+			options: ["big", "small"],
+		},
+		vibrance: {
+			control: "select",
+			options: ["vivid", "subtle"],
 		},
 		color: {
 			control: "select",
-			options: ["green", "gray", "red", "bright", "blue", "yellow"],
-		},
-		subtle: {
-			control: "boolean",
+			options: ["red", "yellow", "green", "blue", "gray"],
 		},
 		showIcon: {
 			control: "boolean",
@@ -45,95 +50,125 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const AllVariants: Story = {
-	render: () => (
-		<div className="flex flex-col gap-6">
-			{/* Vivid variants */}
-			<div className="flex flex-col gap-2">
-				<h3 className="text-sm font-medium">Vivid (Solid)</h3>
-				<div className="flex flex-wrap gap-4">
-					<Tag type="round" color="red" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="yellow" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="green" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="blue" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="gray" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-				</div>
-			</div>
+	render: () => {
+		const colors = [
+			{ label: "Red", value: "red" },
+			{ label: "Yellow", value: "yellow" },
+			{ label: "Green", value: "green" },
+			{ label: "Blue", value: "blue" },
+			{ label: "Gray", value: "gray" },
+		] as const;
 
-			{/* Subtle variants */}
-			<div className="flex flex-col gap-2">
-				<h3 className="text-sm font-medium">Subtle</h3>
-				<div className="flex flex-wrap gap-4">
-					<Tag type="round" color="red" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="yellow" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="green" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="blue" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="round" color="gray" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-				</div>
-			</div>
+		const columns = [
+			{
+				shape: "round" as const,
+				size: "big" as const,
+				vibrance: "vivid" as const,
+			},
+			{
+				shape: "round" as const,
+				size: "big" as const,
+				vibrance: "subtle" as const,
+			},
+			{
+				shape: "round" as const,
+				size: "small" as const,
+				vibrance: "vivid" as const,
+			},
+			{
+				shape: "round" as const,
+				size: "small" as const,
+				vibrance: "subtle" as const,
+			},
+			{
+				shape: "square" as const,
+				size: "big" as const,
+				vibrance: "vivid" as const,
+			},
+			{
+				shape: "square" as const,
+				size: "big" as const,
+				vibrance: "subtle" as const,
+			},
+			{
+				shape: "square" as const,
+				size: "small" as const,
+				vibrance: "vivid" as const,
+			},
+			{
+				shape: "square" as const,
+				size: "small" as const,
+				vibrance: "subtle" as const,
+			},
+		];
 
-			{/* Square Vivid variants */}
-			<div className="flex flex-col gap-2">
-				<h3 className="text-sm font-medium">Square Shape (Vivid)</h3>
-				<div className="flex flex-wrap gap-4">
-					<Tag type="square" color="red" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="yellow" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="green" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="blue" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="gray" subtle={false} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-				</div>
+		return (
+			<div className="overflow-x-auto">
+				<table className="border-collapse">
+					<thead>
+						<tr>
+							<th className="sticky left-0 z-20 bg-white p-2 text-left border border-gray-200">
+								Color
+							</th>
+							<th
+								colSpan={4}
+								className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
+							>
+								Shape=Round
+							</th>
+							<th
+								colSpan={4}
+								className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
+							>
+								Shape=Square
+							</th>
+						</tr>
+						<tr>
+							<th className="sticky left-0 z-10 bg-white p-2 text-left border border-gray-200"></th>
+							{columns.map((col) => (
+								<th
+									key={`${col.shape}-${col.size}-${col.vibrance}`}
+									className="p-2 text-center border border-gray-200 whitespace-nowrap bg-gray-50"
+								>
+									<div className="flex flex-col gap-1">
+										<span className="typo-label-xs">
+											Size={col.size === "big" ? "Big" : "Small"}
+										</span>
+										<span className="typo-label-xs">
+											Vibrance={col.vibrance === "vivid" ? "Vivid" : "Subtle"}
+										</span>
+									</div>
+								</th>
+							))}
+						</tr>
+					</thead>
+					<tbody>
+						{colors.map((color) => (
+							<tr key={color.value}>
+								<td className="sticky left-0 z-10 bg-white p-2 typo-label border border-gray-200">
+									{color.label}
+								</td>
+								{columns.map((col) => (
+									<td
+										key={`${color.value}-${col.shape}-${col.size}-${col.vibrance}`}
+										className="p-2 border border-gray-200 text-center"
+									>
+										<Tag
+											shape={col.shape}
+											size={col.size}
+											vibrance={col.vibrance}
+											color={color.value}
+											icon={<CheckIcon />}
+										>
+											Tag
+										</Tag>
+									</td>
+								))}
+							</tr>
+						))}
+					</tbody>
+				</table>
 			</div>
-
-			{/* Square Subtle variants */}
-			<div className="flex flex-col gap-2">
-				<h3 className="text-sm font-medium">Square Shape (Subtle)</h3>
-				<div className="flex flex-wrap gap-4">
-					<Tag type="square" color="red" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="yellow" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="green" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="blue" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-					<Tag type="square" color="gray" subtle={true} icon={<CheckIcon />}>
-						Tag label
-					</Tag>
-				</div>
-			</div>
-		</div>
-	),
+		);
+	},
 };
