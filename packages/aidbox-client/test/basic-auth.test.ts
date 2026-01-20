@@ -7,7 +7,6 @@ import { describe, expect, it } from "vitest";
 const baseUrl = "http://localhost:8080";
 
 describe("BasicAuthProvider", () => {
-
 	describe("restricted access policy", () => {
 		const restrictedClient = new AidboxClient<Bundle, OperationOutcome, User>(
 			baseUrl,
