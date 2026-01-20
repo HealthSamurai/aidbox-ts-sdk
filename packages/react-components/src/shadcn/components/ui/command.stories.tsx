@@ -82,6 +82,11 @@ const meta = {
 			page: () => (
 				<>
 					<Title />
+					<p className="sbdocs-p">
+						Command is a composable command menu component. It is also used
+						internally by the <strong>Combobox</strong> component for the
+						dropdown content.
+					</p>
 					<Primary />
 					<Controls />
 				</>

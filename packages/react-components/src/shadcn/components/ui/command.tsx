@@ -188,8 +188,8 @@ const commandItemStyles = cn(
 	// States
 	"outline-hidden",
 	"data-[state=checked]:bg-bg-tertiary",
-	"group-hover:data-[state=checked]:bg-transparent",
-	"hover:bg-bg-tertiary",
+	"data-[state=checked]:hover:bg-bg-secondary",
+	"hover:bg-bg-secondary",
 	"hover:text-text-primary",
 	"data-[state=checked]:text-text-primary",
 	"data-[disabled=true]:pointer-events-none",
