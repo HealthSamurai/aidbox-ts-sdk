@@ -1,16 +1,6 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { action } from "storybook/internal/actions";
-import { Button } from "#shadcn/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "#shadcn/components/ui/card";
-import { Input } from "#shadcn/components/ui/input";
-import { Label } from "#shadcn/components/ui/label";
 import {
 	Tabs,
 	TabsAddButton,
@@ -20,209 +10,219 @@ import {
 	TabsTrigger,
 } from "#shadcn/components/ui/tabs";
 
+interface TabsWrapperProps {
+	variant?: "default" | "browser" | "secondary";
+}
+
+function TabsWrapper({ variant = "default" }: TabsWrapperProps) {
+	if (variant === "browser") {
+		return (
+			<Tabs defaultValue="first" variant="browser">
+				<TabsList>
+					<TabsTrigger
+						value="first"
+						onClick={() => action("onClick")()}
+						onClose={(v) => action("onClose")(v)}
+					>
+						<span className="flex items-center gap-1">
+							<span className="text-utility-green">GET</span>
+							<span>/fhir/Patient</span>
+						</span>
+					</TabsTrigger>
+					<TabsTrigger
+						value="second"
+						onClick={() => action("onClick")()}
+						onClose={(v) => action("onClose")(v)}
+					>
+						<span className="flex items-center gap-1">
+							<span className="text-utility-yellow">POST</span>
+							<span>/fhir</span>
+						</span>
+					</TabsTrigger>
+				</TabsList>
+				<TabsAddButton onClick={() => action("onAdd")()} />
+				<TabsContent value="first">
+					<div className="p-4">GET /fhir/Patient content</div>
+				</TabsContent>
+				<TabsContent value="second">
+					<div className="p-4">POST /fhir content</div>
+				</TabsContent>
+			</Tabs>
+		);
+	}
+
+	if (variant === "secondary") {
+		return (
+			<Tabs defaultValue="tab1" variant="secondary">
+				<TabsList>
+					<TabsTrigger value="tab1">Tab 1</TabsTrigger>
+					<TabsTrigger value="tab2">Tab 2</TabsTrigger>
+					<TabsTrigger value="tab3">Tab 3</TabsTrigger>
+				</TabsList>
+				<TabsContent value="tab1">
+					<div className="p-4">Tab 1 content</div>
+				</TabsContent>
+				<TabsContent value="tab2">
+					<div className="p-4">Tab 2 content</div>
+				</TabsContent>
+				<TabsContent value="tab3">
+					<div className="p-4">Tab 3 content</div>
+				</TabsContent>
+			</Tabs>
+		);
+	}
+
+	return (
+		<Tabs defaultValue="tab1">
+			<TabsList>
+				<TabsTrigger value="tab1">Tab 1</TabsTrigger>
+				<TabsTrigger value="tab2">Tab 2</TabsTrigger>
+				<TabsTrigger value="tab3">Tab 3</TabsTrigger>
+			</TabsList>
+			<TabsContent value="tab1">
+				<div className="p-4">Tab 1 content</div>
+			</TabsContent>
+			<TabsContent value="tab2">
+				<div className="p-4">Tab 2 content</div>
+			</TabsContent>
+			<TabsContent value="tab3">
+				<div className="p-4">Tab 3 content</div>
+			</TabsContent>
+		</Tabs>
+	);
+}
+
 const meta = {
 	title: "Component/Tabs",
-	argTypes: {
-		variant: {
-			options: ["button", "dashed", "browser", "secondary"],
-			control: { type: "select" },
+	component: TabsWrapper,
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
 		},
 	},
-} satisfies Meta;
+	argTypes: {
+		variant: {
+			control: "select",
+			options: ["default", "browser", "secondary"],
+		},
+	},
+	args: {
+		variant: "default",
+	},
+} satisfies Meta<typeof TabsWrapper>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Demo = {
-	render: (props) => (
-		<div className="flex w-full max-w-sm flex-col gap-6">
-			<Tabs defaultValue="account" {...props}>
-				<TabsList>
-					<TabsTrigger value="account">Account</TabsTrigger>
-					<TabsTrigger value="password">Password</TabsTrigger>
-				</TabsList>
-				<TabsContent value="account">
-					<Card>
-						<CardHeader>
-							<CardTitle>Account</CardTitle>
-							<CardDescription>
-								Make changes to your account here. Click save when you&apos;re
-								done.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="grid gap-6">
-							<div className="grid gap-3">
-								<Label htmlFor="tabs-demo-name">Name</Label>
-								<Input id="tabs-demo-name" defaultValue="Pedro Duarte" />
-							</div>
-							<div className="grid gap-3">
-								<Label htmlFor="tabs-demo-username">Username</Label>
-								<Input id="tabs-demo-username" defaultValue="@peduarte" />
-							</div>
-						</CardContent>
-						<CardFooter>
-							<Button>Save changes</Button>
-						</CardFooter>
-					</Card>
-				</TabsContent>
-				<TabsContent value="password">
-					<Card>
-						<CardHeader>
-							<CardTitle>Password</CardTitle>
-							<CardDescription>
-								Change your password here. After saving, you&apos;ll be logged
-								out.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="grid gap-6">
-							<div className="grid gap-3">
-								<Label htmlFor="tabs-demo-current">Current password</Label>
-								<Input id="tabs-demo-current" type="password" />
-							</div>
-							<div className="grid gap-3">
-								<Label htmlFor="tabs-demo-new">New password</Label>
-								<Input id="tabs-demo-new" type="password" />
-							</div>
-						</CardContent>
-						<CardFooter>
-							<Button>Save password</Button>
-						</CardFooter>
-					</Card>
-				</TabsContent>
-			</Tabs>
-		</div>
-	),
+export const Default = {
+	tags: ["!dev"],
+	render: ({ variant = "default" }) => <TabsWrapper variant={variant} />,
 } satisfies Story;
 
-function BrowserTabOnClose(value: string) {
-	action("onClose")(value);
-}
-
-function BrowserTabOnClick() {
-	action("onClick")();
-}
-
-function BrowserTabOnAdd() {
-	action("onAdd")();
-}
-
-export const Browser = {
-	parameters: {
-		layout: "fullscreen",
-	},
+export const Demo = {
+	tags: ["!autodocs"],
 	render: () => (
-		<Tabs defaultValue="first" variant="browser">
-			<TabsList>
-				<TabsTrigger
-					value="first"
-					onClick={BrowserTabOnClick}
-					onClose={BrowserTabOnClose}
-				>
-					<span className="flex items-center gap-1">
-						<span className="text-utility-green">GET</span>
-						<span>/fhir/Patient</span>
-					</span>
-				</TabsTrigger>
-				<TabsTrigger
-					value="second"
-					onClick={BrowserTabOnClick}
-					onClose={BrowserTabOnClose}
-				>
-					<span className="flex items-center gap-1">
-						<span className="text-utility-yellow">POST</span>
-						<span>/fhir</span>
-					</span>
-				</TabsTrigger>
-				<TabsTrigger
-					value="third"
-					onClick={BrowserTabOnClick}
-					onClose={BrowserTabOnClose}
-				>
-					<span className="flex items-center gap-1">
-						<span className="text-utility-yellow">POST</span>
-						<span>/$graphql</span>
-					</span>
-				</TabsTrigger>
-			</TabsList>
-			<TabsAddButton onClick={BrowserTabOnAdd} />
-			<TabsListDropdown
-				tabs={[
-					{
-						id: "first",
-						content: (
+		<div className="space-y-8">
+			{/* Default variant */}
+			<div>
+				<h3 className="typo-label mb-4">Default</h3>
+				<Tabs defaultValue="tab1">
+					<TabsList>
+						<TabsTrigger value="tab1">Tab 1</TabsTrigger>
+						<TabsTrigger value="tab2">Tab 2</TabsTrigger>
+						<TabsTrigger value="tab3">Tab 3</TabsTrigger>
+					</TabsList>
+				</Tabs>
+			</div>
+
+			{/* Secondary variant */}
+			<div>
+				<h3 className="typo-label mb-4">Secondary</h3>
+				<Tabs defaultValue="tab1" variant="secondary">
+					<TabsList>
+						<TabsTrigger value="tab1">Tab 1</TabsTrigger>
+						<TabsTrigger value="tab2">Tab 2</TabsTrigger>
+						<TabsTrigger value="tab3">Tab 3</TabsTrigger>
+					</TabsList>
+				</Tabs>
+			</div>
+
+			{/* Browser variant */}
+			<div>
+				<h3 className="typo-label mb-4">Browser</h3>
+				<Tabs defaultValue="first" variant="browser">
+					<TabsList>
+						<TabsTrigger
+							value="first"
+							onClick={() => action("onClick")()}
+							onClose={(v) => action("onClose")(v)}
+						>
 							<span className="flex items-center gap-1">
 								<span className="text-utility-green">GET</span>
 								<span>/fhir/Patient</span>
 							</span>
-						),
-					},
-					{
-						id: "second",
-						content: (
+						</TabsTrigger>
+						<TabsTrigger
+							value="second"
+							onClick={() => action("onClick")()}
+							onClose={(v) => action("onClose")(v)}
+						>
 							<span className="flex items-center gap-1">
 								<span className="text-utility-yellow">POST</span>
 								<span>/fhir</span>
 							</span>
-						),
-					},
-					{
-						id: "third",
-						content: (
+						</TabsTrigger>
+						<TabsTrigger
+							value="third"
+							onClick={() => action("onClick")()}
+							onClose={(v) => action("onClose")(v)}
+						>
 							<span className="flex items-center gap-1">
 								<span className="text-utility-yellow">POST</span>
 								<span>/$graphql</span>
 							</span>
-						),
-					},
-				]}
-			/>
-		</Tabs>
-	),
-} satisfies Story;
-
-export const Secondary = {
-	render: (props) => (
-		<div className="flex w-full max-w-md flex-col gap-6">
-			<Tabs defaultValue="json" variant="secondary" {...props}>
-				<TabsList>
-					<TabsTrigger value="json">JSON</TabsTrigger>
-					<TabsTrigger value="yaml">YAML</TabsTrigger>
-					<TabsTrigger value="xml">XML</TabsTrigger>
-				</TabsList>
-				<TabsContent value="json">
-					<Card>
-						<CardHeader>
-							<CardTitle>JSON Content</CardTitle>
-							<CardDescription>JSON format content here</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<pre className="text-sm">{'{\n  "key": "value"\n}'}</pre>
-						</CardContent>
-					</Card>
-				</TabsContent>
-				<TabsContent value="yaml">
-					<Card>
-						<CardHeader>
-							<CardTitle>YAML Content</CardTitle>
-							<CardDescription>YAML format content here</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<pre className="text-sm">{"key: value"}</pre>
-						</CardContent>
-					</Card>
-				</TabsContent>
-				<TabsContent value="xml">
-					<Card>
-						<CardHeader>
-							<CardTitle>XML Content</CardTitle>
-							<CardDescription>XML format content here</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<pre className="text-sm">{"<key>value</key>"}</pre>
-						</CardContent>
-					</Card>
-				</TabsContent>
-			</Tabs>
+						</TabsTrigger>
+					</TabsList>
+					<TabsAddButton onClick={() => action("onAdd")()} />
+					<TabsListDropdown
+						tabs={[
+							{
+								id: "first",
+								content: (
+									<span className="flex items-center gap-1">
+										<span className="text-utility-green">GET</span>
+										<span>/fhir/Patient</span>
+									</span>
+								),
+							},
+							{
+								id: "second",
+								content: (
+									<span className="flex items-center gap-1">
+										<span className="text-utility-yellow">POST</span>
+										<span>/fhir</span>
+									</span>
+								),
+							},
+							{
+								id: "third",
+								content: (
+									<span className="flex items-center gap-1">
+										<span className="text-utility-yellow">POST</span>
+										<span>/$graphql</span>
+									</span>
+								),
+							},
+						]}
+					/>
+				</Tabs>
+			</div>
 		</div>
 	),
 } satisfies Story;
