@@ -1,4 +1,4 @@
-import { BrowserAuthProvider } from "src/auth-providers";
+import { BasicAuthProvider } from "src/auth-providers";
 import { AidboxClient } from "src/client.js";
 import type {
 	Bundle,
@@ -12,7 +12,7 @@ const baseUrl = "http://localhost:8080";
 
 const client = new AidboxClient<Bundle, OperationOutcome, User>(
 	baseUrl,
-	new BrowserAuthProvider(baseUrl),
+	new BasicAuthProvider(baseUrl, "basic", "Pa$$w0rd"),
 );
 
 const patientId = "pt-test-id";
@@ -214,7 +214,7 @@ describe("Instance Level Interaction", () => {
 			const result = await client.vread({
 				id: patientId,
 				type: "Patient",
-				vid: "8",
+				vid: "14",
 			});
 			expect(result.isOk()).toBeTruthy();
 			if (result.isOk())
