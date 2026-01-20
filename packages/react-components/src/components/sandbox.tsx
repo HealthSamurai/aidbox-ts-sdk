@@ -69,6 +69,8 @@ const copyButtonStyles = cn(
 	"shrink-0",
 	// Sizing
 	"size-4",
+	// Cursor
+	"cursor-pointer",
 	// Hover
 	"hover:opacity-80",
 	"transition-opacity",
@@ -84,6 +86,8 @@ const eyeButtonStyles = cn(
 	"shrink-0",
 	// Sizing
 	"size-4",
+	// Cursor
+	"cursor-pointer",
 	// Hover
 	"hover:opacity-80",
 	"transition-opacity",

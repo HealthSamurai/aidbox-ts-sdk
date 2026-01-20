@@ -25,6 +25,10 @@ const requestMethodVariants = cva<{ method: { [K in RequestMethod]: string } }>(
 		"text-left",
 		"items-center",
 		"w-26",
+		// Focus states
+		"focus-visible:ring-3",
+		"focus-visible:ring-ring-blue",
+		"focus-visible:border-border-link",
 	),
 	{
 		variants: {
