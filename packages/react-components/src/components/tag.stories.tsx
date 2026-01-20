@@ -1,25 +1,45 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Tag } from "./tag";
+import { Check, Circle, Star, X, Zap } from "lucide-react";
+import { Tag, type TagProps } from "./tag";
 
-const CheckIcon = () => (
-	<svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-		<title>Check icon</title>
-		<path
-			d="M13.5 4.5L6 12L2.5 8.5"
-			stroke="currentColor"
-			strokeWidth="1.5"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-		/>
-	</svg>
-);
-const meta: Meta<typeof Tag> = {
+const iconMap = {
+	check: <Check className="size-4" />,
+	star: <Star className="size-4" />,
+	zap: <Zap className="size-4" />,
+	circle: <Circle className="size-4" />,
+	x: <X className="size-4" />,
+} as const;
+
+type IconName = keyof typeof iconMap;
+
+interface TagWrapperProps extends Omit<TagProps, "icon"> {
+	icon?: IconName;
+}
+
+function TagWrapper({ icon = "check", children, ...props }: TagWrapperProps) {
+	return (
+		<Tag icon={iconMap[icon]} {...props}>
+			{children}
+		</Tag>
+	);
+}
+
+const meta = {
 	title: "Component/Tag",
-	component: Tag,
+	component: TagWrapper,
 	parameters: {
 		layout: "centered",
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
 	},
-	tags: ["autodocs"],
 	argTypes: {
 		shape: {
 			control: "select",
@@ -41,15 +61,36 @@ const meta: Meta<typeof Tag> = {
 			control: "boolean",
 		},
 		icon: {
-			control: false,
+			control: "select",
+			options: ["check", "star", "zap", "circle", "x"],
+		},
+		children: {
+			control: "text",
 		},
 	},
-};
+	args: {
+		children: "Tag",
+		shape: "round",
+		size: "big",
+		vibrance: "vivid",
+		color: "green",
+		showIcon: true,
+		icon: "check",
+	},
+} satisfies Meta<typeof TagWrapper>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const AllVariants: Story = {
+export const Default = {
+	tags: ["!dev"],
+	render: ({ children, ...args }) => (
+		<TagWrapper {...args}>{children}</TagWrapper>
+	),
+} satisfies Story;
+
+export const Demo = {
+	tags: ["!autodocs"],
 	render: () => {
 		const colors = [
 			{ label: "Red", value: "red" },
@@ -124,7 +165,7 @@ export const AllVariants: Story = {
 							</th>
 						</tr>
 						<tr>
-							<th className="sticky left-0 z-10 bg-white p-2 text-left border border-gray-200"></th>
+							<th className="sticky left-0 z-10 bg-white p-2 text-left border border-gray-200" />
 							{columns.map((col) => (
 								<th
 									key={`${col.shape}-${col.size}-${col.vibrance}`}
@@ -158,7 +199,7 @@ export const AllVariants: Story = {
 											size={col.size}
 											vibrance={col.vibrance}
 											color={color.value}
-											icon={<CheckIcon />}
+											icon={<Check className="size-4" />}
 										>
 											Tag
 										</Tag>
@@ -171,4 +212,4 @@ export const AllVariants: Story = {
 			</div>
 		);
 	},
-};
+} satisfies Story;
