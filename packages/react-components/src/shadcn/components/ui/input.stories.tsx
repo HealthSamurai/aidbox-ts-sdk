@@ -1,3 +1,4 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { CircleX, Copy, Mail } from "lucide-react";
 import { Badge } from "#shadcn/components/ui/badge";
@@ -53,21 +54,50 @@ function InputWithLabel({
 const meta = {
 	title: "Component/Input",
 	component: Input,
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
+	},
+	argTypes: {
+		type: {
+			control: "select",
+			options: ["text", "password"],
+		},
+		placeholder: {
+			control: "text",
+		},
+		invalid: {
+			control: "boolean",
+		},
+		disabled: {
+			control: "boolean",
+		},
+	},
+	args: {
+		type: "text",
+		placeholder: "Placeholder",
+		invalid: false,
+		disabled: false,
+	},
 } satisfies Meta<typeof Input>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Default = {
-	args: {
-		type: "text",
-		placeholder: "Placeholder",
-		leftSlot: undefined,
-		rightSlot: undefined,
-	},
+	tags: ["!dev"],
+	render: (args: React.ComponentProps<typeof Input>) => <Input {...args} />,
 } satisfies Story;
 
 export const Demo = {
+	tags: ["!autodocs"],
 	render: () => (
 		<div className="p-6 min-h-screen flex justify-center items-center">
 			<div className="rounded-lg p-6 shadow-sm w-280">
