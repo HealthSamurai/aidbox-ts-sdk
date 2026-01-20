@@ -1,36 +1,61 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Play, Trash2 } from "lucide-react";
+import { Play } from "lucide-react";
 import { Badge } from "#shadcn/components/ui/badge";
 import { Button } from "#shadcn/components/ui/button";
 
 const meta = {
 	title: "Component/Button",
 	component: Button,
-	argTypes: {
-		variant: {},
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
 	},
-} satisfies Meta;
+	argTypes: {
+		variant: {
+			control: "select",
+			options: ["primary", "secondary", "ghost", "link"],
+		},
+		size: {
+			control: "select",
+			options: ["regular", "small"],
+		},
+		danger: {
+			control: "boolean",
+		},
+		disabled: {
+			control: "boolean",
+		},
+		children: {
+			control: "text",
+		},
+	},
+	args: {
+		children: "Button",
+		variant: "primary",
+		size: "regular",
+		danger: false,
+		disabled: false,
+	},
+} satisfies Meta<typeof Button>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const TextOnly = {
-	args: {
-		children: "Remove",
-	},
-} satisfies Story;
-
-export const WithIcon = {
-	args: {
-		children: (
-			<>
-				<Trash2 /> Remove{" "}
-			</>
-		),
-	},
+export const Default = {
+	tags: ["!dev"],
+	render: ({ children, ...args }) => <Button {...args}>{children}</Button>,
 } satisfies Story;
 
 export const Demo = {
+	tags: ["!autodocs"],
 	render: () => (
 		<div className="p-6  min-h-screen flex justify-center items-center">
 			<div className=" rounded-lg p-6 shadow-sm w-280">

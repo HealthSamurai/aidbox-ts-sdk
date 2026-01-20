@@ -40,7 +40,7 @@ const alertVariants = cva(baseAlertStyles, {
 				"border",
 				"border-border-primary",
 			),
-			destructive: cn(
+			danger: cn(
 				"text-[var(--color-text-error-primary)]",
 				"bg-[var(--color-red-100)]",
 				"[&>svg]:text-current",
@@ -58,6 +58,12 @@ const alertVariants = cva(baseAlertStyles, {
 				"[&>svg]:text-current",
 				"[&_[data-slot=alert-description]]:text-[var(--color-blue-600)]",
 			),
+			success: cn(
+				"text-[var(--color-green-700)]",
+				"bg-[var(--color-green-100)]",
+				"[&>svg]:text-current",
+				"[&_[data-slot=alert-description]]:text-[var(--color-green-700)]",
+			),
 		},
 	},
 	defaultVariants: {
@@ -68,9 +74,13 @@ const alertVariants = cva(baseAlertStyles, {
 function Alert({
 	className,
 	variant,
+	icon = true,
 	children,
 	...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+}: React.ComponentProps<"div"> &
+	VariantProps<typeof alertVariants> & {
+		icon?: boolean;
+	}) {
 	const childrenArray = React.Children.toArray(children);
 
 	// Find first child that is not AlertTitle or AlertDescription (assumed to be icon)
@@ -82,11 +92,12 @@ function Alert({
 				"AlertDescription",
 	);
 
-	const hasIcon = iconIndex !== -1;
-	const icon = hasIcon ? childrenArray[iconIndex] : null;
-	const content = hasIcon
-		? childrenArray.filter((_, index) => index !== iconIndex)
-		: childrenArray;
+	const hasIcon = icon && iconIndex !== -1;
+	const iconElement = hasIcon ? childrenArray[iconIndex] : null;
+	const content =
+		iconIndex !== -1
+			? childrenArray.filter((_, index) => index !== iconIndex)
+			: childrenArray;
 
 	return (
 		<div
@@ -95,7 +106,7 @@ function Alert({
 			className={cn(alertVariants({ variant }), className)}
 			{...props}
 		>
-			{icon && <div className="shrink-0">{icon}</div>}
+			{iconElement}
 			<div className={alertContentStyles}>{content}</div>
 		</div>
 	);

@@ -1,10 +1,10 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	AlertCircleIcon,
 	AlertTriangleIcon,
 	CheckCircle2Icon,
 	InfoIcon,
-	PopcornIcon,
 } from "lucide-react";
 import {
 	Alert,
@@ -14,71 +14,86 @@ import {
 
 const meta = {
 	title: "Component/Alert",
-} satisfies Meta;
+	component: Alert,
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
+	},
+	argTypes: {
+		variant: {
+			control: "select",
+			options: ["default", "info", "success", "warning", "danger"],
+		},
+		icon: {
+			control: "boolean",
+		},
+	},
+	args: {
+		variant: "info",
+		icon: true,
+	},
+} satisfies Meta<typeof Alert>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Default = {
+	tags: ["!dev"],
+	render: ({ variant, icon = true }) => (
+		<Alert variant={variant} icon={icon}>
+			<InfoIcon />
+			<AlertTitle>Alert Title</AlertTitle>
+			<AlertDescription>
+				This is an alert description with some helpful information.
+			</AlertDescription>
+		</Alert>
+	),
+} satisfies Story;
+
 export const Demo = {
+	tags: ["!autodocs"],
 	render: () => (
 		<div className="grid w-full max-w-xl items-start gap-4">
-			<Alert variant="destructive">
+			<Alert variant="danger">
 				<AlertTriangleIcon />
+				<AlertTitle>Danger Alert</AlertTitle>
 				<AlertDescription>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-					eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-					minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-					aliquip ex ea commodo consequat.{" "}
-					<a href="https://example.com" className="underline">
-						Learn more
-					</a>
+					Something went wrong. Please try again.
 				</AlertDescription>
 			</Alert>
 			<Alert variant="warning">
 				<AlertCircleIcon />
+				<AlertTitle>Warning Alert</AlertTitle>
 				<AlertDescription>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-					eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-					minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-					aliquip ex ea commodo consequat.{" "}
-					<a href="https://example.com" className="underline">
-						Learn more
-					</a>
+					Please review your changes before proceeding.
 				</AlertDescription>
 			</Alert>
 			<Alert variant="info">
 				<InfoIcon />
+				<AlertTitle>Info Alert</AlertTitle>
 				<AlertDescription>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-					eiusmod tempor incididunt ut labore et dolore magna aliqua.{" "}
-					<a href="https://example.com" className="underline">
-						Learn more
-					</a>
+					Here is some useful information for you.
 				</AlertDescription>
 			</Alert>
-			<Alert>
+			<Alert variant="success">
 				<CheckCircle2Icon />
-				<AlertTitle>Success! Your changes have been saved</AlertTitle>
+				<AlertTitle>Success Alert</AlertTitle>
 				<AlertDescription>
-					This is an alert with icon, title and description.
+					Your changes have been saved successfully.
 				</AlertDescription>
 			</Alert>
-			<Alert>
-				<PopcornIcon />
-				<AlertTitle>
-					This Alert has a title and an icon. No description.
-				</AlertTitle>
-			</Alert>
-			<Alert variant="destructive">
-				<AlertCircleIcon />
-				<AlertTitle>Unable to process your payment.</AlertTitle>
+			<Alert variant="info" icon={false}>
+				<InfoIcon />
+				<AlertTitle>Alert without icon</AlertTitle>
 				<AlertDescription>
-					<p>Please verify your billing information and try again.</p>
-					<ul className="list-inside list-disc text-sm">
-						<li>Check your card details</li>
-						<li>Ensure sufficient funds</li>
-						<li>Verify billing address</li>
-					</ul>
+					This alert has icon=false so the icon is hidden.
 				</AlertDescription>
 			</Alert>
 		</div>
