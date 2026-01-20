@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, X } from "lucide-react";
 import * as React from "react";
 import {
 	Command,
@@ -16,6 +16,59 @@ import {
 	SelectValue,
 } from "#shadcn/components/ui/select";
 import { cn } from "#shadcn/lib/utils";
+import { Tag } from "../../../components/tag";
+
+/* ==========================================================================
+   Styles
+   ========================================================================== */
+
+const selectContentStyles = cn(
+	// Spacing
+	"p-0",
+	// Radix viewport reset
+	"[&_[data-radix-select-viewport]]:p-0",
+);
+
+const commandStyles = cn(
+	// Layout
+	"w-full",
+);
+
+const checkIconStyles = cn(
+	// Layout
+	"ml-auto",
+	// Size
+	"size-4",
+);
+
+const checkIconVisibleStyles = cn(checkIconStyles, "opacity-100");
+
+const checkIconHiddenStyles = cn(checkIconStyles, "opacity-0");
+
+const triggerWithValueStyles = cn("text-text-primary");
+
+const triggerWithTagsStyles = cn("pl-2");
+
+const clearButtonStyles = cn(
+	// Layout
+	"ml-auto",
+	"shrink-0",
+	// Size
+	"size-4",
+	// Colors
+	"text-text-tertiary",
+	"hover:text-text-primary",
+	// Interactions
+	"cursor-pointer",
+	"pointer-events-auto",
+	"z-10",
+	// Transitions
+	"transition-colors",
+);
+
+/* ==========================================================================
+   Types
+   ========================================================================== */
 
 export interface ComboboxOption {
 	value: string;
@@ -32,6 +85,10 @@ interface ComboboxProps {
 	disabled?: boolean;
 	className?: string;
 }
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
 
 export function Combobox({
 	options,
@@ -78,8 +135,8 @@ export function Combobox({
 					{selectedOption?.label}
 				</SelectValue>
 			</SelectTrigger>
-			<SelectContent className="p-0 [&_[data-radix-select-viewport]]:p-0">
-				<Command className="w-full">
+			<SelectContent className={selectContentStyles}>
+				<Command className={commandStyles}>
 					<CommandInput
 						ref={inputRef}
 						placeholder={searchPlaceholder}
@@ -101,10 +158,11 @@ export function Combobox({
 							>
 								{option.label}
 								<CheckIcon
-									className={cn(
-										"ml-auto size-4",
-										value === option.value ? "opacity-100" : "opacity-0",
-									)}
+									className={
+										value === option.value
+											? checkIconVisibleStyles
+											: checkIconHiddenStyles
+									}
 								/>
 							</CommandItem>
 						))}
@@ -154,17 +212,6 @@ export function MultiCombobox({
 		[options, value],
 	);
 
-	const displayText = React.useMemo(() => {
-		if (selectedOptions.length === 0) return placeholder;
-		if (selectedOptions.length <= maxDisplay) {
-			return selectedOptions.map((opt) => opt.label).join(", ");
-		}
-		return `${selectedOptions
-			.slice(0, maxDisplay)
-			.map((opt) => opt.label)
-			.join(", ")} +${selectedOptions.length - maxDisplay}`;
-	}, [selectedOptions, placeholder, maxDisplay]);
-
 	const handleSelect = (selectedValue: string) => {
 		const newValue = value.includes(selectedValue)
 			? value.filter((v) => v !== selectedValue)
@@ -172,7 +219,11 @@ export function MultiCombobox({
 		onValueChange?.(newValue);
 	};
 
-	// Reset search when closing and auto-focus when opening
+	const handleClear = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		onValueChange?.([]);
+	};
+
 	const changeOpen = (newOpen: boolean) => {
 		if (!newOpen) {
 			setSearchValue("");
@@ -182,16 +233,60 @@ export function MultiCombobox({
 		setOpen(newOpen);
 	};
 
+	const hasValue = selectedOptions.length > 0;
+	const displayedOptions = selectedOptions.slice(0, maxDisplay);
+	const remainingCount = selectedOptions.length - maxDisplay;
+
 	return (
 		<Select open={open} onOpenChange={changeOpen}>
 			<SelectTrigger
-				className={`${className} ${displayText ? "!text-text-primary" : undefined}`}
+				className={cn(
+					className,
+					hasValue && triggerWithValueStyles,
+					hasValue && triggerWithTagsStyles,
+				)}
 				disabled={disabled}
 			>
-				<SelectValue placeholder={displayText || placeholder} />
+				{hasValue ? (
+					<>
+						<div className="flex items-center gap-1 overflow-hidden">
+							{displayedOptions.map((opt) => (
+								<Tag
+									key={opt.value}
+									size="small"
+									color="gray"
+									vibrance="subtle"
+									showIcon={false}
+								>
+									{opt.label}
+								</Tag>
+							))}
+							{remainingCount > 0 && (
+								<Tag
+									size="small"
+									color="gray"
+									vibrance="subtle"
+									showIcon={false}
+								>
+									+{remainingCount}
+								</Tag>
+							)}
+						</div>
+						<button
+							type="button"
+							className={clearButtonStyles}
+							onClick={handleClear}
+							onPointerDown={(e) => e.stopPropagation()}
+						>
+							<X className="size-4" />
+						</button>
+					</>
+				) : (
+					<SelectValue placeholder={placeholder} />
+				)}
 			</SelectTrigger>
-			<SelectContent className="p-0 [&_[data-radix-select-viewport]]:p-0">
-				<Command className="w-full">
+			<SelectContent className={selectContentStyles}>
+				<Command className={commandStyles}>
 					<CommandInput
 						ref={inputRef}
 						placeholder={searchPlaceholder}
@@ -201,64 +296,29 @@ export function MultiCombobox({
 					<CommandList>
 						<CommandEmpty>{emptyText}</CommandEmpty>
 
-						{filteredOptions.map((option) => (
-							<CommandItem
-								key={option.value}
-								value={option.value}
-								data-state={
-									value.includes(option.value) ? "checked" : undefined
-								}
-								onSelect={handleSelect}
-							>
-								{option.label}
-								<CheckIcon
-									className={cn(
-										"ml-auto size-4",
-										value.includes(option.value) ? "opacity-100" : "opacity-0",
-									)}
-								/>
-							</CommandItem>
-						))}
+						{filteredOptions.map((option) => {
+							const isSelected = value.includes(option.value);
+							return (
+								<CommandItem
+									key={option.value}
+									value={option.value}
+									data-state={isSelected ? "checked" : undefined}
+									onSelect={handleSelect}
+								>
+									{option.label}
+									<CheckIcon
+										className={
+											isSelected
+												? checkIconVisibleStyles
+												: checkIconHiddenStyles
+										}
+									/>
+								</CommandItem>
+							);
+						})}
 					</CommandList>
 				</Command>
 			</SelectContent>
 		</Select>
-	);
-}
-
-// Demo component for Storybook
-const demoOptions = [
-	{ value: "next.js", label: "Next.js" },
-	{ value: "sveltekit", label: "SvelteKit" },
-	{ value: "nuxt.js", label: "Nuxt.js" },
-	{ value: "remix", label: "Remix" },
-	{ value: "astro", label: "Astro" },
-];
-
-export function ComboboxDemo() {
-	const [value, setValue] = React.useState("");
-
-	return (
-		<Combobox
-			options={demoOptions}
-			value={value}
-			onValueChange={setValue}
-			placeholder="Select framework..."
-			searchPlaceholder="Search framework..."
-		/>
-	);
-}
-
-export function MultiComboboxDemo() {
-	const [value, setValue] = React.useState<string[]>([]);
-
-	return (
-		<MultiCombobox
-			options={demoOptions}
-			value={value}
-			onValueChange={setValue}
-			placeholder="Select frameworks..."
-			searchPlaceholder="Search framework..."
-		/>
 	);
 }

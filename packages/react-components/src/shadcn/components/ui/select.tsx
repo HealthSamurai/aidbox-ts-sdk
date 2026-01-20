@@ -31,8 +31,7 @@ const baseSelectTriggerStyles = cn(
 	// Hover
 	"hover:border-border-primary_hover",
 	// Focus
-	"focus-visible:ring-2",
-	"focus-visible:ring-utility-blue/70",
+	"focus-visible:border-border-link",
 	// Placeholder
 	"data-[placeholder]:text-text-tertiary",
 	// Selection
@@ -54,8 +53,8 @@ const baseSelectTriggerStyles = cn(
 	"disabled:pointer-events-none",
 	"disabled:cursor-not-allowed",
 	"disabled:text-text-disabled",
-	"disabled:bg-bg-disabled",
-	"disabled:border-border-disabled",
+	"disabled:bg-bg-secondary",
+	"disabled:border-border-primary",
 	// Invalid
 	"aria-invalid:text-text-error-primary",
 	"aria-invalid:border-border-error",
