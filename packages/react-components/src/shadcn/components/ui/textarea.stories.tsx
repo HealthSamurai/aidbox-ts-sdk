@@ -1,3 +1,4 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Label } from "#shadcn/components/ui/label";
 import { Textarea } from "#shadcn/components/ui/textarea";
@@ -44,18 +45,45 @@ function TextareaWithLabel({
 const meta = {
 	title: "Component/Textarea",
 	component: Textarea,
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
+	},
+	argTypes: {
+		placeholder: {
+			control: "text",
+		},
+		invalid: {
+			control: "boolean",
+		},
+		disabled: {
+			control: "boolean",
+		},
+	},
+	args: {
+		placeholder: "Enter a description...",
+		invalid: false,
+		disabled: false,
+	},
 } satisfies Meta<typeof Textarea>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Default = {
-	args: {
-		placeholder: "Enter a description...",
-	},
+	tags: ["!dev"],
+	render: (args) => <Textarea {...args} />,
 } satisfies Story;
 
 export const Demo = {
+	tags: ["!autodocs"],
 	render: () => (
 		<div className="p-6 space-y-6">
 			{/* Default */}
