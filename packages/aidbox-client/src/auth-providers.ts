@@ -78,4 +78,45 @@ export class BrowserAuthProvider implements AuthProvider {
 	}
 }
 
-// TODO: backend auth provider
+export class BasicAuthProvider implements AuthProvider {
+	/** @ignore */
+	public baseUrl: string;
+	#authHeader: string;
+
+	constructor(baseUrl: string, username: string, password: string) {
+		this.baseUrl = baseUrl;
+		// Create Base64-encoded credentials for Basic Auth header
+		this.#authHeader = `Basic ${btoa(`${username}:${password}`)}`;
+	}
+
+	public async establishSession(): Promise<void> {
+		// No-op for basic auth - credentials are sent with each request
+	}
+
+	public async revokeSession(): Promise<void> {
+		// No-op for basic auth - stateless authentication
+	}
+
+	public async fetch(
+		input: RequestInfo | URL,
+		init?: RequestInit,
+	): Promise<Response> {
+		let url: string;
+
+		if (input instanceof Request) url = input.url;
+		else url = input.toString();
+
+		if (!url.startsWith(this.baseUrl))
+			throw Error("url of the request must start with baseUrl");
+
+		const i = init ?? {};
+
+		// Merge Authorization header with existing headers
+		i.headers = {
+			...i.headers,
+			Authorization: this.#authHeader,
+		};
+
+		return fetch(input, i);
+	}
+}
