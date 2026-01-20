@@ -111,11 +111,28 @@ export class BasicAuthProvider implements AuthProvider {
 
 		const i = init ?? {};
 
-		// Merge Authorization header with existing headers
-		i.headers = {
-			...i.headers,
-			Authorization: this.#authHeader,
-		};
+		// Merge headers from Request object (if any), init.headers, and Authorization
+		const mergedHeaders = new Headers();
+
+		// First, copy headers from Request object if input is a Request
+		if (input instanceof Request) {
+			input.headers.forEach((value, key) => {
+				mergedHeaders.set(key, value);
+			});
+		}
+
+		// Then, copy headers from init (overrides Request headers)
+		if (i.headers) {
+			const initHeaders = new Headers(i.headers);
+			initHeaders.forEach((value, key) => {
+				mergedHeaders.set(key, value);
+			});
+		}
+
+		// Finally, set Authorization header
+		mergedHeaders.set("Authorization", this.#authHeader);
+
+		i.headers = mergedHeaders;
 
 		return fetch(input, i);
 	}
