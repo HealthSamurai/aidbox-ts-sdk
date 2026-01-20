@@ -22,6 +22,14 @@ const commandStyles = cn(
 	// Colors
 	"bg-bg-primary",
 	"text-text-primary",
+	// Group heading styles
+	"[&_*[cmdk-group-heading]]:flex",
+	"[&_*[cmdk-group-heading]]:items-center",
+	"[&_*[cmdk-group-heading]]:h-7",
+	"[&_*[cmdk-group-heading]]:px-3",
+	"[&_*[cmdk-group-heading]]:py-0",
+	"[&_*[cmdk-group-heading]]:typo-label-tiny",
+	"[&_*[cmdk-group-heading]]:text-[color:var(--color-text-secondary)]",
 );
 
 // Command Dialog
@@ -33,11 +41,18 @@ const commandDialogContentStyles = cn(
 
 const commandDialogCommandStyles = cn(
 	// Group headings
-	"[&_[cmdk-group-heading]]:text-muted-foreground",
-	"[&_[cmdk-group-heading]]:px-2",
-	"[&_[cmdk-group-heading]]:font-medium",
+	"[&_[cmdk-group-heading]]:flex",
+	"[&_[cmdk-group-heading]]:items-center",
+	"[&_[cmdk-group-heading]]:h-7",
+	"[&_[cmdk-group-heading]]:px-3",
+	"[&_[cmdk-group-heading]]:py-0",
+	"[&_[cmdk-group-heading]]:typo-label-tiny",
+	"[&_[cmdk-group-heading]]:text-text-secondary",
 	// Groups
-	"[&_[cmdk-group]]:px-2",
+	"[&_[cmdk-group]]:p-2",
+	"[&_[cmdk-group]]:gap-1",
+	"[&_[cmdk-group]]:flex",
+	"[&_[cmdk-group]]:flex-col",
 	"[&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0",
 	// Input wrapper
 	"[&_[cmdk-input-wrapper]]:h-12",
@@ -128,15 +143,21 @@ const commandEmptyStyles = cn(
 const commandGroupStyles = cn(
 	// Layout
 	"overflow-hidden",
-	"p-1",
+	"p-2",
+	"gap-1",
+	"flex",
+	"flex-col",
 	"group",
 	// Colors
 	"text-text-tertiary",
 	// Group heading styles
-	"[&_[cmdk-group-heading]]:text-text-quaternary",
-	"[&_[cmdk-group-heading]]:px-2",
-	"[&_[cmdk-group-heading]]:py-1.5",
-	"[&_[cmdk-group-heading]]:text-xs",
+	"[&_*[cmdk-group-heading]]:flex",
+	"[&_*[cmdk-group-heading]]:items-center",
+	"[&_*[cmdk-group-heading]]:h-7",
+	"[&_*[cmdk-group-heading]]:px-3",
+	"[&_*[cmdk-group-heading]]:py-0",
+	"[&_*[cmdk-group-heading]]:typo-label-tiny",
+	"[&_*[cmdk-group-heading]]:text-[var(--color-text-secondary)]",
 );
 
 // Command Separator
@@ -163,7 +184,7 @@ const commandItemStyles = cn(
 	// Typography
 	"typo-body",
 	// Colors
-	"text-text-secondary",
+	"text-text-primary",
 	// States
 	"outline-hidden",
 	"data-[state=checked]:bg-bg-tertiary",

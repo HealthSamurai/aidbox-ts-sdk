@@ -492,7 +492,7 @@ const baseSidebarMenuButtonStyles = cn(
 	"px-[0.44rem]",
 	// Typography
 	"typo-body",
-	"text-text-secondary",
+	"text-text-primary",
 	// Interaction
 	"outline-hidden",
 	"transition-all",

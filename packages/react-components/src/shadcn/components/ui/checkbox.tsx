@@ -1,68 +1,105 @@
 "use client";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
+import { cva, type VariantProps } from "class-variance-authority";
 import { CheckIcon, MinusIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
+// Checkbox root styles
+const baseCheckboxStyles = cn(
+	// Layout
+	"peer",
+	"shrink-0",
+	// Shape
+	"rounded-md",
+	"border-[1.5px]",
+	// Interaction
+	"outline-none",
+	"cursor-pointer",
+	// Animation
+	"transition-all",
+	"duration-200",
+	"active:scale-90",
+	"active:duration-75",
+	// Default state
+	"bg-white",
+	"border-[var(--color-fg-secondary)]",
+	// Checked state
+	"data-[state=checked]:bg-[var(--color-fg-link)]",
+	"data-[state=checked]:border-[var(--color-fg-link)]",
+	"data-[state=checked]:text-white",
+	// Indeterminate state
+	"data-[state=indeterminate]:bg-[var(--color-fg-link)]",
+	"data-[state=indeterminate]:border-[var(--color-fg-link)]",
+	"data-[state=indeterminate]:text-white",
+	// Disabled states
+	"disabled:cursor-not-allowed",
+	"disabled:active:scale-100",
+	"disabled:bg-white",
+	"disabled:border-[var(--color-fg-disabled)]",
+	"disabled:data-[state=checked]:bg-[var(--color-fg-disabled)]",
+	"disabled:data-[state=checked]:border-[var(--color-fg-disabled)]",
+	"disabled:data-[state=checked]:text-[var(--color-fg-secondary)]",
+	"disabled:data-[state=indeterminate]:bg-[var(--color-fg-disabled)]",
+	"disabled:data-[state=indeterminate]:border-[var(--color-fg-disabled)]",
+	"disabled:data-[state=indeterminate]:text-[var(--color-fg-secondary)]",
+	// Focus styles
+	"focus-visible:ring-4",
+	"focus-visible:ring-ring-blue",
+	// Hover styles
+	"disabled:hover:ring-0",
+);
+
+const checkboxVariants = cva(baseCheckboxStyles, {
+	variants: {
+		size: {
+			regular: "size-5",
+			small: "size-4",
+		},
+	},
+	defaultVariants: {
+		size: "regular",
+	},
+});
+
+// Checkbox indicator styles
+const checkboxIndicatorStyles = cn(
+	// Layout
+	"flex",
+	"items-center",
+	"justify-center",
+	// Colors
+	"text-white",
+	"disabled:text-[var(--color-fg-secondary)]",
+);
+
 function Checkbox({
 	className,
+	size,
 	...props
-}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
+}: React.ComponentProps<typeof CheckboxPrimitive.Root> &
+	VariantProps<typeof checkboxVariants>) {
 	return (
 		<CheckboxPrimitive.Root
 			data-slot="checkbox"
-			className={cn(
-				// Base styles
-				"peer",
-				"size-5",
-				"shrink-0",
-				"rounded-md",
-				"border-[1.5px]",
-				"transition-all",
-				"duration-200",
-				"outline-none",
-				"cursor-pointer",
-				"text-white",
-				// Click animation
-				"active:scale-90",
-				"active:duration-75",
-				// Default state
-				"border-border-primary",
-				"bg-transparent",
-				"hover:bg-bg-tertiary",
-				// Checked state
-				"data-[state=checked]:bg-bg-link",
-				"data-[state=checked]:border-border-link",
-				"data-[state=checked]:text-white",
-				// Indeterminate state
-				"data-[state=indeterminate]:bg-fg-link",
-				"data-[state=indeterminate]:border-fg-link",
-				"data-[state=indeterminate]:text-white",
-				// Disabled states
-				"disabled:cursor-not-allowed",
-				"disabled:active:scale-100",
-				"disabled:border-border-secondary",
-				"disabled:bg-transparent",
-				"disabled:data-[state=checked]:bg-fg-tertiary",
-				"disabled:data-[state=checked]:border-fg-tertiary",
-				"disabled:data-[state=indeterminate]:bg-fg-tertiary",
-				"disabled:data-[state=indeterminate]:border-fg-tertiary",
-				// Focus state
-				"focus-visible:ring-2",
-				"focus-visible:ring-utility-blue/70",
-				className,
-			)}
+			className={cn(checkboxVariants({ size }), className)}
 			{...props}
 		>
 			<CheckboxPrimitive.Indicator
 				data-slot="checkbox-indicator"
-				className="flex items-center justify-center text-white"
+				className={checkboxIndicatorStyles}
 			>
 				{props.checked === "indeterminate" ? (
-					<MinusIcon className="size-3.5" style={{ strokeWidth: 3 }} />
+					<MinusIcon
+						className={cn(size === "small" ? "size-2.5" : "size-3.5")}
+						style={{ strokeWidth: 3 }}
+					/>
 				) : (
-					<CheckIcon className="size-3.5" style={{ strokeWidth: 3 }} />
+					<CheckIcon
+						className={cn(size === "small" ? "size-2.5" : "size-3.5")}
+						style={{ strokeWidth: 3 }}
+					/>
 				)}
 			</CheckboxPrimitive.Indicator>
 		</CheckboxPrimitive.Root>

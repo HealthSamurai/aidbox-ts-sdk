@@ -179,7 +179,7 @@ function TreeItemLabel<T>({
 		<span
 			data-slot="tree-item-label"
 			className={cn(
-				"group/tree-item-label relative select-text in-focus-visible:ring-ring/50 bg-background text-text-secondary in-data-[drag-target=true]:bg-accent flex items-center gap-2 pr-2 pl-2.5 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-2.5 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-400/20! [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				"group/tree-item-label relative select-text in-focus-visible:ring-ring/50 bg-background text-text-primary in-data-[drag-target=true]:bg-accent flex items-center gap-2 pr-2 pl-2.5 py-1.5 text-sm transition-colors not-in-data-[folder=true]:ps-2.5 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-400/20! [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				!disableHover &&
 					"in-data-[focus=true]:bg-bg-secondary in-data-[focus=true]:text-text-primary",
 				!disableHover &&

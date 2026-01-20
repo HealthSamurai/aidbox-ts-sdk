@@ -3,6 +3,15 @@
 @import "./tokens.css";
 @import "./typography.css";
 
+@utility typo-label-tiny {
+	font-size: var(--font-size-xxs);
+	font-family: var(--font-family-sans);
+	font-weight: var(--font-weight-normal);
+	line-height: var(--font-leading-4);
+	letter-spacing: var(--font-tracking-wide);
+	text-transform: uppercase;
+}
+
 .lucide {
 	/* Change this! */
 	stroke-width: 1.5px;
@@ -16,7 +25,7 @@
 	--color-ring-purple: var(--color-purple-200);
 	--color-ring-orange: var(--color-orange-200);
 	--color-ring-pink: var(--color-pink-200);
-	--color-ring-blue: var(--color-blue-200);
+	--color-ring-blue: var(--color-blue-300);
 	--color-ring-red: var(--color-red-200);
 	--color-text-primary: var(--color-neutral-900);
 	--color-text-secondary: var(--color-neutral-500);
@@ -64,12 +73,14 @@
 	--color-bg-overlay: var(--color-neutral-900);
 	--color-bg-disabled: var(--color-neutral-300);
 	--color-bg-dark_tertiary: var(--color-neutral-400);
+
 	--color-bg-brand-primary: var(--color-brand-50);
 	--color-bg-brand-primary_inverse: var(--color-brand-500);
 	--color-bg-brand-secondary: var(--color-brand-100);
 	--color-bg-brand-tertiary: var(--color-brand-200);
 
 	--color-bg-link: var(--color-blue-500);
+	--color-bg-link_disabled: var(--color-blue-400);
 	--color-bg-link_hover: var(--color-blue-600);
 	--color-bg-error-primary: var(--color-red-50);
 	--color-bg-error-primary_inverse: var(--color-red-500);
