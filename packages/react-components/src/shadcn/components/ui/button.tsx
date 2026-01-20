@@ -25,8 +25,6 @@ const baseButtonStyles = cn(
 	"[&_svg:not([class*='size-'])]:size-4",
 	"[&_svg]:shrink-0",
 	// Focus states
-	"focus-visible:ring-2",
-	"focus-visible:ring-utility-blue/70",
 	// Invalid states
 	"aria-invalid:ring-2",
 	"aria-invalid:ring-utility-red/70",
@@ -40,8 +38,6 @@ const buttonVariants = cva(baseButtonStyles, {
 				"text-text-primary_on-brand",
 				"hover:bg-bg-link_hover",
 				"active:bg-bg-link",
-				"disabled:bg-bg-disabled",
-				"disabled:text-text-disabled",
 			),
 			secondary: cn(
 				"border",
@@ -52,23 +48,13 @@ const buttonVariants = cva(baseButtonStyles, {
 				"hover:bg-bg-secondary",
 				"active:bg-bg-primary",
 				"active:text-text-tertiary",
-				"disabled:text-text-disabled",
-				"disabled:border-border-disabled",
-				"disabled:hover:bg-bg-primary",
 			),
-			link: cn(
-				"text-text-secondary",
-				"hover:text-text-primary",
-				"disabled:text-text-disabled",
-				"rounded-none",
-			),
+			link: cn("text-text-secondary", "hover:text-text-primary", "rounded"),
 			ghost: cn(
 				"text-text-secondary",
 				"hover:text-text-primary",
 				"hover:bg-bg-secondary",
 				"active:bg-bg-tertiary",
-				"disabled:text-text-disabled",
-				"disabled:hover:bg-bg-primary",
 			),
 		},
 		size: {
@@ -81,6 +67,31 @@ const buttonVariants = cva(baseButtonStyles, {
 		},
 	},
 	compoundVariants: [
+		// Primary disabled
+		{
+			variant: "primary",
+			class: cn("disabled:bg-bg-disabled", "disabled:text-text-white"),
+		},
+		// Secondary disabled
+		{
+			variant: "secondary",
+			class: cn(
+				"disabled:bg-bg-primary",
+				"disabled:text-text-disabled",
+				"disabled:border-border-disabled",
+			),
+		},
+		// Link disabled
+		{
+			variant: "link",
+			class: cn("disabled:text-text-disabled"),
+		},
+		// Ghost disabled
+		{
+			variant: "ghost",
+			class: cn("disabled:text-text-disabled"),
+		},
+		// Primary danger
 		{
 			variant: "primary",
 			danger: true,
@@ -89,9 +100,9 @@ const buttonVariants = cva(baseButtonStyles, {
 				"text-text-primary_on-brand",
 				"hover:bg-bg-error-primary_inverse_hover",
 				"active:bg-bg-error-primary_inverse",
-				"disabled:bg-bg-disabled",
 			),
 		},
+		// Secondary danger
 		{
 			variant: "secondary",
 			danger: true,
@@ -104,11 +115,13 @@ const buttonVariants = cva(baseButtonStyles, {
 				"active:text-text-error-primary",
 			),
 		},
+		// Link danger
 		{
 			variant: "link",
 			danger: true,
 			class: cn("text-text-error-secondary", "hover:text-text-error-primary"),
 		},
+		// Ghost danger
 		{
 			variant: "ghost",
 			danger: true,
@@ -118,6 +131,28 @@ const buttonVariants = cva(baseButtonStyles, {
 				"hover:bg-bg-error-secondary",
 				"active:bg-bg-error-tertiary",
 			),
+		},
+		// Focus ring for regular size
+		{
+			size: "regular",
+			danger: false,
+			class: cn("focus-visible:ring-4", "focus-visible:ring-ring-blue"),
+		},
+		{
+			size: "regular",
+			danger: true,
+			class: cn("focus-visible:ring-4", "focus-visible:ring-ring-red"),
+		},
+		// Focus ring for small size
+		{
+			size: "small",
+			danger: false,
+			class: cn("focus-visible:ring-3", "focus-visible:ring-ring-blue"),
+		},
+		{
+			size: "small",
+			danger: true,
+			class: cn("focus-visible:ring-3", "focus-visible:ring-ring-red"),
 		},
 	],
 	defaultVariants: {

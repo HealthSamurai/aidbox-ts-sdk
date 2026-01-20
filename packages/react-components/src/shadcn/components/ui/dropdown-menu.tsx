@@ -58,7 +58,7 @@ const dropdownMenuItemBaseStyles = cn(
 	// Typography
 	"typo-body",
 	// Colors
-	"text-text-secondary",
+	"text-text-primary",
 	// Interaction
 	"cursor-pointer",
 	"outline-hidden",
@@ -112,7 +112,7 @@ const dropdownMenuCheckboxItemBaseStyles = cn(
 	// Typography
 	"typo-body",
 	// Colors
-	"text-text-secondary",
+	"text-text-primary",
 	// Interaction
 	"cursor-default",
 	"outline-hidden",
@@ -156,7 +156,7 @@ const dropdownMenuRadioItemBaseStyles = cn(
 	// Typography
 	"typo-body",
 	// Colors
-	"text-text-secondary",
+	"text-text-primary",
 	// Interaction
 	"cursor-pointer",
 	"outline-hidden",
@@ -252,7 +252,7 @@ const dropdownMenuSubTriggerBaseStyles = cn(
 	// Typography
 	"typo-body",
 	// Colors
-	"text-text-secondary",
+	"text-text-primary",
 	// Interaction
 	"cursor-default",
 	"outline-hidden",

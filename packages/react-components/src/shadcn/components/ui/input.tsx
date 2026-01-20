@@ -40,7 +40,7 @@ const iconLeftPosition = cn(
 const iconRightContainer = cn(
 	// Positioning
 	"absolute",
-	"right-3",
+	"right-2",
 	"top-1/2",
 	"-translate-y-1/2",
 
