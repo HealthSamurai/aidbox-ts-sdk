@@ -22,7 +22,7 @@ const popoverContentStyles = cn(
 	// Spacing
 	"p-4",
 	// Shadow
-	"shadow-md",
+	"dropdown-menu-shadow",
 	// Animations - open
 	"data-[state=open]:animate-in",
 	"data-[state=open]:fade-in-0",

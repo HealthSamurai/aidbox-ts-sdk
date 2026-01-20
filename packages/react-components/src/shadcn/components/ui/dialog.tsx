@@ -43,7 +43,7 @@ const dialogContentStyles = cn(
 	// Spacing
 	"p-6",
 	// Shadow
-	"shadow-lg",
+	"dropdown-menu-shadow",
 	// Animation duration
 	"duration-200",
 	// Responsive

@@ -78,7 +78,7 @@ const alertDialogContentStyles = cn(
 	// Background & Colors
 	"bg-bg-primary",
 	// Shadow
-	"shadow-lg",
+	"dropdown-menu-shadow",
 	// Animation duration
 	"duration-200",
 	// Responsive
@@ -106,6 +106,8 @@ const alertDialogCloseButtonStyles = cn(
 	"hover:opacity-100",
 	// Transitions
 	"transition-opacity",
+	// Cursor
+	"cursor-pointer",
 	// Focus
 	"focus:ring-2",
 	"focus:ring-utility-blue/70",
