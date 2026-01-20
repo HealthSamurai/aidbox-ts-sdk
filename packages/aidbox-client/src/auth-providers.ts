@@ -85,8 +85,11 @@ export class BasicAuthProvider implements AuthProvider {
 
 	constructor(baseUrl: string, username: string, password: string) {
 		this.baseUrl = baseUrl;
-		// Create Base64-encoded credentials for Basic Auth header
-		this.#authHeader = `Basic ${btoa(`${username}:${password}`)}`;
+		// Create Base64-encoded credentials for Basic Auth header (RFC 7617: UTF-8 encoded)
+		const credentials = `${username}:${password}`;
+		const utf8Bytes = new TextEncoder().encode(credentials);
+		const base64 = btoa(String.fromCharCode(...utf8Bytes));
+		this.#authHeader = `Basic ${base64}`;
 	}
 
 	public async establishSession(): Promise<void> {

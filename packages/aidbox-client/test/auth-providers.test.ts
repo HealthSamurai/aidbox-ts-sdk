@@ -1,6 +1,13 @@
 import { BasicAuthProvider } from "src/auth-providers";
 import { describe, expect, it, vi } from "vitest";
 
+// Helper to encode credentials the same way as BasicAuthProvider (RFC 7617: UTF-8)
+function encodeBasicAuth(username: string, password: string): string {
+	const credentials = `${username}:${password}`;
+	const utf8Bytes = new TextEncoder().encode(credentials);
+	return btoa(String.fromCharCode(...utf8Bytes));
+}
+
 describe("BasicAuthProvider", () => {
 	const baseUrl = "http://localhost:8080";
 
@@ -21,9 +28,9 @@ describe("BasicAuthProvider", () => {
 			}),
 		);
 
-		const headers = mockFetch.mock.calls[0]![1].headers as Headers;
+		const headers = mockFetch.mock.calls[0]?.[1].headers as Headers;
 		expect(headers.get("Authorization")).toBe(
-			`Basic ${btoa("admin:secret")}`,
+			`Basic ${encodeBasicAuth("admin", "secret")}`,
 		);
 	});
 
@@ -47,9 +54,9 @@ describe("BasicAuthProvider", () => {
 			headers: { "X-Custom-Header": "value" },
 		});
 
-		const headers = mockFetch.mock.calls[0]![1].headers as Headers;
+		const headers = mockFetch.mock.calls[0]?.[1].headers as Headers;
 		expect(headers.get("Authorization")).toBe(
-			`Basic ${btoa("admin:secret")}`,
+			`Basic ${encodeBasicAuth("admin", "secret")}`,
 		);
 		expect(headers.get("X-Custom-Header")).toBe("value");
 	});
@@ -70,9 +77,9 @@ describe("BasicAuthProvider", () => {
 			headers: initHeaders,
 		});
 
-		const headers = mockFetch.mock.calls[0]![1].headers as Headers;
+		const headers = mockFetch.mock.calls[0]?.[1].headers as Headers;
 		expect(headers.get("Authorization")).toBe(
-			`Basic ${btoa("admin:secret")}`,
+			`Basic ${encodeBasicAuth("admin", "secret")}`,
 		);
 		expect(headers.get("X-Custom-Header")).toBe("value");
 		expect(headers.get("Content-Type")).toBe("application/json");
@@ -92,9 +99,9 @@ describe("BasicAuthProvider", () => {
 
 		await provider.fetch(request);
 
-		const headers = mockFetch.mock.calls[0]![1].headers as Headers;
+		const headers = mockFetch.mock.calls[0]?.[1].headers as Headers;
 		expect(headers.get("Authorization")).toBe(
-			`Basic ${btoa("admin:secret")}`,
+			`Basic ${encodeBasicAuth("admin", "secret")}`,
 		);
 		expect(headers.get("X-Request-Header")).toBe("request-value");
 	});
@@ -121,13 +128,29 @@ describe("BasicAuthProvider", () => {
 			},
 		});
 
-		const headers = mockFetch.mock.calls[0]![1].headers as Headers;
+		const headers = mockFetch.mock.calls[0]?.[1].headers as Headers;
 		expect(headers.get("Authorization")).toBe(
-			`Basic ${btoa("admin:secret")}`,
+			`Basic ${encodeBasicAuth("admin", "secret")}`,
 		);
 		expect(headers.get("X-Request-Header")).toBe("request-value");
 		expect(headers.get("X-Init-Header")).toBe("init-value");
 		expect(headers.get("X-Shared-Header")).toBe("from-init");
+	});
+
+	it("should handle non-ASCII characters in credentials", async () => {
+		const mockFetch = vi.fn().mockResolvedValue({
+			ok: true,
+			status: 200,
+		});
+		globalThis.fetch = mockFetch;
+
+		const provider = new BasicAuthProvider(baseUrl, "user", "pässwörd");
+		await provider.fetch(`${baseUrl}/Patient`);
+
+		const headers = mockFetch.mock.calls[0]?.[1].headers as Headers;
+		expect(headers.get("Authorization")).toBe(
+			`Basic ${encodeBasicAuth("user", "pässwörd")}`,
+		);
 	});
 
 	it("establishSession should be a no-op", async () => {
