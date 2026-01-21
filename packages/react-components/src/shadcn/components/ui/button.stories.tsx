@@ -4,9 +4,50 @@ import { Play } from "lucide-react";
 import { Badge } from "#shadcn/components/ui/badge";
 import { Button } from "#shadcn/components/ui/button";
 
+interface ButtonWrapperProps {
+	variant?: "primary" | "secondary" | "ghost" | "link";
+	size?: "regular" | "small";
+	danger?: boolean;
+	disabled?: boolean;
+	icon?: "none" | "left" | "only";
+	children?: string;
+}
+
+function ButtonWrapper({
+	variant = "primary",
+	size = "regular",
+	danger = false,
+	disabled = false,
+	icon = "none",
+	children = "Button",
+}: ButtonWrapperProps) {
+	if (icon === "only") {
+		return (
+			<Button variant={variant} size={size} danger={danger} disabled={disabled}>
+				<Play />
+			</Button>
+		);
+	}
+
+	if (icon === "left") {
+		return (
+			<Button variant={variant} size={size} danger={danger} disabled={disabled}>
+				<Play />
+				{children}
+			</Button>
+		);
+	}
+
+	return (
+		<Button variant={variant} size={size} danger={danger} disabled={disabled}>
+			{children}
+		</Button>
+	);
+}
+
 const meta = {
 	title: "Component/Button",
-	component: Button,
+	component: ButtonWrapper,
 	parameters: {
 		docs: {
 			page: () => (
@@ -33,6 +74,10 @@ const meta = {
 		disabled: {
 			control: "boolean",
 		},
+		icon: {
+			control: "select",
+			options: ["none", "left", "only"],
+		},
 		children: {
 			control: "text",
 		},
@@ -43,15 +88,33 @@ const meta = {
 		size: "regular",
 		danger: false,
 		disabled: false,
+		icon: "none",
 	},
-} satisfies Meta<typeof Button>;
+} satisfies Meta<typeof ButtonWrapper>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
 export const Default = {
 	tags: ["!dev"],
-	render: ({ children, ...args }) => <Button {...args}>{children}</Button>,
+	render: ({
+		variant = "primary",
+		size = "regular",
+		danger = false,
+		disabled = false,
+		icon = "none",
+		children = "Button",
+	}) => (
+		<ButtonWrapper
+			variant={variant}
+			size={size}
+			danger={danger}
+			disabled={disabled}
+			icon={icon}
+		>
+			{children}
+		</ButtonWrapper>
+	),
 } satisfies Story;
 
 export const Demo = {
