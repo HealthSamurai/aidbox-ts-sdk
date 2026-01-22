@@ -9,6 +9,12 @@ export type Resource = {
 export type MsgStart = {
 	type: "start";
 	port: MessagePort;
+	contextType?: string;
+};
+
+export type MsgSetContextType = {
+	type: "setContextType";
+	contextType: string | null;
 };
 
 export type MsgStarted = {
@@ -46,7 +52,7 @@ export type MsgSearchError = {
 export type RequestMsg = MsgResolveRequest | MsgSearchRequest;
 export type ResponseMsg = MsgResolveResponse | MsgSearchResponse;
 export type ErrorMsg = MsgResolveError | MsgSearchError;
-export type ControlMsg = MsgStart | MsgStarted;
+export type ControlMsg = MsgStart | MsgStarted | MsgSetContextType;
 
 export type Msg = RequestMsg | ResponseMsg | ControlMsg;
 

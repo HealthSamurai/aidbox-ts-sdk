@@ -5,10 +5,53 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>test1</title>
+    <title>FHIRPath LSP Example</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .toolbar label {
+            font-weight: 500;
+        }
+        .toolbar select {
+            padding: 6px 12px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #cm {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 
 <body>
+    <h1>FHIRPath LSP Example</h1>
+    <p>Select a context type to write expressions without the resource prefix, or select "(none)" to write full FHIRPath expressions.</p>
+    <div class="toolbar">
+        <label for="context-type">Context Type:</label>
+        <select id="context-type">
+            <option value="">(none) - full FHIRPath</option>
+            <option value="Patient" selected>Patient</option>
+            <option value="Observation">Observation</option>
+            <option value="Encounter">Encounter</option>
+            <option value="Condition">Condition</option>
+            <option value="Medication">Medication</option>
+            <option value="MedicationRequest">MedicationRequest</option>
+            <option value="Practitioner">Practitioner</option>
+            <option value="Organization">Organization</option>
+        </select>
+    </div>
     <div id="cm"></div>
     <div id="log"></div>
     <script type="module" src="/example/main.ts"></script>

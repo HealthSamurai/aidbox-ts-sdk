@@ -446,7 +446,6 @@ export function CodeEditor({
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
 
-
 const editorInputTheme = EditorView.theme({
 	".cm-content": {
 		backgroundColor: "var(--color-bg-primary)",
@@ -470,7 +469,7 @@ const editorInputTheme = EditorView.theme({
 		borderRadius: "var(--radius-md)",
 	},
 	".cm-line": {
-		padding: "0"
+		padding: "0",
 	},
 	".cm-completionInfo": {
 		display: "none",
@@ -488,7 +487,7 @@ const editorInputTheme = EditorView.theme({
 
 export function EditorInput({
 	additionalExtensions,
-	id
+	id,
 }: {
 	additionalExtensions?: Extension[];
 	id: string;
@@ -564,4 +563,4 @@ export function EditorInput({
 	}, [additionalExtensions, view]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
-} 
+}

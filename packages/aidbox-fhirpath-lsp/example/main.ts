@@ -15,7 +15,7 @@ import {
 } from "@codemirror/language";
 import { lintKeymap } from "@codemirror/lint";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { EditorState } from "@codemirror/state";
+import { Compartment, EditorState } from "@codemirror/state";
 import {
 	crosshairCursor,
 	drawSelection,
@@ -32,24 +32,35 @@ import {
 	type AidboxClient,
 	type AuthProvider,
 	BrowserAuthProvider,
-	makeClient,
 } from "@health-samurai/aidbox-client";
 import { createCodeMirrorLsp } from "../src/index";
 
-const initialText = `Patient
-  .name
+// Initial example - without the resource type prefix since we're using contextType
+const initialText = `name
   .where( use = 'official' )
   .first()`;
 
+// Get the initial context type from the dropdown
+const contextTypeSelect = document.getElementById(
+	"context-type",
+) as HTMLSelectElement;
+const initialContextType = contextTypeSelect?.value || "Patient";
+
 const aidboxUrl = "http://localhost:8080";
 const authProvider: AuthProvider = new BrowserAuthProvider(aidboxUrl);
-const client: AidboxClient = makeClient({
-	baseUrl: aidboxUrl,
-	authProvider: authProvider,
-});
-const { extension: lspExtension } = createCodeMirrorLsp(client, {
-	debug: true,
-});
+const client: AidboxClient = new AidboxClient(aidboxUrl, authProvider);
+
+// Create LSP with initial context type
+const { extension: lspExtension, setContextType } = createCodeMirrorLsp(
+	client,
+	{
+		debug: true,
+		contextType: initialContextType,
+	},
+);
+
+// Use a compartment to allow dynamic extension updates
+const lspCompartment = new Compartment();
 
 const editorState = EditorState.create({
 	doc: initialText,
@@ -93,17 +104,7 @@ const editorState = EditorState.create({
 				},
 			},
 		}),
-		// autocompletion({
-		//   activateOnTyping: true,
-		//   activateOnTypingDelay: 0, // No delay for triggers
-		//   selectOnOpen: true, // Auto-select first item
-		//   closeOnBlur: true, // Close on blur
-		//   maxRenderedOptions: 100, // Max items to render
-		//   defaultKeymap: true, // Use default keybindings
-		//   icons: true, // Add icons for completion types
-		// }),
-		// syntaxHighlighting(defaultHighlightStyle),
-		lspExtension,
+		lspCompartment.of(lspExtension),
 	],
 });
 
@@ -112,7 +113,31 @@ if (cmElement === null) {
 	throw Error("No #cm element");
 }
 
-const _editorView = new EditorView({
+const editorView = new EditorView({
 	state: editorState,
 	parent: cmElement,
 });
+
+// Handle context type dropdown changes
+if (contextTypeSelect) {
+	contextTypeSelect.addEventListener("change", (event) => {
+		const target = event.target as HTMLSelectElement;
+		const newContextType = target.value || null;
+		console.log("Context type changed to:", newContextType);
+		setContextType(newContextType);
+
+		// Force re-validation by triggering a document change
+		// This is a workaround to make the LSP re-analyze with the new context
+		const currentDoc = editorView.state.doc.toString();
+		editorView.dispatch({
+			changes: { from: 0, to: currentDoc.length, insert: `${currentDoc} ` },
+		});
+		editorView.dispatch({
+			changes: {
+				from: currentDoc.length,
+				to: currentDoc.length + 1,
+				insert: "",
+			},
+		});
+	});
+}
