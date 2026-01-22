@@ -1,7 +1,11 @@
 import type { ServerOptions } from "@atomic-ehr/fhirpath-lsp";
-import type { Resource, WireMsg } from "./messages";
+import type { MsgSetContextType, Resource, WireMsg } from "./messages";
 
-export function startServer(opts: ServerOptions): Worker {
+export type StartServerOptions = ServerOptions & {
+	contextType?: string;
+};
+
+export function startServer(opts: StartServerOptions): Worker {
 	const worker = new Worker(new URL("./worker.js", import.meta.url), {
 		type: "module",
 	});
@@ -64,6 +68,7 @@ export function startServer(opts: ServerOptions): Worker {
 		const startCommand: WireMsg = {
 			type: "start",
 			port: port,
+			contextType: opts.contextType,
 		};
 
 		worker.postMessage(startCommand, [port]);
@@ -76,4 +81,15 @@ export function startServer(opts: ServerOptions): Worker {
 
 export function terminateServer(worker: Worker): void {
 	worker.terminate();
+}
+
+export function setContextType(
+	worker: Worker,
+	contextType: string | null,
+): void {
+	const msg: MsgSetContextType = {
+		type: "setContextType",
+		contextType: contextType,
+	};
+	worker.postMessage(msg);
 }

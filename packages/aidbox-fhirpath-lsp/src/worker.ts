@@ -62,6 +62,10 @@ self.onmessage = (msg: MessageEvent<WireMsg>) => {
 			resolve: resolve,
 			search: search,
 		});
+	} else if (msg.data.type === "setContextType") {
+		// Context type is handled at the hooks.ts level via message transformation.
+		// This message is received but no action is needed in the worker.
+		// The actual prefix prepending/stripping happens in the transport layer.
 	} else if (
 		msg.data.type === "resolveResponse" ||
 		msg.data.type === "searchResponse"
