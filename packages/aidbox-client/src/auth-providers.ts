@@ -78,4 +78,65 @@ export class BrowserAuthProvider implements AuthProvider {
 	}
 }
 
-// TODO: backend auth provider
+export class BasicAuthProvider implements AuthProvider {
+	/** @ignore */
+	public baseUrl: string;
+	#authHeader: string;
+
+	constructor(baseUrl: string, username: string, password: string) {
+		this.baseUrl = baseUrl;
+		// Create Base64-encoded credentials for Basic Auth header (RFC 7617: UTF-8 encoded)
+		const credentials = `${username}:${password}`;
+		const utf8Bytes = new TextEncoder().encode(credentials);
+		const base64 = btoa(String.fromCharCode(...utf8Bytes));
+		this.#authHeader = `Basic ${base64}`;
+	}
+
+	public async establishSession(): Promise<void> {
+		// No-op for basic auth - credentials are sent with each request
+	}
+
+	public async revokeSession(): Promise<void> {
+		// No-op for basic auth - stateless authentication
+	}
+
+	public async fetch(
+		input: RequestInfo | URL,
+		init?: RequestInit,
+	): Promise<Response> {
+		let url: string;
+
+		if (input instanceof Request) url = input.url;
+		else url = input.toString();
+
+		if (!url.startsWith(this.baseUrl))
+			throw Error("url of the request must start with baseUrl");
+
+		const i = init ?? {};
+
+		// Merge headers from Request object (if any), init.headers, and Authorization
+		const mergedHeaders = new Headers();
+
+		// First, copy headers from Request object if input is a Request
+		if (input instanceof Request) {
+			input.headers.forEach((value, key) => {
+				mergedHeaders.set(key, value);
+			});
+		}
+
+		// Then, copy headers from init (overrides Request headers)
+		if (i.headers) {
+			const initHeaders = new Headers(i.headers);
+			initHeaders.forEach((value, key) => {
+				mergedHeaders.set(key, value);
+			});
+		}
+
+		// Finally, set Authorization header
+		mergedHeaders.set("Authorization", this.#authHeader);
+
+		i.headers = mergedHeaders;
+
+		return fetch(input, i);
+	}
+}

@@ -4,12 +4,58 @@
   "entry": [
     {
       "request": {
-        "method": "POST",
-        "url": "/AccessPolicy"
+        "method": "PUT",
+        "url": "/Client/basic"
+      },
+      "resource": {
+        "secret": "Pa$$w0rd",
+        "grant_types": ["basic"]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/AccessPolicy/basic-full-access"
       },
       "resource": {
         "engine": "allow",
-        "resourceType": "AccessPolicy"
+        "link": [
+          {
+            "reference": "Client/basic"
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/Client/basic-restricted"
+      },
+      "resource": {
+        "secret": "Pa$$w0rd",
+        "grant_types": ["basic"]
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/AccessPolicy/basic-restricted-policy"
+      },
+      "resource": {
+        "engine": "matcho",
+        "link": [
+          {
+            "reference": "Client/basic-restricted"
+          },
+          {
+            "reference": "Operation/FhirSearch"
+          }
+        ],
+        "matcho": {
+          "params": {
+            "resource/type": "Patient"
+          }
+        }
       }
     }
   ]
