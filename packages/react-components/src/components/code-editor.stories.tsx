@@ -332,25 +332,27 @@ export const Complex: Story = {
 	render: () => ComplexComp(),
 };
 
-const client = new AidboxClient(
-	"http://localhost:8765",
-	new BrowserAuthProvider("http://localhost:8765"),
-);
-
-const { extension: lspExtension } = createCodeMirrorLsp(client, {
-	debug: true,
-});
-
 function FhirpathComp() {
+	const { extension, worker } = React.useMemo(() => {
+		const client = new AidboxClient(
+			"http://localhost:8765",
+			new BrowserAuthProvider("http://localhost:8765"),
+		);
+		return createCodeMirrorLsp(client, { debug: true });
+	}, []);
+
+	React.useEffect(() => () => worker.terminate(), [worker]);
+
 	return (
 		<div className="h-[500px] w-[500px]">
 			<EditorInput
 				id="fhirpath-editor-input"
-				additionalExtensions={[lspExtension]}
+				additionalExtensions={[extension]}
 			/>
 		</div>
 	);
 }
+
 export const FhirpathExtension: Story = {
 	render: () => <FhirpathComp />,
 };

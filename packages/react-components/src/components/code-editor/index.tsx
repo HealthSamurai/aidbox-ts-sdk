@@ -488,13 +488,21 @@ const editorInputTheme = EditorView.theme({
 export function EditorInput({
 	additionalExtensions,
 	id,
+	defaultValue,
+	currentValue,
+	onChange,
 }: {
 	additionalExtensions?: Extension[];
 	id: string;
+	defaultValue?: string;
+	currentValue?: string;
+	onChange?: (value: string) => void;
 }) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
 	const additionalExtensionsCompartment = React.useRef(new Compartment());
+	const onChangeCompartment = React.useRef(new Compartment());
+	const initialValue = React.useRef(defaultValue ?? "");
 
 	React.useEffect(() => {
 		if (!domRef.current) {
@@ -504,7 +512,7 @@ export function EditorInput({
 		const view = new EditorView({
 			parent: domRef.current,
 			state: EditorState.create({
-				doc: "Patient.",
+				doc: initialValue.current,
 				extensions: [
 					autocompletion({
 						icons: false,
@@ -527,6 +535,7 @@ export function EditorInput({
 					editorInputTheme,
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
 					additionalExtensionsCompartment.current.of([]),
+					onChangeCompartment.current.of([]),
 					keymap.of([
 						{ key: "Tab", preventDefault: true, run: acceptCompletion },
 						...closeBracketsKeymap,
@@ -561,6 +570,35 @@ export function EditorInput({
 			],
 		});
 	}, [additionalExtensions, view]);
+
+	React.useEffect(() => {
+		view?.dispatch({
+			effects: onChangeCompartment.current.reconfigure([
+				EditorView.updateListener.of((update) => {
+					if (update.docChanged && onChange) {
+						onChange(update.view.state.doc.toString());
+					}
+				}),
+			]),
+		});
+	}, [view, onChange]);
+
+	React.useEffect(() => {
+		if (!view || currentValue === undefined) {
+			return;
+		}
+
+		const currentDoc = view.state.doc.toString();
+		if (currentDoc !== currentValue) {
+			view.dispatch({
+				changes: {
+					from: 0,
+					to: currentDoc.length,
+					insert: currentValue,
+				},
+			});
+		}
+	}, [currentValue, view]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
