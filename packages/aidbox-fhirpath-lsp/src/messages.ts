@@ -9,7 +9,7 @@ export type Resource = {
 export type MsgStart = {
 	type: "start";
 	port: MessagePort;
-	contextType?: string;
+	contextType?: string | undefined;
 };
 
 export type MsgSetContextType = {
