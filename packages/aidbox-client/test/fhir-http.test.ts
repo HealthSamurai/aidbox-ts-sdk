@@ -211,23 +211,34 @@ describe("Instance Level Interaction", () => {
 	});
 	describe("vread", () => {
 		it("should read specific version", async () => {
-			const result = await client.vread({
+			const versions = await client.historyInstance({
 				id: patientId,
 				type: "Patient",
-				vid: "14",
 			});
-			expect(result.isOk()).toBeTruthy();
-			if (result.isOk())
-				expect(result.value.resource).toMatchObject({
-					id: patientId,
-					resourceType: "Patient",
-					name: [
-						{
-							family: "Test",
-							given: ["Patient"],
-						},
-					],
-				});
+			expect(versions.isOk()).toBeTruthy();
+			if (versions.isOk()) {
+				const entries = versions.value.resource.entry ?? [];
+				expect(entries).not.toHaveLength(0);
+				for (const entry of entries) {
+					expect(entry?.resource).not.toBeUndefined();
+					if (entry.resource) {
+						const vid = entry.resource?.meta?.versionId;
+						expect(vid).not.toBeUndefined();
+						if (vid) {
+							const result = await client.vread({
+								id: patientId,
+								type: "Patient",
+								vid: vid,
+							});
+
+							expect(result.isOk()).toBeTruthy();
+
+							if (result.isOk())
+								expect(result.value.resource).toMatchObject(entry.resource);
+						}
+					}
+				}
+			}
 		});
 	});
 	describe("conditionalUpdate", () => {
