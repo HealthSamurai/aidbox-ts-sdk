@@ -522,15 +522,14 @@ export function EditorInput({
 							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary grid grid-cols-2 gap-2",
 						tooltipClass: (_state) =>
 							"!bg-bg-primary rounded-md p-2 shadow-md !border-border-primary !typo-body",
-						compareCompletions: (a, _b) => {
-							if (a.type === "property") {
-								return -1;
-							} else {
-								return 1;
-							}
+						compareCompletions: (a, b) => {
+							const aIsProperty = a.type === "property" ? 0 : 1;
+							const bIsProperty = b.type === "property" ? 0 : 1;
+							return aIsProperty - bIsProperty;
 						},
 					}),
 					closeBrackets(),
+					history(),
 					indentOnInput(),
 					editorInputTheme,
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
