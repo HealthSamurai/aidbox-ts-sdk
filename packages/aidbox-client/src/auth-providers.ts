@@ -1,4 +1,5 @@
 import type { AuthProvider } from "./types";
+import { mergeHeaders, validateBaseUrl } from "./utils";
 
 export class BrowserAuthProvider implements AuthProvider {
 	/** @ignore */
@@ -55,13 +56,7 @@ export class BrowserAuthProvider implements AuthProvider {
 		input: RequestInfo | URL,
 		init?: RequestInit,
 	): Promise<Response> {
-		var url: string;
-
-		if (input instanceof Request) url = input.url;
-		else url = input.toString();
-
-		if (!url.startsWith(this.baseUrl))
-			throw Error("url of the request must start with baseUrl");
+		validateBaseUrl(input, this.baseUrl);
 
 		const i = init ?? {};
 
@@ -104,38 +99,12 @@ export class BasicAuthProvider implements AuthProvider {
 		input: RequestInfo | URL,
 		init?: RequestInit,
 	): Promise<Response> {
-		let url: string;
-
-		if (input instanceof Request) url = input.url;
-		else url = input.toString();
-
-		if (!url.startsWith(this.baseUrl))
-			throw Error("url of the request must start with baseUrl");
+		validateBaseUrl(input, this.baseUrl);
 
 		const i = init ?? {};
-
-		// Merge headers from Request object (if any), init.headers, and Authorization
-		const mergedHeaders = new Headers();
-
-		// First, copy headers from Request object if input is a Request
-		if (input instanceof Request) {
-			input.headers.forEach((value, key) => {
-				mergedHeaders.set(key, value);
-			});
-		}
-
-		// Then, copy headers from init (overrides Request headers)
-		if (i.headers) {
-			const initHeaders = new Headers(i.headers);
-			initHeaders.forEach((value, key) => {
-				mergedHeaders.set(key, value);
-			});
-		}
-
-		// Finally, set Authorization header
-		mergedHeaders.set("Authorization", this.#authHeader);
-
-		i.headers = mergedHeaders;
+		const headers = mergeHeaders(input, i);
+		headers.set("Authorization", this.#authHeader);
+		i.headers = headers;
 
 		return fetch(input, i);
 	}
