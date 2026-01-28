@@ -1,0 +1,91 @@
+---
+description: Rules for creating Storybook stories for React components
+globs: ["**/*.stories.tsx"]
+---
+
+# Storybook Stories Format
+
+When creating stories for components, follow this structure:
+
+## Structure
+
+Each component should have:
+1. **Docs** - auto-generated docs page with component preview and props table (no Stories section)
+2. **Default** - hidden from sidebar, used as Primary in Docs
+3. **Demo** - visual showcase of all component variants (optional, hidden from autodocs)
+
+## Required Imports
+
+```tsx
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+```
+
+## Meta Configuration
+
+```tsx
+const meta = {
+  title: "Component/ComponentName",
+  component: ComponentName,
+  parameters: {
+    docs: {
+      // Custom docs page without Stories section
+      page: () => (
+        <>
+          <Title />
+          <Primary />
+          <Controls />
+        </>
+      ),
+    },
+  },
+  argTypes: {
+    // Define controls for each prop
+    variant: {
+      control: "select",
+      options: ["primary", "secondary"],
+    },
+    disabled: {
+      control: "boolean",
+    },
+  },
+  args: {
+    // Default values
+    variant: "primary",
+    disabled: false,
+  },
+} satisfies Meta<typeof ComponentName>;
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+```
+
+## Stories
+
+### Default Story (for Docs Primary canvas)
+
+```tsx
+export const Default = {
+  tags: ["!dev"], // Hidden from sidebar
+  render: (args) => <ComponentName {...args} />,
+} satisfies Story;
+```
+
+### Demo Story (optional, for visual showcase)
+
+```tsx
+export const Demo = {
+  tags: ["!autodocs"], // Hidden from docs page
+  render: () => (
+    // Visual showcase of all variants
+  ),
+} satisfies Story;
+```
+
+## Key Points
+
+- Use `tags: ["!dev"]` to hide story from sidebar but keep it for Docs Primary
+- Use `tags: ["!autodocs"]` to hide story from Docs page but show in sidebar
+- Custom `docs.page` removes the Stories section from Docs page
+- Always define `argTypes` for interactive controls
+- Always define `args` for default values
