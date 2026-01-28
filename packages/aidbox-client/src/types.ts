@@ -12,7 +12,10 @@ export type Parameters = [string, string][];
 export type Headers = Record<string, string>;
 
 export type AuthProvider = {
-	fetch: typeof fetch;
+	// Explicit signature instead of `typeof fetch` — different runtimes (Bun, Node, Deno)
+	// attach extra static properties to global fetch (e.g. Bun adds `preconnect`),
+	// which makes `typeof fetch` impossible to implement correctly across runtimes.
+	fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 	baseUrl: string;
 	revokeSession: () => void;
 	establishSession: () => void;
