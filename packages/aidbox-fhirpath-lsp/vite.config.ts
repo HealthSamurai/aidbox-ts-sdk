@@ -3,10 +3,18 @@ import { defineConfig } from "vite";
 export default defineConfig({
 	build: {
 		lib: {
-			entry: ["./src/worker.ts"],
-			name: "AidboxFhirPath",
-			formats: ["iife"],
+			entry: "./src/worker.ts",
+			formats: ["es"],
+			fileName: () => "worker.js",
 		},
-		minify: true,
+		outDir: "dist/src",
+		emptyOutDir: false,
+		minify: false,
+		rollupOptions: {
+			external: [],
+			output: {
+				inlineDynamicImports: true,
+			},
+		},
 	},
 });
