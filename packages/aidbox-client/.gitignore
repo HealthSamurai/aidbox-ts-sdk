@@ -3,3 +3,5 @@
 /tmp
 /.codegen-cache
 /docs
+docker-compose.override.yml
+CLAUDE.local.md
