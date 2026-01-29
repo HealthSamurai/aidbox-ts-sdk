@@ -29,7 +29,7 @@ import {
 	rectangularSelection,
 } from "@codemirror/view";
 import {
-	type AidboxClient,
+	AidboxClient,
 	type AuthProvider,
 	BrowserAuthProvider,
 } from "@health-samurai/aidbox-client";
@@ -46,7 +46,7 @@ const contextTypeSelect = document.getElementById(
 ) as HTMLSelectElement;
 const initialContextType = contextTypeSelect?.value || "Patient";
 
-const aidboxUrl = "http://localhost:8080";
+const aidboxUrl = "http://localhost:8765";
 const authProvider: AuthProvider = new BrowserAuthProvider(aidboxUrl);
 const client: AidboxClient = new AidboxClient(aidboxUrl, authProvider);
 

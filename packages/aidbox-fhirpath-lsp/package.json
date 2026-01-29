@@ -1,6 +1,6 @@
 {
 	"name": "@health-samurai/aidbox-fhirpath-lsp",
-	"version": "0.0.0-alpha.2",
+	"version": "0.0.0-alpha.3",
 	"type": "module",
 	"files": [
 		"dist",
@@ -13,7 +13,7 @@
 		}
 	},
 	"scripts": {
-		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && echo success",
+		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && vite build && echo success",
 		"build:watch": "tsx scripts/watch.node.ts",
 		"format": "biome format",
 		"format:check": "biome format",
@@ -26,7 +26,11 @@
 	"dependencies": {
 		"@atomic-ehr/fhirpath": "0.0.5",
 		"@atomic-ehr/fhirpath-lsp": "0.0.2",
-		"@health-samurai/aidbox-client": "workspace:*",
+		"@health-samurai/aidbox-client": "workspace:^"
+	},
+	"peerDependencies": {
+		"@codemirror/lsp-client": "^6.2.0",
+		"@codemirror/state": "^6.5.2",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0"
 	},
