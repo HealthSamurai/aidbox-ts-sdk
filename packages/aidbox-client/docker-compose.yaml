@@ -24,6 +24,7 @@ services:
     volumes:
       - "./resources/bundle.json:/tmp/bundle.json:z"
     environment:
+      BOX_LICENSE: ${BOX_LICENSE:-}
       BOX_ADMIN_PASSWORD: password
       BOX_BOOTSTRAP_FHIR_PACKAGES: hl7.fhir.r4.core#4.0.1
       BOX_COMPATIBILITY_VALIDATION_JSON__SCHEMA_REGEX: '#{:fhir-datetime}'

@@ -2,6 +2,47 @@ import YAML from "yaml";
 import type { ResponseWithMeta } from "./types";
 import { ErrorResponse } from "./types";
 
+/**
+ * Validate that fetch input URL starts with baseUrl.
+ * Throws if the URL doesn't match baseUrl.
+ */
+export function validateBaseUrl(
+	input: RequestInfo | URL,
+	baseUrl: string,
+): void {
+	const url = input instanceof Request ? input.url : input.toString();
+
+	if (!url.startsWith(baseUrl)) {
+		throw new Error("URL of the request must start with baseUrl");
+	}
+}
+
+/**
+ * Merge headers from Request and RequestInit.
+ * Headers from RequestInit override headers from Request.
+ */
+export function mergeHeaders(
+	input: RequestInfo | URL,
+	init: RequestInit | undefined,
+): Headers {
+	const merged = new Headers();
+
+	if (input instanceof Request) {
+		input.headers.forEach((value, key) => {
+			merged.set(key, value);
+		});
+	}
+
+	if (init?.headers) {
+		const initHeaders = new Headers(init.headers);
+		initHeaders.forEach((value, key) => {
+			merged.set(key, value);
+		});
+	}
+
+	return merged;
+}
+
 const normalizeContentType = (contentType: string) => {
 	const semicolon = contentType.indexOf(";");
 	if (semicolon !== -1) {
