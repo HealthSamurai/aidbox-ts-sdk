@@ -294,34 +294,28 @@ Features:
 - Token caching with proactive refresh before expiry
 - Thundering herd prevention — concurrent requests share a single token fetch
 - Automatic retry on 401 with fresh token
-- PKCS#1 format detection with helpful error message
+- OAuth2 discovery from `.well-known/smart-configuration`
 
 ```typescript
 import { AidboxClient, SmartBackendServicesAuthProvider } from "@health-samurai/aidbox-client";
 
+// Generate or import your private key using Web Crypto API
+const privateKey = await crypto.subtle.generateKey(
+  { name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-384" },
+  true,
+  ["sign", "verify"]
+).then(kp => kp.privateKey);
+
 const auth = new SmartBackendServicesAuthProvider({
   baseUrl: "https://fhir-server.address",
   clientId: "my-service",
-  privateKey: process.env.SMART_PRIVATE_KEY,  // PEM format (PKCS#8)
+  privateKey: privateKey,                     // CryptoKey from Web Crypto API
   keyId: "key-001",                           // Must match kid in JWKS
   scope: "system/*.read",
-  // Optional:
-  // algorithm: "RS384",           // RS384 per SMART Backend Services spec
-  // tokenEndpoint: "...",         // Default: baseUrl/auth/token
-  // tokenExpirationBuffer: 30,    // Seconds before expiry to refresh (default: 30)
+  // tokenExpirationBuffer: 30,              // Optional: seconds before expiry to refresh (default: 30)
 });
 
 const client = new AidboxClient("https://fhir-server.address", auth);
-```
-
-The provider also exports a `generateKeyPair()` helper for generating RSA key pairs:
-
-```typescript
-import { generateKeyPair } from "@health-samurai/aidbox-client";
-
-const { privateKeyPem, publicKeyJwk, keyId } = await generateKeyPair();
-// privateKeyPem: PEM string for SMART_PRIVATE_KEY
-// publicKeyJwk: JWK with kid, register in FHIR server's JWKS
 ```
 
 ### Custom Auth Provider
@@ -346,11 +340,20 @@ export class CustomAuthProvider implements AuthProvider {
     /* code to revoke the session */
   }
 
+  /**
+   * A wrapper around the `fetch` function, that does all the
+   * necessary preparations and argument patching required for the
+   * request to go through.
+   *
+   * Optionally, security checks can be implemented, like verifying
+   * that the request indeed goes to the `baseUrl`, and not
+   * somewhere else.
+   */
   public async fetch(
     input: RequestInfo | URL,
     init?: RequestInit,
   ): Promise<Response> {
-    /* fetch wrapper with auth logic */
+    /* ... */
   }
 }
 ```

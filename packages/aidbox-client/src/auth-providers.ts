@@ -58,11 +58,10 @@ export class BrowserAuthProvider implements AuthProvider {
 	): Promise<Response> {
 		validateBaseUrl(input, this.baseUrl);
 
-		const i = init ?? {};
+		const requestInit = init ?? {};
+		requestInit.credentials = "include";
 
-		i.credentials = "include";
-
-		const response = await fetch(input, i);
+		const response = await fetch(input, requestInit);
 
 		if (response.status === 401) {
 			await this.establishSession();
@@ -101,11 +100,15 @@ export class BasicAuthProvider implements AuthProvider {
 	): Promise<Response> {
 		validateBaseUrl(input, this.baseUrl);
 
-		const i = init ?? {};
-		const headers = mergeHeaders(input, i);
+		const requestInit = init ?? {};
+		const baseHeaders = input instanceof Request ? input.headers : undefined;
+		const initHeaders = requestInit.headers
+			? new Headers(requestInit.headers)
+			: undefined;
+		const headers = mergeHeaders(baseHeaders, initHeaders);
 		headers.set("Authorization", this.#authHeader);
-		i.headers = headers;
+		requestInit.headers = headers;
 
-		return fetch(input, i);
+		return fetch(input, requestInit);
 	}
 }

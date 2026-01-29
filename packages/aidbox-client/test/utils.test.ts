@@ -2,57 +2,52 @@ import { mergeHeaders, validateBaseUrl } from "src/utils";
 import { describe, expect, it } from "vitest";
 
 describe("mergeHeaders", () => {
-	it("should return empty headers when no input has headers", () => {
-		const result = mergeHeaders("http://localhost/test", undefined);
+	it("should return empty headers when both inputs are undefined", () => {
+		const result = mergeHeaders(undefined, undefined);
 		expect([...result.entries()]).toEqual([]);
 	});
 
-	it("should copy headers from Request object", () => {
-		const request = new Request("http://localhost/test", {
-			headers: { "X-Custom": "value", "Content-Type": "application/json" },
+	it("should copy headers from base", () => {
+		const base = new Headers({
+			"X-Custom": "value",
+			"Content-Type": "application/json",
 		});
-		const result = mergeHeaders(request, undefined);
+		const result = mergeHeaders(base, undefined);
 		expect(result.get("X-Custom")).toBe("value");
 		expect(result.get("Content-Type")).toBe("application/json");
 	});
 
-	it("should copy headers from init object (plain object)", () => {
-		const result = mergeHeaders("http://localhost/test", {
-			headers: { "X-Custom": "value" },
-		});
+	it("should copy headers from override", () => {
+		const override = new Headers({ "X-Custom": "value" });
+		const result = mergeHeaders(undefined, override);
 		expect(result.get("X-Custom")).toBe("value");
 	});
 
-	it("should copy headers from init object (Headers instance)", () => {
-		const headers = new Headers();
-		headers.set("X-Custom", "value");
-		const result = mergeHeaders("http://localhost/test", { headers });
+	it("should let override headers take precedence over base headers", () => {
+		const base = new Headers({
+			"X-Shared": "from-base",
+			"X-Only-Base": "base",
+		});
+		const override = new Headers({
+			"X-Shared": "from-override",
+			"X-Only-Override": "override",
+		});
+		const result = mergeHeaders(base, override);
+		expect(result.get("X-Shared")).toBe("from-override");
+		expect(result.get("X-Only-Base")).toBe("base");
+		expect(result.get("X-Only-Override")).toBe("override");
+	});
+
+	it("should handle only base headers", () => {
+		const base = new Headers({ "X-Custom": "value" });
+		const result = mergeHeaders(base, undefined);
 		expect(result.get("X-Custom")).toBe("value");
 	});
 
-	it("should let init headers override Request headers", () => {
-		const request = new Request("http://localhost/test", {
-			headers: { "X-Shared": "from-request", "X-Only-Request": "req" },
-		});
-		const result = mergeHeaders(request, {
-			headers: { "X-Shared": "from-init", "X-Only-Init": "init" },
-		});
-		expect(result.get("X-Shared")).toBe("from-init");
-		expect(result.get("X-Only-Request")).toBe("req");
-		expect(result.get("X-Only-Init")).toBe("init");
-	});
-
-	it("should handle URL input with init headers", () => {
-		const url = new URL("http://localhost/test");
-		const result = mergeHeaders(url, {
-			headers: { "X-Custom": "value" },
-		});
+	it("should handle only override headers", () => {
+		const override = new Headers({ "X-Custom": "value" });
+		const result = mergeHeaders(undefined, override);
 		expect(result.get("X-Custom")).toBe("value");
-	});
-
-	it("should handle string input with no init", () => {
-		const result = mergeHeaders("http://localhost/test", undefined);
-		expect([...result.entries()]).toEqual([]);
 	});
 });
 

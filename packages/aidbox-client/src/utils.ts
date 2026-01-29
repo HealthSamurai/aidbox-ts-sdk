@@ -18,27 +18,19 @@ export function validateBaseUrl(
 }
 
 /**
- * Merge headers from Request and RequestInit.
- * Headers from RequestInit override headers from Request.
+ * Merge two Headers objects.
+ * Headers from `override` take precedence over `base`.
  */
-export function mergeHeaders(
-	input: RequestInfo | URL,
-	init: RequestInit | undefined,
-): Headers {
+export function mergeHeaders(base?: Headers, override?: Headers): Headers {
 	const merged = new Headers();
 
-	if (input instanceof Request) {
-		input.headers.forEach((value, key) => {
-			merged.set(key, value);
-		});
-	}
+	base?.forEach((value, key) => {
+		merged.set(key, value);
+	});
 
-	if (init?.headers) {
-		const initHeaders = new Headers(init.headers);
-		initHeaders.forEach((value, key) => {
-			merged.set(key, value);
-		});
-	}
+	override?.forEach((value, key) => {
+		merged.set(key, value);
+	});
 
 	return merged;
 }

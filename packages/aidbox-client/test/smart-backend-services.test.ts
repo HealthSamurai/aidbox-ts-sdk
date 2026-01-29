@@ -5,38 +5,60 @@ import type {
 	OperationOutcome,
 	Patient,
 } from "src/fhir-types/hl7-fhir-r4-core";
-import {
-	generateKeyPair,
-	SmartBackendServicesAuthProvider,
-} from "src/smart-backend-services";
+import { SmartBackendServicesAuthProvider } from "src/smart-backend-services";
 import type { User } from "src/types";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const AIDBOX_BASE_URL = "http://localhost:8080";
 const SMART_CLIENT_ID = "smart-backend-test";
 
-describe("generateKeyPair", () => {
-	it("should generate valid RSA key pair", async () => {
-		const { privateKeyPem, publicKeyJwk, keyId } = await generateKeyPair();
+/**
+ * Generate RSA key pair for testing.
+ * Returns CryptoKey for provider and JWK for registering in Aidbox.
+ */
+async function generateTestKeyPair(): Promise<{
+	privateKey: CryptoKey;
+	publicKeyJwk: {
+		kty: string;
+		n: string;
+		e: string;
+		kid: string;
+		alg: string;
+		use: string;
+	};
+	keyId: string;
+}> {
+	const keyPair = await crypto.subtle.generateKey(
+		{
+			name: "RSASSA-PKCS1-v1_5",
+			modulusLength: 2048,
+			publicExponent: new Uint8Array([1, 0, 1]),
+			hash: "SHA-384",
+		},
+		true,
+		["sign", "verify"],
+	);
 
-		expect(privateKeyPem).toContain("-----BEGIN PRIVATE KEY-----");
-		expect(privateKeyPem).toContain("-----END PRIVATE KEY-----");
+	const keyId = crypto.randomUUID();
 
-		expect(publicKeyJwk.kty).toBe("RSA");
-		expect(publicKeyJwk.n).toBeTruthy();
-		expect(publicKeyJwk.e).toBeTruthy();
-		expect(publicKeyJwk.kid).toBe(keyId);
+	const exportedJwk = await crypto.subtle.exportKey("jwk", keyPair.publicKey);
 
-		expect(keyId).toMatch(/^[a-f0-9]{32}$/);
-	});
+	// Extract only the fields Aidbox expects (remove key_ops, ext)
+	const publicKeyJwk = {
+		kty: exportedJwk.kty as string,
+		n: exportedJwk.n as string,
+		e: exportedJwk.e as string,
+		kid: keyId,
+		alg: "RS384",
+		use: "sig",
+	};
 
-	it("should generate unique key IDs", async () => {
-		const result1 = await generateKeyPair();
-		const result2 = await generateKeyPair();
-
-		expect(result1.keyId).not.toBe(result2.keyId);
-	});
-});
+	return {
+		privateKey: keyPair.privateKey,
+		publicKeyJwk,
+		keyId,
+	};
+}
 
 describe("SmartBackendServicesAuthProvider", () => {
 	// Setup client with basic auth (has full access from init bundle)
@@ -47,7 +69,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 	);
 
 	// Generated credentials - populated in beforeAll
-	let generatedPrivateKey: string;
+	let generatedPrivateKey: CryptoKey;
 	let generatedKeyId: string;
 
 	// Create SMART client resources before all tests
@@ -62,9 +84,9 @@ describe("SmartBackendServicesAuthProvider", () => {
 			});
 		}
 
-		// Generate key pair dynamically (includes alg and use fields)
-		const { privateKeyPem, publicKeyJwk, keyId } = await generateKeyPair();
-		generatedPrivateKey = privateKeyPem;
+		// Generate key pair dynamically
+		const { privateKey, publicKeyJwk, keyId } = await generateTestKeyPair();
+		generatedPrivateKey = privateKey;
 		generatedKeyId = keyId;
 
 		// Create the SMART Backend Client with generated public key
@@ -143,20 +165,6 @@ describe("SmartBackendServicesAuthProvider", () => {
 
 			expect(provider.baseUrl).toBe(AIDBOX_BASE_URL);
 		});
-
-		it("should accept custom tokenEndpoint", () => {
-			const customEndpoint = "https://auth.example.com/oauth/token";
-			const provider = new SmartBackendServicesAuthProvider({
-				baseUrl: AIDBOX_BASE_URL,
-				clientId: SMART_CLIENT_ID,
-				privateKey: generatedPrivateKey,
-				keyId: generatedKeyId,
-				scope: "system/*.read",
-				tokenEndpoint: customEndpoint,
-			});
-
-			expect(provider.baseUrl).toBe(AIDBOX_BASE_URL);
-		});
 	});
 
 	describe("token acquisition", () => {
@@ -167,10 +175,11 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
-			await provider.establishSession();
-			expect(await provider.isAuthenticated()).toBe(true);
+			// establishSession should complete without error
+			await expect(provider.establishSession()).resolves.toBeUndefined();
 		});
 
 		it("should fail with invalid client credentials", async () => {
@@ -180,6 +189,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read",
+				allowInsecureRequests: true,
 			});
 
 			await expect(invalidProvider.establishSession()).rejects.toThrow();
@@ -187,14 +197,15 @@ describe("SmartBackendServicesAuthProvider", () => {
 
 		it("should fail with wrong private key", async () => {
 			// Generate a different key pair
-			const { privateKeyPem, keyId } = await generateKeyPair();
+			const { privateKey, keyId } = await generateTestKeyPair();
 
 			const wrongKeyProvider = new SmartBackendServicesAuthProvider({
 				baseUrl: AIDBOX_BASE_URL,
 				clientId: SMART_CLIENT_ID,
-				privateKey: privateKeyPem,
+				privateKey: privateKey,
 				keyId: keyId,
 				scope: "system/*.read",
+				allowInsecureRequests: true,
 			});
 
 			await expect(wrongKeyProvider.establishSession()).rejects.toThrow();
@@ -209,6 +220,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
 			const response = await provider.fetch(`${AIDBOX_BASE_URL}/fhir/Patient`);
@@ -225,6 +237,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read",
+				allowInsecureRequests: true,
 			});
 
 			await expect(
@@ -239,6 +252,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
 			const response1 = await provider.fetch(`${AIDBOX_BASE_URL}/fhir/Patient`);
@@ -252,36 +266,43 @@ describe("SmartBackendServicesAuthProvider", () => {
 	});
 
 	describe("session management", () => {
-		it("should report isAuthenticated correctly", async () => {
+		it("should obtain token via establishSession", async () => {
 			const provider = new SmartBackendServicesAuthProvider({
 				baseUrl: AIDBOX_BASE_URL,
 				clientId: SMART_CLIENT_ID,
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
-				scope: "system/*.read",
+				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
-			expect(await provider.isAuthenticated()).toBe(false);
-
+			// establishSession should obtain token without error
 			await provider.establishSession();
 
-			expect(await provider.isAuthenticated()).toBe(true);
+			// Subsequent fetch should work
+			const response = await provider.fetch(`${AIDBOX_BASE_URL}/fhir/Patient`);
+			expect(response.ok).toBe(true);
 		});
 
-		it("should clear token on revokeSession", async () => {
+		it("should clear token on revokeSession and re-obtain on next fetch", async () => {
 			const provider = new SmartBackendServicesAuthProvider({
 				baseUrl: AIDBOX_BASE_URL,
 				clientId: SMART_CLIENT_ID,
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
-				scope: "system/*.read",
+				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
+			// Get initial token
 			await provider.establishSession();
-			expect(await provider.isAuthenticated()).toBe(true);
 
+			// Revoke clears cached token
 			await provider.revokeSession();
-			expect(await provider.isAuthenticated()).toBe(false);
+
+			// Next fetch should automatically obtain new token
+			const response = await provider.fetch(`${AIDBOX_BASE_URL}/fhir/Patient`);
+			expect(response.ok).toBe(true);
 		});
 	});
 
@@ -293,6 +314,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
 			const client = new AidboxClient<Bundle, OperationOutcome, User>(
@@ -317,6 +339,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
 			const client = new AidboxClient<Bundle, OperationOutcome, User>(
@@ -366,6 +389,7 @@ describe("SmartBackendServicesAuthProvider", () => {
 				privateKey: generatedPrivateKey,
 				keyId: generatedKeyId,
 				scope: "system/*.read system/*.write",
+				allowInsecureRequests: true,
 			});
 
 			const client = new AidboxClient<Bundle, OperationOutcome, User>(
