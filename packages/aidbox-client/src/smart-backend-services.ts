@@ -62,10 +62,7 @@ export class SmartBackendServicesAuthProvider implements AuthProvider {
 		};
 	}
 
-	/**
-	 * Discover token endpoint URL from .well-known/smart-configuration.
-	 */
-	async #getTokenEndpoint(): Promise<string> {
+	async #discoverAuthServer(): Promise<oauth.AuthorizationServer> {
 		const url = new URL(this.#config.baseUrl);
 		const response = await oauth.discoveryRequest(url, {
 			algorithm: "oauth2",
@@ -77,30 +74,28 @@ export class SmartBackendServicesAuthProvider implements AuthProvider {
 			throw new Error("Discovery response missing token_endpoint");
 		}
 
-		return metadata.token_endpoint;
+		return metadata;
 	}
 
 	/**
 	 * Request access token from token endpoint using client_credentials grant.
 	 */
 	async #requestToken(): Promise<oauth.TokenEndpointResponse> {
-		const tokenEndpoint = await this.#getTokenEndpoint();
+		const as = await this.#discoverAuthServer();
 
 		const client: oauth.Client = {
 			client_id: this.#config.clientId,
 		};
 
-		// Create authorization server metadata with token endpoint
-		const as: oauth.AuthorizationServer = {
-			issuer: new URL(this.#config.baseUrl).origin,
-			token_endpoint: tokenEndpoint,
+		const privateKey = {
+			key: this.#config.privateKey,
+			kid: this.#config.keyId,
 		};
 
-		// Private Key JWT authentication with kid and typ in header
-		const keyId = this.#config.keyId;
-		const clientAuth = oauth.PrivateKeyJwt(this.#config.privateKey, {
+		// Aidbox requires typ: "JWT" in the client assertion JWT header.
+		// oauth.modifyAssertion is a Symbol that allows customizing the JWT before signing.
+		const clientAuth = oauth.PrivateKeyJwt(privateKey, {
 			[oauth.modifyAssertion]: (header) => {
-				header.kid = keyId;
 				header.typ = "JWT";
 			},
 		});
@@ -120,11 +115,10 @@ export class SmartBackendServicesAuthProvider implements AuthProvider {
 		);
 
 		// Some servers (e.g., Aidbox) return "refresh_token": null which is
-		// non-conforming to RFC 6749. oauth4webapi strictly validates this.
+		// non-conforming to RFC 6749. oauth4webapi strictly validates this and throws exception
 		// We intercept the response and remove null fields before processing.
 		const sanitizedResponse = await this.#sanitizeTokenResponse(response);
 
-		// processClientCredentialsResponse throws ResponseBodyError on OAuth2 errors
 		return oauth.processClientCredentialsResponse(
 			as,
 			client,
@@ -133,7 +127,6 @@ export class SmartBackendServicesAuthProvider implements AuthProvider {
 	}
 
 	/**
-	 * Remove null fields from token response body.
 	 * Fixes "refresh_token" = null which does not work with oauth4webapi
 	 * Fixed in Aidbox 2601, but kept for backwards compatibility.
 	 */
@@ -141,13 +134,11 @@ export class SmartBackendServicesAuthProvider implements AuthProvider {
 		const cloned = response.clone();
 		const body = await cloned.json();
 
-		// Remove null values from the response body
-		const sanitized: Record<string, unknown> = {};
-		for (const [key, value] of Object.entries(body)) {
-			if (value !== null) {
-				sanitized[key] = value;
-			}
+		if (!("refresh_token" in body) || body.refresh_token !== null) {
+			return response;
 		}
+
+		const { refresh_token: _, ...sanitized } = body;
 
 		return new Response(JSON.stringify(sanitized), {
 			status: response.status,
