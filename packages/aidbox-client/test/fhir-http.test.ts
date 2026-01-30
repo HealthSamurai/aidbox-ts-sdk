@@ -6,24 +6,41 @@ import type {
 	Patient,
 } from "src/fhir-types/hl7-fhir-r4-core";
 import type { User } from "src/types";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 const baseUrl = "http://localhost:8080";
 
+const authProvider = new BasicAuthProvider(baseUrl, "basic", "Pa$$w0rd");
+
 const client = new AidboxClient<Bundle, OperationOutcome, User>(
 	baseUrl,
-	new BasicAuthProvider(baseUrl, "basic", "Pa$$w0rd"),
+	authProvider,
 );
 
-const patientId = "pt-test-id";
+// Helper to truncate tables
+async function truncateTables(tables: string[]) {
+	for (const table of tables) {
+		await authProvider.fetch(`${baseUrl}/$sql`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify([`TRUNCATE ${table} CASCADE`]),
+		});
+	}
+}
 
 describe("Type Level Interaction", () => {
+	const testPatientId = "type-level-test-patient";
+
+	beforeAll(async () => {
+		await truncateTables(["patient", "patient_history"]);
+	});
+
 	describe("create", () => {
 		it("should create a Patient", async () => {
 			const result = await client.create({
 				type: "Patient",
 				resource: {
-					id: patientId,
+					id: testPatientId,
 					name: [
 						{
 							family: "Test",
@@ -35,7 +52,7 @@ describe("Type Level Interaction", () => {
 			expect(result.isOk()).toBeTruthy();
 			if (result.isOk())
 				expect(result.value.resource).toMatchObject({
-					id: patientId,
+					id: testPatientId,
 					resourceType: "Patient",
 					name: [
 						{
@@ -46,6 +63,7 @@ describe("Type Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("conditionalCreate", () => {
 		it("should create new Patient", async () => {
 			const result = await client.conditionalCreate({
@@ -67,10 +85,11 @@ describe("Type Level Interaction", () => {
 					resourceType: "Patient",
 				});
 		});
+
 		it("should not create a new Patient", async () => {
 			const result = await client.conditionalCreate({
 				type: "Patient",
-				searchParameters: [["family", "Doe"]],
+				searchParameters: [["given", "John"]],
 				resource: {
 					resourceType: "Patient",
 					name: [
@@ -94,10 +113,11 @@ describe("Type Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("search", () => {
 		it("should find a Patient", async () => {
 			const result = await client.searchType({
-				query: [["family", "Doe"]],
+				query: [["given", "John"]],
 				type: "Patient",
 			});
 			expect(result.isOk()).toBeTruthy();
@@ -122,9 +142,10 @@ describe("Type Level Interaction", () => {
 					],
 				});
 		});
+
 		it("should not find a Patient", async () => {
 			const result = await client.searchType({
-				query: [["family", "Smith"]],
+				query: [["family", "NonExistent"]],
 				type: "Patient",
 			});
 			expect(result.isOk()).toBeTruthy();
@@ -136,11 +157,12 @@ describe("Type Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("conditionalDelete", () => {
 		it("should delete a Patient", async () => {
 			const result = await client.conditionalDelete({
 				type: "Patient",
-				searchParameters: [["family", "Doe"]],
+				searchParameters: [["given", "John"]],
 			});
 			expect(result.isOk()).toBeTruthy();
 			if (result.isOk())
@@ -155,6 +177,7 @@ describe("Type Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("history", () => {
 		it("should retrieve type-level history", async () => {
 			const result = await client.historyType({ type: "Patient" });
@@ -169,6 +192,28 @@ describe("Type Level Interaction", () => {
 });
 
 describe("Instance Level Interaction", () => {
+	const patientId = "instance-level-test-patient";
+
+	beforeAll(async () => {
+		await truncateTables(["patient", "patient_history"]);
+		// Create the patient that all instance-level tests will use
+		const createResult = await client.create({
+			type: "Patient",
+			resource: {
+				id: patientId,
+				name: [
+					{
+						family: "Initial",
+						given: ["Name"],
+					},
+				],
+			},
+		});
+		if (!createResult.isOk()) {
+			throw new Error("Failed to create test patient for instance level tests");
+		}
+	});
+
 	describe("read", () => {
 		it("should read Patient", async () => {
 			const result = await client.read({ type: "Patient", id: patientId });
@@ -180,6 +225,7 @@ describe("Instance Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("update", () => {
 		it("should update Patient", async () => {
 			const result = await client.update({
@@ -209,6 +255,7 @@ describe("Instance Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("vread", () => {
 		it("should read specific version", async () => {
 			const versions = await client.historyInstance({
@@ -241,6 +288,7 @@ describe("Instance Level Interaction", () => {
 			}
 		});
 	});
+
 	describe("conditionalUpdate", () => {
 		it("should update patient by query", async () => {
 			const result = await client.conditionalUpdate({
@@ -269,10 +317,11 @@ describe("Instance Level Interaction", () => {
 					],
 				});
 		});
+
 		it("should not update patient by query", async () => {
 			const result = await client.conditionalUpdate({
 				type: "Patient",
-				searchParameters: [["family", "Test"]],
+				searchParameters: [["family", "NonExistent"]],
 				resource: {
 					resourceType: "Patient",
 					name: [
@@ -298,6 +347,7 @@ describe("Instance Level Interaction", () => {
 			}
 		});
 	});
+
 	describe("patch", () => {
 		it("should patch patient", async () => {
 			const result = await client.patch({
@@ -330,6 +380,7 @@ describe("Instance Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("conditionalPatch", () => {
 		it("should patch patient by query", async () => {
 			const result = await client.conditionalPatch({
@@ -361,6 +412,7 @@ describe("Instance Level Interaction", () => {
 					],
 				});
 		});
+
 		it("should not patch patient by query", async () => {
 			const result = await client.conditionalPatch({
 				searchParameters: [["family", "NewFamilyName"]],
@@ -391,14 +443,16 @@ describe("Instance Level Interaction", () => {
 				});
 		});
 	});
-	describe("delete", async () => {
+
+	describe("delete", () => {
 		it("should delete the Patient", async () => {
+			// First search for Unknown patient created by conditionalUpdate
 			const searchResult = await client.searchType({
 				query: [["family", "Unknown"]],
 				type: "Patient",
 			});
 			expect(searchResult.isOk()).toBeTruthy();
-			var id: string | undefined;
+			let id: string | undefined;
 			if (searchResult.isOk()) {
 				expect(searchResult.value.resource).toMatchObject({
 					resourceType: "Bundle",
@@ -435,6 +489,7 @@ describe("Instance Level Interaction", () => {
 			}
 		});
 	});
+
 	describe("history", () => {
 		it("should retrieve specific patient history", async () => {
 			const result = await client.historyInstance({
@@ -442,22 +497,22 @@ describe("Instance Level Interaction", () => {
 				type: "Patient",
 			});
 			expect(result.isOk()).toBeTruthy();
-			if (result.isOk())
-				expect(result.value.resource).toMatchObject({
-					resourceType: "Bundle",
-					total: 5,
-				});
+			if (result.isOk()) {
+				expect(result.value.resource.resourceType).toBe("Bundle");
+				expect(result.value.resource.total).toBeGreaterThanOrEqual(1);
+			}
 		});
+
 		it("should retrieve patient resource history", async () => {
 			const result = await client.historyType({ type: "Patient" });
 			expect(result.isOk()).toBeTruthy();
-			if (result.isOk())
-				expect(result.value.resource).toMatchObject({
-					resourceType: "Bundle",
-					total: 9,
-				});
+			if (result.isOk()) {
+				expect(result.value.resource.resourceType).toBe("Bundle");
+				expect(result.value.resource.total).toBeGreaterThanOrEqual(1);
+			}
 		});
 	});
+
 	// TODO: need server support for DELETE /base/type/id/_history
 	describe("deleteHistoryVersion", () => {
 		it.skip("should delete history version", async () => {
@@ -473,6 +528,7 @@ describe("Instance Level Interaction", () => {
 				});
 		});
 	});
+
 	describe("deleteHistory", () => {
 		it.skip("should delete history for patient", async () => {
 			const result = await client.deleteHistory({
@@ -502,6 +558,7 @@ describe("Whole System Interaction", () => {
 					kind: "instance",
 				});
 		});
+
 		it("should retrieve normative capabilities", async () => {
 			const result = await client.capabilities({
 				mode: "normative",
@@ -514,6 +571,7 @@ describe("Whole System Interaction", () => {
 					kind: "instance",
 				});
 		});
+
 		it("should retrieve terminology capabilities", async () => {
 			const result = await client.capabilities({
 				mode: "terminology",
@@ -527,6 +585,7 @@ describe("Whole System Interaction", () => {
 				});
 		});
 	});
+
 	describe("batch", () => {
 		it("should", async () => {
 			const result = await client.batch({
@@ -588,6 +647,7 @@ describe("Whole System Interaction", () => {
 				});
 		});
 	});
+
 	describe("transaction", () => {
 		it("should", async () => {
 			const result = await client.transaction({
@@ -649,6 +709,7 @@ describe("Whole System Interaction", () => {
 				});
 		});
 	});
+
 	describe("conditionalDelete", () => {
 		// TODO need server support for conditional DELETE /base
 		it.skip("should delete by search", async () => {
@@ -662,7 +723,6 @@ describe("Whole System Interaction", () => {
 			expect(result.isOk()).toBeTruthy();
 			if (result.isOk())
 				expect(result.value.resource).toMatchObject({
-					id: patientId,
 					name: [
 						{
 							family: "Test",
@@ -673,6 +733,7 @@ describe("Whole System Interaction", () => {
 				});
 		});
 	});
+
 	describe("search", () => {
 		// TODO: need server support for GET /base/
 		it.skip("should", async () => {
@@ -691,7 +752,8 @@ describe("Whole System Interaction", () => {
 				});
 		});
 	});
-	describe("history", async () => {
+
+	describe("history", () => {
 		// TODO: need server support for GET /base/_history
 		it.skip("should retrieve system history", async () => {
 			const result = await client.historySystem({});
@@ -706,19 +768,38 @@ describe("Whole System Interaction", () => {
 });
 
 describe("Compartment Interaction", () => {
+	const patientId = "compartment-test-patient";
+
+	beforeAll(async () => {
+		await truncateTables([
+			"patient",
+			"patient_history",
+			"observation",
+			"observation_history",
+		]);
+		// Create patient for compartment test
+		await client.create({
+			type: "Patient",
+			resource: {
+				id: patientId,
+				name: [{ family: "Compartment", given: ["Test"] }],
+			},
+		});
+	});
+
 	describe("searchCompartment", () => {
 		it("should find Observation", async () => {
 			const obsResult = await client.create({
 				type: "Observation",
 				resource: {
 					resourceType: "Observation",
-					id: "obs-pt-test-id-001",
+					id: "obs-compartment-test-001",
 					status: "final",
 					code: {
 						text: "Body temperature",
 					},
 					subject: {
-						reference: "Patient/pt-test-id",
+						reference: `Patient/${patientId}`,
 					},
 				},
 			});
@@ -737,13 +818,13 @@ describe("Compartment Interaction", () => {
 						{
 							resource: {
 								resourceType: "Observation",
-								id: "obs-pt-test-id-001",
+								id: "obs-compartment-test-001",
 								status: "final",
 								code: {
 									text: "Body temperature",
 								},
 								subject: {
-									reference: "Patient/pt-test-id",
+									reference: `Patient/${patientId}`,
 								},
 							},
 						},

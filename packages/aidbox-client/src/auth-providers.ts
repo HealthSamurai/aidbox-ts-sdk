@@ -1,4 +1,5 @@
 import type { AuthProvider } from "./types";
+import { mergeHeaders, validateBaseUrl } from "./utils";
 
 export class BrowserAuthProvider implements AuthProvider {
 	/** @ignore */
@@ -55,19 +56,12 @@ export class BrowserAuthProvider implements AuthProvider {
 		input: RequestInfo | URL,
 		init?: RequestInit,
 	): Promise<Response> {
-		var url: string;
+		validateBaseUrl(input, this.baseUrl);
 
-		if (input instanceof Request) url = input.url;
-		else url = input.toString();
+		const requestInit = init ?? {};
+		requestInit.credentials = "include";
 
-		if (!url.startsWith(this.baseUrl))
-			throw Error("url of the request must start with baseUrl");
-
-		const i = init ?? {};
-
-		i.credentials = "include";
-
-		const response = await fetch(input, i);
+		const response = await fetch(input, requestInit);
 
 		if (response.status === 401) {
 			await this.establishSession();
@@ -104,39 +98,17 @@ export class BasicAuthProvider implements AuthProvider {
 		input: RequestInfo | URL,
 		init?: RequestInit,
 	): Promise<Response> {
-		let url: string;
+		validateBaseUrl(input, this.baseUrl);
 
-		if (input instanceof Request) url = input.url;
-		else url = input.toString();
+		const requestInit = init ?? {};
+		const baseHeaders = input instanceof Request ? input.headers : undefined;
+		const initHeaders = requestInit.headers
+			? new Headers(requestInit.headers)
+			: undefined;
+		const headers = mergeHeaders(baseHeaders, initHeaders);
+		headers.set("Authorization", this.#authHeader);
+		requestInit.headers = headers;
 
-		if (!url.startsWith(this.baseUrl))
-			throw Error("url of the request must start with baseUrl");
-
-		const i = init ?? {};
-
-		// Merge headers from Request object (if any), init.headers, and Authorization
-		const mergedHeaders = new Headers();
-
-		// First, copy headers from Request object if input is a Request
-		if (input instanceof Request) {
-			input.headers.forEach((value, key) => {
-				mergedHeaders.set(key, value);
-			});
-		}
-
-		// Then, copy headers from init (overrides Request headers)
-		if (i.headers) {
-			const initHeaders = new Headers(i.headers);
-			initHeaders.forEach((value, key) => {
-				mergedHeaders.set(key, value);
-			});
-		}
-
-		// Finally, set Authorization header
-		mergedHeaders.set("Authorization", this.#authHeader);
-
-		i.headers = mergedHeaders;
-
-		return fetch(input, i);
+		return fetch(input, requestInit);
 	}
 }
