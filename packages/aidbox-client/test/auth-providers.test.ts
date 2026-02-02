@@ -39,7 +39,7 @@ describe("BasicAuthProvider", () => {
 
 		await expect(
 			provider.fetch("http://other-server.com/Patient"),
-		).rejects.toThrow("url of the request must start with baseUrl");
+		).rejects.toThrow("URL of the request must start with baseUrl");
 	});
 
 	it("should preserve existing headers from init object", async () => {
