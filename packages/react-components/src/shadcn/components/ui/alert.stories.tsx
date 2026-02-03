@@ -2,8 +2,8 @@ import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	AlertCircleIcon,
-	AlertTriangleIcon,
-	CheckCircle2Icon,
+	CheckIcon,
+	CircleXIcon,
 	InfoIcon,
 } from "lucide-react";
 import {
@@ -29,7 +29,10 @@ const meta = {
 	argTypes: {
 		variant: {
 			control: "select",
-			options: ["default", "info", "success", "warning", "danger"],
+			options: ["critical", "warning", "info", "neutral", "success"],
+		},
+		vivid: {
+			control: "boolean",
 		},
 		icon: {
 			control: "boolean",
@@ -37,6 +40,7 @@ const meta = {
 	},
 	args: {
 		variant: "info",
+		vivid: false,
 		icon: true,
 	},
 } satisfies Meta<typeof Alert>;
@@ -46,8 +50,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
 	tags: ["!dev"],
-	render: ({ variant, icon = true }) => (
-		<Alert variant={variant} icon={icon}>
+	render: ({ variant, vivid, icon = true }) => (
+		<Alert variant={variant} vivid={vivid} icon={icon}>
 			<InfoIcon />
 			<AlertTitle>Alert Title</AlertTitle>
 			<AlertDescription>
@@ -60,40 +64,80 @@ export const Default = {
 export const Demo = {
 	tags: ["!autodocs"],
 	render: () => (
-		<div className="grid w-full max-w-xl items-start gap-4">
-			<Alert variant="danger">
-				<AlertTriangleIcon />
-				<AlertTitle>Danger Alert</AlertTitle>
+		<div className="grid grid-cols-2 w-full max-w-4xl items-start gap-4">
+			{/* Default variants */}
+			<Alert variant="critical">
+				<CircleXIcon />
 				<AlertDescription>
-					Something went wrong. Please try again.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
 				</AlertDescription>
 			</Alert>
+			<Alert variant="critical" vivid>
+				<CircleXIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
+				</AlertDescription>
+			</Alert>
+
 			<Alert variant="warning">
 				<AlertCircleIcon />
-				<AlertTitle>Warning Alert</AlertTitle>
 				<AlertDescription>
-					Please review your changes before proceeding.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
 				</AlertDescription>
 			</Alert>
+			<Alert variant="warning" vivid>
+				<AlertCircleIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
+				</AlertDescription>
+			</Alert>
+
 			<Alert variant="info">
 				<InfoIcon />
-				<AlertTitle>Info Alert</AlertTitle>
 				<AlertDescription>
-					Here is some useful information for you.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
 				</AlertDescription>
 			</Alert>
-			<Alert variant="success">
-				<CheckCircle2Icon />
-				<AlertTitle>Success Alert</AlertTitle>
-				<AlertDescription>
-					Your changes have been saved successfully.
-				</AlertDescription>
-			</Alert>
-			<Alert variant="info" icon={false}>
+			<Alert variant="info" vivid>
 				<InfoIcon />
-				<AlertTitle>Alert without icon</AlertTitle>
 				<AlertDescription>
-					This alert has icon=false so the icon is hidden.
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
+				</AlertDescription>
+			</Alert>
+
+			<Alert variant="neutral">
+				<InfoIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
+				</AlertDescription>
+			</Alert>
+			<Alert variant="neutral" vivid>
+				<InfoIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
+				</AlertDescription>
+			</Alert>
+
+			<Alert variant="success">
+				<CheckIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
+				</AlertDescription>
+			</Alert>
+			<Alert variant="success" vivid>
+				<CheckIcon />
+				<AlertDescription>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+					eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more
 				</AlertDescription>
 			</Alert>
 		</div>
