@@ -4,7 +4,7 @@ import { cn } from "#shadcn/lib/utils.js";
 // Styles
 const containerClass = cn(
 	"inline-flex",
-	"bg-bg-secondary_inverse",
+	"bg-bg-tertiary_inverse",
 	"p-0.5",
 	"gap-0",
 	"rounded-full",
