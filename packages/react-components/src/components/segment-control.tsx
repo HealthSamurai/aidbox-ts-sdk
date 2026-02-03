@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import { cn } from "#shadcn/lib/utils.js";
 
-// Styles
+// Container: h-24px, p-2px, rounded-full, bg-secondary_inverse
 const containerClass = cn(
 	"inline-flex",
-	"bg-bg-tertiary_inverse",
+	"h-6",
 	"p-0.5",
-	"gap-0",
+	"bg-bg-secondary_inverse",
 	"rounded-full",
-	"border-1",
+	"border",
 	"border-transparent",
 	"outline-none",
 	"transition-all",
@@ -17,19 +17,22 @@ const containerClass = cn(
 	"focus-visible:ring-ring-blue",
 );
 
+// Item: px-8px py-2px, rounded-full (16px), typo-body
 const itemBaseClass = cn(
 	"flex",
 	"items-center",
 	"justify-center",
 	"px-2",
 	"py-0.5",
-	"text-sm",
+	"typo-body",
+	"leading-4",
 	"cursor-pointer",
-	"rounded-2xl",
+	"rounded-full",
 	"select-none",
+	"transition-colors",
 );
 
-const itemInactiveClass = "text-white/80";
+const itemInactiveClass = "text-text-quternary_on-brand";
 const itemActiveClass = "bg-bg-primary text-text-primary";
 
 interface SegmentControlProps<T extends string> {
