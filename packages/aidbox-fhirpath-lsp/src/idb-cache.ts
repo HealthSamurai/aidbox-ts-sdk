@@ -112,10 +112,10 @@ export function wrapCache(opts: ServerOptions): ServerOptions {
 		});
 	};
 
-	const resolve = async (canonicalUrl: string): Promise<Resource | null> => {
+	const resolve = async (typeName: string): Promise<Resource | null> => {
 		let value: Resource | undefined;
 		try {
-			value = await tryCache<Resource>(canonicalByUrlStore, canonicalUrl);
+			value = await tryCache<Resource>(canonicalByUrlStore, typeName);
 		} catch (e) {
 			console.error(e);
 			console.error("Error checking for cached canonical by URL");
@@ -126,7 +126,7 @@ export function wrapCache(opts: ServerOptions): ServerOptions {
 			return value;
 		}
 
-		const newValue = await opts.resolve(canonicalUrl);
+		const newValue = await opts.resolve(typeName);
 
 		if (newValue === null) {
 			return newValue;

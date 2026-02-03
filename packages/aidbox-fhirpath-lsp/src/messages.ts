@@ -23,7 +23,7 @@ export type MsgStarted = {
 
 export type MsgResolveRequest = {
 	type: "resolveRequest";
-	canonicalUrl: string;
+	typeName: string;
 };
 
 export type MsgResolveResponse = {

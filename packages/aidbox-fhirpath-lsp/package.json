@@ -24,7 +24,7 @@
 		"tsc:check": "tsc -b --noEmit"
 	},
 	"dependencies": {
-		"@atomic-ehr/fhirpath": "0.0.5",
+		"@atomic-ehr/fhirpath": "0.1.0",
 		"@atomic-ehr/fhirpath-lsp": "0.0.2",
 		"@health-samurai/aidbox-client": "workspace:^"
 	},

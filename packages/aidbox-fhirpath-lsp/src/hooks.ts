@@ -641,11 +641,11 @@ export function createCodeMirrorLsp(
 		onLspMessageReceive(JSON.stringify(transformed));
 	};
 
-	async function resolve(canonicalUrl: string): Promise<Resource | null> {
+	async function resolve(typeName: string): Promise<Resource | null> {
 		const response = await client.request<Bundle>({
 			method: "GET",
 			url: "/fhir/StructureDefinition",
-			params: [["url", canonicalUrl]],
+			params: [["type", typeName], ["derivation", "specialization"]],
 		});
 
 		if (!response.ok) {
@@ -709,8 +709,8 @@ export function createCodeMirrorLsp(
 
 	const worker = startServer(
 		wrapCache({
-			resolve: async (canonicalUrl: string) => {
-				return await resolve(canonicalUrl);
+			resolve: async (typeName: string) => {
+				return await resolve(typeName);
 			},
 			search: async (kind) => {
 				return await search(kind);

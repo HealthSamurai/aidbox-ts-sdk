@@ -22,10 +22,10 @@ function query(msg: RequestMsg): Promise<WireMsg> {
 	});
 }
 
-async function resolve(canonicalUrl: string): Promise<Resource | null> {
+async function resolve(typeName: string): Promise<Resource | null> {
 	const msg = await query({
 		type: "resolveRequest",
-		canonicalUrl: canonicalUrl,
+		typeName: typeName,
 	});
 
 	if (msg.type !== "resolveResponse") {
