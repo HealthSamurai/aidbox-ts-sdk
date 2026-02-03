@@ -20,7 +20,7 @@ const dropdownMenuContentBaseStyles = cn(
 	"rounded-md",
 	// Border
 	"border",
-	"border-border-separator",
+	"border-border-primary",
 	// Spacing
 	"p-2",
 	"gap-1",
@@ -51,7 +51,7 @@ const dropdownMenuItemBaseStyles = cn(
 	"gap-2",
 	"h-7",
 	// Spacing
-	"px-3",
+	"px-2",
 	"py-0",
 	// Shape
 	"rounded",
@@ -190,7 +190,7 @@ const dropdownMenuLabelBaseStyles = cn(
 	"items-center",
 	"h-7",
 	// Spacing
-	"px-3",
+	"px-2",
 	"py-0",
 	"data-[inset]:pl-10",
 	// Typography
@@ -244,7 +244,7 @@ const dropdownMenuSubTriggerBaseStyles = cn(
 	"items-center",
 	"h-7",
 	// Spacing
-	"px-3",
+	"px-2",
 	"py-0",
 	"data-[inset]:pl-8",
 	// Shape
@@ -276,7 +276,7 @@ const dropdownMenuSubContentBaseStyles = cn(
 	"rounded-md",
 	// Border
 	"border",
-	"border-border-separator",
+	"border-border-primary",
 	// Spacing
 	"p-2",
 	"gap-1",
