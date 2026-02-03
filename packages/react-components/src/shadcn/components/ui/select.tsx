@@ -64,17 +64,12 @@ const baseSelectTriggerStyles = cn(
 
 const selectTriggerVariants = cva(baseSelectTriggerStyles, {
 	variants: {
-		size: {
-			regular: cn("h-9"),
-			small: cn("h-8"),
-		},
 		variant: {
-			default: cn(""),
-			compound: cn("border-r-0", "typo-label"),
+			default: cn("h-9"),
+			compound: cn("h-9", "border-r-0", "typo-label"),
 		},
 	},
 	defaultVariants: {
-		size: "regular",
 		variant: "default",
 	},
 });
@@ -99,7 +94,6 @@ function SelectValue({
 
 function SelectTrigger({
 	className,
-	size,
 	variant,
 	children,
 	...props
@@ -108,7 +102,7 @@ function SelectTrigger({
 	return (
 		<SelectPrimitive.Trigger
 			data-slot="select-trigger"
-			className={cn(selectTriggerVariants({ variant, size, className }))}
+			className={cn(selectTriggerVariants({ variant, className }))}
 			{...props}
 		>
 			{children}

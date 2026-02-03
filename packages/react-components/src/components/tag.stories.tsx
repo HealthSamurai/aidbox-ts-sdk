@@ -49,13 +49,17 @@ const meta = {
 			control: "select",
 			options: ["big", "small"],
 		},
+		type: {
+			control: "select",
+			options: ["filled", "outlined"],
+		},
 		vibrance: {
 			control: "select",
 			options: ["vivid", "subtle"],
 		},
 		color: {
 			control: "select",
-			options: ["red", "yellow", "green", "blue", "gray"],
+			options: ["red", "yellow", "green", "blue", "gray", "contrast"],
 		},
 		showIcon: {
 			control: "boolean",
@@ -72,6 +76,7 @@ const meta = {
 		children: "Tag",
 		shape: "round",
 		size: "big",
+		type: "filled",
 		vibrance: "vivid",
 		color: "green",
 		showIcon: true,
@@ -98,117 +103,268 @@ export const Demo = {
 			{ label: "Green", value: "green" },
 			{ label: "Blue", value: "blue" },
 			{ label: "Gray", value: "gray" },
+			{ label: "Contrast", value: "contrast" },
 		] as const;
 
-		const columns = [
-			{
-				shape: "round" as const,
-				size: "big" as const,
-				vibrance: "vivid" as const,
-			},
-			{
-				shape: "round" as const,
-				size: "big" as const,
-				vibrance: "subtle" as const,
-			},
-			{
-				shape: "round" as const,
-				size: "small" as const,
-				vibrance: "vivid" as const,
-			},
-			{
-				shape: "round" as const,
-				size: "small" as const,
-				vibrance: "subtle" as const,
-			},
-			{
-				shape: "square" as const,
-				size: "big" as const,
-				vibrance: "vivid" as const,
-			},
-			{
-				shape: "square" as const,
-				size: "big" as const,
-				vibrance: "subtle" as const,
-			},
-			{
-				shape: "square" as const,
-				size: "small" as const,
-				vibrance: "vivid" as const,
-			},
-			{
-				shape: "square" as const,
-				size: "small" as const,
-				vibrance: "subtle" as const,
-			},
-		];
-
 		return (
-			<div className="overflow-x-auto">
-				<table className="border-collapse">
-					<thead>
-						<tr>
-							<th className="sticky left-0 z-20 bg-white p-2 text-left border border-gray-200">
-								Color
-							</th>
-							<th
-								colSpan={4}
-								className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
-							>
-								Shape=Round
-							</th>
-							<th
-								colSpan={4}
-								className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
-							>
-								Shape=Square
-							</th>
-						</tr>
-						<tr>
-							<th className="sticky left-0 z-10 bg-white p-2 text-left border border-gray-200" />
-							{columns.map((col) => (
-								<th
-									key={`${col.shape}-${col.size}-${col.vibrance}`}
-									className="p-2 text-center border border-gray-200 whitespace-nowrap bg-gray-50"
-								>
-									<div className="flex flex-col gap-1">
-										<span className="typo-label-xs">
-											Size={col.size === "big" ? "Big" : "Small"}
-										</span>
-										<span className="typo-label-xs">
-											Vibrance={col.vibrance === "vivid" ? "Vivid" : "Subtle"}
-										</span>
-									</div>
-								</th>
-							))}
-						</tr>
-					</thead>
-					<tbody>
-						{colors.map((color) => (
-							<tr key={color.value}>
-								<td className="sticky left-0 z-10 bg-white p-2 typo-label border border-gray-200">
-									{color.label}
-								</td>
-								{columns.map((col) => (
-									<td
-										key={`${color.value}-${col.shape}-${col.size}-${col.vibrance}`}
-										className="p-2 border border-gray-200 text-center"
+			<div className="space-y-8">
+				{/* Filled Section */}
+				<div>
+					<h2 className="typo-h4 mb-4">Filled</h2>
+					<div className="overflow-x-auto">
+						<table className="border-collapse">
+							<thead>
+								<tr>
+									<th className="p-2 text-left border border-gray-200">
+										Color
+									</th>
+									<th
+										colSpan={4}
+										className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
 									>
-										<Tag
-											shape={col.shape}
-											size={col.size}
-											vibrance={col.vibrance}
-											color={color.value}
-											icon={<Check className="size-4" />}
-										>
-											Tag
-										</Tag>
-									</td>
+										Round
+									</th>
+									<th
+										colSpan={4}
+										className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
+									>
+										Square
+									</th>
+								</tr>
+								<tr>
+									<th className="p-2 border border-gray-200" />
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Big/Vivid
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Big/Subtle
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Small/Vivid
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Small/Subtle
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Big/Vivid
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Big/Subtle
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Small/Vivid
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Small/Subtle
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{colors.map((color) => (
+									<tr key={color.value}>
+										<td className="p-2 typo-label border border-gray-200">
+											{color.label}
+										</td>
+										{/* Round */}
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="round"
+												size="big"
+												type="filled"
+												vibrance="vivid"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="round"
+												size="big"
+												type="filled"
+												vibrance="subtle"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="round"
+												size="small"
+												type="filled"
+												vibrance="vivid"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="round"
+												size="small"
+												type="filled"
+												vibrance="subtle"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										{/* Square */}
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="square"
+												size="big"
+												type="filled"
+												vibrance="vivid"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="square"
+												size="big"
+												type="filled"
+												vibrance="subtle"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="square"
+												size="small"
+												type="filled"
+												vibrance="vivid"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="square"
+												size="small"
+												type="filled"
+												vibrance="subtle"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+									</tr>
 								))}
-							</tr>
-						))}
-					</tbody>
-				</table>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				{/* Outlined Section */}
+				<div>
+					<h2 className="typo-h4 mb-4">Outlined</h2>
+					<div className="overflow-x-auto">
+						<table className="border-collapse">
+							<thead>
+								<tr>
+									<th className="p-2 text-left border border-gray-200">
+										Color
+									</th>
+									<th
+										colSpan={2}
+										className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
+									>
+										Round
+									</th>
+									<th
+										colSpan={2}
+										className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs"
+									>
+										Square
+									</th>
+								</tr>
+								<tr>
+									<th className="p-2 border border-gray-200" />
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Big
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Small
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Big
+									</th>
+									<th className="p-2 text-center border border-gray-200 bg-gray-50 typo-label-xs">
+										Small
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								{colors.map((color) => (
+									<tr key={color.value}>
+										<td className="p-2 typo-label border border-gray-200">
+											{color.label}
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="round"
+												size="big"
+												type="outlined"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="round"
+												size="small"
+												type="outlined"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="square"
+												size="big"
+												type="outlined"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+										<td className="p-2 border border-gray-200 text-center">
+											<Tag
+												shape="square"
+												size="small"
+												type="outlined"
+												color={color.value}
+												icon={<Check />}
+											>
+												Tag
+											</Tag>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				</div>
 			</div>
 		);
 	},

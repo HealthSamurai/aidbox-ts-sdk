@@ -35,8 +35,12 @@ const tagVariants = cva(baseChipStyles, {
 			square: "rounded",
 		},
 		size: {
-			big: cn("gap-1", "px-3", "py-1", "typo-body"),
-			small: cn("gap-1", "px-2", "h-[22px]", "typo-body-xs"),
+			big: cn("gap-1", "typo-body"),
+			small: cn("gap-1", "typo-body-xs"),
+		},
+		type: {
+			filled: "",
+			outlined: "border bg-transparent",
 		},
 		vibrance: {
 			vivid: "",
@@ -46,87 +50,146 @@ const tagVariants = cva(baseChipStyles, {
 			green: "",
 			gray: "",
 			red: "",
-			bright: "",
 			blue: "",
 			yellow: "",
+			contrast: "",
 		},
 	},
 	compoundVariants: [
-		// Green variants
+		// ============ SIZE + TYPE (padding compensation for border) ============
 		{
-			color: "green",
-			vibrance: "vivid",
-			class: "bg-[var(--color-tag-green-vivid-bg)] text-text-primary_on-brand",
+			size: "big",
+			type: "filled",
+			class: "px-3 py-1",
 		},
 		{
-			color: "green",
-			vibrance: "subtle",
-			class:
-				"bg-[var(--color-tag-green-subtle-bg)] text-[var(--color-tag-green-subtle-text)]",
-		},
-		// Gray variants
-		{
-			color: "gray",
-			vibrance: "vivid",
-			class: "bg-[var(--color-tag-gray-vivid-bg)] text-text-primary_on-brand",
+			size: "big",
+			type: "outlined",
+			class: "px-[11px] py-[3px]",
 		},
 		{
-			color: "gray",
-			vibrance: "subtle",
-			class: "bg-[var(--color-tag-gray-subtle-bg)] text-text-primary",
+			size: "small",
+			type: "filled",
+			class: "px-2 h-[22px]",
 		},
-		// Red variants
 		{
+			size: "small",
+			type: "outlined",
+			class: "px-[7px] h-[22px]",
+		},
+
+		// ============ FILLED VIVID ============
+		{
+			type: "filled",
 			color: "red",
 			vibrance: "vivid",
-			class: "bg-[var(--color-tag-red-vivid-bg)] text-text-primary_on-brand",
+			class: "bg-bg-error-primary_inverse text-fg-primary_on-brand",
 		},
 		{
+			type: "filled",
+			color: "yellow",
+			vibrance: "vivid",
+			class: "bg-bg-warning-primary_inverse text-fg-warning-primary",
+		},
+		{
+			type: "filled",
+			color: "green",
+			vibrance: "vivid",
+			class: "bg-fg-success-primary text-fg-primary_on-brand",
+		},
+		{
+			type: "filled",
+			color: "blue",
+			vibrance: "vivid",
+			class: "bg-bg-link text-fg-primary_on-brand",
+		},
+		{
+			type: "filled",
+			color: "gray",
+			vibrance: "vivid",
+			class: "bg-fg-tertiary text-fg-primary_on-brand",
+		},
+		{
+			type: "filled",
+			color: "contrast",
+			vibrance: "vivid",
+			class: "bg-bg-primary_inverse text-fg-primary_on-brand",
+		},
+
+		// ============ FILLED SUBTLE ============
+		{
+			type: "filled",
 			color: "red",
 			vibrance: "subtle",
-			class:
-				"bg-[var(--color-tag-red-subtle-bg)] text-[var(--color-tag-red-subtle-text)]",
-		},
-		// Bright variants (removed, not in Figma)
-		{
-			color: "bright",
-			vibrance: "vivid",
-			class: "bg-bg-quaternary text-text-primary_on-brand",
+			class: "bg-bg-error-tertiary text-fg-error-primary",
 		},
 		{
-			color: "bright",
-			vibrance: "subtle",
-			class: "bg-bg-tertiary text-text-tertiary",
-		},
-		// Blue variants
-		{
-			color: "blue",
-			vibrance: "vivid",
-			class: "bg-[var(--color-tag-blue-vivid-bg)] text-text-primary_on-brand",
-		},
-		{
-			color: "blue",
-			vibrance: "subtle",
-			class:
-				"bg-[var(--color-tag-blue-subtle-bg)] text-[var(--color-tag-blue-subtle-text)]",
-		},
-		// Yellow variants
-		{
-			color: "yellow",
-			vibrance: "vivid",
-			class:
-				"bg-[var(--color-tag-yellow-vivid-bg)] text-[var(--color-tag-yellow-vivid-text)]",
-		},
-		{
+			type: "filled",
 			color: "yellow",
 			vibrance: "subtle",
-			class:
-				"bg-[var(--color-tag-yellow-subtle-bg)] text-[var(--color-tag-yellow-subtle-text)]",
+			class: "bg-bg-warning-secondary text-fg-warning-primary",
+		},
+		{
+			type: "filled",
+			color: "green",
+			vibrance: "subtle",
+			class: "bg-bg-success-secondary text-fg-success-primary",
+		},
+		{
+			type: "filled",
+			color: "blue",
+			vibrance: "subtle",
+			class: "bg-bg-info-primary text-fg-info-primary",
+		},
+		{
+			type: "filled",
+			color: "gray",
+			vibrance: "subtle",
+			class: "bg-bg-tertiary text-text-secondary",
+		},
+		{
+			type: "filled",
+			color: "contrast",
+			vibrance: "subtle",
+			class: "bg-bg-tertiary text-fg-primary",
+		},
+
+		// ============ OUTLINED (only vivid) ============
+		{
+			type: "outlined",
+			color: "red",
+			class: "border-border-error text-text-error-primary",
+		},
+		{
+			type: "outlined",
+			color: "yellow",
+			class: "border-fg-warning-primary text-text-warning-primary",
+		},
+		{
+			type: "outlined",
+			color: "green",
+			class: "border-border-success text-text-success-primary",
+		},
+		{
+			type: "outlined",
+			color: "blue",
+			class: "border-border-link text-text-link",
+		},
+		{
+			type: "outlined",
+			color: "gray",
+			class: "border-border-primary_hover text-fg-secondary",
+		},
+		{
+			type: "outlined",
+			color: "contrast",
+			class: "border-border-primary_hover text-fg-primary",
 		},
 	],
 	defaultVariants: {
 		shape: "round",
 		size: "big",
+		type: "filled",
 		vibrance: "vivid",
 		color: "green",
 	},
@@ -142,6 +205,7 @@ export function Tag({
 	children,
 	shape,
 	size = "big",
+	type = "filled",
 	vibrance = "vivid",
 	color,
 	icon,
@@ -155,7 +219,10 @@ export function Tag({
 	return (
 		<div
 			data-slot="tag"
-			className={cn(tagVariants({ shape, size, vibrance, color }), className)}
+			className={cn(
+				tagVariants({ shape, size, type, vibrance, color }),
+				className,
+			)}
 			{...props}
 		>
 			{shouldShowIcon && (
