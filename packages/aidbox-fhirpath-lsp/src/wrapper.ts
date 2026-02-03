@@ -37,7 +37,7 @@ export function startServer(opts: StartServerOptions): Worker {
 					worker.postMessage(msg);
 				};
 
-				opts.resolve(msg.canonicalUrl).then(onFulfilled, onRejected);
+				opts.resolve(msg.typeName).then(onFulfilled, onRejected);
 			} else if (type === "searchRequest") {
 				const msg = ev.data;
 				const id = msg.id;

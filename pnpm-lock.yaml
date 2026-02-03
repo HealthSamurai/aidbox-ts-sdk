@@ -52,8 +52,8 @@ importers:
   packages/aidbox-fhirpath-lsp:
     dependencies:
       '@atomic-ehr/fhirpath':
-        specifier: 0.0.5
-        version: 0.0.5(typescript@5.8.3)
+        specifier: 0.1.0
+        version: 0.1.0(typescript@5.8.3)
       '@atomic-ehr/fhirpath-lsp':
         specifier: 0.0.2
         version: 0.0.2(typescript@5.8.3)
@@ -408,6 +408,11 @@ packages:
 
   '@atomic-ehr/fhirpath@0.0.5':
     resolution: {integrity: sha512-H7px0lpuazIioXTiHspM3wcTxRE8Fobx92tEPexbaxOpo7qzLgPoQP9hQUqTZMXmfF4kUf0nMs48/eX+jDLcYQ==}
+    peerDependencies:
+      typescript: ^5
+
+  '@atomic-ehr/fhirpath@0.1.0':
+    resolution: {integrity: sha512-aIrO63BLae5jE7JNPLE7HRZgwl4pkHj+Rspe8a7JfC/s+xL1rh1/84R4wtLrFu16PlN9VjCjwRU40cEUBnRC5w==}
     peerDependencies:
       typescript: ^5
 
@@ -4405,6 +4410,14 @@ snapshots:
       - typescript
 
   '@atomic-ehr/fhirpath@0.0.5(typescript@5.8.3)':
+    dependencies:
+      '@atomic-ehr/fhir-canonical-manager': 0.0.11(typescript@5.8.3)
+      '@atomic-ehr/fhirschema': 0.0.2(typescript@5.8.3)
+      '@atomic-ehr/ucum': 0.2.5(typescript@5.8.3)
+      fast-xml-parser: 5.3.2
+      typescript: 5.8.3
+
+  '@atomic-ehr/fhirpath@0.1.0(typescript@5.8.3)':
     dependencies:
       '@atomic-ehr/fhir-canonical-manager': 0.0.11(typescript@5.8.3)
       '@atomic-ehr/fhirschema': 0.0.2(typescript@5.8.3)
