@@ -1,10 +1,13 @@
+import { cva, type VariantProps } from "class-variance-authority";
 import type React from "react";
 import { buttonVariants } from "#shadcn/components/ui/button";
 import { cn } from "#shadcn/lib/utils";
 
-const iconButtonStyles = cn(
-	// Size override for icon-only
+// Styles
+const iconButtonBaseStyles = cn(
+	// Size
 	"size-6",
+	// Spacing
 	"p-0",
 	// SVG
 	"[&>svg]:size-4",
@@ -12,13 +15,27 @@ const iconButtonStyles = cn(
 	"[&>svg]:shrink-0",
 );
 
+const iconButtonVariants = cva(iconButtonBaseStyles, {
+	variants: {
+		variant: {
+			ghost: buttonVariants({ variant: "ghost", size: "small" }),
+			link: buttonVariants({ variant: "link", size: "small" }),
+		},
+	},
+	defaultVariants: {
+		variant: "ghost",
+	},
+});
+
+// Interface
 export interface IconButtonProps
-	extends Omit<React.ComponentProps<"button">, "children"> {
+	extends Omit<React.ComponentProps<"button">, "children">,
+		VariantProps<typeof iconButtonVariants> {
 	icon: React.ReactNode;
 	"aria-label": string;
-	variant?: "ghost" | "link";
 }
 
+// Component
 function IconButton({
 	icon,
 	className,
@@ -29,11 +46,7 @@ function IconButton({
 		<button
 			type="button"
 			data-slot="icon-button"
-			className={cn(
-				buttonVariants({ variant, size: "small" }),
-				iconButtonStyles,
-				className,
-			)}
+			className={cn(iconButtonVariants({ variant }), className)}
 			{...props}
 		>
 			{icon}
@@ -41,4 +54,4 @@ function IconButton({
 	);
 }
 
-export { IconButton };
+export { IconButton, iconButtonVariants };
