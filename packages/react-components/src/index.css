@@ -66,9 +66,11 @@
 	--color-bg-primary: #ffffff;
 	--color-bg-primary_inverse: var(--color-neutral-900);
 	--color-bg-secondary: var(--color-neutral-50);
-	--color-bg-secondary_inverse: var(--color-neutral-400);
+	--color-bg-secondary_inverse: var(--color-neutral-500);
+	--color-bg-secondary_inverse_hover: var(--color-neutral-600);
 
 	--color-bg-tertiary: var(--color-neutral-100);
+	--color-bg-tertiary_inverse: var(--color-neutral-400);
 	--color-bg-quaternary: var(--color-neutral-200);
 	--color-bg-overlay: var(--color-neutral-900);
 	--color-bg-disabled: var(--color-neutral-300);

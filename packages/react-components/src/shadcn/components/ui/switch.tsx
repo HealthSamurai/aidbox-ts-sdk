@@ -14,20 +14,18 @@ const baseSwitchRootStyles = cn(
 	"shrink-0",
 	// Shape
 	"rounded-full",
-	"border",
-	"border-transparent",
 	// Interaction
 	"transition-all",
 	"outline-none",
 	"cursor-pointer",
 	// States
-	"data-[state=unchecked]:bg-bg-quaternary",
+	"data-[state=unchecked]:bg-bg-secondary_inverse",
 	"data-[state=checked]:bg-bg-link",
-	"hover:data-[state=unchecked]:bg-bg-disabled/70",
+	"hover:data-[state=unchecked]:bg-bg-secondary_inverse_hover",
 	"hover:data-[state=checked]:bg-bg-link_hover",
 	// Focus
-	"focus-visible:ring-2",
-	"focus-visible:ring-utility-blue/70",
+	"focus-visible:ring-4",
+	"focus-visible:ring-ring-blue",
 	// Disabled
 	"disabled:cursor-not-allowed",
 	"disabled:hover:data-[state=unchecked]:bg-bg-disabled",
@@ -39,7 +37,7 @@ const baseSwitchRootStyles = cn(
 const switchRootVariants = cva(baseSwitchRootStyles, {
 	variants: {
 		size: {
-			regular: cn("h-5", "w-9"),
+			regular: cn("h-6", "w-10"),
 			small: cn("h-4", "w-7"),
 		},
 	},
@@ -61,16 +59,12 @@ const baseSwitchThumbStyles = cn(
 	// Animation
 	"transition-transform",
 	"data-[state=unchecked]:translate-x-0.5",
-	// Border for unchecked state
-	"border",
-	"border-transparent",
-	"data-[state=unchecked]:border-border-secondary",
 );
 
 const switchThumbVariants = cva(baseSwitchThumbStyles, {
 	variants: {
 		size: {
-			regular: cn("size-4", "data-[state=checked]:translate-x-[1.125rem]"),
+			regular: cn("size-5", "data-[state=checked]:translate-x-[1.125rem]"),
 			small: cn("size-3", "data-[state=checked]:translate-x-[0.875rem]"),
 		},
 	},
