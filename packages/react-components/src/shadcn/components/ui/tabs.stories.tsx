@@ -11,7 +11,7 @@ import {
 } from "#shadcn/components/ui/tabs";
 
 interface TabsWrapperProps {
-	variant?: "default" | "browser" | "secondary";
+	variant?: "default" | "browser" | "secondary" | "tertiary";
 }
 
 function TabsWrapper({ variant = "default" }: TabsWrapperProps) {
@@ -72,6 +72,27 @@ function TabsWrapper({ variant = "default" }: TabsWrapperProps) {
 		);
 	}
 
+	if (variant === "tertiary") {
+		return (
+			<Tabs defaultValue="tab1" variant="tertiary">
+				<TabsList>
+					<TabsTrigger value="tab1">Tab 1</TabsTrigger>
+					<TabsTrigger value="tab2">Tab 2</TabsTrigger>
+					<TabsTrigger value="tab3">Tab 3</TabsTrigger>
+				</TabsList>
+				<TabsContent value="tab1">
+					<div className="p-4">Tab 1 content</div>
+				</TabsContent>
+				<TabsContent value="tab2">
+					<div className="p-4">Tab 2 content</div>
+				</TabsContent>
+				<TabsContent value="tab3">
+					<div className="p-4">Tab 3 content</div>
+				</TabsContent>
+			</Tabs>
+		);
+	}
+
 	return (
 		<Tabs defaultValue="tab1">
 			<TabsList>
@@ -109,7 +130,7 @@ const meta = {
 	argTypes: {
 		variant: {
 			control: "select",
-			options: ["default", "browser", "secondary"],
+			options: ["default", "browser", "secondary", "tertiary"],
 		},
 	},
 	args: {
@@ -145,6 +166,18 @@ export const Demo = {
 			<div>
 				<h3 className="typo-label mb-4">Secondary</h3>
 				<Tabs defaultValue="tab1" variant="secondary">
+					<TabsList>
+						<TabsTrigger value="tab1">Tab 1</TabsTrigger>
+						<TabsTrigger value="tab2">Tab 2</TabsTrigger>
+						<TabsTrigger value="tab3">Tab 3</TabsTrigger>
+					</TabsList>
+				</Tabs>
+			</div>
+
+			{/* Tertiary variant */}
+			<div>
+				<h3 className="typo-label mb-4">Tertiary</h3>
+				<Tabs defaultValue="tab1" variant="tertiary">
 					<TabsList>
 						<TabsTrigger value="tab1">Tab 1</TabsTrigger>
 						<TabsTrigger value="tab2">Tab 2</TabsTrigger>

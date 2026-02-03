@@ -107,6 +107,21 @@ const tabsVariants = cva("", {
 			),
 			secondary: cn(
 				// TabsList
+				"**:data-[slot=tabs-list]:h-10",
+				"**:data-[slot=tabs-list]:bg-bg-tertiary",
+				// TabsTrigger
+				"**:data-[slot=tabs-trigger]:h-10",
+				"**:data-[slot=tabs-trigger]:px-3",
+				"**:data-[slot=tabs-trigger]:pb-2",
+				"**:data-[slot=tabs-trigger]:pt-2",
+				"**:data-[slot=tabs-trigger]:text-text-secondary",
+				"**:data-[slot=tabs-trigger]:hover:text-text-primary",
+				"**:data-[slot=tabs-trigger]:data-[state=active]:border-b-2",
+				"**:data-[slot=tabs-trigger]:data-[state=active]:border-b-border-dark",
+				"**:data-[slot=tabs-trigger]:data-[state=active]:text-text-primary",
+			),
+			tertiary: cn(
+				// TabsList
 				"**:data-[slot=tabs-list]:bg-bg-secondary",
 				"**:data-[slot=tabs-list]:border-b",
 				"**:data-[slot=tabs-list]:border-b-border-separator",
@@ -567,6 +582,7 @@ function TabsTrigger({
 }) {
 	const variant = React.useContext(TabsVariantContext);
 	const isSecondary = variant === "secondary";
+	const isTertiary = variant === "tertiary";
 
 	return (
 		<TabsPrimitive.Trigger
@@ -574,7 +590,8 @@ function TabsTrigger({
 			className={cn(
 				baseTabsTriggerStyles,
 				onClose ? "justify-between" : "justify-start",
-				isSecondary && ["typo-body", "data-[state=active]:typo-label"],
+				isSecondary && ["body14", "data-[state=active]:body14bold"],
+				isTertiary && ["typo-body", "data-[state=active]:typo-label"],
 				className,
 			)}
 			{...props}
