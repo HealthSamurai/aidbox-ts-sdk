@@ -12,8 +12,7 @@ const baseCheckboxStyles = cn(
 	"peer",
 	"shrink-0",
 	// Shape
-	"rounded-md",
-	"border-[1.5px]",
+	"rounded-[4px]",
 	// Interaction
 	"outline-none",
 	"cursor-pointer",
@@ -24,7 +23,7 @@ const baseCheckboxStyles = cn(
 	"active:duration-75",
 	// Default state
 	"bg-white",
-	"border-[var(--color-fg-secondary)]",
+	"border-border-dark",
 	// Checked state
 	"data-[state=checked]:bg-[var(--color-fg-link)]",
 	"data-[state=checked]:border-[var(--color-fg-link)]",
@@ -47,6 +46,7 @@ const baseCheckboxStyles = cn(
 	// Focus styles
 	"focus-visible:ring-4",
 	"focus-visible:ring-ring-blue",
+	"focus-visible:border-border-link",
 	// Hover styles
 	"disabled:hover:ring-0",
 );
@@ -54,8 +54,8 @@ const baseCheckboxStyles = cn(
 const checkboxVariants = cva(baseCheckboxStyles, {
 	variants: {
 		size: {
-			regular: "size-5",
-			small: "size-4",
+			regular: "size-5 border-2",
+			small: "size-4 border",
 		},
 	},
 	defaultVariants: {
