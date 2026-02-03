@@ -12,7 +12,7 @@ const labelStyles = cn(
 	"gap-2",
 	// Typography
 	"text-text-primary",
-	"typo-label",
+	"body14",
 	"leading-none",
 	// Interaction
 	"select-none",

@@ -10,19 +10,17 @@ import {
 } from "#shadcn/components/ui/select";
 
 interface SelectWrapperProps {
-	size?: "regular" | "small";
 	variant?: "default" | "compound";
 	disabled?: boolean;
 }
 
 function SelectWrapper({
-	size = "regular",
 	variant = "default",
 	disabled = false,
 }: SelectWrapperProps) {
 	return (
 		<Select disabled={disabled}>
-			<SelectTrigger className="w-[200px]" size={size} variant={variant}>
+			<SelectTrigger className="w-[200px]" variant={variant}>
 				<SelectValue placeholder="Select a fruit" />
 			</SelectTrigger>
 			<SelectContent>
@@ -59,10 +57,6 @@ const meta = {
 		},
 	},
 	argTypes: {
-		size: {
-			control: "select",
-			options: ["regular", "small"],
-		},
 		variant: {
 			control: "select",
 			options: ["default", "compound"],
@@ -72,7 +66,6 @@ const meta = {
 		},
 	},
 	args: {
-		size: "regular",
 		variant: "default",
 		disabled: false,
 	},
@@ -83,8 +76,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
 	tags: ["!dev"],
-	render: ({ size = "regular", variant = "default", disabled = false }) => (
-		<SelectWrapper size={size} variant={variant} disabled={disabled} />
+	render: ({ variant = "default", disabled = false }) => (
+		<SelectWrapper variant={variant} disabled={disabled} />
 	),
 } satisfies Story;
 
@@ -97,23 +90,6 @@ export const Demo = {
 				<h3 className="typo-label mb-4">Default</h3>
 				<Select>
 					<SelectTrigger className="w-[200px]">
-						<SelectValue placeholder="Select a fruit" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectGroup>
-							<SelectItem value="apple">Apple</SelectItem>
-							<SelectItem value="banana">Banana</SelectItem>
-							<SelectItem value="blueberry">Blueberry</SelectItem>
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-			</div>
-
-			{/* Small */}
-			<div>
-				<h3 className="typo-label mb-4">Small</h3>
-				<Select>
-					<SelectTrigger className="w-[200px]" size="small">
 						<SelectValue placeholder="Select a fruit" />
 					</SelectTrigger>
 					<SelectContent>
