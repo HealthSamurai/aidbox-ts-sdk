@@ -54,8 +54,8 @@ const baseCheckboxStyles = cn(
 const checkboxVariants = cva(baseCheckboxStyles, {
 	variants: {
 		size: {
-			regular: "size-5 border-2",
-			small: "size-4 border",
+			regular: "size-5 border-[1.5px]",
+			small: "size-4 border-[1.5px]",
 		},
 	},
 	defaultVariants: {

@@ -31,7 +31,7 @@ const baseRadioGroupItemStyles = cn(
 	"active:duration-75",
 	// Default state
 	"bg-white",
-	"border-[1.6px]",
+	"border-[1.5px]",
 	"border-solid",
 	"border-border-primary",
 	// Checked state
@@ -47,6 +47,7 @@ const baseRadioGroupItemStyles = cn(
 	// Focus styles
 	"focus-visible:ring-4",
 	"focus-visible:ring-ring-blue",
+	"focus-visible:data-[state=unchecked]:border-bg-link",
 );
 
 const radioGroupItemVariants = cva(baseRadioGroupItemStyles, {
@@ -107,7 +108,7 @@ function RadioGroupItem({
 						// Colors
 						"bg-white",
 						// Size based on variant
-						size === "small" ? "size-1" : "size-1.5",
+						size === "small" ? "size-1.5" : "size-2",
 					)}
 				/>
 			</RadioGroupPrimitive.Indicator>

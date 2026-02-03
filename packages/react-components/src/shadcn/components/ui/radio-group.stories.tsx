@@ -1,14 +1,46 @@
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { RadioGroup, RadioGroupItem } from "#shadcn/components/ui/radio-group";
 
 const meta = {
 	title: "Component/Radio group",
-} satisfies Meta;
+	component: RadioGroup,
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
+	},
+	argTypes: {
+		disabled: {
+			control: "boolean",
+		},
+	},
+	args: {
+		disabled: false,
+	},
+} satisfies Meta<typeof RadioGroup>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+export const Default = {
+	tags: ["!dev"],
+	render: (args) => (
+		<RadioGroup defaultValue="option-1" {...args}>
+			<RadioGroupItem value="option-1" id="option-1" size="regular" />
+			<RadioGroupItem value="option-2" id="option-2" size="regular" />
+		</RadioGroup>
+	),
+} satisfies Story;
+
 export const Demo = {
+	tags: ["!autodocs"],
 	render: () => (
 		<div className="flex gap-12">
 			{/* Regular size */}
