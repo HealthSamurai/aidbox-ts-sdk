@@ -79,12 +79,22 @@ const meta = {
 		disabled: {
 			control: "boolean",
 		},
+		hasPrefix: {
+			control: "boolean",
+			name: "hasPrefix",
+		},
+		hasSuffix: {
+			control: "boolean",
+			name: "hasSuffix",
+		},
 	},
 	args: {
 		type: "text",
 		placeholder: "Placeholder",
 		invalid: false,
 		disabled: false,
+		hasPrefix: false,
+		hasSuffix: false,
 	},
 } satisfies Meta<typeof Input>;
 export default meta;
@@ -93,7 +103,19 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
 	tags: ["!dev"],
-	render: (args: React.ComponentProps<typeof Input>) => <Input {...args} />,
+	render: (args) => {
+		const { hasPrefix, hasSuffix, ...rest } = args as typeof args & {
+			hasPrefix?: boolean;
+			hasSuffix?: boolean;
+		};
+		return (
+			<Input
+				{...rest}
+				{...(hasPrefix && { prefixValue: "https://" })}
+				{...(hasSuffix && { suffix: ".com" })}
+			/>
+		);
+	},
 } satisfies Story;
 
 export const Demo = {
