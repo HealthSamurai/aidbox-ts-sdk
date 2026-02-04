@@ -116,7 +116,7 @@ export function wrapCache(opts: ServerOptions): ServerOptions {
 			value = await tryCache<Resource>(canonicalByUrlStore, typeName);
 		} catch (e) {
 			console.error(e);
-			console.error("Error checking for cached canonical by URL");
+			console.error("Error checking for cached canonical by type name");
 			value = undefined;
 		}
 
