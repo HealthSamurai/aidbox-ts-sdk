@@ -712,12 +712,8 @@ export function createCodeMirrorLsp(
 
 	const worker = startServer(
 		wrapCache({
-			resolve: async (typeName: string) => {
-				return await resolve(typeName);
-			},
-			search: async (kind) => {
-				return await search(kind);
-			},
+			resolve,
+			search,
 			port: lspPort,
 		}),
 	);
