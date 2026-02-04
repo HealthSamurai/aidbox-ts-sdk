@@ -3,3 +3,15 @@
 
 *storybook.log
 storybook-static
+
+# AI agents configs
+.agents/
+.claude/
+.github/copilot-instructions.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
+# Experiment files
+figma-jq-experiments.md
+tokensSpent.md
