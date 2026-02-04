@@ -8,7 +8,7 @@ export function wrapCache(opts: ServerOptions): ServerOptions {
 	const canonicalByUrlStore = "canonicalByUrl";
 	const canonicalsByKindStore = "canonicalsByKind";
 
-	const req = self.indexedDB.open("aidbox-fhirpath-lsp-cache", 1);
+	const req = self.indexedDB.open("aidbox-fhirpath-lsp-cache", 2);
 	req.onerror = (ev) => {
 		console.error(ev);
 		console.error(
@@ -34,9 +34,7 @@ export function wrapCache(opts: ServerOptions): ServerOptions {
 		try {
 			resDb.deleteObjectStore(canonicalsByKindStore);
 		} catch {}
-		resDb.createObjectStore(canonicalByUrlStore, {
-			keyPath: "url",
-		});
+		resDb.createObjectStore(canonicalByUrlStore);
 		resDb.createObjectStore(canonicalsByKindStore);
 		db = resDb;
 	};
@@ -135,7 +133,7 @@ export function wrapCache(opts: ServerOptions): ServerOptions {
 		value = newValue;
 
 		try {
-			await updateCache(canonicalByUrlStore, value);
+			await updateCache(canonicalByUrlStore, value, typeName);
 		} catch (e) {
 			console.error(e);
 			console.error("Error updating cached canonical");
