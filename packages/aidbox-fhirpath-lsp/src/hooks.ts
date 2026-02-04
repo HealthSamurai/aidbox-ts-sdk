@@ -653,13 +653,33 @@ export function createCodeMirrorLsp(
 
 		if (!response.ok) {
 			return null;
-		} else {
+		}
+
+		const result = response.value.resource.entry?.[0]?.resource ?? null;
+
+		if (result) {
 			// There is type conflict between aidbox client and atomic
 			// id of the StructureDefinition is not checked,
 			// so we can safely cast here.
-			return (response.value.resource.entry?.[0]?.resource ??
-				null) as Resource | null;
+			return result as Resource | null;
 		}
+
+		// In FHIR R4 StructureDefinition for "Resource" has no derivation specified
+		const fallback = await client.request<Bundle>({
+			method: "GET",
+			url: "/fhir/StructureDefinition",
+			params: [
+				["type", typeName],
+				["derivation:missing", "true"],
+			],
+		});
+
+		if (!fallback.ok) {
+			return null;
+		}
+
+		return (fallback.value.resource.entry?.[0]?.resource ??
+			null) as Resource | null;
 	}
 
 	async function search(
