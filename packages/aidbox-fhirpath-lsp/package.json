@@ -1,6 +1,6 @@
 {
 	"name": "@health-samurai/aidbox-fhirpath-lsp",
-	"version": "0.0.0-alpha.3",
+	"version": "0.0.0-alpha.4",
 	"type": "module",
 	"files": [
 		"dist",
