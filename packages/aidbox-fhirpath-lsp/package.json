@@ -25,7 +25,7 @@
 	},
 	"dependencies": {
 		"@atomic-ehr/fhirpath": "0.1.0",
-		"@atomic-ehr/fhirpath-lsp": "0.0.2",
+		"@atomic-ehr/fhirpath-lsp": "0.0.3",
 		"@health-samurai/aidbox-client": "workspace:^"
 	},
 	"peerDependencies": {
