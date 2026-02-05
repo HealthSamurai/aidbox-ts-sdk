@@ -57,7 +57,7 @@ export function DataTable<TData>({
 											width:
 												header.column.getIndex() ===
 												headerGroup.headers.length - 1
-													? "w-full"
+													? "100%"
 													: header.getSize(),
 										}}
 									>
@@ -101,7 +101,7 @@ export function DataTable<TData>({
 											width:
 												cell.column.getIndex() ===
 												row.getVisibleCells().length - 1
-													? "w-full"
+													? "100%"
 													: cell.column.getSize(),
 										}}
 									>

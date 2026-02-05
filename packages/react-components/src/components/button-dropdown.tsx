@@ -54,13 +54,13 @@ export function ButtonDropdown({
 
 	const selectedOption = options.find(
 		(option) => option.value === selectedValue,
-	)?.value;
+	);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button variant="link" className={popoverTriggerButtonStyle}>
-					<span className="typo-body">{selectedOption}</span>
+					<span className="typo-body">{selectedOption?.label}</span>
 					<Lucide.ChevronDownIcon />
 				</Button>
 			</PopoverTrigger>
@@ -72,7 +72,7 @@ export function ButtonDropdown({
 							<CommandItem
 								key={option.value}
 								data-state={
-									selectedOption === option.value ? "checked" : "unchecked"
+									selectedOption?.value === option.value ? "checked" : "unchecked"
 								}
 								value={option.value}
 								onSelect={onSelectItemMy}
@@ -81,7 +81,7 @@ export function ButtonDropdown({
 								<Lucide.CheckIcon
 									className={cn(
 										checkIconStyles({
-											isSelected: selectedOption === option.value,
+											isSelected: selectedOption?.value === option.value,
 										}),
 									)}
 								/>

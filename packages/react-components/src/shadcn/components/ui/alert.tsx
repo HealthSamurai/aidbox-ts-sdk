@@ -112,17 +112,15 @@ function Alert({
 	const iconIndex = childrenArray.findIndex(
 		(child) =>
 			React.isValidElement(child) &&
-			(child.type as { displayName?: string })?.displayName !== "AlertTitle" &&
-			(child.type as { displayName?: string })?.displayName !==
-				"AlertDescription",
+			child.type !== AlertTitle &&
+			child.type !== AlertDescription,
 	);
 
 	const hasIcon = icon && iconIndex !== -1;
 	const iconElement = hasIcon ? childrenArray[iconIndex] : null;
-	const content =
-		iconIndex !== -1
-			? childrenArray.filter((_, index) => index !== iconIndex)
-			: childrenArray;
+	const content = hasIcon
+		? childrenArray.filter((_, index) => index !== iconIndex)
+		: childrenArray;
 
 	const variantStyle = variantStyles[variant][vivid ? "vivid" : "default"];
 

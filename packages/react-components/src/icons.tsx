@@ -94,7 +94,7 @@ export function ResourceIcon() {
 	);
 }
 
-export function BackoneElementIcon() {
+export function BackboneElementIcon() {
 	return (
 		<svg
 			width="16"
@@ -102,7 +102,7 @@ export function BackoneElementIcon() {
 			viewBox="0 0 16 17"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
-			aria-label="BackoneElement"
+			aria-label="BackboneElement"
 			role="img"
 		>
 			<path
