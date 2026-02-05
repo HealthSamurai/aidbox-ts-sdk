@@ -229,7 +229,9 @@ function languageExtensions(mode: LanguageMode) {
 			http((ct) =>
 				ct === "application/json"
 					? jsonLang.language
-					: ct === "text/yaml"
+					: ct === "text/yaml" ||
+						ct === "application/yaml" ||
+						ct === "application/x-yaml"
 						? yamlLang.language
 						: null,
 			),

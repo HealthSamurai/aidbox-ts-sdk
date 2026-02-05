@@ -141,7 +141,7 @@ function parse(query: string): Parsed {
 		}
 
 		// header name
-		for (lo = hi; hi <= query.length; ++hi) {
+		for (lo = hi; hi < query.length; ++hi) {
 			const c = query[hi];
 			if (c === " " || c === "\t" || c === "\n" || c === ":") {
 				break;
@@ -156,7 +156,7 @@ function parse(query: string): Parsed {
 
 		// header name trivia
 		let colonFound = false;
-		for (lo = hi; hi <= query.length; ++hi) {
+		for (lo = hi; hi < query.length; ++hi) {
 			const c = query[hi];
 			if (c === ":" && !colonFound) {
 				colonFound = true;
@@ -294,7 +294,6 @@ function ComplexComp() {
 			const from =
 				parsedRef.current.method.length + parsedRef.current.methodTrivia.length;
 			const to = from + parsedRef.current.path.length;
-			console.log(from, to);
 
 			view.dispatch({
 				changes: {
