@@ -9,6 +9,8 @@ export * from "./components/icon-button";
 export * from "./components/request-line-editor";
 export * from "./components/segment-control";
 export * from "./components/split-button";
+export * from "./components/tag";
+export * from "./components/tile";
 export * from "./components/toolbar";
 export * from "./components/tree-view";
 export * from "./icons";

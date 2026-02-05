@@ -2,7 +2,6 @@ import { Copy, Eye, EyeOff } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Toaster } from "../shadcn/components/ui/sonner";
 import {
 	Tooltip,
 	TooltipContent,
@@ -187,7 +186,6 @@ function Sandbox({
 					)}
 				</div>
 			</div>
-			<Toaster position="top-center" />
 		</>
 	);
 }
