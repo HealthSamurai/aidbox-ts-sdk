@@ -47,13 +47,11 @@ function SegmentControl<T extends string>({
 	items,
 }: SegmentControlProps<T>) {
 	return (
-		<div className={containerClass} role="radiogroup">
+		<div className={containerClass}>
 			{items.map((item) => (
 				<button
 					type="button"
 					key={item.value}
-					role="radio"
-					aria-checked={item.value === value}
 					className={cn(
 						itemBaseClass,
 						item.value === value ? itemActiveClass : itemInactiveClass,

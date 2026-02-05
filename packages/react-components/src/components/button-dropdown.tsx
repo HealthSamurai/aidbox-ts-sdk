@@ -72,7 +72,9 @@ export function ButtonDropdown({
 							<CommandItem
 								key={option.value}
 								data-state={
-									selectedOption?.value === option.value ? "checked" : "unchecked"
+									selectedOption?.value === option.value
+										? "checked"
+										: "unchecked"
 								}
 								value={option.value}
 								onSelect={onSelectItemMy}
