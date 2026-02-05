@@ -287,7 +287,7 @@ function AlertDialogAction({
 	}) {
 	if (asChild) {
 		return (
-			<AlertDialogPrimitive.Action asChild {...props}>
+			<AlertDialogPrimitive.Action asChild className={className} {...props}>
 				{children}
 			</AlertDialogPrimitive.Action>
 		);
@@ -323,7 +323,7 @@ function AlertDialogCancel({
 }) {
 	if (asChild) {
 		return (
-			<AlertDialogPrimitive.Cancel asChild {...props}>
+			<AlertDialogPrimitive.Cancel asChild className={className} {...props}>
 				{children}
 			</AlertDialogPrimitive.Cancel>
 		);

@@ -70,7 +70,7 @@ const buttonVariants = cva(baseButtonStyles, {
 		// Primary disabled
 		{
 			variant: "primary",
-			class: cn("disabled:bg-bg-disabled", "disabled:text-text-white"),
+			class: cn("disabled:bg-bg-disabled", "disabled:text-white"),
 		},
 		// Secondary disabled
 		{

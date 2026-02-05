@@ -173,7 +173,7 @@ function TreeView<T>({
 		getItemName: (item: ItemInstance<TreeViewItem<T>>) =>
 			item.getItemData()?.name,
 		dataLoader: {
-			getItem: (itemId) => (items[itemId] as TreeViewItem<T>) ?? {},
+			getItem: (itemId) => items[itemId] as TreeViewItem<T>,
 			getChildren: (itemId) => items[itemId]?.children ?? [],
 		},
 		...(onRename ? { onRename: onRename } : {}),

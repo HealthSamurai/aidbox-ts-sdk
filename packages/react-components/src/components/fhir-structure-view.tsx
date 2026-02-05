@@ -47,7 +47,7 @@ function FiledIcon(item: ItemInstance<TreeViewItem<FhirStructure>>) {
 		case "Resource":
 			return <CustomIcon.ResourceIcon />;
 		case "BackboneElement":
-			return <CustomIcon.BackoneElementIcon />;
+			return <CustomIcon.BackboneElementIcon />;
 		case "Reference":
 			return <CustomIcon.ReferenceIcon />;
 		case "union":

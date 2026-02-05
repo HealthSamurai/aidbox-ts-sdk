@@ -135,7 +135,7 @@ function TreeItem<T = any>({
 				)}
 				onDragStart={(e) => {
 					if ((e.target as HTMLElement).dataset.slot === "drag-handle") {
-						item.getProps().onDragStart(e);
+						item.getProps().onDragStart?.(e);
 					}
 				}}
 			>

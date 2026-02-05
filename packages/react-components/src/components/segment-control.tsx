@@ -46,29 +46,24 @@ function SegmentControl<T extends string>({
 	onValueChange,
 	items,
 }: SegmentControlProps<T>) {
-	const toggle = () => {
-		const currentIndex = items.findIndex((item) => item.value === value);
-		const nextIndex = (currentIndex + 1) % items.length;
-		const nextItem = items[nextIndex];
-		if (nextItem) {
-			onValueChange(nextItem.value);
-		}
-	};
-
 	return (
-		<button type="button" className={containerClass} onClick={toggle}>
+		<div className={containerClass} role="radiogroup">
 			{items.map((item) => (
-				<span
+				<button
+					type="button"
 					key={item.value}
+					role="radio"
+					aria-checked={item.value === value}
 					className={cn(
 						itemBaseClass,
 						item.value === value ? itemActiveClass : itemInactiveClass,
 					)}
+					onClick={() => onValueChange(item.value)}
 				>
 					{item.label}
-				</span>
+				</button>
 			))}
-		</button>
+		</div>
 	);
 }
 
