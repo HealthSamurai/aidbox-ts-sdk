@@ -1,8 +1,20 @@
+"use client";
+
+import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+	createColumnHelper,
+	flexRender,
+	getCoreRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+} from "@tanstack/react-table";
+import { useState } from "react";
+
 import {
 	Table,
 	TableBody,
-	TableCaption,
 	TableCell,
 	TableFooter,
 	TableHead,
@@ -10,86 +22,201 @@ import {
 	TableRow,
 } from "#shadcn/components/ui/table";
 
-const invoices = [
+type Invoice = {
+	invoice: string;
+	paymentStatus: "Paid" | "Pending" | "Unpaid";
+	totalAmount: number;
+	paymentMethod: string;
+};
+
+const invoiceData: Invoice[] = [
 	{
 		invoice: "INV001",
 		paymentStatus: "Paid",
-		totalAmount: "$250.00",
+		totalAmount: 250,
 		paymentMethod: "Credit Card",
 	},
 	{
 		invoice: "INV002",
 		paymentStatus: "Pending",
-		totalAmount: "$150.00",
+		totalAmount: 150,
 		paymentMethod: "PayPal",
 	},
 	{
 		invoice: "INV003",
 		paymentStatus: "Unpaid",
-		totalAmount: "$350.00",
+		totalAmount: 350,
 		paymentMethod: "Bank Transfer",
 	},
 	{
 		invoice: "INV004",
 		paymentStatus: "Paid",
-		totalAmount: "$450.00",
+		totalAmount: 450,
 		paymentMethod: "Credit Card",
 	},
 	{
 		invoice: "INV005",
 		paymentStatus: "Paid",
-		totalAmount: "$550.00",
+		totalAmount: 550,
 		paymentMethod: "PayPal",
 	},
 	{
 		invoice: "INV006",
 		paymentStatus: "Pending",
-		totalAmount: "$200.00",
+		totalAmount: 200,
 		paymentMethod: "Bank Transfer",
 	},
 	{
 		invoice: "INV007",
 		paymentStatus: "Unpaid",
-		totalAmount: "$300.00",
+		totalAmount: 300,
 		paymentMethod: "Credit Card",
 	},
 ];
 
-const meta = {
-	title: "Component/Table",
-} satisfies Meta;
-export default meta;
+const columnHelper = createColumnHelper<Invoice>();
 
-type Story = StoryObj<typeof meta>;
+const columns = [
+	columnHelper.accessor("invoice", {
+		header: "Invoice",
+		cell: (info) => String(info.getValue()),
+		enableSorting: true,
+	}),
+	columnHelper.accessor("paymentStatus", {
+		header: "Status",
+		cell: (info) => String(info.getValue()),
+		enableSorting: true,
+	}),
+	columnHelper.accessor("paymentMethod", {
+		header: "Method",
+		cell: (info) => String(info.getValue()),
+		enableSorting: true,
+	}),
+	columnHelper.accessor("totalAmount", {
+		header: "Amount",
+		cell: (info) => {
+			const value = info.getValue();
+			return `$${value.toFixed(2)}`;
+		},
+		enableSorting: true,
+	}),
+];
 
-export const Demo = {
-	render: () => (
-		<Table>
-			<TableCaption>A list of your recent invoices.</TableCaption>
+function TableWithSorting({ zebra = false }: { zebra?: boolean } = {}) {
+	const [sorting, setSorting] = useState<SortingState>([]);
+
+	const table = useReactTable({
+		data: invoiceData,
+		columns,
+		state: {
+			sorting,
+		},
+		onSortingChange: setSorting,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+	});
+
+	return (
+		<Table zebra={zebra}>
 			<TableHeader>
-				<TableRow>
-					<TableHead className="w-[100px]">Invoice</TableHead>
-					<TableHead>Status</TableHead>
-					<TableHead>Method</TableHead>
-					<TableHead className="text-right">Amount</TableHead>
-				</TableRow>
+				{table.getHeaderGroups().map((headerGroup) => (
+					<TableRow key={headerGroup.id}>
+						{headerGroup.headers.map((header) => (
+							<TableHead
+								key={header.id}
+								onClick={header.column.getToggleSortingHandler()}
+								sortable={header.column.getCanSort()}
+								sorted={header.column.getIsSorted() || false}
+							>
+								{flexRender(
+									header.column.columnDef.header,
+									header.getContext(),
+								)}
+							</TableHead>
+						))}
+					</TableRow>
+				))}
 			</TableHeader>
 			<TableBody>
-				{invoices.map((invoice) => (
-					<TableRow key={invoice.invoice}>
-						<TableCell className="font-medium">{invoice.invoice}</TableCell>
-						<TableCell>{invoice.paymentStatus}</TableCell>
-						<TableCell>{invoice.paymentMethod}</TableCell>
-						<TableCell className="text-right">{invoice.totalAmount}</TableCell>
+				{table.getRowModel().rows.map((row, index) => (
+					<TableRow key={row.id} zebra={zebra} index={index}>
+						{row.getVisibleCells().map((cell) => (
+							<TableCell
+								key={cell.id}
+								type={cell.column.id === "invoice" ? "link" : "text"}
+							>
+								{flexRender(cell.column.columnDef.cell, cell.getContext())}
+							</TableCell>
+						))}
 					</TableRow>
 				))}
 			</TableBody>
 			<TableFooter>
-				<TableRow>
+				<TableRow zebra={zebra} index={table.getRowModel().rows.length}>
 					<TableCell colSpan={3}>Total</TableCell>
-					<TableCell className="text-right">$2,500.00</TableCell>
+					<TableCell>
+						$
+						{invoiceData
+							.reduce((sum, inv) => sum + inv.totalAmount, 0)
+							.toFixed(2)}
+					</TableCell>
 				</TableRow>
 			</TableFooter>
 		</Table>
+	);
+}
+
+const meta = {
+	title: "Component/Table",
+	component: TableWithSorting,
+	parameters: {
+		docs: {
+			page: () => (
+				<>
+					<Title />
+					<Primary />
+					<Controls />
+				</>
+			),
+		},
+	},
+	argTypes: {
+		zebra: {
+			control: "boolean",
+			description: "Enable alternating row background colors",
+		},
+	},
+	args: {
+		zebra: false,
+	},
+} satisfies Meta<typeof TableWithSorting>;
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default = {
+	tags: ["!dev"],
+	render: ({ zebra = false }: { zebra?: boolean } = {}) => (
+		<TableWithSorting zebra={zebra} />
+	),
+} satisfies Story;
+
+export const Demo = {
+	tags: ["!autodocs"],
+	render: () => (
+		<div className="space-y-8 p-6">
+			<div>
+				<h3 className="text-lg font-semibold mb-4 text-text-primary">
+					Without Zebra Striping
+				</h3>
+				<TableWithSorting zebra={false} />
+			</div>
+			<div>
+				<h3 className="text-lg font-semibold mb-4 text-text-primary">
+					With Zebra Striping
+				</h3>
+				<TableWithSorting zebra={true} />
+			</div>
+		</div>
 	),
 } satisfies Story;
