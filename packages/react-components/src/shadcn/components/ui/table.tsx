@@ -1,5 +1,5 @@
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from "lucide-react";
-import type * as React from "react";
+import * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
 
@@ -26,6 +26,13 @@ const tableHeaderStyles = cn(
 	"[&_tr]:border-b",
 	"[&_tr]:border-border-secondary",
 	"[&_tr]:h-8",
+);
+
+// Table header sticky variant
+const tableHeaderStickyStyles = cn(
+	"sticky",
+	"top-0",
+	"z-10",
 );
 
 // Table body
@@ -101,28 +108,45 @@ const tableCaptionStyles = cn(
 	"text-left",
 );
 
+// Context for sticky header
+const TableStickyContext = React.createContext(false);
+
 type TableProps = React.ComponentProps<"table"> & {
 	zebra?: boolean | undefined;
+	stickyHeader?: boolean | undefined;
 };
 
-function Table({ className, zebra = false, ...props }: TableProps) {
+function Table({
+	className,
+	zebra = false,
+	stickyHeader = false,
+	...props
+}: TableProps) {
 	return (
-		<div data-slot="table-container" className={tableContainerStyles}>
-			<table
-				data-slot="table"
-				data-zebra={zebra}
-				className={cn(tableStyles, className)}
-				{...props}
-			/>
-		</div>
+		<TableStickyContext.Provider value={stickyHeader}>
+			<div data-slot="table-container" className={tableContainerStyles}>
+				<table
+					data-slot="table"
+					data-zebra={zebra}
+					className={cn(tableStyles, className)}
+					{...props}
+				/>
+			</div>
+		</TableStickyContext.Provider>
 	);
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
+	const stickyHeader = React.useContext(TableStickyContext);
+
 	return (
 		<thead
 			data-slot="table-header"
-			className={cn(tableHeaderStyles, className)}
+			className={cn(
+				tableHeaderStyles,
+				stickyHeader && tableHeaderStickyStyles,
+				className,
+			)}
 			{...props}
 		/>
 	);

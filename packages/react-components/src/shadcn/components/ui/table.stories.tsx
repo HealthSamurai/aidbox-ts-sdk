@@ -31,50 +31,19 @@ type Invoice = {
 	paymentMethod: string;
 };
 
-const invoiceData: Invoice[] = [
-	{
-		invoice: "INV001",
-		paymentStatus: "Paid",
-		totalAmount: 250,
-		paymentMethod: "Credit Card",
-	},
-	{
-		invoice: "INV002",
-		paymentStatus: "Pending",
-		totalAmount: 150,
-		paymentMethod: "PayPal",
-	},
-	{
-		invoice: "INV003",
-		paymentStatus: "Unpaid",
-		totalAmount: 350,
-		paymentMethod: "Bank Transfer",
-	},
-	{
-		invoice: "INV004",
-		paymentStatus: "Paid",
-		totalAmount: 450,
-		paymentMethod: "Credit Card",
-	},
-	{
-		invoice: "INV005",
-		paymentStatus: "Paid",
-		totalAmount: 550,
-		paymentMethod: "PayPal",
-	},
-	{
-		invoice: "INV006",
-		paymentStatus: "Pending",
-		totalAmount: 200,
-		paymentMethod: "Bank Transfer",
-	},
-	{
-		invoice: "INV007",
-		paymentStatus: "Unpaid",
-		totalAmount: 300,
-		paymentMethod: "Credit Card",
-	},
+const statuses: Invoice["paymentStatus"][] = ["Paid", "Pending", "Unpaid"];
+const methods: Invoice["paymentMethod"][] = [
+	"Credit Card",
+	"PayPal",
+	"Bank Transfer",
 ];
+
+const invoiceData: Invoice[] = Array.from({ length: 50 }, (_, i) => ({
+	invoice: `INV${String(i + 1).padStart(3, "0")}`,
+	paymentStatus: statuses[i % statuses.length],
+	totalAmount: 100 + ((i * 73) % 900),
+	paymentMethod: methods[i % methods.length],
+}));
 
 const columnHelper = createColumnHelper<Invoice>();
 
@@ -134,7 +103,8 @@ const selectColumn: ColumnDef<Invoice, unknown> = {
 function TableWithSorting({
 	zebra = false,
 	selectable = false,
-}: { zebra?: boolean; selectable?: boolean } = {}) {
+	stickyHeader = false,
+}: { zebra?: boolean; selectable?: boolean; stickyHeader?: boolean } = {}) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -156,7 +126,7 @@ function TableWithSorting({
 	});
 
 	return (
-		<Table zebra={zebra}>
+		<Table zebra={zebra} stickyHeader={stickyHeader}>
 			<TableHeader>
 				{table.getHeaderGroups().map((headerGroup) => (
 					<TableRow key={headerGroup.id}>
@@ -222,10 +192,15 @@ const meta = {
 			control: "boolean",
 			description: "Enable row selection with checkboxes",
 		},
+		stickyHeader: {
+			control: "boolean",
+			description: "Keep header fixed while scrolling",
+		},
 	},
 	args: {
 		zebra: false,
 		selectable: false,
+		stickyHeader: false,
 	},
 } satisfies Meta<typeof TableWithSorting>;
 export default meta;
@@ -237,8 +212,11 @@ export const Default = {
 	render: ({
 		zebra = false,
 		selectable = false,
-	}: { zebra?: boolean; selectable?: boolean } = {}) => (
-		<TableWithSorting zebra={zebra} selectable={selectable} />
+		stickyHeader = false,
+	}: { zebra?: boolean; selectable?: boolean; stickyHeader?: boolean } = {}) => (
+		<div className="h-80">
+			<TableWithSorting zebra={zebra} selectable={selectable} stickyHeader={stickyHeader} />
+		</div>
 	),
 } satisfies Story;
 
@@ -250,25 +228,33 @@ export const Demo = {
 				<h3 className="text-lg font-semibold mb-4 text-text-primary">
 					Without Zebra Striping
 				</h3>
-				<TableWithSorting zebra={false} />
+				<div className="h-80">
+					<TableWithSorting zebra={false} stickyHeader={true} />
+				</div>
 			</div>
 			<div>
 				<h3 className="text-lg font-semibold mb-4 text-text-primary">
 					With Zebra Striping
 				</h3>
-				<TableWithSorting zebra={true} />
+				<div className="h-80">
+					<TableWithSorting zebra={true} stickyHeader={true} />
+				</div>
 			</div>
 			<div>
 				<h3 className="text-lg font-semibold mb-4 text-text-primary">
 					Selectable
 				</h3>
-				<TableWithSorting selectable={true} />
+				<div className="h-80">
+					<TableWithSorting selectable={true} stickyHeader={true} />
+				</div>
 			</div>
 			<div>
 				<h3 className="text-lg font-semibold mb-4 text-text-primary">
 					Selectable + Zebra
 				</h3>
-				<TableWithSorting selectable={true} zebra={true} />
+				<div className="h-80">
+					<TableWithSorting selectable={true} zebra={true} stickyHeader={true} />
+				</div>
 			</div>
 		</div>
 	),
