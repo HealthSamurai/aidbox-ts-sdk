@@ -20,6 +20,87 @@ const tableStyles = cn(
 	"border-spacing-0",
 );
 
+// Table header
+const tableHeaderStyles = cn(
+	"bg-bg-secondary",
+	"[&_tr]:border-b",
+	"[&_tr]:border-border-secondary",
+	"[&_tr]:h-8",
+);
+
+// Table body
+const tableBodyStyles = cn(
+	"[&_tr:last-child]:border-0",
+	"[&_tr]:hover:bg-bg-hover",
+);
+
+// Table footer
+const tableFooterStyles = cn(
+	"bg-bg-secondary",
+	"border-t",
+	"border-border-secondary",
+	"font-medium",
+	"[&>tr]:last:border-b-0",
+);
+
+// Table row
+const tableRowStyles = cn(
+	"h-7",
+	"transition-colors",
+	"duration-150",
+);
+
+// Table head cell
+const tableHeadStyles = cn(
+	"group/head",
+	"text-text-secondary",
+	"h-8",
+	"px-4",
+	"py-2",
+	"text-left",
+	"align-middle",
+	"typo-label-xs",
+	"whitespace-nowrap",
+	"transition-colors",
+	"duration-150",
+	"hover:bg-bg-tertiary",
+	"[&:has([role=checkbox])]:pr-0",
+);
+
+// Table head sort icon
+const tableSortIconStyles = cn(
+	"size-3.5",
+	"shrink-0",
+	"transition-opacity",
+	"duration-150",
+);
+
+// Table cell
+const tableCellStyles = cn(
+	"px-4",
+	"py-1",
+	"align-middle",
+	"whitespace-nowrap",
+	"text-sm",
+	"text-text-primary",
+	"[&:has([role=checkbox])]:pr-0",
+);
+
+// Table cell link variant
+const tableCellLinkStyles = cn(
+	"text-text-link",
+	"cursor-pointer",
+	"hover:underline",
+);
+
+// Table caption
+const tableCaptionStyles = cn(
+	"text-text-secondary",
+	"mt-4",
+	"text-xs",
+	"text-left",
+);
+
 type TableProps = React.ComponentProps<"table"> & {
 	zebra?: boolean | undefined;
 };
@@ -41,12 +122,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 	return (
 		<thead
 			data-slot="table-header"
-			className={cn(
-				"bg-bg-secondary",
-				"[&_tr]:border-b",
-				"[&_tr]:border-border-secondary",
-				className,
-			)}
+			className={cn(tableHeaderStyles, className)}
 			{...props}
 		/>
 	);
@@ -56,7 +132,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 	return (
 		<tbody
 			data-slot="table-body"
-			className={cn("[&_tr:last-child]:border-0", className)}
+			className={cn(tableBodyStyles, className)}
 			{...props}
 		/>
 	);
@@ -66,14 +142,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 	return (
 		<tfoot
 			data-slot="table-footer"
-			className={cn(
-				"bg-bg-secondary",
-				"border-t",
-				"border-border-secondary",
-				"font-medium",
-				"[&>tr]:last:border-b-0",
-				className,
-			)}
+			className={cn(tableFooterStyles, className)}
 			{...props}
 		/>
 	);
@@ -82,12 +151,14 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 type TableRowProps = React.ComponentProps<"tr"> & {
 	zebra?: boolean | undefined;
 	index?: number | undefined;
+	selected?: boolean | undefined;
 };
 
 function TableRow({
 	className,
 	zebra = false,
 	index = 0,
+	selected = false,
 	...props
 }: TableRowProps) {
 	const isOdd = index % 2 === 1;
@@ -96,13 +167,11 @@ function TableRow({
 		<tr
 			data-slot="table-row"
 			className={cn(
-				"h-7",
+				tableRowStyles,
 				!zebra && "border-b",
 				!zebra && "border-border-secondary",
-				"transition-colors",
-				"duration-150",
-				"hover:bg-bg-hover",
 				zebra && isOdd && "bg-bg-secondary",
+				selected && "bg-bg-hover",
 				className,
 			)}
 			{...props}
@@ -133,20 +202,8 @@ function TableHead({
 		<th
 			data-slot="table-head"
 			className={cn(
-				"group/head",
-				"text-text-secondary",
-				"h-8",
-				"px-4",
-				"py-2",
-				"text-left",
-				"align-middle",
-				"typo-label-xs",
-				"whitespace-nowrap",
-				"transition-colors",
-				"duration-150",
-				"[&:has([role=checkbox])]:pr-0",
-				"[&>[role=checkbox]]:translate-y-[2px]",
-				sortable && "cursor-pointer select-none hover:bg-bg-tertiary",
+				tableHeadStyles,
+				sortable && "cursor-pointer select-none",
 				className,
 			)}
 			{...props}
@@ -156,7 +213,7 @@ function TableHead({
 					{children}
 					<SortIcon
 						className={cn(
-							"size-3.5 shrink-0 transition-opacity duration-150",
+							tableSortIconStyles,
 							sorted ? "opacity-100" : "opacity-0 group-hover/head:opacity-30",
 						)}
 					/>
@@ -175,25 +232,15 @@ type TableCellProps = React.ComponentProps<"td"> & {
 };
 
 function TableCell({ className, type = "text", ...props }: TableCellProps) {
-	const cellStyles = cn(
-		"px-4",
-		"py-1",
-		"align-middle",
-		"whitespace-nowrap",
-		"text-sm",
-		"text-text-primary",
-		"[&:has([role=checkbox])]:pr-0",
-		"[&>[role=checkbox]]:translate-y-[2px]",
-		type === "link" &&
-			"text-text-link cursor-pointer hover:text-text-link_hover underline",
-		className,
-	);
-
 	return (
 		<td
 			data-slot="table-cell"
 			data-type={type}
-			className={cellStyles}
+			className={cn(
+				tableCellStyles,
+				type === "link" && tableCellLinkStyles,
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -206,13 +253,7 @@ function TableCaption({
 	return (
 		<caption
 			data-slot="table-caption"
-			className={cn(
-				"text-text-secondary",
-				"mt-4",
-				"text-xs",
-				"text-left",
-				className,
-			)}
+			className={cn(tableCaptionStyles, className)}
 			{...props}
 		/>
 	);

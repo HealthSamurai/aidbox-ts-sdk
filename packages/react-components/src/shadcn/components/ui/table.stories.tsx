@@ -3,15 +3,18 @@
 import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
+	type ColumnDef,
 	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
 	getSortedRowModel,
+	type RowSelectionState,
 	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
 
+import { Checkbox } from "#shadcn/components/ui/checkbox";
 import {
 	Table,
 	TableBody,
@@ -101,16 +104,53 @@ const columns = [
 	}),
 ];
 
-function TableWithSorting({ zebra = false }: { zebra?: boolean } = {}) {
+const selectColumn: ColumnDef<Invoice, unknown> = {
+	id: "select",
+	header: ({ table }) => (
+		<Checkbox
+			size="small"
+			checked={
+				table.getIsAllPageRowsSelected()
+					? true
+					: table.getIsSomePageRowsSelected()
+						? "indeterminate"
+						: false
+			}
+			onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+			aria-label="Select all"
+		/>
+	),
+	cell: ({ row }) => (
+		<Checkbox
+			size="small"
+			checked={row.getIsSelected()}
+			onCheckedChange={(value) => row.toggleSelected(!!value)}
+			aria-label="Select row"
+		/>
+	),
+	enableSorting: false,
+};
+
+function TableWithSorting({
+	zebra = false,
+	selectable = false,
+}: { zebra?: boolean; selectable?: boolean } = {}) {
 	const [sorting, setSorting] = useState<SortingState>([]);
+	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+	const tableColumns = selectable
+		? [selectColumn, ...columns]
+		: columns;
 
 	const table = useReactTable({
 		data: invoiceData,
-		columns,
+		columns: tableColumns,
 		state: {
 			sorting,
+			rowSelection,
 		},
 		onSortingChange: setSorting,
+		onRowSelectionChange: setRowSelection,
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 	});
@@ -138,7 +178,12 @@ function TableWithSorting({ zebra = false }: { zebra?: boolean } = {}) {
 			</TableHeader>
 			<TableBody>
 				{table.getRowModel().rows.map((row, index) => (
-					<TableRow key={row.id} zebra={zebra} index={index}>
+					<TableRow
+						key={row.id}
+						zebra={zebra}
+						index={index}
+						selected={row.getIsSelected()}
+					>
 						{row.getVisibleCells().map((cell) => (
 							<TableCell
 								key={cell.id}
@@ -173,9 +218,14 @@ const meta = {
 			control: "boolean",
 			description: "Enable alternating row background colors",
 		},
+		selectable: {
+			control: "boolean",
+			description: "Enable row selection with checkboxes",
+		},
 	},
 	args: {
 		zebra: false,
+		selectable: false,
 	},
 } satisfies Meta<typeof TableWithSorting>;
 export default meta;
@@ -184,8 +234,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default = {
 	tags: ["!dev"],
-	render: ({ zebra = false }: { zebra?: boolean } = {}) => (
-		<TableWithSorting zebra={zebra} />
+	render: ({
+		zebra = false,
+		selectable = false,
+	}: { zebra?: boolean; selectable?: boolean } = {}) => (
+		<TableWithSorting zebra={zebra} selectable={selectable} />
 	),
 } satisfies Story;
 
@@ -204,6 +257,18 @@ export const Demo = {
 					With Zebra Striping
 				</h3>
 				<TableWithSorting zebra={true} />
+			</div>
+			<div>
+				<h3 className="text-lg font-semibold mb-4 text-text-primary">
+					Selectable
+				</h3>
+				<TableWithSorting selectable={true} />
+			</div>
+			<div>
+				<h3 className="text-lg font-semibold mb-4 text-text-primary">
+					Selectable + Zebra
+				</h3>
+				<TableWithSorting selectable={true} zebra={true} />
 			</div>
 		</div>
 	),
