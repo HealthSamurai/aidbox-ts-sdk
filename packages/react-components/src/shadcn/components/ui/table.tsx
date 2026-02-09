@@ -96,11 +96,12 @@ function TableRow({
 		<tr
 			data-slot="table-row"
 			className={cn(
-				"h-8",
-				"border-b",
-				"border-border-secondary",
+				"h-7",
+				!zebra && "border-b",
+				!zebra && "border-border-secondary",
 				"transition-colors",
 				"duration-150",
+				"hover:bg-bg-hover",
 				zebra && isOdd && "bg-bg-secondary",
 				className,
 			)}
@@ -176,7 +177,7 @@ type TableCellProps = React.ComponentProps<"td"> & {
 function TableCell({ className, type = "text", ...props }: TableCellProps) {
 	const cellStyles = cn(
 		"px-4",
-		"py-2",
+		"py-1",
 		"align-middle",
 		"whitespace-nowrap",
 		"text-sm",

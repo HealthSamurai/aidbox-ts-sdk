@@ -16,7 +16,6 @@ import {
 	Table,
 	TableBody,
 	TableCell,
-	TableFooter,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -151,17 +150,6 @@ function TableWithSorting({ zebra = false }: { zebra?: boolean } = {}) {
 					</TableRow>
 				))}
 			</TableBody>
-			<TableFooter>
-				<TableRow zebra={zebra} index={table.getRowModel().rows.length}>
-					<TableCell colSpan={3}>Total</TableCell>
-					<TableCell>
-						$
-						{invoiceData
-							.reduce((sum, inv) => sum + inv.totalAmount, 0)
-							.toFixed(2)}
-					</TableCell>
-				</TableRow>
-			</TableFooter>
 		</Table>
 	);
 }
