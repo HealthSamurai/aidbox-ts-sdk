@@ -40,9 +40,9 @@ const methods: Invoice["paymentMethod"][] = [
 
 const invoiceData: Invoice[] = Array.from({ length: 50 }, (_, i) => ({
 	invoice: `INV${String(i + 1).padStart(3, "0")}`,
-	paymentStatus: statuses[i % statuses.length],
+	paymentStatus: statuses[i % statuses.length]!,
 	totalAmount: 100 + ((i * 73) % 900),
-	paymentMethod: methods[i % methods.length],
+	paymentMethod: methods[i % methods.length]!,
 }));
 
 const columnHelper = createColumnHelper<Invoice>();
