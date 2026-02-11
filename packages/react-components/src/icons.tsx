@@ -272,6 +272,28 @@ export function ComplexTypeIcon() {
 	);
 }
 
+export function ExtensionIcon() {
+	return (
+		<svg
+			width="16"
+			height="17"
+			viewBox="0 0 16 17"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			aria-label="Extension"
+			role="img"
+		>
+			<path
+				d="M7.84809 1.125L9.77102 5.02065L14.0712 5.64918L10.9596 8.67983L11.694 12.9613L7.84809 10.9388L4.00222 12.9613L4.73654 8.67983L1.625 5.64918L5.92515 5.02065L7.84809 1.125Z"
+				stroke="#D72710"
+				strokeWidth="1.25"
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+}
+
 export function UnionIcon() {
 	return (
 		<svg
