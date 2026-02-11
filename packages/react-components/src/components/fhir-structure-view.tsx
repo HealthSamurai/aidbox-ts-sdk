@@ -215,7 +215,7 @@ function FhirStructureView({
 			<TreeView
 				focusedItem={null}
 				onFocusedItemChange={() => {}}
-				hideChevron={true}
+				hideChevron={false}
 				horizontalLines={true}
 				disableHover={true}
 				zebra={true}
