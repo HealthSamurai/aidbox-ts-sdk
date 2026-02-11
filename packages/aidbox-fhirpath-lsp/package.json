@@ -1,6 +1,6 @@
 {
 	"name": "@health-samurai/aidbox-fhirpath-lsp",
-	"version": "0.0.0-alpha.5",
+	"version": "0.0.0-alpha.6",
 	"type": "module",
 	"files": [
 		"dist",
@@ -24,8 +24,8 @@
 		"tsc:check": "tsc -b --noEmit"
 	},
 	"dependencies": {
-		"@atomic-ehr/fhirpath": "0.1.0",
-		"@atomic-ehr/fhirpath-lsp": "0.0.3",
+		"@atomic-ehr/fhirpath": "0.1.2",
+		"@atomic-ehr/fhirpath-lsp": "0.0.5",
 		"@health-samurai/aidbox-client": "workspace:^"
 	},
 	"peerDependencies": {
