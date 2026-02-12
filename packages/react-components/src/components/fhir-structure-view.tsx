@@ -48,6 +48,8 @@ function FiledIcon(item: ItemInstance<TreeViewItem<FhirStructure>>) {
 			return <CustomIcon.ResourceIcon />;
 		case "BackboneElement":
 			return <CustomIcon.BackboneElementIcon />;
+		case "Extension":
+			return <CustomIcon.ExtensionIcon />;
 		case "Reference":
 			return <CustomIcon.ReferenceIcon />;
 		case "union":
@@ -215,7 +217,7 @@ function FhirStructureView({
 			<TreeView
 				focusedItem={null}
 				onFocusedItemChange={() => {}}
-				hideChevron={true}
+				hideChevron={false}
 				horizontalLines={true}
 				disableHover={true}
 				zebra={true}

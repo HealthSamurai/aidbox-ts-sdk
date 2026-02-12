@@ -1,6 +1,7 @@
 import {
 	acceptCompletion,
 	autocompletion,
+	type Completion,
 	closeBrackets,
 	closeBracketsKeymap,
 	completionKeymap,
@@ -19,12 +20,21 @@ import {
 } from "@codemirror/language";
 import { linter, lintGutter, lintKeymap } from "@codemirror/lint";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { Compartment, EditorState, type Extension } from "@codemirror/state";
+import {
+	Compartment,
+	EditorState,
+	type Extension,
+	RangeSet,
+	StateEffect,
+	StateField,
+} from "@codemirror/state";
 import {
 	crosshairCursor,
 	drawSelection,
 	dropCursor,
 	EditorView,
+	GutterMarker,
+	gutterLineClass,
 	highlightActiveLine,
 	highlightActiveLineGutter,
 	highlightSpecialChars,
@@ -35,8 +45,45 @@ import {
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
 import * as React from "react";
+import { flushSync } from "react-dom";
+import { createRoot } from "react-dom/client";
 
+import { ComplexTypeIcon, SquareFunctionIcon, TypCodeIcon } from "../../icons";
 import { http } from "./http";
+
+// --- Issue line numbers gutter highlighting ---
+
+class ErrorLineGutterMarker extends GutterMarker {
+	elementClass = "cm-errorLineGutter";
+}
+const errorLineMarker = new ErrorLineGutterMarker();
+
+const setIssueLineNumbersEffect = StateEffect.define<number[]>();
+
+const issueLineNumbersField = StateField.define<RangeSet<GutterMarker>>({
+	create() {
+		return RangeSet.empty;
+	},
+	update(set, tr) {
+		for (const effect of tr.effects) {
+			if (effect.is(setIssueLineNumbersEffect)) {
+				const markers: { from: number; to: number; value: GutterMarker }[] = [];
+				const doc = tr.state.doc;
+				for (const lineNo of effect.value) {
+					if (lineNo >= 1 && lineNo <= doc.lines) {
+						const line = doc.line(lineNo);
+						markers.push(errorLineMarker.range(line.from));
+					}
+				}
+				return RangeSet.of(markers, true);
+			}
+		}
+		return set;
+	},
+	provide(field) {
+		return gutterLineClass.from(field);
+	},
+});
 
 const baseTheme = EditorView.baseTheme({
 	"&": {
@@ -73,6 +120,9 @@ const baseTheme = EditorView.baseTheme({
 	},
 	".cm-activeLine": {
 		backgroundColor: "rgba(255, 255, 255, 0)",
+	},
+	".cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
 	},
 });
 
@@ -111,6 +161,9 @@ const readOnlyTheme = EditorView.theme({
 	},
 	".cm-activeLine": {
 		backgroundColor: "rgba(255, 255, 255, 0)",
+	},
+	".cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
 	},
 });
 
@@ -264,6 +317,7 @@ type CodeEditorProps = {
 	mode?: LanguageMode;
 	viewCallback?: (view: EditorView) => void;
 	additionalExtensions?: Extension[];
+	issueLineNumbers?: number[];
 };
 
 export type CodeEditorView = EditorView;
@@ -279,6 +333,7 @@ export function CodeEditor({
 	mode = "json",
 	isReadOnlyTheme = false,
 	additionalExtensions,
+	issueLineNumbers,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -332,6 +387,7 @@ export function CodeEditor({
 						...lintKeymap,
 					]),
 					lintGutter(),
+					issueLineNumbersField,
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
 					additionalExtensionsCompartment.current.of([]),
@@ -445,6 +501,15 @@ export function CodeEditor({
 		});
 	}, [additionalExtensions, view]);
 
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		view.dispatch({
+			effects: setIssueLineNumbersEffect.of(issueLineNumbers ?? []),
+		});
+	}, [issueLineNumbers, view]);
+
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
 
@@ -473,6 +538,9 @@ const editorInputTheme = EditorView.theme({
 	".cm-line": {
 		padding: "0",
 	},
+	".cm-tooltip.cm-tooltip-autocomplete > ul": {
+		maxHeight: "400px",
+	},
 	".cm-completionInfo": {
 		display: "none",
 		fontFamily: "var(--font-family-sans)",
@@ -482,10 +550,111 @@ const editorInputTheme = EditorView.theme({
 		fontSize: "14px",
 	},
 	".cm-completionDetail": {
-		color: "var(--color-text-secondary)",
-		fontSize: "14px",
+		display: "none",
+	},
+	".cm-completion-icon": {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		width: "16px",
+		height: "16px",
+		flexShrink: "0",
 	},
 });
+
+function getCompletionIcon(completion: Completion): React.FC | null {
+	if (completion.type === "function") return SquareFunctionIcon;
+	const detail = completion.detail;
+	if (!detail) return null;
+	const typeName = detail.replace(/\[\]$/, "");
+	if (!typeName) return null;
+	const firstChar = typeName[0];
+	if (!firstChar) return null;
+	const isComplex = firstChar === firstChar.toUpperCase();
+	return isComplex ? ComplexTypeIcon : TypCodeIcon;
+}
+
+function renderCompletionIcon(completion: Completion): Node {
+	const container = document.createElement("div");
+	container.className = "cm-completion-icon";
+	const Icon = getCompletionIcon(completion);
+	if (Icon) {
+		flushSync(() => {
+			createRoot(container).render(<Icon />);
+		});
+	}
+	return container;
+}
+
+let activeTooltip: HTMLDivElement | null = null;
+let activeRafId: number | null = null;
+
+function cleanupActiveTooltip() {
+	activeTooltip?.remove();
+	activeTooltip = null;
+	if (activeRafId !== null) {
+		cancelAnimationFrame(activeRafId);
+		activeRafId = null;
+	}
+}
+
+function renderCompletionDetail(completion: Completion): Node | null {
+	const detail = completion.detail;
+	if (!detail) return null;
+
+	const anchor = document.createElement("span");
+	anchor.style.display = "none";
+
+	const showTooltip = () => {
+		cleanupActiveTooltip();
+
+		const tooltip = document.createElement("div");
+		tooltip.textContent = detail;
+		Object.assign(tooltip.style, {
+			position: "fixed",
+			backgroundColor: "var(--color-bg-primary)",
+			border: "1px solid var(--color-border-primary)",
+			borderRadius: "var(--radius-md)",
+			padding: "8px 12px",
+			fontSize: "12px",
+			lineHeight: "1.4",
+			color: "var(--color-text-secondary)",
+			fontFamily: "var(--font-family-sans)",
+			whiteSpace: "normal",
+			width: "280px",
+			boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+			zIndex: "1000",
+			pointerEvents: "none",
+		});
+		document.body.appendChild(tooltip);
+		activeTooltip = tooltip;
+
+		const autocompleteEl = anchor.closest(".cm-tooltip-autocomplete");
+		const anchorRect = autocompleteEl
+			? autocompleteEl.getBoundingClientRect()
+			: anchor.getBoundingClientRect();
+		tooltip.style.top = `${anchorRect.top}px`;
+		tooltip.style.left = `${anchorRect.right + 8}px`;
+
+		const checkAlive = () => {
+			if (!anchor.isConnected) {
+				cleanupActiveTooltip();
+				return;
+			}
+			activeRafId = requestAnimationFrame(checkAlive);
+		};
+		activeRafId = requestAnimationFrame(checkAlive);
+	};
+
+	requestAnimationFrame(() => {
+		const option = anchor.closest("li");
+		if (!option) return;
+		option.addEventListener("mouseenter", showTooltip);
+		option.addEventListener("mouseleave", cleanupActiveTooltip);
+	});
+
+	return anchor;
+}
 
 export function EditorInput({
 	additionalExtensions,
@@ -520,8 +689,12 @@ export function EditorInput({
 						icons: false,
 						maxRenderedOptions: 1000,
 						closeOnBlur: false,
+						addToOptions: [
+							{ render: renderCompletionIcon, position: 20 },
+							{ render: renderCompletionDetail, position: 80 },
+						],
 						optionClass: (_completion) =>
-							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary grid grid-cols-2 gap-2",
+							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary grid grid-cols-[16px_1fr] items-center gap-2",
 						tooltipClass: (_state) =>
 							"!bg-bg-primary rounded-md p-2 shadow-md !border-border-primary !typo-body",
 						compareCompletions: (a, b) => {

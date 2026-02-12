@@ -98,6 +98,8 @@ type TreeViewProps<T> = {
 	horizontalLines?: boolean;
 	hideChevron?: boolean;
 	itemLabelClassFn?: (item: ItemInstance<TreeViewItem<T>>) => string;
+	onItemLabelClick?: (item: ItemInstance<TreeViewItem<T>>) => void;
+	chevronClassName?: string;
 	canReorder?: boolean;
 	onDropFn?: (
 		tree: TreeInstance<TreeViewItem<T>>,
@@ -123,6 +125,8 @@ function TreeView<T>({
 	horizontalLines,
 	hideChevron,
 	itemLabelClassFn,
+	onItemLabelClick,
+	chevronClassName,
 	canReorder,
 	onDropFn,
 }: TreeViewProps<T>) {
@@ -218,8 +222,11 @@ function TreeView<T>({
 							hideChevron={hideChevron ?? false}
 							disableHover={disableHover ?? false}
 							className={cn(treeItemLabelStyle, itemLabelClassFn?.(item))}
-							// onClick={() => onSelectItem?.(item)}
+							onClick={
+								onItemLabelClick ? () => onItemLabelClick(item) : undefined
+							}
 							horizontalLines={horizontalLines ?? false}
+							{...(chevronClassName !== undefined ? { chevronClassName } : {})}
 						>
 							{customItemView
 								? customItemView(item, tree)

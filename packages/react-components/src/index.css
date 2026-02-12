@@ -75,6 +75,7 @@
 	--color-bg-quaternary: var(--color-neutral-200);
 	--color-bg-overlay: var(--color-neutral-900);
 	--color-bg-disabled: var(--color-neutral-300);
+	--color-bg-hover: var(--color-blue-200);
 	--color-bg-dark_tertiary: var(--color-neutral-400);
 
 	--color-bg-brand-primary: var(--color-brand-50);

@@ -9,18 +9,19 @@ import { cn } from "#shadcn/lib/utils";
 // Checkbox root styles
 const baseCheckboxStyles = cn(
 	// Layout
+	"inline-flex",
+	"items-center",
+	"justify-center",
 	"peer",
 	"shrink-0",
 	// Shape
-	"rounded-[4px]",
+	"rounded-[2px]",
 	// Interaction
 	"outline-none",
 	"cursor-pointer",
 	// Animation
-	"transition-all",
+	"transition-colors",
 	"duration-200",
-	"active:scale-90",
-	"active:duration-75",
 	// Default state
 	"bg-white",
 	"border-border-dark",
@@ -34,7 +35,6 @@ const baseCheckboxStyles = cn(
 	"data-[state=indeterminate]:text-white",
 	// Disabled states
 	"disabled:cursor-not-allowed",
-	"disabled:active:scale-100",
 	"disabled:bg-white",
 	"disabled:border-[var(--color-fg-disabled)]",
 	"disabled:data-[state=checked]:bg-[var(--color-fg-disabled)]",
@@ -87,8 +87,12 @@ function Checkbox({
 			{...props}
 		>
 			<CheckboxPrimitive.Indicator
+				forceMount
 				data-slot="checkbox-indicator"
-				className={checkboxIndicatorStyles}
+				className={cn(
+					checkboxIndicatorStyles,
+					"data-[state=unchecked]:opacity-0",
+				)}
 			>
 				{props.checked === "indeterminate" ? (
 					<MinusIcon

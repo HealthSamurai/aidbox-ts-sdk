@@ -152,6 +152,7 @@ interface TreeItemLabelProps<T = any>
 	disableHover?: boolean;
 	item?: ItemInstance<T>;
 	horizontalLines?: boolean;
+	chevronClassName?: string;
 }
 
 function TreeItemLabel<T>({
@@ -161,6 +162,7 @@ function TreeItemLabel<T>({
 	disableHover,
 	horizontalLines,
 	hideChevron,
+	chevronClassName = "self-start mt-0.5 cursor-pointer",
 	...props
 }: TreeItemLabelProps<T & WithMeta>) {
 	const { currentItem } = useTreeContext<T & WithMeta>();
@@ -193,11 +195,12 @@ function TreeItemLabel<T>({
 			)}
 			{...props}
 		>
-			{item.isFolder() && (
+			{item.isFolder() && !hideChevron && (
 				<button
 					type="button"
-					className="self-start mt-0.5 cursor-pointer"
-					onClick={() => {
+					className={chevronClassName}
+					onClick={(e) => {
+						e.stopPropagation();
 						item.isExpanded() ? item.collapse() : item.expand();
 					}}
 				>

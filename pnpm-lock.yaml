@@ -52,11 +52,11 @@ importers:
   packages/aidbox-fhirpath-lsp:
     dependencies:
       '@atomic-ehr/fhirpath':
-        specifier: 0.1.0
-        version: 0.1.0(typescript@5.8.3)
+        specifier: 0.1.2
+        version: 0.1.2(typescript@5.8.3)
       '@atomic-ehr/fhirpath-lsp':
-        specifier: 0.0.3
-        version: 0.0.3(typescript@5.8.3)
+        specifier: 0.0.5
+        version: 0.0.5(typescript@5.8.3)
       '@health-samurai/aidbox-client':
         specifier: workspace:^
         version: link:../aidbox-client
@@ -403,11 +403,11 @@ packages:
     peerDependencies:
       typescript: ^5
 
-  '@atomic-ehr/fhirpath-lsp@0.0.3':
-    resolution: {integrity: sha512-FJSzSLEXpQbLQ9tWD02EN13T91PqVE8Y/J/KFDCCRFdct1AKPo+8hvlJaTbv0ImL9fv6w+YrrtgqZ62d6MnIQQ==}
+  '@atomic-ehr/fhirpath-lsp@0.0.5':
+    resolution: {integrity: sha512-qi1aP/sWcavxUuz3YCcFp+qu8/rBFu3Kd/qGmg9tBid0dGFMKCFE/9myrKe4jYHMPPWruNEEcKCQf1RkOaYWyQ==}
 
-  '@atomic-ehr/fhirpath@0.1.0':
-    resolution: {integrity: sha512-aIrO63BLae5jE7JNPLE7HRZgwl4pkHj+Rspe8a7JfC/s+xL1rh1/84R4wtLrFu16PlN9VjCjwRU40cEUBnRC5w==}
+  '@atomic-ehr/fhirpath@0.1.2':
+    resolution: {integrity: sha512-bqf0ah7aE3ZjuA49CQZMxuhC1d1XInMwR7dTocSiAKLGkx2wYcdn6OGbisFHpD7NJCTzXD+psxNcWXLS0K6qIw==}
     peerDependencies:
       typescript: ^5
 
@@ -4391,9 +4391,9 @@ snapshots:
     dependencies:
       typescript: 5.8.3
 
-  '@atomic-ehr/fhirpath-lsp@0.0.3(typescript@5.8.3)':
+  '@atomic-ehr/fhirpath-lsp@0.0.5(typescript@5.8.3)':
     dependencies:
-      '@atomic-ehr/fhirpath': 0.1.0(typescript@5.8.3)
+      '@atomic-ehr/fhirpath': 0.1.2(typescript@5.8.3)
       '@codemirror/autocomplete': 6.20.0
       '@codemirror/commands': 6.8.1
       '@codemirror/language': 6.11.3
@@ -4408,7 +4408,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@atomic-ehr/fhirpath@0.1.0(typescript@5.8.3)':
+  '@atomic-ehr/fhirpath@0.1.2(typescript@5.8.3)':
     dependencies:
       '@atomic-ehr/fhir-canonical-manager': 0.0.11(typescript@5.8.3)
       '@atomic-ehr/fhirschema': 0.0.2(typescript@5.8.3)
