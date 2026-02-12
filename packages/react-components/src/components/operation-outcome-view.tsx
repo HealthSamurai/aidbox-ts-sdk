@@ -1,11 +1,11 @@
-import React from "react";
 import { Check, Copy, Info, TriangleAlert } from "lucide-react";
-import { cn } from "../shadcn/lib/utils";
+import React from "react";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "../shadcn/components/ui/tooltip";
+import { cn } from "../shadcn/lib/utils";
 
 type OperationOutcomeSeverity = "fatal" | "error" | "warning" | "information";
 
@@ -130,7 +130,10 @@ function groupIssuesBySeverity(issues: OperationOutcomeIssue[]) {
 	}
 	return severityOrder
 		.filter((s) => groups.has(s))
-		.map((s) => ({ severity: s, issues: groups.get(s)! }));
+		.map((s) => ({
+			severity: s,
+			issues: groups.get(s) as OperationOutcomeIssue[],
+		}));
 }
 
 function CopyButton({ resource }: { resource: OperationOutcome }) {
@@ -196,21 +199,20 @@ export function OperationOutcomeView({
 							<CopyButton resource={resource} />
 						</div>
 						<div className="flex flex-col py-1 bg-bg-primary">
-							{issues.map((issue, i) => {
-								const expressionText =
-									issue.expression?.join(", ");
+							{issues.map((issue) => {
+								const expressionText = issue.expression?.join(", ");
 								const codeLabel = getIssueCodeLabel(getIssueCode(issue));
+								const key = `${issue.severity}-${getIssueCode(issue)}-${expressionText ?? ""}`;
 
 								const row = (
-									<div
-										key={i}
+									<button
+										type="button"
+										key={key}
 										className={cn(
-											"flex cursor-pointer hover:bg-bg-secondary",
+											"flex cursor-pointer hover:bg-bg-secondary w-full text-left",
 										)}
 										onClick={
-											onIssueClick
-												? () => onIssueClick(issue)
-												: undefined
+											onIssueClick ? () => onIssueClick(issue) : undefined
 										}
 									>
 										<span
@@ -221,21 +223,17 @@ export function OperationOutcomeView({
 										>
 											{codeLabel}
 										</span>
-										<span
-											className="pr-4 py-1 typo-body text-text-primary whitespace-nowrap"
-										>
+										<span className="pr-4 py-1 typo-body text-text-primary whitespace-nowrap">
 											{expressionText ?? ""}
 										</span>
-									</div>
+									</button>
 								);
 
 								if (!issue.diagnostics) return row;
 
 								return (
-									<Tooltip key={i}>
-										<TooltipTrigger asChild>
-											{row}
-										</TooltipTrigger>
+									<Tooltip key={key}>
+										<TooltipTrigger asChild>{row}</TooltipTrigger>
 										<TooltipContent
 											side="bottom"
 											align="start"

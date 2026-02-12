@@ -124,69 +124,67 @@ function Sandbox({
 	const [isVisible, setIsVisible] = useState(true);
 
 	return (
-		<>
-			<div
-				data-slot="sandbox"
-				className={cn(baseSandboxStyles, className)}
-				{...props}
-			>
-				<div className={inputContainerStyles}>
-					<div className={contentStyles}>
-						<span className={textStyles}>
-							{isVisible ? url : "•".repeat(url.length)}
-						</span>
-					</div>
-					{showEye && (
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<button
-									type="button"
-									className={eyeButtonStyles}
-									onClick={() => setIsVisible(!isVisible)}
-								>
-									{isVisible ? <Eye /> : <EyeOff />}
-								</button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{isVisible ? "Hide URL" : "Show URL"}</p>
-							</TooltipContent>
-						</Tooltip>
-					)}
-					{showCopy && (
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<button
-									type="button"
-									className={copyButtonStyles}
-									onClick={async () => {
-										try {
-											await navigator.clipboard.writeText(url);
-
-											if (showToast) {
-												toast("Copied", {
-													description:
-														url.length > 50 ? `${url.slice(0, 50)}...` : url,
-													duration: 2000,
-												});
-											}
-
-											onCopy?.(url);
-										} catch (error) {
-											console.error("Failed to copy to clipboard:", error);
-										}
-									}}
-								>
-									{copyIcon}
-								</button>
-							</TooltipTrigger>
-							<TooltipContent>
-								<p>{tooltipText}</p>
-							</TooltipContent>
-						</Tooltip>
-					)}
+		<div
+			data-slot="sandbox"
+			className={cn(baseSandboxStyles, className)}
+			{...props}
+		>
+			<div className={inputContainerStyles}>
+				<div className={contentStyles}>
+					<span className={textStyles}>
+						{isVisible ? url : "•".repeat(url.length)}
+					</span>
 				</div>
+				{showEye && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<button
+								type="button"
+								className={eyeButtonStyles}
+								onClick={() => setIsVisible(!isVisible)}
+							>
+								{isVisible ? <Eye /> : <EyeOff />}
+							</button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>{isVisible ? "Hide URL" : "Show URL"}</p>
+						</TooltipContent>
+					</Tooltip>
+				)}
+				{showCopy && (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<button
+								type="button"
+								className={copyButtonStyles}
+								onClick={async () => {
+									try {
+										await navigator.clipboard.writeText(url);
+
+										if (showToast) {
+											toast("Copied", {
+												description:
+													url.length > 50 ? `${url.slice(0, 50)}...` : url,
+												duration: 2000,
+											});
+										}
+
+										onCopy?.(url);
+									} catch (error) {
+										console.error("Failed to copy to clipboard:", error);
+									}
+								}}
+							>
+								{copyIcon}
+							</button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>{tooltipText}</p>
+						</TooltipContent>
+					</Tooltip>
+				)}
 			</div>
-		</>
+		</div>
 	);
 }
 

@@ -222,7 +222,9 @@ function TreeView<T>({
 							hideChevron={hideChevron ?? false}
 							disableHover={disableHover ?? false}
 							className={cn(treeItemLabelStyle, itemLabelClassFn?.(item))}
-							onClick={onItemLabelClick ? () => onItemLabelClick(item) : undefined}
+							onClick={
+								onItemLabelClick ? () => onItemLabelClick(item) : undefined
+							}
 							horizontalLines={horizontalLines ?? false}
 							{...(chevronClassName !== undefined ? { chevronClassName } : {})}
 						>

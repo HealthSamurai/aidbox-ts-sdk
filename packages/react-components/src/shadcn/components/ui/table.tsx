@@ -29,11 +29,7 @@ const tableHeaderStyles = cn(
 );
 
 // Table header sticky variant
-const tableHeaderStickyStyles = cn(
-	"sticky",
-	"top-0",
-	"z-10",
-);
+const tableHeaderStickyStyles = cn("sticky", "top-0", "z-10");
 
 // Table body
 const tableBodyStyles = cn(
@@ -51,11 +47,7 @@ const tableFooterStyles = cn(
 );
 
 // Table row
-const tableRowStyles = cn(
-	"h-7",
-	"transition-colors",
-	"duration-150",
-);
+const tableRowStyles = cn("h-7", "transition-colors", "duration-150");
 
 // Table head cell
 const tableHeadStyles = cn(

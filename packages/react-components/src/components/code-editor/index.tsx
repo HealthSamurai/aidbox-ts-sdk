@@ -1,10 +1,10 @@
 import {
 	acceptCompletion,
 	autocompletion,
+	type Completion,
 	closeBrackets,
 	closeBracketsKeymap,
 	completionKeymap,
-	type Completion,
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
@@ -29,11 +29,11 @@ import {
 	StateField,
 } from "@codemirror/state";
 import {
-	GutterMarker,
 	crosshairCursor,
 	drawSelection,
 	dropCursor,
 	EditorView,
+	GutterMarker,
 	gutterLineClass,
 	highlightActiveLine,
 	highlightActiveLineGutter,
@@ -67,8 +67,7 @@ const issueLineNumbersField = StateField.define<RangeSet<GutterMarker>>({
 	update(set, tr) {
 		for (const effect of tr.effects) {
 			if (effect.is(setIssueLineNumbersEffect)) {
-				const markers: { from: number; to: number; value: GutterMarker }[] =
-					[];
+				const markers: { from: number; to: number; value: GutterMarker }[] = [];
 				const doc = tr.state.doc;
 				for (const lineNo of effect.value) {
 					if (lineNo >= 1 && lineNo <= doc.lines) {
@@ -563,9 +562,7 @@ const editorInputTheme = EditorView.theme({
 	},
 });
 
-function getCompletionIcon(
-	completion: Completion,
-): React.FC | null {
+function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;
 	const detail = completion.detail;
 	if (!detail) return null;

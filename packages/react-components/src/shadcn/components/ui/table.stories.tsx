@@ -40,9 +40,9 @@ const methods: Invoice["paymentMethod"][] = [
 
 const invoiceData: Invoice[] = Array.from({ length: 50 }, (_, i) => ({
 	invoice: `INV${String(i + 1).padStart(3, "0")}`,
-	paymentStatus: statuses[i % statuses.length]!,
+	paymentStatus: statuses[i % statuses.length] as string,
 	totalAmount: 100 + ((i * 73) % 900),
-	paymentMethod: methods[i % methods.length]!,
+	paymentMethod: methods[i % methods.length] as string,
 }));
 
 const columnHelper = createColumnHelper<Invoice>();
@@ -104,13 +104,15 @@ function TableWithSorting({
 	zebra = false,
 	selectable = false,
 	stickyHeader = false,
-}: { zebra?: boolean; selectable?: boolean; stickyHeader?: boolean } = {}) {
+}: {
+	zebra?: boolean;
+	selectable?: boolean;
+	stickyHeader?: boolean;
+} = {}) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-	const tableColumns = selectable
-		? [selectColumn, ...columns]
-		: columns;
+	const tableColumns = selectable ? [selectColumn, ...columns] : columns;
 
 	const table = useReactTable({
 		data: invoiceData,
@@ -213,9 +215,17 @@ export const Default = {
 		zebra = false,
 		selectable = false,
 		stickyHeader = false,
-	}: { zebra?: boolean; selectable?: boolean; stickyHeader?: boolean } = {}) => (
+	}: {
+		zebra?: boolean;
+		selectable?: boolean;
+		stickyHeader?: boolean;
+	} = {}) => (
 		<div className="h-80">
-			<TableWithSorting zebra={zebra} selectable={selectable} stickyHeader={stickyHeader} />
+			<TableWithSorting
+				zebra={zebra}
+				selectable={selectable}
+				stickyHeader={stickyHeader}
+			/>
 		</div>
 	),
 } satisfies Story;
@@ -253,7 +263,11 @@ export const Demo = {
 					Selectable + Zebra
 				</h3>
 				<div className="h-80">
-					<TableWithSorting selectable={true} zebra={true} stickyHeader={true} />
+					<TableWithSorting
+						selectable={true}
+						zebra={true}
+						stickyHeader={true}
+					/>
 				</div>
 			</div>
 		</div>

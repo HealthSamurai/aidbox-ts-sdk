@@ -89,7 +89,10 @@ function Checkbox({
 			<CheckboxPrimitive.Indicator
 				forceMount
 				data-slot="checkbox-indicator"
-				className={cn(checkboxIndicatorStyles, "data-[state=unchecked]:opacity-0")}
+				className={cn(
+					checkboxIndicatorStyles,
+					"data-[state=unchecked]:opacity-0",
+				)}
 			>
 				{props.checked === "indeterminate" ? (
 					<MinusIcon
