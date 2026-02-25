@@ -318,6 +318,9 @@ type CodeEditorProps = {
 	viewCallback?: (view: EditorView) => void;
 	additionalExtensions?: Extension[];
 	issueLineNumbers?: number[];
+	foldGutter?: boolean;
+	lintGutter?: boolean;
+	lineNumbers?: boolean;
 };
 
 export type CodeEditorView = EditorView;
@@ -334,6 +337,9 @@ export function CodeEditor({
 	isReadOnlyTheme = false,
 	additionalExtensions,
 	issueLineNumbers,
+	foldGutter: enableFoldGutter = true,
+	lintGutter: enableLintGutter = true,
+	lineNumbers: enableLineNumbers = true,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -359,8 +365,8 @@ export function CodeEditor({
 				extensions: [
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
 					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
-					lineNumbers(),
-					foldGutter(),
+					...(enableLineNumbers ? [lineNumbers()] : []),
+					...(enableFoldGutter ? [foldGutter()] : []),
 					highlightSpecialChars(),
 					history(),
 					drawSelection(),
@@ -386,7 +392,7 @@ export function CodeEditor({
 						...completionKeymap,
 						...lintKeymap,
 					]),
-					lintGutter(),
+					...(enableLintGutter ? [lintGutter()] : []),
 					issueLineNumbersField,
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
