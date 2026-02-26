@@ -19,7 +19,17 @@ import {
 	syntaxHighlighting,
 } from "@codemirror/language";
 import { linter, lintGutter, lintKeymap } from "@codemirror/lint";
-import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
+import {
+	closeSearchPanel,
+	findNext,
+	findPrevious,
+	getSearchQuery,
+	highlightSelectionMatches,
+	search,
+	SearchQuery,
+	searchKeymap,
+	setSearchQuery,
+} from "@codemirror/search";
 import {
 	Compartment,
 	EditorState,
@@ -45,6 +55,7 @@ import {
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
@@ -283,6 +294,247 @@ const readOnlyTheme = EditorView.theme({
 	},
 });
 
+const iconButtonStyle: React.CSSProperties = {
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	width: "28px",
+	height: "28px",
+	border: "none",
+	borderRadius: "var(--radius-sm)",
+	background: "transparent",
+	color: "var(--color-text-secondary)",
+	cursor: "pointer",
+	padding: 0,
+};
+
+function getMatchInfo(
+	state: EditorState,
+	searchText: string,
+): { current: number; total: number } {
+	if (!searchText) return { current: 0, total: 0 };
+	const doc = state.doc.toString();
+	const sel = state.selection.main;
+	const lowerDoc = doc.toLowerCase();
+	const lowerSearch = searchText.toLowerCase();
+	const searchLen = searchText.length;
+	let total = 0;
+	let current = 0;
+	let pos = 0;
+	for (;;) {
+		const idx = lowerDoc.indexOf(lowerSearch, pos);
+		if (idx === -1) break;
+		total++;
+		if (idx === sel.from && idx + searchLen === sel.to) {
+			current = total;
+		}
+		pos = idx + 1;
+	}
+	return { current, total };
+}
+
+function createSearchPanel(view: EditorView) {
+	const dom = document.createElement("div");
+	const root = createRoot(dom);
+
+	const panelRef: {
+		setSearch: ((v: string) => void) | null;
+		setMatch: ((info: { current: number; total: number }) => void) | null;
+		lastSearch: string;
+		lastCurrent: number;
+		lastTotal: number;
+	} = {
+		setSearch: null,
+		setMatch: null,
+		lastSearch: "",
+		lastCurrent: 0,
+		lastTotal: 0,
+	};
+
+	function Panel() {
+		const [value, setValue] = React.useState(
+			() => getSearchQuery(view.state).search,
+		);
+		const [match, setMatchState] = React.useState({ current: 0, total: 0 });
+
+		panelRef.setSearch = setValue;
+		panelRef.setMatch = setMatchState;
+
+		const handleChange = (newValue: string) => {
+			setValue(newValue);
+			view.dispatch({
+				effects: setSearchQuery.of(
+					new SearchQuery({ search: newValue }),
+				),
+			});
+		};
+
+		return (
+			<div
+				style={{
+					display: "flex",
+					alignItems: "center",
+					gap: "2px",
+					padding: "6px 8px",
+					backgroundColor: "var(--color-bg-primary)",
+					border: "1px solid var(--color-border-primary)",
+					borderRadius: "var(--radius-md)",
+					boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+				}}
+			>
+				<input
+					value={value}
+					onChange={(e) => handleChange(e.target.value)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
+							e.preventDefault();
+							if (e.shiftKey) findPrevious(view);
+							else findNext(view);
+						}
+						if (e.key === "Escape") {
+							e.preventDefault();
+							closeSearchPanel(view);
+							view.focus();
+						}
+					}}
+					placeholder="Find..."
+					style={{
+						height: "28px",
+						padding: "0 8px",
+						border: "1px solid var(--color-border-primary)",
+						borderRadius: "var(--radius-md)",
+						fontSize: "13px",
+						fontFamily: "var(--font-family-sans)",
+						backgroundColor: "var(--color-bg-primary)",
+						color: "var(--color-text-primary)",
+						outline: "none",
+						flex: "0 0 200px",
+					}}
+				/>
+				<span
+					style={{
+						fontSize: "12px",
+						fontFamily: "var(--font-family-sans)",
+						color: "var(--color-text-secondary)",
+						whiteSpace: "nowrap",
+						minWidth: "70px",
+						textAlign: "center",
+						visibility: value ? "visible" : "hidden",
+					}}
+				>
+					{value
+						? match.total > 0
+							? `${match.current} of ${match.total}`
+							: "No results"
+						: "No results"}
+				</span>
+				<button
+					type="button"
+					onClick={() => findPrevious(view)}
+					title="Previous match"
+					style={iconButtonStyle}
+				>
+					<ChevronUp size={16} />
+				</button>
+				<button
+					type="button"
+					onClick={() => findNext(view)}
+					title="Next match"
+					style={iconButtonStyle}
+				>
+					<ChevronDown size={16} />
+				</button>
+				<button
+					type="button"
+					onClick={() => {
+						closeSearchPanel(view);
+						view.focus();
+					}}
+					title="Close"
+					style={iconButtonStyle}
+				>
+					<X size={14} />
+				</button>
+			</div>
+		);
+	}
+
+	flushSync(() => {
+		root.render(<Panel />);
+	});
+
+	const input = dom.querySelector("input");
+	if (input) input.setAttribute("main-field", "true");
+
+	// Compute initial match info
+	const q = getSearchQuery(view.state);
+	panelRef.lastSearch = q.search;
+	if (q.search) {
+		const info = getMatchInfo(view.state, q.search);
+		panelRef.lastCurrent = info.current;
+		panelRef.lastTotal = info.total;
+		panelRef.setMatch?.(info);
+	}
+
+	return {
+		dom,
+		top: true,
+		mount() {
+			const el = dom.querySelector("input");
+			if (el) {
+				el.focus();
+				el.select();
+			}
+		},
+		update(update: ViewUpdate) {
+			const query = getSearchQuery(update.state);
+
+			if (query.search !== panelRef.lastSearch) {
+				panelRef.setSearch?.(query.search);
+			}
+			panelRef.lastSearch = query.search;
+
+			const info = getMatchInfo(update.state, query.search);
+			if (
+				info.current !== panelRef.lastCurrent ||
+				info.total !== panelRef.lastTotal
+			) {
+				panelRef.lastCurrent = info.current;
+				panelRef.lastTotal = info.total;
+				panelRef.setMatch?.(info);
+			}
+		},
+		destroy() {
+			root.unmount();
+			panelRef.setSearch = null;
+			panelRef.setMatch = null;
+		},
+	};
+}
+
+const searchPanelTheme = EditorView.baseTheme({
+	".cm-panels-top": {
+		position: "absolute",
+		top: "4px",
+		right: "4px",
+		left: "auto",
+		zIndex: "10",
+		backgroundColor: "transparent",
+		border: "none",
+	},
+	".cm-searchMatch": {
+		backgroundColor: "#e9f2fc",
+	},
+	".cm-searchMatch-selected": {
+		backgroundColor: "#d0e2f8",
+	},
+});
+
+const customSearchExtension = [
+	search({ createPanel: createSearchPanel }),
+	searchPanelTheme,
+];
+
 const customHighlightStyle = HighlightStyle.define([
 	{ tag: tags.propertyName, color: "#EA4A35" },
 	{ tag: tags.string, color: "#405CBF" },
@@ -517,6 +769,7 @@ export function CodeEditor({
 					...(enableLintGutter ? [lintGutter()] : []),
 					issueLinesField,
 					errorTooltipHandler,
+					...customSearchExtension,
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
 					additionalExtensionsCompartment.current.of([]),
@@ -837,6 +1090,7 @@ export function EditorInput({
 					indentOnInput(),
 					editorInputTheme,
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
+					...customSearchExtension,
 					additionalExtensionsCompartment.current.of([]),
 					onChangeCompartment.current.of([]),
 					keymap.of([
