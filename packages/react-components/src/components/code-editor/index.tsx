@@ -25,8 +25,8 @@ import {
 	findPrevious,
 	getSearchQuery,
 	highlightSelectionMatches,
-	search,
 	SearchQuery,
+	search,
 	searchKeymap,
 	setSearchQuery,
 } from "@codemirror/search";
@@ -363,9 +363,7 @@ function createSearchPanel(view: EditorView) {
 		const handleChange = (newValue: string) => {
 			setValue(newValue);
 			view.dispatch({
-				effects: setSearchQuery.of(
-					new SearchQuery({ search: newValue }),
-				),
+				effects: setSearchQuery.of(new SearchQuery({ search: newValue })),
 			});
 		};
 
@@ -783,7 +781,7 @@ export function CodeEditor({
 			view.destroy();
 			setView(() => null);
 		};
-	}, []);
+	}, [enableFoldGutter, enableLineNumbers, enableLintGutter]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
