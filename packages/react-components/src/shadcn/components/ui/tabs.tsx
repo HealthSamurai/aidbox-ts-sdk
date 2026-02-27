@@ -418,7 +418,7 @@ function TabScrollLeftButton({
 			variant="link"
 			size="small"
 			disabled={disabled}
-			className="h-full border-r border-b bg-bg-secondary"
+			className="h-full border-r border-b bg-bg-secondary rounded-none"
 			onClick={onClick}
 		>
 			<ChevronLeft />
@@ -435,7 +435,7 @@ function TabScrollRightButton({
 			variant="link"
 			size="small"
 			disabled={disabled}
-			className="h-full border-l border-b bg-bg-secondary"
+			className="h-full border-l border-b bg-bg-secondary rounded-none"
 			onClick={onClick}
 		>
 			<ChevronRight />
