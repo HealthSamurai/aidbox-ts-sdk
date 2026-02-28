@@ -147,34 +147,50 @@
 	--corner-corner-m: 6px;
 	--corner-corner-l: 8px;
 	--corner-corner-xs: 2px;
-	--color-elements-readable: var(--color-neutral-900);
 	--color-cta: var(--color-brand-600);
 	--color-critical-default: var(--color-red-600);
-	--color-elements-disabled: var(--color-neutral-300);
-	--color-elements-assistive: var(--color-neutral-500);
-	--color-surface-0: var(--color-neutral-50);
-	--color-border-default: var(--color-neutral-200);
-	--color-surface-selected: var(--color-neutral-200);
 	--color-cta-hover: var(--color-brand-700);
 	--color-critical-hover: var(--color-red-700);
-	--color-surface-1: var(--color-neutral-100);
 	--color-border-XS-critical: var(--color-red-50);
 	--color-border-XS-critical-hover: var(--color-red-100);
 	--color-elements-green: var(--color-green-600);
 	--color-elements-yellow: var(--color-yellow-500);
 	--color-border-XS-regular: var(--color-blue-300);
 	--color-border-XS-regular-hover: var(--color-blue-400);
-	--color-separator: var(--color-neutral-200);
 	--color-surface-info: var(--color-blue-50);
 	--color-surface-warning: var(--color-yellow-50);
 	--color-surface-alert: var(--color-red-50);
 	--color-elements-warning: var(--color-yellow-700);
 	--color-code-red: var(--color-red-600);
 	--color-code-blue: var(--color-blue-500);
-	--color-elements-readable-inv: var(--color-neutral-50);
 	--color-logo-readable: var(--color-neutral-800);
 	--color-elements-links: var(--color-brand-600);
 	--color-elements-info: var(--color-brand-600);
 	--color-elements-alert: var(--color-red-600);
 	--color-illustrations-solid: var(--color-brand-600);
+}
+
+/* Semantic tokens that need dark mode overrides — use @theme inline + :root so .dark can override */
+@theme inline {
+	--color-elements-readable: var(--hs-elements-readable);
+	--color-elements-readable-inv: var(--hs-elements-readable-inv);
+	--color-elements-assistive: var(--hs-elements-assistive);
+	--color-elements-disabled: var(--hs-elements-disabled);
+	--color-surface-0: var(--hs-surface-0);
+	--color-surface-1: var(--hs-surface-1);
+	--color-surface-selected: var(--hs-surface-selected);
+	--color-border-default: var(--hs-border-default);
+	--color-separator: var(--hs-separator);
+}
+
+:root {
+	--hs-elements-readable: var(--color-neutral-900);
+	--hs-elements-readable-inv: var(--color-neutral-50);
+	--hs-elements-assistive: var(--color-neutral-500);
+	--hs-elements-disabled: var(--color-neutral-300);
+	--hs-surface-0: var(--color-neutral-50);
+	--hs-surface-1: var(--color-neutral-100);
+	--hs-surface-selected: var(--color-neutral-200);
+	--hs-border-default: var(--color-neutral-200);
+	--hs-separator: var(--color-neutral-200);
 }
