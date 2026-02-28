@@ -219,6 +219,9 @@ const baseTheme = EditorView.baseTheme({
 	"&.cm-focused": {
 		outline: "none",
 	},
+	".cm-cursor, .cm-dropCursor": {
+		borderLeftColor: "var(--color-text-primary)",
+	},
 	".cm-gutter": {
 		fontFamily: "var(--font-family-mono)",
 	},
@@ -244,6 +247,47 @@ const baseTheme = EditorView.baseTheme({
 	".cm-errorLine": {
 		backgroundColor:
 			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+	},
+});
+
+const completionTheme = EditorView.theme({
+	".cm-tooltip.cm-tooltip-autocomplete > ul": {
+		maxHeight: "400px",
+	},
+	".cm-tooltip.cm-tooltip-autocomplete > ul > li": {
+		display: "flex",
+		alignItems: "center",
+		gap: "8px",
+	},
+	".cm-completionLabel": {
+		flex: "1",
+		minWidth: "0",
+	},
+	".cm-completionDetail": {
+		color: "var(--color-text-tertiary)",
+		fontSize: "12px",
+		marginLeft: "auto",
+		whiteSpace: "nowrap",
+	},
+	".cm-completionInfo": {
+		backgroundColor: "var(--color-bg-primary)",
+		border: "1px solid var(--color-border-primary)",
+		borderRadius: "var(--radius-md)",
+		color: "var(--color-text-secondary)",
+		fontFamily: "var(--font-family-sans)",
+		fontSize: "12px",
+		padding: "8px 12px",
+		lineHeight: "1.4",
+		whiteSpace: "normal",
+		maxWidth: "300px",
+	},
+	".cm-completion-icon": {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		width: "16px",
+		height: "16px",
+		flexShrink: "0",
 	},
 });
 
@@ -534,20 +578,20 @@ const customSearchExtension = [
 ];
 
 const customHighlightStyle = HighlightStyle.define([
-	{ tag: tags.propertyName, color: "#EA4A35" },
-	{ tag: tags.string, color: "#405CBF" },
-	{ tag: tags.number, color: "#00A984" },
-	{ tag: tags.bool, color: "#569cd6" },
-	{ tag: tags.null, color: "#569cd6" },
-	{ tag: tags.keyword, color: "#569cd6" },
-	{ tag: tags.operatorKeyword, color: "#405CBF" },
-	{ tag: tags.controlKeyword, color: "#EA4A35" },
-	{ tag: tags.typeName, color: "#00A984" },
-	{ tag: tags.variableName, color: "#EA4A35" },
-	{ tag: tags.operator, color: "#405CBF" },
-	{ tag: tags.comment, color: "#00A984" },
-	{ tag: tags.lineComment, color: "#00A984" },
-	{ tag: tags.blockComment, color: "#00A984" },
+	{ tag: tags.propertyName, color: "var(--hs-syntax-property)" },
+	{ tag: tags.string, color: "var(--hs-syntax-string)" },
+	{ tag: tags.number, color: "var(--hs-syntax-number)" },
+	{ tag: tags.bool, color: "var(--hs-syntax-keyword)" },
+	{ tag: tags.null, color: "var(--hs-syntax-keyword)" },
+	{ tag: tags.keyword, color: "var(--hs-syntax-keyword)" },
+	{ tag: tags.operatorKeyword, color: "var(--hs-syntax-string)" },
+	{ tag: tags.controlKeyword, color: "var(--hs-syntax-property)" },
+	{ tag: tags.typeName, color: "var(--hs-syntax-number)" },
+	{ tag: tags.variableName, color: "var(--hs-syntax-property)" },
+	{ tag: tags.operator, color: "var(--hs-syntax-string)" },
+	{ tag: tags.comment, color: "var(--hs-syntax-comment)" },
+	{ tag: tags.lineComment, color: "var(--hs-syntax-comment)" },
+	{ tag: tags.blockComment, color: "var(--hs-syntax-comment)" },
 ]);
 
 const SQL_KEYWORDS = [
@@ -748,13 +792,29 @@ export function CodeEditor({
 					languageCompartment.current.of([]),
 					bracketMatching(),
 					closeBrackets(),
-					autocompletion(),
+					autocompletion({
+						icons: false,
+						maxRenderedOptions: 1000,
+						addToOptions: [
+							{ render: renderCompletionIcon, position: 20 },
+						],
+						optionClass: (_completion) =>
+							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary flex items-center gap-2",
+						tooltipClass: (_state) =>
+							"!bg-bg-primary rounded-md p-2 shadow-md !border-border-primary !typo-body",
+						compareCompletions: (a, b) => {
+							const aIsProperty = a.type === "property" ? 0 : 1;
+							const bIsProperty = b.type === "property" ? 0 : 1;
+							return aIsProperty - bIsProperty;
+						},
+					}),
 					rectangularSelection(),
 					crosshairCursor(),
 					highlightActiveLine(),
 					highlightActiveLineGutter(),
 					highlightSelectionMatches(),
 					themeCompartment.current.of(baseTheme),
+					completionTheme,
 					keymap.of([
 						...closeBracketsKeymap,
 						...defaultKeymap,
@@ -907,6 +967,9 @@ const editorInputTheme = EditorView.theme({
 	".cm-editor": {
 		fontSize: "var(--font-size-sm)",
 		color: "var(--color-text-primary)",
+	},
+	".cm-cursor, .cm-dropCursor": {
+		borderLeftColor: "var(--color-text-primary)",
 	},
 	"&.cm-editor.cm-focused": {
 		outline: "none",

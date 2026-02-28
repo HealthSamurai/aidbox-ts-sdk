@@ -213,6 +213,11 @@
 	--hs-fg-warning-secondary: var(--color-yellow-400);
 	--hs-fg-info-primary: var(--color-blue-600);
 	--hs-fg-neutral-primary: var(--color-neutral-500);
+	--hs-syntax-property: #EA4A35;
+	--hs-syntax-string: #405CBF;
+	--hs-syntax-number: #00A984;
+	--hs-syntax-keyword: #569cd6;
+	--hs-syntax-comment: #00A984;
 }
 
 @theme inline {
@@ -325,6 +330,11 @@
 	--hs-fg-warning-secondary: var(--color-yellow-400);
 	--hs-fg-info-primary: var(--color-blue-400);
 	--hs-fg-neutral-primary: oklch(0.556 0 0);
+	--hs-syntax-property: #f87171;
+	--hs-syntax-string: #7cacf8;
+	--hs-syntax-number: #34d399;
+	--hs-syntax-keyword: #7cacf8;
+	--hs-syntax-comment: #6b7280;
 }
 
 .no-scrollbar::-webkit-scrollbar {
