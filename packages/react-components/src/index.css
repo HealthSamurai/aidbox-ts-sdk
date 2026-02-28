@@ -137,6 +137,113 @@
 	--font-family-mono: "JetBrains Mono", monospace;
 }
 
+.dark {
+	/* tokens.css overrides */
+	--color-elements-readable: var(--color-neutral-50);
+	--color-elements-readable-inv: var(--color-neutral-900);
+	--color-elements-assistive: var(--color-neutral-400);
+	--color-elements-disabled: var(--color-neutral-700);
+	--color-surface-0: var(--color-neutral-900);
+	--color-surface-1: var(--color-neutral-800);
+	--color-surface-selected: var(--color-neutral-700);
+	--color-border-default: var(--color-neutral-700);
+	--color-separator: var(--color-neutral-800);
+
+	/* Text */
+	--color-text-primary: var(--color-neutral-50);
+	--color-text-secondary: var(--color-neutral-400);
+	--color-text-secondary_hover: var(--color-neutral-300);
+	--color-text-primary_on-brand: var(--color-neutral-50);
+	--color-text-secondary_on-brand: var(--color-neutral-200);
+	--color-text-tertiary: var(--color-neutral-500);
+	--color-text-tertiary_hover: var(--color-neutral-400);
+	--color-text-quternary: var(--color-neutral-500);
+	--color-text-quternary_hover: var(--color-neutral-400);
+	--color-text-disabled: var(--color-neutral-600);
+	--color-text-link: var(--color-blue-400);
+	--color-text-link_hover: var(--color-blue-300);
+	--color-text-link_disabled: var(--color-blue-600);
+	--color-text-brand-primary: var(--color-brand-400);
+	--color-text-brand-secondary: var(--color-brand-300);
+	--color-text-brand-secondary_hover: var(--color-brand-200);
+	--color-text-error-primary: var(--color-red-400);
+	--color-text-error-secondary: var(--color-red-300);
+	--color-text-success-primary: var(--color-green-400);
+	--color-text-warning-primary: var(--color-yellow-500);
+	--color-text-info-primary: var(--color-blue-400);
+
+	/* Borders */
+	--color-border-primary: var(--color-neutral-700);
+	--color-border-primary_hover: var(--color-neutral-600);
+	--color-border-secondary: var(--color-neutral-800);
+	--color-border-separator: var(--color-neutral-800);
+	--color-border-disabled: var(--color-neutral-800);
+	--color-border-dark: var(--color-neutral-400);
+
+	/* Backgrounds */
+	--color-bg-primary: var(--color-neutral-950);
+	--color-bg-primary_inverse: var(--color-neutral-50);
+	--color-bg-secondary: var(--color-neutral-900);
+	--color-bg-secondary_inverse: var(--color-neutral-400);
+	--color-bg-secondary_inverse_hover: var(--color-neutral-300);
+	--color-bg-tertiary: var(--color-neutral-800);
+	--color-bg-tertiary_inverse: var(--color-neutral-500);
+	--color-bg-quaternary: var(--color-neutral-700);
+	--color-bg-overlay: var(--color-neutral-950);
+	--color-bg-disabled: var(--color-neutral-700);
+	--color-bg-hover: var(--color-blue-900);
+	--color-bg-dark_tertiary: var(--color-neutral-600);
+	--color-bg-brand-primary: var(--color-brand-950);
+	--color-bg-brand-primary_inverse: var(--color-brand-400);
+	--color-bg-brand-secondary: var(--color-brand-900);
+	--color-bg-brand-tertiary: var(--color-brand-800);
+	--color-bg-link: var(--color-blue-500);
+	--color-bg-link_hover: var(--color-blue-400);
+	--color-bg-link_disabled: var(--color-blue-600);
+	--color-bg-error-primary: var(--color-red-950);
+	--color-bg-error-primary_inverse: var(--color-red-500);
+	--color-bg-error-primary_inverse_hover: var(--color-red-400);
+	--color-bg-error-secondary: var(--color-red-900);
+	--color-bg-error-tertiary: var(--color-red-800);
+	--color-bg-success-primary: var(--color-green-950);
+	--color-bg-success-primary_inverse: var(--color-green-500);
+	--color-bg-success-secondary: var(--color-green-900);
+	--color-bg-warning-primary: var(--color-yellow-950);
+	--color-bg-warning-primary_inverse: var(--color-yellow-500);
+	--color-bg-warning-secondary: var(--color-yellow-900);
+	--color-bg-info-primary: var(--color-blue-900);
+	--color-bg-info-primary_inverse: var(--color-blue-400);
+	--color-bg-neutral-primary: var(--color-neutral-800);
+	--color-bg-neutral-primary_inverse: var(--color-neutral-50);
+
+	/* Foreground */
+	--color-fg-primary: var(--color-neutral-50);
+	--color-fg-primary_inverse: var(--color-neutral-900);
+	--color-fg-primary_on-brand: var(--color-neutral-50);
+	--color-fg-secondary: var(--color-neutral-300);
+	--color-fg-secondary_inverse: var(--color-neutral-600);
+	--color-fg-secondary_hover: var(--color-neutral-200);
+	--color-fg-secondary_on-brand: var(--color-neutral-200);
+	--color-fg-tertiary: var(--color-neutral-400);
+	--color-fg-tertiary_hover: var(--color-neutral-300);
+	--color-fg-tertiary_on-brand: var(--color-neutral-300);
+	--color-fg-disabled: var(--color-neutral-600);
+	--color-fg-brand-primary: var(--color-brand-400);
+	--color-fg-brand-secondary: var(--color-brand-300);
+	--color-fg-link: var(--color-blue-400);
+	--color-fg-error-primary: var(--color-red-400);
+	--color-fg-error-secondary: var(--color-red-300);
+	--color-fg-success-primary: var(--color-green-400);
+	--color-fg-success-secondary: var(--color-green-300);
+	--color-fg-warning-primary: var(--color-yellow-500);
+	--color-fg-warning-secondary: var(--color-yellow-400);
+	--color-fg-info-primary: var(--color-blue-400);
+	--color-fg-neutral-primary: var(--color-neutral-400);
+
+	/* Selection & rings */
+	--color-selection: var(--color-blue-800);
+}
+
 .no-scrollbar::-webkit-scrollbar {
 	display: none;
 }

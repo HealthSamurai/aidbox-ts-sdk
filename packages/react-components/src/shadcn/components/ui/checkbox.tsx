@@ -23,7 +23,7 @@ const baseCheckboxStyles = cn(
 	"transition-colors",
 	"duration-200",
 	// Default state
-	"bg-white",
+	"bg-bg-primary",
 	"border-border-dark",
 	// Checked state
 	"data-[state=checked]:bg-[var(--color-fg-link)]",
@@ -35,7 +35,7 @@ const baseCheckboxStyles = cn(
 	"data-[state=indeterminate]:text-white",
 	// Disabled states
 	"disabled:cursor-not-allowed",
-	"disabled:bg-white",
+	"disabled:bg-bg-primary",
 	"disabled:border-[var(--color-fg-disabled)]",
 	"disabled:data-[state=checked]:bg-[var(--color-fg-disabled)]",
 	"disabled:data-[state=checked]:border-[var(--color-fg-disabled)]",
