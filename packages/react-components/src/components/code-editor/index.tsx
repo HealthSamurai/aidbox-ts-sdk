@@ -343,7 +343,7 @@ const iconButtonStyle: React.CSSProperties = {
 	alignItems: "center",
 	justifyContent: "center",
 	width: "28px",
-	height: "28px",
+    height: "28px",
 	border: "none",
 	borderRadius: "var(--radius-sm)",
 	background: "transparent",
