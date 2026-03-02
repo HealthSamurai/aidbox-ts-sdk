@@ -36,3 +36,26 @@ export const Default: Story = {
 		);
 	},
 };
+
+export const MoreThanTwo: Story = {
+	args: {
+		value: "yaml",
+		onValueChange: () => {},
+		items: [
+			{ value: "yaml", label: "YAML" },
+			{ value: "json", label: "JSON" },
+			{ value: "toml", label: "TOML" },
+		],
+	},
+	render: (args) => {
+		const [value, setValue] = useState(args.value);
+
+		return (
+			<SegmentControl
+				value={value}
+				onValueChange={setValue}
+				items={args.items}
+			/>
+		);
+	},
+};

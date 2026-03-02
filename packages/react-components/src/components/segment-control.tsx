@@ -46,23 +46,62 @@ function SegmentControl<T extends string>({
 	onValueChange,
 	items,
 }: SegmentControlProps<T>) {
-	return (
-		<div className={containerClass}>
-			{items.map((item) => (
-				<button
-					type="button"
-					key={item.value}
-					className={cn(
-						itemBaseClass,
-						item.value === value ? itemActiveClass : itemInactiveClass,
-					)}
-					onClick={() => onValueChange(item.value)}
-				>
-					{item.label}
-				</button>
-			))}
-		</div>
-	);
+	if (items.length === 2) {
+		const [a, b] = items;
+		if (a && b) {
+			const others = new Map([
+				[a.value, b.value],
+				[b.value, a.value],
+			]);
+
+			return (
+				<div className={containerClass}>
+					{items.map((item) => {
+						const isActive = item.value === value;
+						return (
+							<button
+								key={item.value}
+								type="button"
+								className={cn(
+									itemBaseClass,
+									isActive ? itemActiveClass : itemInactiveClass,
+								)}
+								onClick={() =>
+									onValueChange(
+										isActive
+											? (others.get(item.value) ?? item.value)
+											: item.value,
+									)
+								}
+							>
+								{item.label}
+							</button>
+						);
+					})}
+				</div>
+			);
+		}
+	} else {
+		return (
+			<div className={containerClass}>
+				{items.map((item) => (
+					<button
+						type="button"
+						key={item.value}
+						className={cn(
+							itemBaseClass,
+							item.value === value ? itemActiveClass : itemInactiveClass,
+						)}
+						onClick={() => {
+							if (item.value !== value) onValueChange(item.value);
+						}}
+					>
+						{item.label}
+					</button>
+				))}
+			</div>
+		);
+	}
 }
 
 export { SegmentControl };
