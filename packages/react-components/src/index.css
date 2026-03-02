@@ -84,7 +84,9 @@
 	--color-bg-link_hover: var(--hs-bg-link-hover);
 	--color-bg-error-primary: var(--hs-bg-error-primary);
 	--color-bg-error-primary_inverse: var(--hs-bg-error-primary-inverse);
-	--color-bg-error-primary_inverse_hover: var(--hs-bg-error-primary-inverse-hover);
+	--color-bg-error-primary_inverse_hover: var(
+		--hs-bg-error-primary-inverse-hover
+	);
 	--color-bg-error-secondary: var(--hs-bg-error-secondary);
 	--color-bg-error-tertiary: var(--hs-bg-error-tertiary);
 	--color-bg-success-primary: var(--hs-bg-success-primary);
@@ -213,11 +215,11 @@
 	--hs-fg-warning-secondary: var(--color-yellow-400);
 	--hs-fg-info-primary: var(--color-blue-600);
 	--hs-fg-neutral-primary: var(--color-neutral-500);
-	--hs-syntax-property: #EA4A35;
-	--hs-syntax-string: #405CBF;
-	--hs-syntax-number: #00A984;
+	--hs-syntax-property: #ea4a35;
+	--hs-syntax-string: #405cbf;
+	--hs-syntax-number: #00a984;
 	--hs-syntax-keyword: #569cd6;
-	--hs-syntax-comment: #00A984;
+	--hs-syntax-comment: #00a984;
 }
 
 @theme inline {
@@ -245,10 +247,10 @@
 	--hs-text-secondary: oklch(0.556 0 0);
 	--hs-text-secondary-hover: oklch(0.708 0 0);
 	--hs-text-primary-on-brand: oklch(0.985 0 0);
-	--hs-text-secondary-on-brand: oklch(0.870 0 0);
-	--hs-text-tertiary: oklch(0.450 0 0);
+	--hs-text-secondary-on-brand: oklch(0.87 0 0);
+	--hs-text-tertiary: oklch(0.45 0 0);
 	--hs-text-tertiary-hover: oklch(0.556 0 0);
-	--hs-text-quaternary: oklch(0.450 0 0);
+	--hs-text-quaternary: oklch(0.45 0 0);
 	--hs-text-quaternary-hover: oklch(0.556 0 0);
 	--hs-text-disabled: oklch(0.371 0 0);
 	--hs-text-link: var(--color-blue-400);
@@ -278,9 +280,9 @@
 	--hs-bg-secondary-inverse: oklch(0.556 0 0);
 	--hs-bg-secondary-inverse-hover: oklch(0.708 0 0);
 	--hs-bg-tertiary: oklch(0.198 0 0);
-	--hs-bg-tertiary-inverse: oklch(0.450 0 0);
+	--hs-bg-tertiary-inverse: oklch(0.45 0 0);
 	--hs-bg-quaternary: oklch(0.269 0 0);
-	--hs-bg-overlay: oklch(0.100 0 0);
+	--hs-bg-overlay: oklch(0.1 0 0);
 	--hs-bg-disabled: oklch(0.269 0 0);
 	--hs-bg-hover: var(--color-blue-900);
 	--hs-bg-dark-tertiary: oklch(0.371 0 0);
@@ -313,8 +315,8 @@
 	--hs-fg-primary-on-brand: oklch(0.985 0 0);
 	--hs-fg-secondary: oklch(0.708 0 0);
 	--hs-fg-secondary-inverse: oklch(0.371 0 0);
-	--hs-fg-secondary-hover: oklch(0.870 0 0);
-	--hs-fg-secondary-on-brand: oklch(0.870 0 0);
+	--hs-fg-secondary-hover: oklch(0.87 0 0);
+	--hs-fg-secondary-on-brand: oklch(0.87 0 0);
 	--hs-fg-tertiary: oklch(0.556 0 0);
 	--hs-fg-tertiary-hover: oklch(0.708 0 0);
 	--hs-fg-tertiary-on-brand: oklch(0.708 0 0);

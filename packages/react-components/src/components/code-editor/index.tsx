@@ -795,9 +795,7 @@ export function CodeEditor({
 					autocompletion({
 						icons: false,
 						maxRenderedOptions: 1000,
-						addToOptions: [
-							{ render: renderCompletionIcon, position: 20 },
-						],
+						addToOptions: [{ render: renderCompletionIcon, position: 20 }],
 						optionClass: (_completion) =>
 							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary flex items-center gap-2",
 						tooltipClass: (_state) =>
