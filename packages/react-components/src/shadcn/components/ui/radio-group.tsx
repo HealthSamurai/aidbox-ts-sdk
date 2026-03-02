@@ -30,7 +30,7 @@ const baseRadioGroupItemStyles = cn(
 	"active:scale-90",
 	"active:duration-75",
 	// Default state
-	"bg-white",
+	"bg-bg-primary",
 	"border-[1.5px]",
 	"border-solid",
 	"border-border-primary",
@@ -40,7 +40,7 @@ const baseRadioGroupItemStyles = cn(
 	// Disabled states
 	"disabled:cursor-not-allowed",
 	"disabled:active:scale-100",
-	"disabled:bg-white",
+	"disabled:bg-bg-primary",
 	"disabled:border-border-secondary",
 	"disabled:data-[state=checked]:bg-border-secondary",
 	"disabled:data-[state=checked]:border-border-secondary",
