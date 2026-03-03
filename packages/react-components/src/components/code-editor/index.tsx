@@ -55,7 +55,7 @@ import {
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { Braces, ChevronDown, ChevronUp, Terminal, X } from "lucide-react";
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
@@ -1011,10 +1011,18 @@ const editorInputTheme = EditorView.theme({
 	},
 });
 
+const KeywordIcon = () => <Terminal size={16} color="#717684" />;
+const OperatorIcon = () => <Braces size={16} color="#717684" />;
+
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;
+	if (completion.type === "keyword") return KeywordIcon;
+	if (completion.type === "operator") return OperatorIcon;
 	const detail = completion.detail;
-	if (!detail) return null;
+	if (!detail) {
+		if (completion.type === "variable") return SquareFunctionIcon;
+		return null;
+	}
 	const typeName = detail.replace(/\[\]$/, "");
 	if (!typeName) return null;
 	const firstChar = typeName[0];
