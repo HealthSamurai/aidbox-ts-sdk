@@ -200,17 +200,21 @@ const errorTooltipHandler = EditorView.domEventHandlers({
 	},
 });
 
-const baseTheme = EditorView.baseTheme({
+const baseTheme = EditorView.theme({
 	"&": {
 		backgroundColor: "var(--color-bg-primary)",
 		height: "100%",
 		width: "100%",
 		fontSize: "14px",
-		paddingTop: "8px",
-		paddingBottom: "8px",
+	},
+	"&.cm-editor": {
+		paddingTop: "0 !important",
+		paddingBottom: "0 !important",
 	},
 	".cm-scroller": {
 		overflow: "auto",
+		paddingTop: "8px",
+		paddingBottom: "8px",
 	},
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
@@ -297,11 +301,15 @@ const readOnlyTheme = EditorView.theme({
 		height: "100%",
 		width: "100%",
 		fontSize: "14px",
-		paddingTop: "8px",
-		paddingBottom: "8px",
+	},
+	"&.cm-editor": {
+		paddingTop: "0 !important",
+		paddingBottom: "0 !important",
 	},
 	".cm-scroller": {
 		overflow: "auto",
+		paddingTop: "8px",
+		paddingBottom: "8px",
 	},
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
