@@ -1,6 +1,7 @@
 "use client";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Lock } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
@@ -77,9 +78,12 @@ function Switch({
 	className,
 	size,
 	disabled,
+	locked,
 	...props
 }: React.ComponentProps<typeof SwitchPrimitive.Root> &
-	VariantProps<typeof switchRootVariants>) {
+	VariantProps<typeof switchRootVariants> & {
+		locked?: boolean;
+	}) {
 	return (
 		<SwitchPrimitive.Root
 			data-slot="switch"
@@ -89,8 +93,20 @@ function Switch({
 		>
 			<SwitchPrimitive.Thumb
 				data-slot="switch-thumb"
-				className={switchThumbVariants({ size })}
-			/>
+				className={cn(
+					switchThumbVariants({ size }),
+					locked && "flex items-center justify-center",
+				)}
+			>
+				{locked && (
+					<Lock
+						size={size === "small" ? 8 : 10}
+						strokeWidth={2.5}
+						style={{ strokeWidth: 2.5 }}
+						className="text-neutral-600"
+					/>
+				)}
+			</SwitchPrimitive.Thumb>
 		</SwitchPrimitive.Root>
 	);
 }
