@@ -58,8 +58,10 @@
 	"publishConfig": {
 		"access": "public"
 	},
+	"homepage": "https://github.com/HealthSamurai/aidbox-ts-sdk/tree/master/packages/aidbox-fhirpath-lsp#readme",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk"
+		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk",
+		"directory": "packages/aidbox-fhirpath-lsp"
 	}
 }
