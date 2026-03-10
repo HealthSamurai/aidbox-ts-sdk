@@ -46,21 +46,35 @@ function SegmentControl<T extends string>({
 	onValueChange,
 	items,
 }: SegmentControlProps<T>) {
+	const isToggle = items.length === 2;
+
 	return (
 		<div className={containerClass}>
-			{items.map((item) => (
-				<button
-					type="button"
-					key={item.value}
-					className={cn(
-						itemBaseClass,
-						item.value === value ? itemActiveClass : itemInactiveClass,
-					)}
-					onClick={() => onValueChange(item.value)}
-				>
-					{item.label}
-				</button>
-			))}
+			{items.map((item) => {
+				const isActive = item.value === value;
+				return (
+					<button
+						key={item.value}
+						type="button"
+						className={cn(
+							itemBaseClass,
+							isActive ? itemActiveClass : itemInactiveClass,
+						)}
+						onClick={() => {
+							if (isToggle) {
+								const other = items.find((i) => i.value !== item.value);
+								onValueChange(
+									isActive ? (other?.value ?? item.value) : item.value,
+								);
+							} else if (!isActive) {
+								onValueChange(item.value);
+							}
+						}}
+					>
+						{item.label}
+					</button>
+				);
+			})}
 		</div>
 	);
 }
