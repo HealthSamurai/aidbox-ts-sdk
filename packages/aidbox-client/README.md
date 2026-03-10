@@ -1,6 +1,17 @@
-# Typescript FHIR client
+<p align="center">
+  <img src="../../.github/logo.svg" width="64" height="64" alt="Health Samurai">
+</p>
 
-A TypeScript client for interacting with a FHIR server.
+<h1 align="center">@health-samurai/aidbox-client</h1>
+
+<p align="center">
+  A TypeScript client for interacting with a FHIR server.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@health-samurai/aidbox-client"><img src="https://img.shields.io/npm/v/@health-samurai/aidbox-client/alpha" alt="npm"></a>
+  <a href="https://healthsamurai.github.io/aidbox-ts-sdk/aidbox-client/"><img src="https://img.shields.io/badge/docs-typedoc-blue" alt="API Docs"></a>
+</p>
 
 ## Usage
 
