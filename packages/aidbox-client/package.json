@@ -29,8 +29,8 @@
 	},
 	"dependencies": {
 		"@types/json-patch": "^0.0.33",
-		"oauth4webapi": "^3.8.3",
-		"yaml": "^2.8.1"
+		"oauth4webapi": "^3.8.5",
+		"yaml": "^2.8.2"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -43,9 +43,9 @@
 	},
 	"devDependencies": {
 		"@atomic-ehr/codegen": "^0.0.3",
-		"@types/node": "^24.2.0",
-		"tsx": "^4.20.4",
-		"typedoc": "^0.28.14",
+		"@types/node": "^24.12.0",
+		"tsx": "^4.21.0",
+		"typedoc": "^0.28.17",
 		"typescript": "~5.8.3",
 		"vitest": "^3.2.4"
 	}
