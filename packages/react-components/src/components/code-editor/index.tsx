@@ -5,6 +5,7 @@ import {
 	closeBrackets,
 	closeBracketsKeymap,
 	completionKeymap,
+	completionStatus,
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
@@ -34,6 +35,7 @@ import {
 	Compartment,
 	EditorState,
 	type Extension,
+	Prec,
 	RangeSet,
 	StateEffect,
 	StateField,
@@ -55,13 +57,18 @@ import {
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import { Braces, ChevronDown, ChevronUp, Terminal, X } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsRight, Table2, Terminal, X } from "lucide-react";
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
 import { ComplexTypeIcon, SquareFunctionIcon, TypCodeIcon } from "../../icons";
 import { http } from "./http";
+import {
+	type SqlConfig,
+	buildSqlCompletionExtensions,
+	fetchSqlMetadata,
+} from "./sql-completion";
 
 // --- Issue lines: gutter highlighting, line background, hover tooltip ---
 
@@ -234,11 +241,16 @@ const baseTheme = EditorView.theme({
 		border: "none",
 	},
 	".cm-lineNumbers": {
-		paddingLeft: "16px",
+		minWidth: "3.5ch",
 	},
-	".cm-activeLineGutter": {
+	".cm-lineNumbers .cm-gutterElement": {
+		minWidth: "3.5ch",
+		paddingRight: "4px",
+		color: "var(--color-text-quaternary)",
+	},
+	".cm-lineNumbers .cm-gutterElement.cm-activeLineGutter": {
 		backgroundColor: "var(--color-bg-primary)",
-		color: "var(--color-text-primary)",
+		color: "var(--color-text-secondary)",
 	},
 	".cm-activeLine": {
 		backgroundColor: "rgba(255, 255, 255, 0)",
@@ -266,6 +278,14 @@ const completionTheme = EditorView.theme({
 	".cm-completionLabel": {
 		flex: "1",
 		minWidth: "0",
+		fontFamily: "var(--font-family-mono)",
+		fontSize: "var(--font-size-sm)",
+		lineHeight: "var(--font-leading-5)",
+	},
+	".cm-completionMatchedText": {
+		textDecoration: "none",
+		fontWeight: "600",
+		color: "var(--color-text-link)",
 	},
 	".cm-completionDetail": {
 		color: "var(--color-text-tertiary)",
@@ -326,11 +346,16 @@ const readOnlyTheme = EditorView.theme({
 		border: "none",
 	},
 	".cm-lineNumbers": {
-		paddingLeft: "16px",
+		minWidth: "3.5ch",
 	},
-	".cm-activeLineGutter": {
+	".cm-lineNumbers .cm-gutterElement": {
+		minWidth: "3.5ch",
+		paddingRight: "4px",
+		color: "var(--color-text-quaternary)",
+	},
+	".cm-lineNumbers .cm-gutterElement.cm-activeLineGutter": {
 		backgroundColor: "var(--color-bg-secondary)",
-		color: "var(--color-text-primary)",
+		color: "var(--color-text-secondary)",
 	},
 	".cm-activeLine": {
 		backgroundColor: "rgba(255, 255, 255, 0)",
@@ -573,10 +598,10 @@ const searchPanelTheme = EditorView.baseTheme({
 		border: "none",
 	},
 	".cm-searchMatch": {
-		backgroundColor: "#e9f2fc",
+		backgroundColor: "var(--color-blue-200)",
 	},
 	".cm-searchMatch-selected": {
-		backgroundColor: "#d0e2f8",
+		backgroundColor: "var(--color-blue-400)",
 	},
 });
 
@@ -743,10 +768,16 @@ type CodeEditorProps = {
 	foldGutter?: boolean;
 	lintGutter?: boolean;
 	lineNumbers?: boolean;
-	sqlExtraBuiltins?: string[];
+	sql?: SqlConfig;
 };
 
 export type CodeEditorView = EditorView;
+
+export type {
+	SqlConfig,
+	SqlQueryType,
+	SqlMetadata,
+} from "./sql-completion";
 
 export function CodeEditor({
 	defaultValue,
@@ -763,7 +794,7 @@ export function CodeEditor({
 	foldGutter: enableFoldGutter = true,
 	lintGutter: enableLintGutter = true,
 	lineNumbers: enableLineNumbers = true,
-	sqlExtraBuiltins,
+	sql,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -776,6 +807,11 @@ export function CodeEditor({
 	const readOnlyCompartment = React.useRef(new Compartment());
 	const themeCompartment = React.useRef(new Compartment());
 	const additionalExtensionsCompartment = React.useRef(new Compartment());
+	const sqlCompletionCompartment = React.useRef(new Compartment());
+	const [sqlFunctions, setSqlFunctions] = React.useState<
+		string[] | undefined
+	>();
+	const executeSqlRef = React.useRef(sql?.executeSql);
 
 	React.useEffect(() => {
 		if (!domRef.current) {
@@ -819,6 +855,18 @@ export function CodeEditor({
 					highlightActiveLine(),
 					highlightActiveLineGutter(),
 					highlightSelectionMatches(),
+					Prec.highest(
+						keymap.of([
+							{
+								key: "Tab",
+								run: acceptCompletion,
+							},
+							{
+								key: "Enter",
+								run: (v) => completionStatus(v.state) === "active",
+							},
+						]),
+					),
 					themeCompartment.current.of(baseTheme),
 					completionTheme,
 					keymap.of([
@@ -837,6 +885,7 @@ export function CodeEditor({
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
 					additionalExtensionsCompartment.current.of([]),
+					sqlCompletionCompartment.current.of([]),
 				],
 			}),
 		});
@@ -848,6 +897,45 @@ export function CodeEditor({
 			setView(() => null);
 		};
 	}, [enableFoldGutter, enableLineNumbers, enableLintGutter]);
+
+	React.useEffect(() => {
+		executeSqlRef.current = sql?.executeSql;
+	});
+
+	React.useEffect(() => {
+		if (!view || !sql) {
+			if (view) {
+				view.dispatch({
+					effects: sqlCompletionCompartment.current.reconfigure([]),
+				});
+			}
+			setSqlFunctions(undefined);
+			return;
+		}
+
+		let cancelled = false;
+
+		fetchSqlMetadata(sql.executeSql)
+			.then((metadata) => {
+				if (cancelled) return;
+				setSqlFunctions(metadata.functions);
+				const extensions = buildSqlCompletionExtensions(
+					metadata,
+					(query, type) =>
+						executeSqlRef.current?.(query, type) ?? Promise.resolve([]),
+				);
+				view.dispatch({
+					effects: sqlCompletionCompartment.current.reconfigure(
+						extensions,
+					),
+				});
+			})
+			.catch(() => {});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [view, sql]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
@@ -903,10 +991,10 @@ export function CodeEditor({
 		}
 		view.dispatch({
 			effects: languageCompartment.current.reconfigure(
-				languageExtensions(mode, sqlExtraBuiltins),
+				languageExtensions(mode, sqlFunctions),
 			),
 		});
-	}, [mode, view, sqlExtraBuiltins]);
+	}, [mode, view, sqlFunctions]);
 
 	React.useEffect(() => {
 		if (view === null) {
@@ -1012,12 +1100,14 @@ const editorInputTheme = EditorView.theme({
 });
 
 const KeywordIcon = () => <Terminal size={16} color="#717684" />;
-const OperatorIcon = () => <Braces size={16} color="#717684" />;
+const OperatorIcon = () => <ChevronsRight size={16} color="#717684" />;
+const TableIcon = () => <Table2 size={16} color="#717684" />;
 
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;
 	if (completion.type === "keyword") return KeywordIcon;
 	if (completion.type === "operator") return OperatorIcon;
+	if (completion.type === "table") return TableIcon;
 	const detail = completion.detail;
 	if (!detail) {
 		if (completion.type === "variable") return SquareFunctionIcon;
