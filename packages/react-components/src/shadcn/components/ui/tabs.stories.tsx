@@ -1,6 +1,6 @@
 import { Controls, Primary, Title } from "@storybook/addon-docs/blocks";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { action } from "storybook/internal/actions";
+import { action } from "storybook/actions";
 import {
 	Tabs,
 	TabsAddButton,

@@ -45,11 +45,11 @@
 		"directory": "packages/aidbox-client"
 	},
 	"devDependencies": {
-		"@atomic-ehr/codegen": "^0.0.3",
-		"@types/node": "^24.12.0",
+		"@atomic-ehr/codegen": "^0.0.8",
+		"@types/node": "^25.4.0",
 		"tsx": "^4.21.0",
 		"typedoc": "^0.28.17",
-		"typescript": "~5.8.3",
-		"vitest": "^3.2.4"
+		"typescript": "~5.9.3",
+		"vitest": "^4.0.18"
 	}
 }
