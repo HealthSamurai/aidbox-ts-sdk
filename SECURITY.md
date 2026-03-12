@@ -13,7 +13,7 @@
 If you discover a security vulnerability in this project, **please report it privately**.
 Do not open a public issue.
 
-**Email:** [mk@health-samurai.io](mailto:mk@health-samurai.io)
+**Email:** [security@health-samurai.io](mailto:security@health-samurai.io)
 
 Include as much of the following as you can:
 
