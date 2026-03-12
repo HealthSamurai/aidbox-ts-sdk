@@ -1,16 +1,19 @@
 {
 	"name": "@health-samurai/aidbox-client",
-	"version": "0.0.0-alpha.4",
+	"version": "0.0.0-alpha.5",
 	"description": "A client library for communicating with Aidbox",
 	"author": "Health Samurai",
 	"type": "module",
 	"main": "./dist/src/index.js",
-	"types": "./dist/src/index.types.d.ts",
+	"types": "./dist/src/index.d.ts",
 	"files": [
 		"dist"
 	],
 	"exports": {
-		".": "./dist/src/index.js"
+		".": {
+			"types": "./dist/src/index.d.ts",
+			"default": "./dist/src/index.js"
+		}
 	},
 	"scripts": {
 		"build": "rm -rf dist && mkdir -p dist && swc src -d dist -D && tsc -b --force && echo success",
