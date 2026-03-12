@@ -11,13 +11,17 @@ function spawnWithDecorations(
 		data
 			.toString()
 			.split("\n")
-			.forEach((line) => console.log(decorationOut, line));
+			.forEach((line) => {
+				console.log(decorationOut, line);
+			});
 	});
 	subprocess.stderr.on("data", (data: Buffer) => {
 		data
 			.toString()
 			.split("\n")
-			.forEach((line) => console.log(decorationErr, line));
+			.forEach((line) => {
+				console.log(decorationErr, line);
+			});
 	});
 	return subprocess;
 }

@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.1.3/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -10,7 +10,7 @@
 			".storybook/**",
 			"src/**",
 			"test/**",
-			"!src/fhir-types/**",
+			"!src/fhir-types",
 			".vscode/**",
 			"biome.json",
 			"index.html",
