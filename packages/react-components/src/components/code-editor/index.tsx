@@ -48,8 +48,6 @@ import {
 	EditorView,
 	GutterMarker,
 	gutterLineClass,
-	highlightActiveLine,
-	highlightActiveLineGutter,
 	highlightSpecialChars,
 	keymap,
 	lineNumbers,
@@ -252,8 +250,11 @@ const baseTheme = EditorView.theme({
 		backgroundColor: "var(--color-bg-primary)",
 		color: "var(--color-text-secondary)",
 	},
+	".cm-activeLineGutter": {
+		backgroundColor: "transparent !important",
+	},
 	".cm-activeLine": {
-		backgroundColor: "rgba(255, 255, 255, 0)",
+		backgroundColor: "transparent !important",
 	},
 	".cm-errorLineGutter": {
 		color: "var(--color-text-error-primary)",
@@ -357,8 +358,11 @@ const readOnlyTheme = EditorView.theme({
 		backgroundColor: "var(--color-bg-secondary)",
 		color: "var(--color-text-secondary)",
 	},
+	".cm-activeLineGutter": {
+		backgroundColor: "transparent !important",
+	},
 	".cm-activeLine": {
-		backgroundColor: "rgba(255, 255, 255, 0)",
+		backgroundColor: "transparent !important",
 	},
 	".cm-errorLineGutter": {
 		color: "var(--color-text-error-primary)",
@@ -852,8 +856,6 @@ export function CodeEditor({
 					}),
 					rectangularSelection(),
 					crosshairCursor(),
-					highlightActiveLine(),
-					highlightActiveLineGutter(),
 					highlightSelectionMatches(),
 					Prec.highest(
 						keymap.of([
