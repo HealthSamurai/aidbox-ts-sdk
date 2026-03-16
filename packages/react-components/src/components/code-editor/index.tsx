@@ -67,6 +67,10 @@ import {
 	buildSqlCompletionExtensions,
 	fetchSqlMetadata,
 } from "./sql-completion";
+import {
+	buildFhirCompletionExtension,
+	type GetStructureDefinition,
+} from "./fhir-completion";
 
 // --- Issue lines: gutter highlighting, line background, hover tooltip ---
 
@@ -773,6 +777,7 @@ type CodeEditorProps = {
 	lintGutter?: boolean;
 	lineNumbers?: boolean;
 	sql?: SqlConfig;
+	getStructureDefinition?: GetStructureDefinition;
 };
 
 export type CodeEditorView = EditorView;
@@ -782,6 +787,8 @@ export type {
 	SqlQueryType,
 	SqlMetadata,
 } from "./sql-completion";
+
+export type { GetStructureDefinition } from "./fhir-completion";
 
 export function CodeEditor({
 	defaultValue,
@@ -799,6 +806,7 @@ export function CodeEditor({
 	lintGutter: enableLintGutter = true,
 	lineNumbers: enableLineNumbers = true,
 	sql,
+	getStructureDefinition,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -812,6 +820,7 @@ export function CodeEditor({
 	const themeCompartment = React.useRef(new Compartment());
 	const additionalExtensionsCompartment = React.useRef(new Compartment());
 	const sqlCompletionCompartment = React.useRef(new Compartment());
+	const fhirCompletionCompartment = React.useRef(new Compartment());
 	const [sqlFunctions, setSqlFunctions] = React.useState<
 		string[] | undefined
 	>();
@@ -888,6 +897,7 @@ export function CodeEditor({
 					onUpdateComparment.current.of([]),
 					additionalExtensionsCompartment.current.of([]),
 					sqlCompletionCompartment.current.of([]),
+					fhirCompletionCompartment.current.of([]),
 				],
 			}),
 		});
@@ -938,6 +948,21 @@ export function CodeEditor({
 			cancelled = true;
 		};
 	}, [view, sql]);
+
+	React.useEffect(() => {
+		if (!view) return;
+		if (getStructureDefinition) {
+			view.dispatch({
+				effects: fhirCompletionCompartment.current.reconfigure(
+					buildFhirCompletionExtension(getStructureDefinition),
+				),
+			});
+		} else {
+			view.dispatch({
+				effects: fhirCompletionCompartment.current.reconfigure([]),
+			});
+		}
+	}, [view, getStructureDefinition]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
