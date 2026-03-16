@@ -46,7 +46,7 @@ body {
 	font-size: var(--font-size-xs);
 	font-family: var(--font-family-sans);
 	font-weight: var(--font-weight-normal);
-	line-height: var(--font-leading-3);
+	line-height: var(--font-leading-4);
 }
 .typo-label-xs {
 	font-size: var(--font-size-xs);
