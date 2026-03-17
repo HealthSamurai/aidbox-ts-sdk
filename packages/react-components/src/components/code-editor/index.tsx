@@ -55,22 +55,35 @@ import {
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import { ChevronDown, ChevronUp, ChevronsRight, Table2, Terminal, X } from "lucide-react";
+import {
+	ChevronDown,
+	ChevronsRight,
+	ChevronUp,
+	Heading,
+	Table2,
+	Terminal,
+	X,
+} from "lucide-react";
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
-import { ComplexTypeIcon, SquareFunctionIcon, TypCodeIcon } from "../../icons";
-import { http } from "./http";
 import {
-	type SqlConfig,
-	buildSqlCompletionExtensions,
-	fetchSqlMetadata,
-} from "./sql-completion";
+	ComplexTypeIcon,
+	ResourceIcon,
+	SquareFunctionIcon,
+	TypCodeIcon,
+} from "../../icons";
 import {
 	buildFhirCompletionExtension,
-	type GetStructureDefinition,
+	type GetStructureDefinitions,
 } from "./fhir-completion";
+import { type GetUrlSuggestions, http } from "./http";
+import {
+	buildSqlCompletionExtensions,
+	fetchSqlMetadata,
+	type SqlConfig,
+} from "./sql-completion";
 
 // --- Issue lines: gutter highlighting, line background, hover tooltip ---
 
@@ -303,9 +316,10 @@ const completionTheme = EditorView.theme({
 		border: "1px solid var(--color-border-primary)",
 		borderRadius: "var(--radius-md)",
 		color: "var(--color-text-secondary)",
-		fontFamily: "var(--font-family-sans)",
-		fontSize: "12px",
+		fontFamily: "var(--font-family-mono)",
+		fontSize: "14px",
 		padding: "8px 12px",
+		marginLeft: "8px",
 		lineHeight: "1.4",
 		whiteSpace: "normal",
 		maxWidth: "300px",
@@ -459,6 +473,7 @@ function createSearchPanel(view: EditorView) {
 					alignItems: "center",
 					gap: "2px",
 					padding: "6px 8px",
+					marginTop: "4px",
 					backgroundColor: "var(--color-bg-primary)",
 					border: "1px solid var(--color-border-primary)",
 					borderRadius: "var(--radius-md)",
@@ -595,10 +610,10 @@ function createSearchPanel(view: EditorView) {
 	};
 }
 
-const searchPanelTheme = EditorView.baseTheme({
-	".cm-panels-top": {
+const searchPanelTheme = EditorView.theme({
+	"& .cm-panels-top": {
 		position: "absolute",
-		top: "4px",
+		top: "8px",
 		right: "4px",
 		left: "auto",
 		zIndex: "10",
@@ -606,10 +621,13 @@ const searchPanelTheme = EditorView.baseTheme({
 		border: "none",
 	},
 	".cm-searchMatch": {
-		backgroundColor: "var(--color-blue-200)",
+		backgroundColor: "var(--color-blue-200) !important",
 	},
 	".cm-searchMatch-selected": {
-		backgroundColor: "var(--color-blue-400)",
+		backgroundColor: "var(--color-blue-400) !important",
+	},
+	".cm-selectionMatch": {
+		backgroundColor: "var(--color-blue-100) !important",
 	},
 });
 
@@ -725,19 +743,25 @@ const customSQLDialect = SQLDialect.define({
 
 type LanguageMode = "json" | "http" | "sql" | "yaml";
 
-function languageExtensions(mode: LanguageMode, sqlExtraBuiltins?: string[]) {
+function languageExtensions(
+	mode: LanguageMode,
+	sqlExtraBuiltins?: string[],
+	getUrlSuggestions?: GetUrlSuggestions,
+) {
 	if (mode === "http") {
 		const jsonLang = json();
 		const yamlLang = yaml();
 		return [
-			http((ct) =>
-				ct === "application/json"
-					? jsonLang.language
-					: ct === "text/yaml" ||
-							ct === "application/yaml" ||
-							ct === "application/x-yaml"
-						? yamlLang.language
-						: null,
+			http(
+				(ct) =>
+					ct === "application/json"
+						? jsonLang.language
+						: ct === "text/yaml" ||
+								ct === "application/yaml" ||
+								ct === "application/x-yaml"
+							? yamlLang.language
+							: null,
+				getUrlSuggestions,
 			),
 			syntaxHighlighting(customHighlightStyle),
 		];
@@ -751,7 +775,36 @@ function languageExtensions(mode: LanguageMode, sqlExtraBuiltins?: string[]) {
 		}
 		return [sql({ dialect }), syntaxHighlighting(customHighlightStyle)];
 	} else if (mode === "yaml") {
-		return [yaml(), syntaxHighlighting(customHighlightStyle)];
+		return [
+			yaml(),
+			syntaxHighlighting(customHighlightStyle),
+			keymap.of([{
+				key: "Enter",
+				run: (view) => {
+					const { state } = view;
+					const line = state.doc.lineAt(state.selection.main.head);
+					const lineText = line.text;
+					const indent = lineText.match(/^(\s*)/)?.[1] ?? "";
+					const trimmed = lineText.trimEnd();
+					if (trimmed.endsWith(":")) {
+						// After "key:" — indent to key content level + 2
+						const dashMatch = trimmed.match(/^(\s*-\s+)/);
+						const baseIndent = dashMatch?.[1] ? " ".repeat(dashMatch[1].length) : indent;
+						const newIndent = `${baseIndent}  `;
+						view.dispatch({
+							changes: { from: state.selection.main.head, insert: `\n${newIndent}` },
+							selection: { anchor: state.selection.main.head + 1 + newIndent.length },
+						});
+					} else {
+						view.dispatch({
+							changes: { from: state.selection.main.head, insert: `\n${indent}` },
+							selection: { anchor: state.selection.main.head + 1 + indent.length },
+						});
+					}
+					return true;
+				},
+			}]),
+		];
 	} else {
 		return [
 			json(),
@@ -777,18 +830,19 @@ type CodeEditorProps = {
 	lintGutter?: boolean;
 	lineNumbers?: boolean;
 	sql?: SqlConfig;
-	getStructureDefinition?: GetStructureDefinition;
+	getStructureDefinitions?: GetStructureDefinitions;
+	getUrlSuggestions?: GetUrlSuggestions;
 };
 
 export type CodeEditorView = EditorView;
 
+export type { GetStructureDefinitions } from "./fhir-completion";
+export type { GetUrlSuggestions } from "./http";
 export type {
 	SqlConfig,
-	SqlQueryType,
 	SqlMetadata,
+	SqlQueryType,
 } from "./sql-completion";
-
-export type { GetStructureDefinition } from "./fhir-completion";
 
 export function CodeEditor({
 	defaultValue,
@@ -806,7 +860,8 @@ export function CodeEditor({
 	lintGutter: enableLintGutter = true,
 	lineNumbers: enableLineNumbers = true,
 	sql,
-	getStructureDefinition,
+	getStructureDefinitions,
+	getUrlSuggestions,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -937,9 +992,7 @@ export function CodeEditor({
 						executeSqlRef.current?.(query, type) ?? Promise.resolve([]),
 				);
 				view.dispatch({
-					effects: sqlCompletionCompartment.current.reconfigure(
-						extensions,
-					),
+					effects: sqlCompletionCompartment.current.reconfigure(extensions),
 				});
 			})
 			.catch(() => {});
@@ -951,10 +1004,10 @@ export function CodeEditor({
 
 	React.useEffect(() => {
 		if (!view) return;
-		if (getStructureDefinition) {
+		if (getStructureDefinitions) {
 			view.dispatch({
 				effects: fhirCompletionCompartment.current.reconfigure(
-					buildFhirCompletionExtension(getStructureDefinition),
+					buildFhirCompletionExtension(getStructureDefinitions),
 				),
 			});
 		} else {
@@ -962,7 +1015,7 @@ export function CodeEditor({
 				effects: fhirCompletionCompartment.current.reconfigure([]),
 			});
 		}
-	}, [view, getStructureDefinition]);
+	}, [view, getStructureDefinitions]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
@@ -1012,16 +1065,25 @@ export function CodeEditor({
 		}
 	}, [currentValue, view]);
 
+	const getUrlSuggestionsRef = React.useRef(getUrlSuggestions);
+	getUrlSuggestionsRef.current = getUrlSuggestions;
+
+	const stableGetUrlSuggestions = React.useMemo(() => {
+		if (!getUrlSuggestions) return undefined;
+		return ((path: string, method: string) =>
+			getUrlSuggestionsRef.current?.(path, method) ?? []) as GetUrlSuggestions;
+	}, [!!getUrlSuggestions]);
+
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
 		view.dispatch({
 			effects: languageCompartment.current.reconfigure(
-				languageExtensions(mode, sqlFunctions),
+				languageExtensions(mode, sqlFunctions, stableGetUrlSuggestions),
 			),
 		});
-	}, [mode, view, sqlFunctions]);
+	}, [mode, view, sqlFunctions, stableGetUrlSuggestions]);
 
 	React.useEffect(() => {
 		if (view === null) {
@@ -1129,21 +1191,28 @@ const editorInputTheme = EditorView.theme({
 const KeywordIcon = () => <Terminal size={16} color="#717684" />;
 const OperatorIcon = () => <ChevronsRight size={16} color="#717684" />;
 const TableIcon = () => <Table2 size={16} color="#717684" />;
+const HeaderIcon = () => <Heading size={16} color="#717684" />;
 
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;
 	if (completion.type === "keyword") return KeywordIcon;
 	if (completion.type === "operator") return OperatorIcon;
 	if (completion.type === "table") return TableIcon;
+	if (completion.type === "header") return HeaderIcon;
+	if (completion.type === "text") return TypCodeIcon;
+	if (completion.type === "type") return ResourceIcon;
+	if (completion.type === "search-param") return null;
 	const detail = completion.detail;
 	if (!detail) {
 		if (completion.type === "variable") return SquareFunctionIcon;
-		return null;
+		return TypCodeIcon;
 	}
 	const typeName = detail.replace(/\[\]$/, "");
-	if (!typeName) return null;
+	if (!typeName) return TypCodeIcon;
+	// Search param types (TOKEN, REFERENCE) — no icon
+	if (typeName === typeName.toUpperCase()) return null;
 	const firstChar = typeName[0];
-	if (!firstChar) return null;
+	if (!firstChar) return TypCodeIcon;
 	const isComplex = firstChar === firstChar.toUpperCase();
 	return isComplex ? ComplexTypeIcon : TypCodeIcon;
 }
@@ -1156,6 +1225,8 @@ function renderCompletionIcon(completion: Completion): Node {
 		flushSync(() => {
 			createRoot(container).render(<Icon />);
 		});
+	} else {
+		container.style.display = "none";
 	}
 	return container;
 }

@@ -11,7 +11,12 @@ import { EditorView } from "@codemirror/view";
 
 // ── Public types ──
 
-export type SqlQueryType = "tables" | "columns" | "functions" | "jsonb_columns" | "structure_definition";
+export type SqlQueryType =
+	| "tables"
+	| "columns"
+	| "functions"
+	| "jsonb_columns"
+	| "structure_definition";
 
 interface StructureDefinitionElementType {
 	code: string;
@@ -86,10 +91,7 @@ const COLUMNS_QUERY = `SELECT c.table_schema, c.table_name, c.column_name, c.dat
 
 // ── FHIR StructureDefinition processing ──
 
-function isExpandedVariant(
-	path: string,
-	unionBases: Set<string>,
-): boolean {
+function isExpandedVariant(path: string, unionBases: Set<string>): boolean {
 	const parts = path.split(".");
 	if (parts.length < 2) return false;
 	const parentPath = parts.slice(0, -1).join(".");
@@ -394,12 +396,14 @@ function buildJsonbResult(
 		return {
 			from: context.pos - chain.partialInput.length,
 			validFor: /^\w*$/,
-			options: filtered.map((f): Completion => ({
-				label: f.name,
-				type: "property",
-				detail: f.datatype + (f.isArray ? "[]" : ""),
-				...(f.description != null ? { info: f.description } : {}),
-			})),
+			options: filtered.map(
+				(f): Completion => ({
+					label: f.name,
+					type: "property",
+					detail: f.datatype + (f.isArray ? "[]" : ""),
+					...(f.description != null ? { info: f.description } : {}),
+				}),
+			),
 		};
 	}
 
@@ -407,34 +411,43 @@ function buildJsonbResult(
 		return {
 			from: context.pos - chain.partialInput.length,
 			validFor: /^\w*$/,
-			options: filtered.map((f): Completion => ({
-				label: f.name,
-				type: "property",
-				detail: f.datatype + (f.isArray ? "[]" : ""),
-				...(f.description != null ? { info: f.description } : {}),
-				apply: (view: EditorView, _completion: Completion, from: number, to: number) => {
-					const after = view.state.sliceDoc(to, to + 1);
-					const end = after === "'" ? to + 1 : to;
-					const insert = `${f.name}'`;
-					view.dispatch({
-						changes: { from, to: end, insert },
-						selection: { anchor: from + insert.length },
-					});
-				},
-			})),
+			options: filtered.map(
+				(f): Completion => ({
+					label: f.name,
+					type: "property",
+					detail: f.datatype + (f.isArray ? "[]" : ""),
+					...(f.description != null ? { info: f.description } : {}),
+					apply: (
+						view: EditorView,
+						_completion: Completion,
+						from: number,
+						to: number,
+					) => {
+						const after = view.state.sliceDoc(to, to + 1);
+						const end = after === "'" ? to + 1 : to;
+						const insert = `${f.name}'`;
+						view.dispatch({
+							changes: { from, to: end, insert },
+							selection: { anchor: from + insert.length },
+						});
+					},
+				}),
+			),
 		};
 	}
 
 	return {
 		from: context.pos - chain.partialInput.length,
 		validFor: /^'?\w*'?$/,
-		options: filtered.map((f): Completion => ({
-			label: `'${f.name}'`,
-			type: "property",
-			detail: f.datatype + (f.isArray ? "[]" : ""),
-			...(f.description != null ? { info: f.description } : {}),
-			apply: `'${f.name}'`,
-		})),
+		options: filtered.map(
+			(f): Completion => ({
+				label: `'${f.name}'`,
+				type: "property",
+				detail: f.datatype + (f.isArray ? "[]" : ""),
+				...(f.description != null ? { info: f.description } : {}),
+				apply: `'${f.name}'`,
+			}),
+		),
 	};
 }
 
@@ -838,9 +851,7 @@ function jsonbCompletionExtension(ctx: {
 function sqlCompletionOverride(): Extension {
 	return autocompletion({
 		override: [
-			async (
-				context: CompletionContext,
-			): Promise<CompletionResult | null> => {
+			async (context: CompletionContext): Promise<CompletionResult | null> => {
 				const line = context.state.doc.lineAt(context.pos);
 				const textBefore = line.text.slice(0, context.pos - line.from);
 				const inJsonb = isInJsonbContext(textBefore);
@@ -878,9 +889,7 @@ function sqlCompletionOverride(): Extension {
 
 				if (hasTableResults) {
 					const tableOptions = results.flatMap((r) =>
-						r.options.filter(
-							(o) => o.type === "table" || o.type === "keyword",
-						),
+						r.options.filter((o) => o.type === "table" || o.type === "keyword"),
 					);
 					const from = results.find((r) =>
 						r.options.some((o) => o.type === "table"),
@@ -891,7 +900,10 @@ function sqlCompletionOverride(): Extension {
 
 				if (results.length === 1) return results[0]!;
 
-				const groups = new Map<number, { from: number; options: Completion[] }>();
+				const groups = new Map<
+					number,
+					{ from: number; options: Completion[] }
+				>();
 				for (const r of results) {
 					const existing = groups.get(r.from);
 					if (existing) {
@@ -927,13 +939,14 @@ function sqlCompletionOverride(): Extension {
 export async function fetchSqlMetadata(
 	executeSql: SqlConfig["executeSql"],
 ): Promise<SqlMetadata> {
-	const [tablesRows, jsonbRows, functionsRows, columnsRows] =
-		await Promise.all([
+	const [tablesRows, jsonbRows, functionsRows, columnsRows] = await Promise.all(
+		[
 			executeSql(TABLES_QUERY, "tables"),
 			executeSql(JSONB_COLUMNS_QUERY, "jsonb_columns"),
 			executeSql(FUNCTIONS_QUERY, "functions"),
 			executeSql(COLUMNS_QUERY, "columns"),
-		]);
+		],
+	);
 
 	const schemas: SchemaMap = {};
 	for (const row of tablesRows) {
