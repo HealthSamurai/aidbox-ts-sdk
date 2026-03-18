@@ -663,6 +663,39 @@ async function resolveReferenceTargets(
 	return targets.length > 0 ? targets : null;
 }
 
+// Check if cursor is directly inside a JSON array (not inside an object within the array)
+function isInsideJsonArray(doc: string, pos: number): boolean {
+	let depth = 0;
+	let inString = false;
+	let isEscaped = false;
+	for (let i = pos - 1; i >= 0; i--) {
+		const ch = doc[i];
+		if (isEscaped) {
+			isEscaped = false;
+			continue;
+		}
+		if (ch === "\\") {
+			isEscaped = true;
+			continue;
+		}
+		if (ch === '"') {
+			inString = !inString;
+			continue;
+		}
+		if (inString) continue;
+		if (ch === "}" || ch === "]") {
+			depth++;
+		} else if (ch === "{") {
+			if (depth === 0) return false;
+			depth--;
+		} else if (ch === "[") {
+			if (depth === 0) return true;
+			depth--;
+		}
+	}
+	return false;
+}
+
 // Check if cursor is in a value position (after "key": or key: )
 function isValuePosition(beforeCursor: string): string | null {
 	const match = beforeCursor.match(/"?(\w+)"?\s*:\s*"?([^"]*)?$/);
@@ -745,6 +778,9 @@ export function fhirCompletionSource(
 			/[{,]\s*"?[\w]*$/.test(beforeCursor);
 
 		if (!isPropertyPosition) return null;
+
+		// Don't offer property completions inside arrays (e.g. "profile": [""])
+		if (isInsideJsonArray(doc, pos)) return null;
 
 		const path = getJsonPathAtCursor(doc, pos);
 		const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/) ??
