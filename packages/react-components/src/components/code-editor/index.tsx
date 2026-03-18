@@ -804,6 +804,75 @@ const customSQLDialect = SQLDialect.define({
 	builtin: SQL_BUILTIN.join(" "),
 });
 
+function computeYamlNewlineIndent(lineText: string): string {
+	const indent = lineText.match(/^(\s*)/)?.[1] ?? "";
+	const trimmed = lineText.trimEnd();
+
+	if (trimmed.endsWith(":")) {
+		// After "key:" with no value — increase indent
+		// For "  - key:", base indent is at the dash content level
+		const dashMatch = trimmed.match(/^(\s*-\s+)/);
+		const baseIndent = dashMatch?.[1] ? " ".repeat(dashMatch[1].length) : indent;
+		return `${baseIndent}  `;
+	}
+	if (/^\s*-\s*$/.test(trimmed)) {
+		// After bare "- " (array item marker only) — align to content after dash
+		const dashMatch = trimmed.match(/^(\s*-\s*)/);
+		return dashMatch?.[1] ? " ".repeat(dashMatch[1].length) : indent;
+	}
+	// Preserve current indent; for "  - key: val" align to key level
+	const dashKeyMatch = trimmed.match(/^(\s*-\s+)\S/);
+	return dashKeyMatch?.[1] ? " ".repeat(dashKeyMatch[1].length) : indent;
+}
+
+function yamlEnterKeymap(): Extension {
+	return keymap.of([{
+		key: "Enter",
+		run: (view) => {
+			const { state } = view;
+			const pos = state.selection.main.head;
+			const line = state.doc.lineAt(pos);
+			const newIndent = computeYamlNewlineIndent(line.text);
+
+			view.dispatch({
+				changes: { from: pos, insert: `\n${newIndent}` },
+				selection: { anchor: pos + 1 + newIndent.length },
+			});
+			return true;
+		},
+	}]);
+}
+
+function httpYamlEnterKeymap(): Extension {
+	return keymap.of([{
+		key: "Enter",
+		run: (view) => {
+			const { state } = view;
+			const pos = state.selection.main.head;
+			const doc = state.doc.toString();
+
+			// Only handle if cursor is in YAML body (after blank line separator)
+			const textBeforeCursor = doc.slice(0, pos);
+			const blankLineIdx = textBeforeCursor.indexOf("\n\n");
+			if (blankLineIdx === -1 || pos <= blankLineIdx + 1) return false;
+
+			// Check if the body looks like YAML (not JSON)
+			const bodyStart = blankLineIdx + 2;
+			const bodyPrefix = doc.slice(bodyStart, bodyStart + 20).trimStart();
+			if (bodyPrefix.startsWith("{") || bodyPrefix.startsWith("[")) return false;
+
+			const line = state.doc.lineAt(pos);
+			const newIndent = computeYamlNewlineIndent(line.text);
+
+			view.dispatch({
+				changes: { from: pos, insert: `\n${newIndent}` },
+				selection: { anchor: pos + 1 + newIndent.length },
+			});
+			return true;
+		},
+	}]);
+}
+
 type LanguageMode = "json" | "http" | "sql" | "yaml";
 
 function languageExtensions(
@@ -828,6 +897,7 @@ function languageExtensions(
 			),
 			syntaxHighlighting(customHighlightStyle),
 			jsonAutoExpandBraces(),
+			httpYamlEnterKeymap(),
 		];
 	} else if (mode === "sql") {
 		let dialect = customSQLDialect;
@@ -842,32 +912,7 @@ function languageExtensions(
 		return [
 			yaml(),
 			syntaxHighlighting(customHighlightStyle),
-			keymap.of([{
-				key: "Enter",
-				run: (view) => {
-					const { state } = view;
-					const line = state.doc.lineAt(state.selection.main.head);
-					const lineText = line.text;
-					const indent = lineText.match(/^(\s*)/)?.[1] ?? "";
-					const trimmed = lineText.trimEnd();
-					if (trimmed.endsWith(":")) {
-						// After "key:" — indent to key content level + 2
-						const dashMatch = trimmed.match(/^(\s*-\s+)/);
-						const baseIndent = dashMatch?.[1] ? " ".repeat(dashMatch[1].length) : indent;
-						const newIndent = `${baseIndent}  `;
-						view.dispatch({
-							changes: { from: state.selection.main.head, insert: `\n${newIndent}` },
-							selection: { anchor: state.selection.main.head + 1 + newIndent.length },
-						});
-					} else {
-						view.dispatch({
-							changes: { from: state.selection.main.head, insert: `\n${indent}` },
-							selection: { anchor: state.selection.main.head + 1 + indent.length },
-						});
-					}
-					return true;
-				},
-			}]),
+			yamlEnterKeymap(),
 		];
 	} else {
 		return [

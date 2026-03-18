@@ -38,6 +38,7 @@ interface FhirElement {
 	max?: string;
 	type?: FhirElementType[];
 	binding?: { valueSet: string; strength: string };
+	contentReference?: string;
 }
 
 interface StructureDefinition {
@@ -251,10 +252,12 @@ function getYamlResourceType(doc: string): string | null {
 
 function isYamlPropertyPosition(beforeCursor: string): boolean {
 	const trimmed = beforeCursor.trimStart();
-	// Empty line, or typing a key (no colon yet), or after "- "
-	if (trimmed === "" || trimmed === "-" || trimmed === "- ") return true;
+	// Empty line, or after "- " (dash with space)
+	if (trimmed === "" || trimmed === "- ") return true;
+	// Bare "-" without space — not ready for property yet
+	if (trimmed === "-") return false;
 	if (trimmed.includes(":")) return false;
-	// Typing a word without colon = key position
+	// Typing a word without colon = key position (optionally after "- ")
 	return /^(-\s+)?[\w]*$/.test(trimmed);
 }
 
@@ -361,8 +364,16 @@ async function resolveElements(
 		if (key === "resourceType") return [];
 
 		const el = findElement(currentElements, currentPath, key);
-		if (!el?.type?.[0]) return [];
+		if (!el) return [];
 
+		// contentReference (e.g. "#Questionnaire.item") — resolve to referenced path
+		if (el.contentReference) {
+			const refPath = el.contentReference.replace(/^#/, "");
+			currentPath = refPath;
+			continue;
+		}
+
+		if (!el.type?.[0]) return [];
 		const typeCode = el.type[0].code;
 
 		if (typeCode === "BackboneElement") {
@@ -452,6 +463,39 @@ const PRIMITIVE_TYPES = new Set([
 	"xhtml",
 ]);
 
+function isPrimitiveType(typeCode: string): boolean {
+	return (
+		PRIMITIVE_TYPES.has(typeCode) ||
+		typeCode.startsWith("http://hl7.org/fhirpath/System.")
+	);
+}
+
+const FHIR_STRING_TYPES = new Set([
+	"string",
+	"code",
+	"uri",
+	"url",
+	"canonical",
+	"id",
+	"markdown",
+	"oid",
+	"uuid",
+	"base64Binary",
+	"xhtml",
+	"http://hl7.org/fhirpath/System.String",
+]);
+
+const FHIR_NUMBER_TYPES = new Set([
+	"boolean",
+	"integer",
+	"decimal",
+	"positiveInt",
+	"unsignedInt",
+	"http://hl7.org/fhirpath/System.Boolean",
+	"http://hl7.org/fhirpath/System.Integer",
+	"http://hl7.org/fhirpath/System.Decimal",
+]);
+
 type SnippetKind =
 	| "array-complex"
 	| "array-primitive"
@@ -463,18 +507,15 @@ type SnippetKind =
 function snippetKind(element: FhirElement): SnippetKind {
 	const isArray = element.max === "*";
 	const typeCode = element.type?.[0]?.code;
-	if (!typeCode) return "bare";
+	if (!typeCode) {
+		// contentReference elements have no type but are complex objects
+		if (element.contentReference) return isArray ? "array-complex" : "object";
+		return "bare";
+	}
 	if (isArray)
-		return PRIMITIVE_TYPES.has(typeCode) ? "array-primitive" : "array-complex";
-	if (
-		typeCode === "boolean" ||
-		typeCode === "integer" ||
-		typeCode === "decimal" ||
-		typeCode === "positiveInt" ||
-		typeCode === "unsignedInt"
-	)
-		return "number";
-	if (PRIMITIVE_TYPES.has(typeCode)) return "string";
+		return isPrimitiveType(typeCode) ? "array-primitive" : "array-complex";
+	if (FHIR_NUMBER_TYPES.has(typeCode)) return "number";
+	if (isPrimitiveType(typeCode)) return "string";
 	return "object";
 }
 
@@ -562,6 +603,66 @@ function toCompletion(element: FhirElement): Completion {
 
 // ── Completion source ──────────────────────────────────────────────────
 
+// ── Reference target resolution ────────────────────────────────────────
+
+async function resolveReferenceTargets(
+	path: string[],
+	resourceType: string,
+	getSDs: GetStructureDefinitions,
+): Promise<string[] | null> {
+	// path is the path TO the Reference element (e.g. ["managingOrganization"])
+	// We need to find the element at this path and check if its type is Reference
+	const result = await collectAllElements(resourceType, getSDs);
+	if (!result) return null;
+
+	let currentPath = resourceType;
+	let currentElements = result.elements;
+
+	// Walk all segments except the last to resolve the parent context
+	for (let i = 0; i < path.length - 1; i++) {
+		const key = path[i]!;
+		if (key === "resourceType") return null;
+
+		const el = findElement(currentElements, currentPath, key);
+		if (!el) return null;
+
+		if (el.contentReference) {
+			currentPath = el.contentReference.replace(/^#/, "");
+			continue;
+		}
+		if (!el.type?.[0]) return null;
+		const typeCode = el.type[0].code;
+		if (typeCode === "BackboneElement") {
+			currentPath = el.path;
+			continue;
+		}
+		const typeResult = await collectAllElements(typeCode, getSDs);
+		if (!typeResult) return null;
+		currentPath = typeResult.basePath;
+		currentElements = typeResult.elements;
+	}
+
+	// Now find the last segment — this should be a Reference element
+	const lastKey = path[path.length - 1];
+	if (!lastKey) return null;
+
+	const el = findElement(currentElements, currentPath, lastKey);
+	if (!el?.type) return null;
+
+	// Collect targetProfile from all Reference types
+	const targets: string[] = [];
+	for (const t of el.type) {
+		if (t.code === "Reference" && t.targetProfile) {
+			for (const profile of t.targetProfile) {
+				// Extract resource type from profile URL: "http://hl7.org/fhir/StructureDefinition/Organization" → "Organization"
+				const rt = profile.split("/").pop();
+				if (rt) targets.push(rt);
+			}
+		}
+	}
+	return targets.length > 0 ? targets : null;
+}
+
 // Check if cursor is in a value position (after "key": or key: )
 function isValuePosition(beforeCursor: string): string | null {
 	const match = beforeCursor.match(/"?(\w+)"?\s*:\s*"?([^"]*)?$/);
@@ -610,6 +711,30 @@ export function fhirCompletionSource(
 			if (options.length === 0) return null;
 			const word = context.matchBefore(/[\w]*/);
 			return { from: word?.from ?? pos, options, validFor: /^\w*$/ };
+		}
+
+		// Check if we're in a value position for "reference" inside a Reference type
+		if (valueKey === "reference") {
+			const path = getJsonPathAtCursor(doc, pos);
+			const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/);
+			const resourceType = rtMatch?.[1] ?? resourceTypeHint;
+			if (resourceType && path.length > 0) {
+				const targets = await resolveReferenceTargets(path, resourceType, getSDs);
+				if (targets) {
+					const options: Completion[] = targets.map((rt) => ({
+						label: `${rt}/`,
+						type: "type",
+						apply: (view: EditorView, _c: Completion, from: number, to: number) => {
+							view.dispatch({
+								changes: { from, to, insert: `${rt}/` },
+								selection: { anchor: from + rt.length + 1 },
+							});
+						},
+					}));
+					const word = context.matchBefore(/[\w/]*/);
+					return { from: word?.from ?? pos, options, validFor: /^[\w/]*$/ };
+				}
+			}
 		}
 
 		// Property name position — with or without quotes
@@ -704,7 +829,7 @@ function toYamlFieldCompletion(element: FhirElement): Completion {
 	const types = element.type?.map((t) => t.code).join(" | ") ?? "";
 	const isArray = element.max === "*";
 	const typeCode = element.type?.[0]?.code;
-	const isPrimitive = typeCode ? PRIMITIVE_TYPES.has(typeCode) : false;
+	const isPrimitive = typeCode ? isPrimitiveType(typeCode) : false;
 
 	const completion: Completion = {
 		label: name,
@@ -731,7 +856,7 @@ function toYamlFieldCompletion(element: FhirElement): Completion {
 
 			let text: string;
 			let cursorOffset: number;
-			const isString = typeCode === "string" || typeCode === "code" || typeCode === "uri" || typeCode === "url" || typeCode === "canonical" || typeCode === "id" || typeCode === "markdown" || typeCode === "oid" || typeCode === "uuid" || typeCode === "base64Binary" || typeCode === "xhtml";
+			const isString = typeCode ? FHIR_STRING_TYPES.has(typeCode) : false;
 			if (isArray) {
 				text = `${name}:\n${inner}- `;
 				cursorOffset = text.length;
@@ -792,6 +917,29 @@ export function yamlFhirCompletionSource(
 			return { from: word?.from ?? pos, options, validFor: /^\w*$/ };
 		}
 
+		// Value position for "reference" inside a Reference type
+		if (valueKey === "reference") {
+			const path = getYamlPathAtCursor(doc, pos);
+			// path includes keys up to cursor; "reference" is the current key,
+			// so the parent Reference element is at path (without "reference" in path since
+			// getYamlPathAtCursor gives parents). We need path + ["reference"] context.
+			// Actually path gives ancestor keys. The element containing "reference" is at path.
+			const resourceType = getYamlResourceType(doc) ?? resourceTypeHint;
+			if (resourceType && path.length > 0) {
+				// path = ["managingOrganization"] when cursor is on reference value
+				// We need to find the element at path[-1] from the grandparent
+				const targets = await resolveReferenceTargets(path, resourceType, getSDs);
+				if (targets) {
+					const options: Completion[] = targets.map((rt) => ({
+						label: `${rt}/`,
+						type: "type",
+					}));
+					const word = context.matchBefore(/[\w/]*/);
+					return { from: word?.from ?? pos, options, validFor: /^[\w/]*$/ };
+				}
+			}
+		}
+
 		if (!isYamlPropertyPosition(beforeCursor)) return null;
 
 		const path = getYamlPathAtCursor(doc, pos);
@@ -842,6 +990,140 @@ export function yamlFhirCompletionSource(
 
 		return { from: word?.from ?? pos, options: completions, validFor: /^\w*$/ };
 	};
+}
+
+// ── YAML FHIR linter ──────────────────────────────────────────────────
+
+const HTTP_METHOD_RE = /^(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\s/;
+
+function findRootYamlDocument(doc: string): { start: number } | null {
+	const firstLine = doc.slice(0, doc.indexOf("\n") >>> 0).trimStart();
+	const isHttpMode = HTTP_METHOD_RE.test(firstLine);
+
+	if (isHttpMode) {
+		// HTTP mode: body starts after blank line
+		const bodyStart = doc.indexOf("\n\n");
+		if (bodyStart === -1) return null;
+		const start = bodyStart + 2;
+		if (start >= doc.length) return null;
+		const bodyContent = doc.slice(start).trimStart();
+		if (!bodyContent) return null;
+		// Check that what follows isn't JSON
+		if (bodyContent.startsWith("{") || bodyContent.startsWith("[")) return null;
+		return { start };
+	}
+
+	// Pure YAML: check first non-whitespace isn't JSON
+	const firstNonWs = doc.trimStart();
+	if (firstNonWs.startsWith("{") || firstNonWs.startsWith("[")) return null;
+	return { start: 0 };
+}
+
+function walkYamlObject(
+	text: string,
+	startOffset: number,
+	parentPath: string[],
+	parentResourceType: string | null,
+	result: PropertyInfo[],
+	emptyStrings?: EmptyStringInfo[],
+): void {
+	const yamlText = text.slice(startOffset);
+	const yamlLines = yamlText.split("\n");
+
+	// Detect resourceType
+	let ownResourceType: string | null = null;
+	for (const line of yamlLines) {
+		const trimmed = line.trimStart();
+		if (!trimmed || trimmed.startsWith("#")) continue;
+		const m = trimmed.match(/^resourceType:\s*(\S+)/);
+		if (m) {
+			ownResourceType = m[1] ?? null;
+			break;
+		}
+		// Only check top-level lines (indent 0)
+		if (line.search(/\S/) === 0 && !m) continue;
+		if (line.search(/\S/) > 0) continue;
+	}
+
+	const resourceType = ownResourceType ?? parentResourceType;
+	const basePath = ownResourceType ? [] : parentPath;
+	if (!resourceType) return;
+
+	const stack: { indent: number; path: string[]; arrayChildIndent: number | null }[] = [
+		{ indent: -1, path: basePath, arrayChildIndent: null },
+	];
+
+	for (let i = 0; i < yamlLines.length; i++) {
+		const line = yamlLines[i]!;
+		const trimmed = line.trimStart();
+		if (!trimmed || trimmed.startsWith("#")) continue;
+
+		const indent = line.length - trimmed.length;
+		const isArrayItem = trimmed.startsWith("- ");
+		const content = isArrayItem ? trimmed.slice(2) : trimmed;
+		const colonIdx = content.indexOf(":");
+		if (colonIdx <= 0) continue;
+
+		const key = content.slice(0, colonIdx).trim();
+		const valueAfterColon = content.slice(colonIdx + 1).trim();
+
+		// Pop stack to find parent
+		while (stack.length > 1 && stack[stack.length - 1]!.indent >= indent) {
+			stack.pop();
+		}
+		let parentEntry = stack[stack.length - 1]!;
+
+		// Track where array items appear under this parent
+		if (isArrayItem && parentEntry.arrayChildIndent === null) {
+			parentEntry.arrayChildIndent = indent;
+		}
+
+		// If parent has array children and this non-array line is at the array item
+		// level (not deeper inside an item), it's invalid YAML — treat as grandparent's child.
+		if (
+			!isArrayItem &&
+			parentEntry.arrayChildIndent !== null &&
+			indent <= parentEntry.arrayChildIndent &&
+			stack.length > 1
+		) {
+			stack.pop();
+			parentEntry = stack[stack.length - 1]!;
+		}
+
+		// Calculate character offset for this key
+		const keyIndent = isArrayItem ? indent + 2 : indent;
+		let charOffset = startOffset;
+		for (let j = 0; j < i; j++) {
+			charOffset += yamlLines[j]!.length + 1;
+		}
+		const keyFrom = charOffset + keyIndent;
+		const keyTo = keyFrom + key.length;
+
+		result.push({
+			name: key,
+			path: [...parentEntry.path],
+			resourceType,
+			from: keyFrom,
+			to: keyTo,
+		});
+
+		// Check for empty strings
+		if (emptyStrings && (valueAfterColon === "''" || valueAfterColon === '""')) {
+			const afterColonStr = content.slice(colonIdx + 1);
+			const wsLen = afterColonStr.length - afterColonStr.trimStart().length;
+			const emptyFrom = charOffset + keyIndent + colonIdx + 1 + wsLen;
+			const emptyTo = emptyFrom + 2;
+			emptyStrings.push({ from: emptyFrom, to: emptyTo });
+		}
+
+		// Push to stack if this key has nested content (no inline value, or value is empty)
+		// For array items (- key:), use effective indent (indent + 2) so that
+		// sibling properties at the same level correctly pop this entry.
+		if (!valueAfterColon || valueAfterColon === "" || valueAfterColon.startsWith("#")) {
+			const effectiveIndent = isArrayItem ? indent + 2 : indent;
+			stack.push({ indent: effectiveIndent, path: [...parentEntry.path, key], arrayChildIndent: null });
+		}
+	}
 }
 
 // ── JSON FHIR linter ──────────────────────────────────────────────────
@@ -989,7 +1271,7 @@ async function validateFhirProperties(
 			if (
 				el.type?.length === 1 &&
 				typeCode &&
-				PRIMITIVE_TYPES.has(typeCode)
+				isPrimitiveType(typeCode)
 			) {
 				validNames.add(`_${name}`);
 			}
@@ -1186,9 +1468,22 @@ function buildFhirValidationPlugin(
 				ensureSyntaxTree(view.state, view.state.doc.length, 1000) ??
 				syntaxTree(view.state);
 
+			const properties: PropertyInfo[] = [];
+			const emptyStrings: EmptyStringInfo[] = [];
+
+			// Try JSON first
 			const rootObj = findRootJsonObject(currentDoc, tree);
-			if (!rootObj) {
-				// JSON truly has no object — clear diagnostics
+			if (rootObj) {
+				walkJsonObject(rootObj, [], resourceTypeHint ?? null, currentDoc, properties, emptyStrings);
+			} else {
+				// Try YAML
+				const yamlDoc = findRootYamlDocument(currentDoc);
+				if (yamlDoc) {
+					walkYamlObject(currentDoc, yamlDoc.start, [], resourceTypeHint ?? null, properties, emptyStrings);
+				}
+			}
+
+			if (!rootObj && !findRootYamlDocument(currentDoc)) {
 				try {
 					view.dispatch({
 						effects: setFhirDiagnosticsEffect.of([]),
@@ -1199,9 +1494,6 @@ function buildFhirValidationPlugin(
 				return;
 			}
 
-			const properties: PropertyInfo[] = [];
-			const emptyStrings: EmptyStringInfo[] = [];
-			walkJsonObject(rootObj, [], resourceTypeHint ?? null, currentDoc, properties, emptyStrings);
 			if (properties.length === 0 && emptyStrings.length === 0) {
 				try {
 					view.dispatch({
