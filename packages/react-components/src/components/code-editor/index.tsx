@@ -18,8 +18,9 @@ import {
 	HighlightStyle,
 	indentOnInput,
 	syntaxHighlighting,
+	syntaxTree,
 } from "@codemirror/language";
-import { linter, lintGutter, lintKeymap } from "@codemirror/lint";
+import { linter, lintKeymap } from "@codemirror/lint";
 import {
 	closeSearchPanel,
 	findNext,
@@ -76,6 +77,7 @@ import {
 } from "../../icons";
 import {
 	buildFhirCompletionExtension,
+	fhirDiagnosticsField,
 	type GetStructureDefinitions,
 } from "./fhir-completion";
 import { type GetUrlSuggestions, http } from "./http";
@@ -99,7 +101,7 @@ const setIssueLinesEffect = StateEffect.define<IssueLine[]>();
 
 let errorTooltipEl: HTMLDivElement | null = null;
 
-function showErrorTooltip(anchor: Element, message: string) {
+function showErrorTooltip(message: string, x: number, y: number) {
 	hideErrorTooltip();
 
 	const tooltip = document.createElement("div");
@@ -123,13 +125,9 @@ function showErrorTooltip(anchor: Element, message: string) {
 	document.body.appendChild(tooltip);
 	errorTooltipEl = tooltip;
 
-	const guttersEl = anchor.closest(".cm-gutters");
-	const guttersRect = guttersEl
-		? guttersEl.getBoundingClientRect()
-		: anchor.getBoundingClientRect();
-	const anchorRect = anchor.getBoundingClientRect();
-	tooltip.style.left = `${guttersRect.right + 4}px`;
-	tooltip.style.top = `${anchorRect.top}px`;
+	const tooltipHeight = tooltip.getBoundingClientRect().height;
+	tooltip.style.left = `${x}px`;
+	tooltip.style.top = `${y - tooltipHeight - 8}px`;
 }
 
 function hideErrorTooltip() {
@@ -179,6 +177,21 @@ const issueLinesField = StateField.define<{
 				};
 			}
 		}
+		if (tr.docChanged) {
+			try {
+				return {
+					gutterMarkers: state.gutterMarkers.map(tr.changes),
+					lineDecorations: state.lineDecorations.map(tr.changes),
+					messages: state.messages,
+				};
+			} catch {
+				return {
+					gutterMarkers: RangeSet.empty,
+					lineDecorations: Decoration.none,
+					messages: new Map(),
+				};
+			}
+		}
 		return state;
 	},
 	provide(field) {
@@ -189,33 +202,67 @@ const issueLinesField = StateField.define<{
 	},
 });
 
-const errorTooltipHandler = EditorView.domEventHandlers({
-	mouseover(event, view) {
-		const target = event.target as HTMLElement;
-		const gutterEl = target.closest(
-			".cm-lineNumbers .cm-gutterElement",
-		) as HTMLElement | null;
-		if (!gutterEl) {
-			hideErrorTooltip();
-			return false;
-		}
+function getErrorMessageForLine(
+	view: EditorView,
+	lineNo: number,
+): string | undefined {
+	const issueMsg = view.state.field(issueLinesField).messages.get(lineNo);
+	if (issueMsg) return issueMsg;
+	try {
+		return view.state.field(fhirDiagnosticsField).messages.get(lineNo);
+	} catch {
+		return undefined;
+	}
+}
 
+function handleErrorTooltipMove(event: Event, view: EditorView) {
+	const target = event.target as HTMLElement;
+	const mouseEvent = event as MouseEvent;
+
+	// Check gutter line number
+	const gutterEl = target.closest(
+		".cm-lineNumbers .cm-gutterElement",
+	) as HTMLElement | null;
+	if (gutterEl) {
 		const lineNo = Number.parseInt(gutterEl.textContent ?? "", 10);
-		if (Number.isNaN(lineNo)) {
-			hideErrorTooltip();
-			return false;
+		if (!Number.isNaN(lineNo)) {
+			const message = getErrorMessageForLine(view, lineNo);
+			if (message) {
+				showErrorTooltip(
+					message,
+					mouseEvent.clientX,
+					mouseEvent.clientY,
+				);
+				return false;
+			}
 		}
-
-		const { messages } = view.state.field(issueLinesField);
-		const message = messages.get(lineNo);
-		if (!message) {
-			hideErrorTooltip();
-			return false;
-		}
-
-		showErrorTooltip(gutterEl, message);
+		hideErrorTooltip();
 		return false;
-	},
+	}
+
+	// Check content line (cm-line) — follow cursor
+	const lineEl = target.closest(".cm-line") as HTMLElement | null;
+	if (lineEl) {
+		const pos = view.posAtDOM(lineEl);
+		const lineNo = view.state.doc.lineAt(pos).number;
+		const message = getErrorMessageForLine(view, lineNo);
+		if (message) {
+			showErrorTooltip(
+				message,
+				mouseEvent.clientX,
+				mouseEvent.clientY,
+			);
+			return false;
+		}
+	}
+
+	hideErrorTooltip();
+	return false;
+}
+
+const errorTooltipHandler = EditorView.domEventHandlers({
+	mouseover: handleErrorTooltipMove,
+	mousemove: handleErrorTooltipMove,
 	mouseleave() {
 		hideErrorTooltip();
 		return false;
@@ -252,7 +299,7 @@ const baseTheme = EditorView.theme({
 		fontFamily: "var(--font-family-mono)",
 	},
 	".cm-gutters": {
-		backgroundColor: "var(--color-bg-primary)",
+		backgroundColor: "transparent",
 		border: "none",
 	},
 	".cm-lineNumbers": {
@@ -273,10 +320,18 @@ const baseTheme = EditorView.theme({
 	".cm-activeLine": {
 		backgroundColor: "transparent !important",
 	},
-	".cm-errorLineGutter": {
+	".cm-lineNumbers .cm-gutterElement.cm-errorLineGutter": {
 		color: "var(--color-text-error-primary)",
 		backgroundColor:
 			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+	},
+	".cm-foldGutter .cm-gutterElement.cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
+		backgroundColor:
+			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	".cm-errorLine": {
 		backgroundColor:
@@ -382,10 +437,18 @@ const readOnlyTheme = EditorView.theme({
 	".cm-activeLine": {
 		backgroundColor: "transparent !important",
 	},
-	".cm-errorLineGutter": {
+	".cm-lineNumbers .cm-gutterElement.cm-errorLineGutter": {
 		color: "var(--color-text-error-primary)",
 		backgroundColor:
 			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+	},
+	".cm-foldGutter .cm-gutterElement.cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
+		backgroundColor:
+			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	".cm-errorLine": {
 		backgroundColor:
@@ -764,6 +827,7 @@ function languageExtensions(
 				getUrlSuggestions,
 			),
 			syntaxHighlighting(customHighlightStyle),
+			jsonAutoExpandBraces(),
 		];
 	} else if (mode === "sql") {
 		let dialect = customSQLDialect;
@@ -810,8 +874,47 @@ function languageExtensions(
 			json(),
 			linter(jsonParseLinter(), { delay: 300 }),
 			syntaxHighlighting(customHighlightStyle),
+			jsonAutoExpandBraces(),
 		];
 	}
+}
+
+function jsonAutoExpandBraces(): Extension {
+	return EditorState.transactionFilter.of((tr) => {
+		if (!tr.docChanged) return tr;
+
+		let braceFrom = -1;
+		let braceTo = -1;
+		let changeCount = 0;
+
+		tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+			changeCount++;
+			if (inserted.toString() === "{}") {
+				braceFrom = fromA;
+				braceTo = toA;
+			}
+		});
+
+		if (changeCount !== 1 || braceFrom === -1) return tr;
+
+		const tree = syntaxTree(tr.startState);
+		const nodeBefore = tree.resolveInner(braceFrom, -1);
+		if (
+			nodeBefore.name === "String" ||
+			nodeBefore.parent?.name === "String"
+		) {
+			return tr;
+		}
+
+		const line = tr.startState.doc.lineAt(braceFrom);
+		const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
+		const inner = `${indent}  `;
+
+		return {
+			changes: { from: braceFrom, to: braceTo, insert: `{\n${inner}\n${indent}}` },
+			selection: { anchor: braceFrom + 2 + inner.length },
+		};
+	});
 }
 
 type CodeEditorProps = {
@@ -827,10 +930,10 @@ type CodeEditorProps = {
 	additionalExtensions?: Extension[];
 	issueLineNumbers?: { line: number; message?: string }[];
 	foldGutter?: boolean;
-	lintGutter?: boolean;
 	lineNumbers?: boolean;
 	sql?: SqlConfig;
 	getStructureDefinitions?: GetStructureDefinitions;
+	resourceTypeHint?: string;
 	getUrlSuggestions?: GetUrlSuggestions;
 };
 
@@ -857,14 +960,25 @@ export function CodeEditor({
 	additionalExtensions,
 	issueLineNumbers,
 	foldGutter: enableFoldGutter = true,
-	lintGutter: enableLintGutter = true,
 	lineNumbers: enableLineNumbers = true,
 	sql,
 	getStructureDefinitions,
+	resourceTypeHint,
 	getUrlSuggestions,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
+
+	const safeDispatch = React.useCallback(
+		(spec: Parameters<EditorView["dispatch"]>[0]) => {
+			try {
+				view?.dispatch(spec);
+			} catch {
+				// Ignore RangeError from stale decoration positions during reconfigure
+			}
+		},
+		[view],
+	);
 
 	const initialValue = React.useRef(defaultValue ?? "");
 
@@ -894,7 +1008,24 @@ export function CodeEditor({
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
 					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
 					...(enableLineNumbers ? [lineNumbers()] : []),
-					...(enableFoldGutter ? [foldGutter()] : []),
+					...(enableFoldGutter
+					? [
+							foldGutter({
+								markerDOM: (open) => {
+									const el = document.createElement("span");
+									el.style.display = "flex";
+									el.style.alignItems = "center";
+									el.style.justifyContent = "center";
+									el.style.width = "100%";
+									el.style.height = "100%";
+									el.innerHTML = open
+										? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
+										: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+									return el;
+								},
+							}),
+						]
+					: []),
 					highlightSpecialChars(),
 					history(),
 					drawSelection(),
@@ -944,9 +1075,9 @@ export function CodeEditor({
 						...completionKeymap,
 						...lintKeymap,
 					]),
-					...(enableLintGutter ? [lintGutter()] : []),
 					issueLinesField,
 					errorTooltipHandler,
+					EditorView.exceptionSink.of(() => {}),
 					...customSearchExtension,
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
@@ -963,7 +1094,7 @@ export function CodeEditor({
 			view.destroy();
 			setView(() => null);
 		};
-	}, [enableFoldGutter, enableLineNumbers, enableLintGutter]);
+	}, [enableFoldGutter, enableLineNumbers]);
 
 	React.useEffect(() => {
 		executeSqlRef.current = sql?.executeSql;
@@ -972,7 +1103,7 @@ export function CodeEditor({
 	React.useEffect(() => {
 		if (!view || !sql) {
 			if (view) {
-				view.dispatch({
+				safeDispatch({
 					effects: sqlCompletionCompartment.current.reconfigure([]),
 				});
 			}
@@ -991,7 +1122,7 @@ export function CodeEditor({
 					(query, type) =>
 						executeSqlRef.current?.(query, type) ?? Promise.resolve([]),
 				);
-				view.dispatch({
+				safeDispatch({
 					effects: sqlCompletionCompartment.current.reconfigure(extensions),
 				});
 			})
@@ -1005,17 +1136,17 @@ export function CodeEditor({
 	React.useEffect(() => {
 		if (!view) return;
 		if (getStructureDefinitions) {
-			view.dispatch({
+			safeDispatch({
 				effects: fhirCompletionCompartment.current.reconfigure(
-					buildFhirCompletionExtension(getStructureDefinitions),
+					buildFhirCompletionExtension(getStructureDefinitions, resourceTypeHint),
 				),
 			});
 		} else {
-			view.dispatch({
+			safeDispatch({
 				effects: fhirCompletionCompartment.current.reconfigure([]),
 			});
 		}
-	}, [view, getStructureDefinitions]);
+	}, [view, getStructureDefinitions, resourceTypeHint, safeDispatch]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
@@ -1024,7 +1155,7 @@ export function CodeEditor({
 	}, [view, viewCallback]);
 
 	React.useEffect(() => {
-		view?.dispatch({
+		safeDispatch({
 			effects: onChangeComparment.current.reconfigure([
 				EditorView.updateListener.of((update) => {
 					if (update.docChanged && onChange) {
@@ -1033,10 +1164,10 @@ export function CodeEditor({
 				}),
 			]),
 		});
-	}, [view, onChange]);
+	}, [view, onChange, safeDispatch]);
 
 	React.useEffect(() => {
-		view?.dispatch({
+		safeDispatch({
 			effects: onUpdateComparment.current.reconfigure([
 				EditorView.updateListener.of((update) => {
 					if (onUpdate) {
@@ -1045,7 +1176,7 @@ export function CodeEditor({
 				}),
 			]),
 		});
-	}, [view, onUpdate]);
+	}, [view, onUpdate, safeDispatch]);
 
 	// FIXME: it is probably better to have CM manage its state.
 	React.useEffect(() => {
@@ -1055,7 +1186,7 @@ export function CodeEditor({
 
 		const currentDoc = view.state.doc.toString();
 		if (currentDoc !== currentValue) {
-			view.dispatch({
+			safeDispatch({
 				changes: {
 					from: 0,
 					to: currentDoc.length,
@@ -1063,7 +1194,7 @@ export function CodeEditor({
 				},
 			});
 		}
-	}, [currentValue, view]);
+	}, [currentValue, view, safeDispatch]);
 
 	const getUrlSuggestionsRef = React.useRef(getUrlSuggestions);
 	getUrlSuggestionsRef.current = getUrlSuggestions;
@@ -1078,60 +1209,60 @@ export function CodeEditor({
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: languageCompartment.current.reconfigure(
 				languageExtensions(mode, sqlFunctions, stableGetUrlSuggestions),
 			),
 		});
-	}, [mode, view, sqlFunctions, stableGetUrlSuggestions]);
+	}, [mode, view, sqlFunctions, stableGetUrlSuggestions, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: [
 				readOnlyCompartment.current.reconfigure(
 					EditorState.readOnly.of(readOnly),
 				),
 			],
 		});
-	}, [readOnly, view]);
+	}, [readOnly, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: [
 				themeCompartment.current.reconfigure(
 					isReadOnlyTheme ? readOnlyTheme : baseTheme,
 				),
 			],
 		});
-	}, [isReadOnlyTheme, view]);
+	}, [isReadOnlyTheme, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: [
 				additionalExtensionsCompartment.current.reconfigure(
 					additionalExtensions ?? [],
 				),
 			],
 		});
-	}, [additionalExtensions, view]);
+	}, [additionalExtensions, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: setIssueLinesEffect.of(issueLineNumbers ?? []),
 		});
-	}, [issueLineNumbers, view]);
+	}, [issueLineNumbers, view, safeDispatch]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }

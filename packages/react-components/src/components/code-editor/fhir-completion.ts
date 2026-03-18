@@ -6,8 +6,22 @@ import type {
 } from "@codemirror/autocomplete";
 import { jsonLanguage } from "@codemirror/lang-json";
 import { yamlLanguage } from "@codemirror/lang-yaml";
-import type { Extension } from "@codemirror/state";
-import type { EditorView } from "@codemirror/view";
+import {
+	type Extension,
+	RangeSet,
+	StateEffect,
+	StateField,
+} from "@codemirror/state";
+import {
+	Decoration,
+	EditorView,
+	GutterMarker,
+	gutterLineClass,
+	ViewPlugin,
+	type ViewUpdate,
+} from "@codemirror/view";
+import { ensureSyntaxTree, syntaxTree } from "@codemirror/language";
+import type { SyntaxNode } from "@lezer/common";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -196,7 +210,8 @@ function getJsonPathAtCursor(doc: string, pos: number): string[] {
 function getYamlPathAtCursor(doc: string, pos: number): string[] {
 	const lines = doc.slice(0, pos).split("\n");
 	const currentLine = lines[lines.length - 1] ?? "";
-	const currentIndent = currentLine.search(/\S/);
+	let currentIndent = currentLine.search(/\S/);
+	if (currentIndent === -1) currentIndent = currentLine.length;
 
 	// Walk backwards to build path from indentation
 	const path: string[] = [];
@@ -208,11 +223,18 @@ function getYamlPathAtCursor(doc: string, pos: number): string[] {
 		if (!trimmed || trimmed.startsWith("#")) continue;
 
 		const indent = line.search(/\S/);
-		// Strip leading "- " for array items
-		const content = trimmed.startsWith("- ") ? trimmed.slice(2) : trimmed;
+		const isArrayItem = trimmed.startsWith("- ");
+		const content = isArrayItem ? trimmed.slice(2) : trimmed;
 		const colonIdx = content.indexOf(":");
 
 		if (indent < targetIndent && colonIdx > 0) {
+			// For array items like "  - given:", dash is at indent 2 but
+			// content starts at indent 4. If cursor is at indent 4, it's a
+			// sibling of "given" (same array item), not nested under it.
+			if (isArrayItem && indent + 2 >= targetIndent) {
+				targetIndent = indent;
+				continue;
+			}
 			const key = content.slice(0, colonIdx).trim();
 			path.unshift(key);
 			targetIndent = indent;
@@ -509,6 +531,18 @@ function toCompletion(element: FhirElement): Completion {
 			if (actualFrom > 0 && doc[actualFrom - 1] === '"') actualFrom--;
 			if (actualTo < doc.length && doc[actualTo] === '"') actualTo++;
 
+			// If replacing an existing property name (colon already follows),
+			// only replace the name, don't insert a snippet with value
+			const afterName = doc.slice(actualTo).match(/^\s*:/);
+			if (afterName) {
+				const insert = `"${name}"`;
+				view.dispatch({
+					changes: { from: actualFrom, to: actualTo, insert },
+					selection: { anchor: actualFrom + insert.length },
+				});
+				return;
+			}
+
 			// Detect current indentation
 			const line = view.state.doc.lineAt(actualFrom);
 			const lineText = line.text;
@@ -537,6 +571,7 @@ function isValuePosition(beforeCursor: string): string | null {
 
 export function fhirCompletionSource(
 	getSDs: GetStructureDefinitions,
+	resourceTypeHint?: string,
 ): CompletionSource {
 	return async (
 		context: CompletionContext,
@@ -581,19 +616,44 @@ export function fhirCompletionSource(
 		const isPropertyPosition =
 			beforeCursor === "" ||
 			beforeCursor === '"' ||
-			/^"?[\w]*$/.test(beforeCursor);
+			/^"?[\w]*$/.test(beforeCursor) ||
+			/[{,]\s*"?[\w]*$/.test(beforeCursor);
 
 		if (!isPropertyPosition) return null;
 
 		const path = getJsonPathAtCursor(doc, pos);
 		const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/) ??
 			doc.match(/resourceType\s*:\s*"([^"]+)"/);
-		const resourceType = rtMatch?.[1];
+		const resourceType = rtMatch?.[1] ?? resourceTypeHint;
+
+		const hasExplicitResourceType = !!rtMatch?.[1];
 
 		let completions: Completion[];
 		if (resourceType) {
 			const elements = await resolveElements(path, resourceType, getSDs);
 			completions = elementsToCompletions(elements, toCompletion);
+			if (!hasExplicitResourceType && path.length === 0) {
+				const rtCompletion: Completion = {
+					label: "resourceType",
+					type: "property",
+					detail: "string",
+					boost: 10,
+					apply: (view, _completion, from, to) => {
+						const d = view.state.doc.toString();
+						let actualFrom = from;
+						let actualTo = to;
+						if (actualFrom > 0 && d[actualFrom - 1] === '"') actualFrom--;
+						if (actualTo < d.length && d[actualTo] === '"') actualTo++;
+						const text = '"resourceType": ""';
+						view.dispatch({
+							changes: { from: actualFrom, to: actualTo, insert: text },
+							selection: { anchor: actualFrom + text.length - 1 },
+						});
+					},
+				};
+				rtCompletion.info = "FHIR resource type";
+				completions = [rtCompletion, ...completions];
+			}
 		} else if (path.length === 0) {
 			const rtCompletion: Completion = {
 				label: "resourceType",
@@ -652,8 +712,19 @@ function toYamlFieldCompletion(element: FhirElement): Completion {
 		detail: types,
 		boost: element.min && element.min > 0 ? 2 : 0,
 		apply: (view, _completion, from, to) => {
+			const doc = view.state.doc.toString();
+			const afterTo = doc.slice(to);
+
+			// If a colon already follows, just replace the property name
+			if (/^\s*:/.test(afterTo)) {
+				view.dispatch({
+					changes: { from, to, insert: name },
+					selection: { anchor: from + name.length },
+				});
+				return;
+			}
+
 			const line = view.state.doc.lineAt(from);
-			// Indent = everything before cursor position on this line
 			const charsBeforeFrom = from - line.from;
 			const indent = " ".repeat(charsBeforeFrom);
 			const inner = `${indent}  `;
@@ -689,6 +760,7 @@ function toYamlFieldCompletion(element: FhirElement): Completion {
 
 export function yamlFhirCompletionSource(
 	getSDs: GetStructureDefinitions,
+	resourceTypeHint?: string,
 ): CompletionSource {
 	return async (
 		context: CompletionContext,
@@ -723,12 +795,24 @@ export function yamlFhirCompletionSource(
 		if (!isYamlPropertyPosition(beforeCursor)) return null;
 
 		const path = getYamlPathAtCursor(doc, pos);
-		const resourceType = getYamlResourceType(doc);
+		const hasExplicitResourceType = !!getYamlResourceType(doc);
+		const resourceType = getYamlResourceType(doc) ?? resourceTypeHint;
 
 		let completions: Completion[];
 		if (resourceType) {
 			const elements = await resolveElements(path, resourceType, getSDs);
 			completions = elementsToCompletions(elements, toYamlFieldCompletion);
+			if (!hasExplicitResourceType && path.length === 0) {
+				const rtCompletion: Completion = {
+					label: "resourceType",
+					type: "property",
+					detail: "string",
+					boost: 10,
+					apply: "resourceType: ",
+				};
+				rtCompletion.info = "FHIR resource type";
+				completions = [rtCompletion, ...completions];
+			}
 		} else if (path.length === 0) {
 			const rtCompletion: Completion = {
 				label: "resourceType",
@@ -760,15 +844,433 @@ export function yamlFhirCompletionSource(
 	};
 }
 
+// ── JSON FHIR linter ──────────────────────────────────────────────────
+
+type PropertyInfo = {
+	name: string;
+	path: string[];
+	resourceType: string;
+	from: number;
+	to: number;
+};
+
+type EmptyStringInfo = {
+	from: number;
+	to: number;
+};
+
+function walkJsonObject(
+	node: SyntaxNode,
+	parentPath: string[],
+	parentResourceType: string | null,
+	doc: string,
+	result: PropertyInfo[],
+	emptyStrings?: EmptyStringInfo[],
+): void {
+	// Detect if this object declares its own resourceType
+	let ownResourceType: string | null = null;
+	for (let child = node.firstChild; child; child = child.nextSibling) {
+		if (child.name !== "Property") continue;
+		const nameNode = child.getChild("PropertyName");
+		if (!nameNode) continue;
+		const keyName = doc
+			.slice(nameNode.from, nameNode.to)
+			.replace(/^"|"$/g, "");
+		if (keyName === "resourceType") {
+			for (let v = child.firstChild; v; v = v.nextSibling) {
+				if (v.name === "String") {
+					ownResourceType = doc
+						.slice(v.from, v.to)
+						.replace(/^"|"$/g, "");
+					break;
+				}
+			}
+			break;
+		}
+	}
+
+	const resourceType = ownResourceType ?? parentResourceType;
+	const path = ownResourceType ? [] : parentPath;
+
+	if (!resourceType) return;
+
+	for (let child = node.firstChild; child; child = child.nextSibling) {
+		if (child.name !== "Property") continue;
+		const nameNode = child.getChild("PropertyName");
+		if (!nameNode) continue;
+		const name = doc
+			.slice(nameNode.from, nameNode.to)
+			.replace(/^"|"$/g, "");
+
+		result.push({
+			name,
+			path: [...path],
+			resourceType,
+			from: nameNode.from,
+			to: nameNode.to,
+		});
+
+		for (let v = child.firstChild; v; v = v.nextSibling) {
+			if (v.name === "Object") {
+				walkJsonObject(
+					v,
+					[...path, name],
+					resourceType,
+					doc,
+					result,
+					emptyStrings,
+				);
+			} else if (v.name === "Array") {
+				for (
+					let item = v.firstChild;
+					item;
+					item = item.nextSibling
+				) {
+					if (item.name === "Object") {
+						walkJsonObject(
+							item,
+							[...path, name],
+							resourceType,
+							doc,
+							result,
+							emptyStrings,
+						);
+					}
+				}
+			} else if (v.name === "String" && emptyStrings) {
+				const raw = doc.slice(v.from, v.to);
+				if (raw === '""') {
+					emptyStrings.push({ from: v.from, to: v.to });
+				}
+			}
+		}
+	}
+}
+
+type FhirDiagnostic = {
+	from: number;
+	to: number;
+	message: string;
+};
+
+async function validateFhirProperties(
+	properties: PropertyInfo[],
+	getSDs: GetStructureDefinitions,
+): Promise<FhirDiagnostic[]> {
+	const groups = new Map<
+		string,
+		{ resourceType: string; path: string[]; props: PropertyInfo[] }
+	>();
+	for (const prop of properties) {
+		const key = `${prop.resourceType}|${prop.path.join(".")}`;
+		let group = groups.get(key);
+		if (!group) {
+			group = {
+				resourceType: prop.resourceType,
+				path: [...prop.path],
+				props: [],
+			};
+			groups.set(key, group);
+		}
+		group.props.push(prop);
+	}
+
+	const diagnostics: FhirDiagnostic[] = [];
+
+	for (const { resourceType, path, props } of groups.values()) {
+		const elements = await resolveElements(path, resourceType, getSDs);
+		if (elements.length === 0) continue;
+
+		const validNames = new Set<string>();
+		for (const el of elements) {
+			const name = fieldName(el);
+			validNames.add(name);
+			const typeCode = el.type?.[0]?.code;
+			if (
+				el.type?.length === 1 &&
+				typeCode &&
+				PRIMITIVE_TYPES.has(typeCode)
+			) {
+				validNames.add(`_${name}`);
+			}
+		}
+		if (path.length === 0) {
+			validNames.add("resourceType");
+		}
+
+		for (const prop of props) {
+			if (!validNames.has(prop.name)) {
+				diagnostics.push({
+					from: prop.from,
+					to: prop.to,
+					message: `Unknown property "${prop.name}"`,
+				});
+			}
+		}
+	}
+
+	return diagnostics;
+}
+
+function findRootJsonObject(
+	doc: string,
+	tree: ReturnType<typeof syntaxTree>,
+): SyntaxNode | null {
+	// Pure JSON mode: top node is JsonText with Object child
+	const direct = tree.topNode.getChild("Object");
+	if (direct) return direct;
+
+	// HTTP mode (mixed parsing): find body after blank line,
+	// then resolve into the mounted JSON subtree
+	const bodyStart = doc.indexOf("\n\n");
+	if (bodyStart === -1) return null;
+
+	const jsonStart = bodyStart + 2;
+	if (jsonStart >= doc.length) return null;
+
+	// resolveInner enters mounted (mixed-parsed) subtrees
+	const innerNode = tree.resolveInner(jsonStart, 1);
+	if (!innerNode) return null;
+
+	// Walk up to find the Object node
+	let node: SyntaxNode | null = innerNode;
+	while (node) {
+		if (node.name === "Object") return node;
+		if (node.name === "JsonText") {
+			return node.getChild("Object");
+		}
+		node = node.parent;
+	}
+
+	return null;
+}
+
+// ── FHIR validation decorations ───────────────────────────────────────
+
+type FhirDiagnosticWithLine = FhirDiagnostic & { line: number };
+
+const setFhirDiagnosticsEffect = StateEffect.define<FhirDiagnosticWithLine[]>();
+
+const fhirUnderline = Decoration.mark({ class: "cm-fhir-error-underline" });
+const fhirErrorLineDecoration = Decoration.line({ class: "cm-errorLine" });
+
+class FhirGutterMarker extends GutterMarker {
+	elementClass = "cm-errorLineGutter";
+}
+const fhirGutterMarker = new FhirGutterMarker();
+
+export const fhirDiagnosticsField = StateField.define<{
+	marks: RangeSet<Decoration>;
+	lineDecos: RangeSet<Decoration>;
+	gutterMarkers: RangeSet<GutterMarker>;
+	messages: Map<number, string>;
+}>({
+	create() {
+		return {
+			marks: Decoration.none,
+			lineDecos: Decoration.none,
+			gutterMarkers: RangeSet.empty,
+			messages: new Map(),
+		};
+	},
+	update(value, tr) {
+		for (const effect of tr.effects) {
+			if (effect.is(setFhirDiagnosticsEffect)) {
+				const diags = effect.value;
+				if (diags.length === 0) {
+					return {
+						marks: Decoration.none,
+						lineDecos: Decoration.none,
+						gutterMarkers: RangeSet.empty,
+						messages: new Map(),
+					};
+				}
+
+				const marks: { from: number; to: number; value: Decoration }[] =
+					[];
+				const lineDecos: {
+					from: number;
+					to: number;
+					value: Decoration;
+				}[] = [];
+				const gutter: {
+					from: number;
+					to: number;
+					value: GutterMarker;
+				}[] = [];
+				const messages = new Map<number, string>();
+
+				for (const d of diags) {
+					marks.push(fhirUnderline.range(d.from, d.to));
+					const existing = messages.get(d.line);
+					if (existing) {
+						messages.set(d.line, `${existing}\n${d.message}`);
+					} else {
+						messages.set(d.line, d.message);
+						const line = tr.state.doc.line(d.line);
+						lineDecos.push(
+							fhirErrorLineDecoration.range(line.from),
+						);
+						gutter.push(fhirGutterMarker.range(line.from));
+					}
+				}
+
+				return {
+					marks: Decoration.set(marks, true),
+					lineDecos: Decoration.set(lineDecos, true),
+					gutterMarkers: RangeSet.of(gutter, true),
+					messages,
+				};
+			}
+		}
+		if (tr.docChanged) {
+			try {
+				return {
+					marks: value.marks.map(tr.changes),
+					lineDecos: value.lineDecos.map(tr.changes),
+					gutterMarkers: value.gutterMarkers.map(tr.changes),
+					messages: value.messages,
+				};
+			} catch {
+				return {
+					marks: Decoration.none,
+					lineDecos: Decoration.none,
+					gutterMarkers: RangeSet.empty,
+					messages: new Map(),
+				};
+			}
+		}
+		return value;
+	},
+	provide(field) {
+		return [
+			EditorView.decorations.from(field, (v) => v.marks),
+			EditorView.decorations.from(field, (v) => v.lineDecos),
+			gutterLineClass.from(field, (v) => v.gutterMarkers),
+		];
+	},
+});
+
+const fhirLinterTheme = EditorView.theme({
+	".cm-fhir-error-underline": {
+		textDecorationLine: "underline",
+		textDecorationStyle: "wavy",
+		textDecorationColor: "var(--color-text-error-primary)",
+		textUnderlineOffset: "3px",
+	},
+	".cm-lineNumbers .cm-gutterElement.cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
+		backgroundColor:
+			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+	},
+});
+
+function buildFhirValidationPlugin(
+	getSDs: GetStructureDefinitions,
+	resourceTypeHint?: string,
+): Extension {
+	return ViewPlugin.define((view) => {
+		let timeout: ReturnType<typeof setTimeout> | null = null;
+		let destroyed = false;
+
+		function scheduleCheck() {
+			if (timeout) clearTimeout(timeout);
+			timeout = setTimeout(() => check(), 500);
+		}
+
+		async function check() {
+			if (destroyed) return;
+			const currentDoc = view.state.doc.toString();
+			// Ensure syntax tree is fully parsed before checking
+			const tree =
+				ensureSyntaxTree(view.state, view.state.doc.length, 1000) ??
+				syntaxTree(view.state);
+
+			const rootObj = findRootJsonObject(currentDoc, tree);
+			if (!rootObj) {
+				// JSON truly has no object — clear diagnostics
+				try {
+					view.dispatch({
+						effects: setFhirDiagnosticsEffect.of([]),
+					});
+				} catch {
+					/* view destroyed */
+				}
+				return;
+			}
+
+			const properties: PropertyInfo[] = [];
+			const emptyStrings: EmptyStringInfo[] = [];
+			walkJsonObject(rootObj, [], resourceTypeHint ?? null, currentDoc, properties, emptyStrings);
+			if (properties.length === 0 && emptyStrings.length === 0) {
+				try {
+					view.dispatch({
+						effects: setFhirDiagnosticsEffect.of([]),
+					});
+				} catch {
+					/* view destroyed */
+				}
+				return;
+			}
+
+			const rawDiags = await validateFhirProperties(
+				properties,
+				getSDs,
+			);
+			if (destroyed) return;
+			if (view.state.doc.toString() !== currentDoc) return;
+
+			for (const es of emptyStrings) {
+				rawDiags.push({
+					from: es.from,
+					to: es.to,
+					message: "Value must not be empty",
+				});
+			}
+
+			const diags: FhirDiagnosticWithLine[] = rawDiags.map((d) => ({
+				...d,
+				line: view.state.doc.lineAt(d.from).number,
+			}));
+
+			try {
+				view.dispatch({
+					effects: setFhirDiagnosticsEffect.of(diags),
+				});
+			} catch {
+				/* view destroyed */
+			}
+		}
+
+		scheduleCheck();
+
+		return {
+			update(update: ViewUpdate) {
+				if (update.docChanged) {
+					scheduleCheck();
+				}
+			},
+			destroy() {
+				destroyed = true;
+				if (timeout) clearTimeout(timeout);
+			},
+		};
+	});
+}
+
 // ── Public API ─────────────────────────────────────────────────────────
 
 export function buildFhirCompletionExtension(
 	getSDs: GetStructureDefinitions,
+	resourceTypeHint?: string,
 ): Extension {
-	const jsonSource = fhirCompletionSource(getSDs);
-	const yamlSource = yamlFhirCompletionSource(getSDs);
+	const jsonSource = fhirCompletionSource(getSDs, resourceTypeHint);
+	const yamlSource = yamlFhirCompletionSource(getSDs, resourceTypeHint);
 	return [
 		jsonLanguage.data.of({ autocomplete: jsonSource }),
 		yamlLanguage.data.of({ autocomplete: yamlSource }),
+		fhirDiagnosticsField,
+		fhirLinterTheme,
+		buildFhirValidationPlugin(getSDs, resourceTypeHint),
 	];
 }

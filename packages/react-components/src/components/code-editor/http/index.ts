@@ -353,6 +353,7 @@ function httpUrlCompletionSource(
 								: "text",
 			};
 			if (s.type === "search-param") c.apply = `${s.label}=`;
+			else if (s.type === "path" && s.label === "fhir") c.apply = `${s.label}/`;
 			if (s.description) c.detail = s.description.toUpperCase();
 			if (s.expression) c.info = s.expression;
 			return c;
