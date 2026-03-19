@@ -1,8 +1,10 @@
-import type {
-	Completion,
-	CompletionContext,
-	CompletionResult,
-	CompletionSource,
+import {
+	type Completion,
+	type CompletionContext,
+	type CompletionResult,
+	type CompletionSource,
+	completionStatus,
+	startCompletion,
 } from "@codemirror/autocomplete";
 import { jsonLanguage } from "@codemirror/lang-json";
 import { yamlLanguage } from "@codemirror/lang-yaml";
@@ -27,6 +29,7 @@ import type { SyntaxNode } from "@lezer/common";
 
 interface FhirElementType {
 	code: string;
+	profile?: string[];
 	targetProfile?: string[];
 }
 
@@ -39,12 +42,16 @@ interface FhirElement {
 	type?: FhirElementType[];
 	binding?: { valueSet: string; strength: string };
 	contentReference?: string;
+	sliceName?: string;
+	fixedUri?: string;
 }
 
 interface StructureDefinition {
 	type: string;
+	url?: string;
 	name?: string;
 	baseDefinition?: string;
+	context?: { expression: string; type: string }[];
 	differential?: { element: FhirElement[] };
 }
 
@@ -56,11 +63,17 @@ export interface StructureDefinitionSearchParams {
 	kind?: string;
 	_count?: string;
 	_elements?: string;
+	_ilike?: string;
 }
 
 export type GetStructureDefinitions = (
 	params: StructureDefinitionSearchParams,
 ) => Promise<StructureDefinition[]>;
+
+export type ExpandValueSet = (
+	url: string,
+	filter: string,
+) => Promise<{ code: string; display?: string; system?: string }[]>;
 
 // ── Cache ──────────────────────────────────────────────────────────────
 
@@ -69,7 +82,7 @@ const pendingRequests = new Map<string, Promise<StructureDefinition | null>>();
 const listCache = new Map<string, StructureDefinition[]>();
 const pendingListRequests = new Map<string, Promise<StructureDefinition[]>>();
 
-const SD_ELEMENTS = "differential,type,name,baseDefinition";
+const SD_ELEMENTS = "differential,type,name,baseDefinition,url,context";
 
 function cacheKey(params: StructureDefinitionSearchParams): string {
 	return JSON.stringify(params);
@@ -300,14 +313,19 @@ function findElement(
 	if (direct) return direct;
 
 	// Choice type match: key "deceasedBoolean" → element "deceased[x]" with type boolean
-	return elements.find((el) => {
-		if (!el.path.endsWith("[x]")) return false;
-		if (!el.path.startsWith(`${parentPath}.`)) return false;
+	// Return element with only the matched type so resolveElements picks the right one
+	for (const el of elements) {
+		if (!el.path.endsWith("[x]")) continue;
+		if (!el.path.startsWith(`${parentPath}.`)) continue;
 		const baseName = fieldName(el);
-		if (!key.toLowerCase().startsWith(baseName.toLowerCase())) return false;
+		if (!key.toLowerCase().startsWith(baseName.toLowerCase())) continue;
 		const typeSuffix = key.slice(baseName.length).toLowerCase();
-		return el.type?.some((t) => t.code.toLowerCase() === typeSuffix) ?? false;
-	});
+		const matchedType = el.type?.find((t) => t.code.toLowerCase() === typeSuffix);
+		if (matchedType) {
+			return { ...el, type: [matchedType] };
+		}
+	}
+	return undefined;
 }
 
 // ── Resolve completions at path ────────────────────────────────────────
@@ -318,14 +336,6 @@ async function collectAllElements(
 	getSDs: GetStructureDefinitions,
 ): Promise<{ elements: FhirElement[]; basePath: string } | null> {
 	const sd = await getCachedSD(type, getSDs);
-	console.log(
-		"[fhir] collectAllElements:",
-		type,
-		"sd:",
-		sd?.type,
-		"elements:",
-		sd?.differential?.element?.length,
-	);
 	if (!sd?.differential?.element) return null;
 
 	const elements = [...sd.differential.element];
@@ -512,6 +522,8 @@ function snippetKind(element: FhirElement): SnippetKind {
 		if (element.contentReference) return isArray ? "array-complex" : "object";
 		return "bare";
 	}
+	// Extension arrays get special treatment — show extension URL picker
+	if (typeCode === "Extension" && isArray) return "array-primitive";
 	if (isArray)
 		return isPrimitiveType(typeCode) ? "array-primitive" : "array-complex";
 	if (FHIR_NUMBER_TYPES.has(typeCode)) return "number";
@@ -535,8 +547,8 @@ function buildSnippet(
 			};
 		}
 		case "array-primitive": {
-			const text = `"${name}": []`;
-			return { text, cursorOffset: text.length - 1 };
+			const text = `"${name}": [\n${inner}\n${indent}]`;
+			return { text, cursorOffset: text.indexOf(inner + "\n") + inner.length };
 		}
 		case "object": {
 			const text = `"${name}": {\n${inner}\n${indent}}`;
@@ -553,6 +565,86 @@ function buildSnippet(
 			return { text, cursorOffset: text.length };
 		}
 	}
+}
+
+// ── Extension helpers ──────────────────────────────────────────────────
+
+interface ExtensionInfo {
+	url: string;
+	name?: string | undefined;
+	isNested: boolean;
+	valueTypes: string[];
+	slices: { sliceName: string; fixedUri: string; short?: string | undefined }[];
+}
+
+function analyzeExtensionSD(sd: StructureDefinition): ExtensionInfo | null {
+	if (!sd.differential?.element) return null;
+	const elements = sd.differential.element;
+
+	const valueEl = elements.find((e) => e.path === "Extension.value[x]");
+	const isNested = valueEl?.max === "0";
+	const valueTypes = isNested ? [] : (valueEl?.type?.map((t) => t.code) ?? []);
+
+	const slices: ExtensionInfo["slices"] = [];
+	for (const el of elements) {
+		if (el.path === "Extension.extension" && el.sliceName) {
+			const sliceName = el.sliceName;
+			const urlEl = elements.find(
+				(e) =>
+					e.path === "Extension.extension.url" &&
+					e.fixedUri &&
+					elements.indexOf(e) > elements.indexOf(el),
+			);
+			const fixedUri = urlEl?.fixedUri ?? sliceName;
+			slices.push({ sliceName, fixedUri, short: el.short });
+		}
+	}
+
+	return {
+		url: sd.url ?? sd.type,
+		name: sd.name,
+		isNested,
+		valueTypes,
+		slices,
+	};
+}
+
+function extensionValueFieldName(typeCode: string): string {
+	return `value${typeCode.charAt(0).toUpperCase()}${typeCode.slice(1)}`;
+}
+
+function buildExtensionSnippet(
+	extInfo: ExtensionInfo,
+	indent: string,
+): { text: string; cursorOffset: number } {
+	const inner = indent + "  ";
+
+	if (extInfo.isNested) {
+		const innerInner = inner + "  ";
+		const text = `{\n${inner}"url": "${extInfo.url}",\n${inner}"extension": [\n${innerInner}\n${inner}]\n${indent}}`;
+		return { text, cursorOffset: text.indexOf(innerInner + "\n" + inner) + innerInner.length };
+	}
+
+	if (extInfo.valueTypes.length === 1) {
+		const vField = extensionValueFieldName(extInfo.valueTypes[0]!);
+		const typeCode = extInfo.valueTypes[0]!;
+		if (FHIR_STRING_TYPES.has(typeCode) || typeCode === "code") {
+			const text = `{\n${inner}"url": "${extInfo.url}",\n${inner}"${vField}": ""\n${indent}}`;
+			return { text, cursorOffset: text.lastIndexOf('""') + 1 };
+		}
+		if (FHIR_NUMBER_TYPES.has(typeCode)) {
+			const text = `{\n${inner}"url": "${extInfo.url}",\n${inner}"${vField}": \n${indent}}`;
+			return { text, cursorOffset: text.lastIndexOf(": ") + 2 };
+		}
+		// Complex type (Coding, CodeableConcept, etc.)
+		const innerInner = inner + "  ";
+		const text = `{\n${inner}"url": "${extInfo.url}",\n${inner}"${vField}": {\n${innerInner}\n${inner}}\n${indent}}`;
+		return { text, cursorOffset: text.indexOf(innerInner + "\n" + inner) + innerInner.length };
+	}
+
+	// Multiple types or no types — just url, user picks value field
+	const text = `{\n${inner}"url": "${extInfo.url}",\n${inner}\n${indent}}`;
+	return { text, cursorOffset: text.indexOf(inner + "\n" + indent) + inner.length };
 }
 
 function toCompletion(element: FhirElement): Completion {
@@ -595,6 +687,11 @@ function toCompletion(element: FhirElement): Completion {
 				changes: { from: actualFrom, to: actualTo, insert: text },
 				selection: { anchor: actualFrom + cursorOffset },
 			});
+
+			// Trigger value autocomplete after inserting a snippet with cursor in value position
+			if (kind === "string" || kind === "array-primitive") {
+				setTimeout(() => startCompletion(view), 0);
+			}
 		},
 	};
 	if (element.short) completion.info = element.short;
@@ -602,6 +699,186 @@ function toCompletion(element: FhirElement): Completion {
 }
 
 // ── Completion source ──────────────────────────────────────────────────
+
+// ── Terminology binding resolution ─────────────────────────────────────
+
+// Build the FHIR element path for a given JSON path + valueKey
+// e.g. resourceType="Patient", path=["address"], valueKey="state" → "Patient.address.state"
+// For "code" inside Coding: path=["maritalStatus","coding"], valueKey="code" → walk up to find bound parent
+function buildFhirElementPath(
+	resourceType: string,
+	path: string[],
+	valueKey: string,
+): string {
+	return `${resourceType}.${[...path, valueKey].join(".")}`;
+}
+
+// Check if a profile's differential overrides the binding for a given element path
+async function findProfileBinding(
+	profileUrls: string[],
+	resourceType: string,
+	path: string[],
+	valueKey: string,
+	getSDs: GetStructureDefinitions,
+): Promise<string | null> {
+	if (profileUrls.length === 0) return null;
+
+	for (const profileUrl of profileUrls) {
+		const sd = await getCachedSD(profileUrl, getSDs);
+		if (!sd?.differential?.element) continue;
+
+		// Direct match: e.g. Patient.gender
+		const directPath = buildFhirElementPath(resourceType, path, valueKey);
+		for (const el of sd.differential.element) {
+			if (el.path === directPath && el.binding?.valueSet) {
+				return el.binding.valueSet;
+			}
+		}
+
+		// For "code" inside Coding/CodeableConcept — check parent paths
+		if (valueKey === "code") {
+			for (let i = path.length; i > 0; i--) {
+				const parentFhirPath = buildFhirElementPath(resourceType, path.slice(0, i - 1), path[i - 1]!);
+				for (const el of sd.differential.element) {
+					if (el.path === parentFhirPath && el.binding?.valueSet) {
+						return el.binding.valueSet;
+					}
+				}
+			}
+		}
+	}
+	return null;
+}
+
+// Find binding from extension SD differential for a value inside extension object
+async function findExtensionBinding(
+	doc: string,
+	pos: number,
+	getSDs: GetStructureDefinitions,
+): Promise<string | null> {
+	const textBefore = doc.slice(0, pos);
+
+	// Find the nearest extension "url" in current or parent object
+	// Match "url": "value" scanning backwards through the text
+	const urlMatches = [...textBefore.matchAll(/"url"\s*:\s*"([^"]+)"/g)];
+	if (urlMatches.length === 0) return null;
+
+	// Work backwards from the most recent url match
+	for (let i = urlMatches.length - 1; i >= 0; i--) {
+		const extUrl = urlMatches[i]![1]!;
+		// Skip non-extension URLs (like profile URLs)
+		if (!extUrl.includes("StructureDefinition/") && !extUrl.includes("Extension")) {
+			// Could be a slice name like "ombCategory" — find the parent extension URL
+			const parentUrlMatches = [...textBefore.slice(0, urlMatches[i]!.index).matchAll(/"url"\s*:\s*"([^"]+)"/g)];
+			for (let j = parentUrlMatches.length - 1; j >= 0; j--) {
+				const parentUrl = parentUrlMatches[j]![1]!;
+				if (!parentUrl.includes("/")) continue;
+				const parentSD = await getCachedSD(parentUrl, getSDs);
+				if (!parentSD?.differential?.element) continue;
+				// Find the slice matching extUrl and check its value[x] binding
+				let inSlice = false;
+				for (const el of parentSD.differential.element) {
+					if (el.path === "Extension.extension" && el.sliceName) {
+						const urlEl = parentSD.differential.element.find(
+							(e) => e.path === "Extension.extension.url" && e.fixedUri &&
+								parentSD.differential!.element.indexOf(e) > parentSD.differential!.element.indexOf(el),
+						);
+						if ((urlEl?.fixedUri ?? el.sliceName) === extUrl) {
+							inSlice = true;
+							continue;
+						}
+						if (inSlice) break;
+					}
+					if (inSlice && el.path === "Extension.extension.value[x]" && el.binding?.valueSet) {
+						return el.binding.valueSet;
+					}
+				}
+				if (inSlice) break;
+			}
+			continue;
+		}
+		// Direct extension URL — check its value[x] binding
+		const sd = await getCachedSD(extUrl, getSDs);
+		if (!sd?.differential?.element) continue;
+		for (const el of sd.differential.element) {
+			if (el.path === "Extension.value[x]" && el.binding?.valueSet) {
+				return el.binding.valueSet;
+			}
+		}
+	}
+	return null;
+}
+
+async function findBindingForValue(
+	path: string[],
+	valueKey: string,
+	resourceType: string,
+	getSDs: GetStructureDefinitions,
+	profileUrls: string[] = [],
+	doc?: string,
+	pos?: number,
+): Promise<string | null> {
+	// Check extension binding first (for values inside extension objects)
+	if (doc != null && pos != null) {
+		// Check if we're inside an extension context (path contains "extension")
+		const inExtension = path.some((p) => p === "extension" || p === "modifierExtension");
+		if (inExtension) {
+			const extBinding = await findExtensionBinding(doc, pos, getSDs);
+			if (extBinding) return extBinding;
+		}
+	}
+
+	// Check profile overrides first
+	const profileBinding = await findProfileBinding(profileUrls, resourceType, path, valueKey, getSDs);
+	if (profileBinding) return profileBinding;
+
+	// Case 1: Direct binding on the field (e.g. code type like Patient.gender)
+	const elements = await resolveElements(path, resourceType, getSDs);
+	for (const el of elements) {
+		if (fieldName(el) === valueKey && el.binding?.valueSet) {
+			return el.binding.valueSet;
+		}
+	}
+
+	// Case 2: valueKey is "code" — walk up to find Coding/CodeableConcept with binding
+	// Handles: Coding.code, CodeableConcept.coding[].code
+	if (valueKey === "code") {
+		for (let i = path.length; i > 0; i--) {
+			const parentElements = await resolveElements(
+				path.slice(0, i - 1),
+				resourceType,
+				getSDs,
+			);
+			for (const el of parentElements) {
+				if (fieldName(el) === path[i - 1] && el.binding?.valueSet) {
+					return el.binding.valueSet;
+				}
+			}
+		}
+	}
+
+	return null;
+}
+
+// Find canonical targetProfile for an array element (e.g. Meta.profile → StructureDefinition)
+// Returns the FHIR resource type name from the targetProfile URL, or null
+async function findCanonicalTargetType(
+	path: string[],
+	arrayKey: string,
+	resourceType: string,
+	getSDs: GetStructureDefinitions,
+): Promise<string | null> {
+	const elements = await resolveElements(path, resourceType, getSDs);
+	for (const el of elements) {
+		if (fieldName(el) !== arrayKey) continue;
+		if (el.max !== "*") continue;
+		const t = el.type?.[0];
+		if (t?.code !== "canonical" || !t.targetProfile?.length) continue;
+		// Extract resource type from targetProfile URL
+		return t.targetProfile[0]?.split("/").pop() ?? null;
+	}
+	return null;
+}
 
 // ── Reference target resolution ────────────────────────────────────────
 
@@ -663,39 +940,6 @@ async function resolveReferenceTargets(
 	return targets.length > 0 ? targets : null;
 }
 
-// Check if cursor is directly inside a JSON array (not inside an object within the array)
-function isInsideJsonArray(doc: string, pos: number): boolean {
-	let depth = 0;
-	let inString = false;
-	let isEscaped = false;
-	for (let i = pos - 1; i >= 0; i--) {
-		const ch = doc[i];
-		if (isEscaped) {
-			isEscaped = false;
-			continue;
-		}
-		if (ch === "\\") {
-			isEscaped = true;
-			continue;
-		}
-		if (ch === '"') {
-			inString = !inString;
-			continue;
-		}
-		if (inString) continue;
-		if (ch === "}" || ch === "]") {
-			depth++;
-		} else if (ch === "{") {
-			if (depth === 0) return false;
-			depth--;
-		} else if (ch === "[") {
-			if (depth === 0) return true;
-			depth--;
-		}
-	}
-	return false;
-}
-
 // Check if cursor is in a value position (after "key": or key: )
 function isValuePosition(beforeCursor: string): string | null {
 	const match = beforeCursor.match(/"?(\w+)"?\s*:\s*"?([^"]*)?$/);
@@ -703,9 +947,36 @@ function isValuePosition(beforeCursor: string): string | null {
 	return null;
 }
 
+// Extract meta.profile URLs from JSON document
+function getJsonProfileUrls(doc: string): string[] {
+	const match = doc.match(/"profile"\s*:\s*\[([\s\S]*?)\]/);
+	if (!match?.[1]) return [];
+	const urls: string[] = [];
+	const re = /"([^"]+)"/g;
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(match[1])) !== null) {
+		if (m[1]) urls.push(m[1]);
+	}
+	return urls;
+}
+
+// Extract meta.profile URLs from YAML document
+function getYamlProfileUrls(doc: string): string[] {
+	const profileSection = doc.match(/profile:\s*\n((?:\s+-\s+.+\n?)*)/);
+	if (!profileSection?.[1]) return [];
+	const urls: string[] = [];
+	const re = /-\s+['"]?([^'"\n]+)['"]?/g;
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(profileSection[1])) !== null) {
+		if (m[1]) urls.push(m[1].trim());
+	}
+	return urls;
+}
+
 export function fhirCompletionSource(
 	getSDs: GetStructureDefinitions,
 	resourceTypeHint?: string,
+	expandValueSet?: ExpandValueSet,
 ): CompletionSource {
 	return async (
 		context: CompletionContext,
@@ -770,6 +1041,363 @@ export function fhirCompletionSource(
 			}
 		}
 
+		// Terminology binding value completion
+		if (valueKey && valueKey !== "resourceType" && valueKey !== "reference" && expandValueSet) {
+			const path = getJsonPathAtCursor(doc, pos);
+			const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/);
+			const resourceType = rtMatch?.[1] ?? resourceTypeHint;
+			if (resourceType) {
+				const profileUrls = getJsonProfileUrls(doc);
+				const valueSetUrl = await findBindingForValue(path, valueKey, resourceType, getSDs, profileUrls, doc, pos);
+				if (valueSetUrl) {
+					// Include opening quote in match so from < pos (triggers auto-show)
+					const quoteWord = context.matchBefore(/"[\w-]*/);
+					const from = quoteWord?.from ?? pos;
+					const filter = quoteWord ? quoteWord.text.replace(/^"/, "") : "";
+					try {
+						const codes = await expandValueSet(valueSetUrl, filter);
+						if (codes.length > 0) {
+							const options: Completion[] = codes.map((c) => ({
+								label: c.code,
+								...(c.display ? { info: c.display } : {}),
+								type: "text",
+								apply: (view: EditorView, _c: Completion, applyFrom: number, applyTo: number) => {
+									const d = view.state.doc.toString();
+									let actualFrom = applyFrom;
+									let actualTo = applyTo;
+									if (d[actualFrom] === '"') actualFrom++;
+									if (actualTo < d.length && d[actualTo] === '"') actualTo++;
+									view.dispatch({
+										changes: { from: actualFrom, to: actualTo, insert: `${c.code}"` },
+										selection: { anchor: actualFrom + c.code.length + 1 },
+									});
+								},
+							}));
+							return { from, options, filter: false };
+						}
+					} catch {
+						// expand failed — fall through
+					}
+				}
+			}
+		}
+
+		// Canonical array completion (e.g. meta.profile → StructureDefinition profiles)
+		// Use regex to detect array context — isInsideJsonArray fails inside ""
+		{
+			const textBefore = doc.slice(0, pos);
+			// Match "key": [ ... with cursor inside the array (possibly inside "")
+			const arrayMatch = textBefore.match(/"(\w+)"\s*:\s*\[\s*(?:"[^"]*"\s*,\s*)*"?[^"]*$/s);
+			if (arrayMatch) {
+				const arrayKey = arrayMatch[1]!;
+				// Find JSON body start for correct path resolution
+				const bodyStart = doc.indexOf("\n\n");
+				const jsonStart = bodyStart !== -1 ? bodyStart + 2 : 0;
+				const jsonBody = doc.slice(jsonStart);
+				const posInBody = pos - jsonStart;
+				// Get path excluding the array key itself (parent path)
+				const fullPath = getJsonPathAtCursor(jsonBody, posInBody);
+				// The array key is the last segment pushed by { before [
+				// Remove it to get parentPath
+				const parentPath = fullPath.length > 0 && fullPath[fullPath.length - 1] === arrayKey
+					? fullPath.slice(0, -1)
+					: fullPath;
+				const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/);
+				const resourceType = rtMatch?.[1] ?? resourceTypeHint;
+				if (resourceType) {
+					const targetType = await findCanonicalTargetType(parentPath, arrayKey, resourceType, getSDs);
+					if (targetType === "StructureDefinition") {
+						const allSDs = await getCachedSDList(
+							{ type: `${resourceType},DomainResource,Resource`, derivation: "constraint", _elements: "url,name", _count: "50" },
+							getSDs,
+						);
+						const seen = new Set<string>();
+						const uniqueSDs = allSDs.filter((sd) => {
+							const u = sd.url ?? sd.type;
+							if (seen.has(u)) return false;
+							seen.add(u);
+							return true;
+						});
+						if (uniqueSDs.length > 0) {
+							const quoteWord = context.matchBefore(/"[^"]*/);
+							const bareWord = context.matchBefore(/[\w.:/-]*/);
+							const from = quoteWord?.from ?? bareWord?.from ?? pos;
+							const filter = quoteWord
+								? quoteWord.text.replace(/^"/, "").toLowerCase()
+								: (bareWord?.text.toLowerCase() ?? "");
+							const filtered = filter
+								? uniqueSDs.filter((sd) => sd.name?.toLowerCase().includes(filter) || sd.url?.toLowerCase().includes(filter))
+								: uniqueSDs;
+							const options: Completion[] = filtered.map((sd) => {
+								const url = sd.url ?? sd.type;
+								return {
+									label: url,
+									...(sd.name ? { info: sd.name } : {}),
+									type: "text",
+									apply: (view: EditorView, _c: Completion, applyFrom: number, applyTo: number) => {
+										const d = view.state.doc.toString();
+										let actualTo = applyTo;
+										if (actualTo < d.length && d[actualTo] === '"') actualTo++;
+										view.dispatch({
+											changes: { from: applyFrom, to: actualTo, insert: `"${url}"` },
+											selection: { anchor: applyFrom + url.length + 2 },
+										});
+									},
+								};
+							});
+							if (options.length > 0) {
+								return { from, options, filter: false };
+							}
+						}
+					}
+					if (targetType) return null;
+				}
+			}
+		}
+
+		// Extension array completion — offer extension URLs with full snippets
+		{
+			const textBefore = doc.slice(0, pos);
+			const extArrayMatch = textBefore.match(/"(?:extension|modifierExtension)"\s*:\s*\[\s*(?:\{[\s\S]*?\}\s*,?\s*)*[\w.:/-]*$/s);
+			if (extArrayMatch) {
+				const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/);
+				const resourceType = rtMatch?.[1] ?? resourceTypeHint;
+				{
+					// Also check if we're inside a nested extension (parent has url)
+					const parentUrlMatch = textBefore.match(/"url"\s*:\s*"([^"]+)"[\s\S]*?"extension"\s*:\s*\[\s*(?:\{[\s\S]*?\}\s*,?\s*)*[\w.:/-]*$/s);
+					const parentExtUrl = parentUrlMatch?.[1];
+
+					if (parentExtUrl) {
+						// Nested: offer slice URLs from parent extension
+						const parentSD = await getCachedSD(parentExtUrl, getSDs);
+						if (parentSD) {
+							const parentInfo = analyzeExtensionSD(parentSD);
+							if (parentInfo?.slices.length) {
+								const line = state.doc.lineAt(pos);
+								const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
+								const bareWord = context.matchBefore(/[\w.:/-]*/);
+								const filter = bareWord?.text.toLowerCase() ?? "";
+								const matchingSlices = filter
+									? parentInfo.slices.filter((s) => s.fixedUri.toLowerCase().includes(filter) || (s.short?.toLowerCase().includes(filter) ?? false))
+									: parentInfo.slices;
+								const options: Completion[] = matchingSlices.map((slice) => {
+									// Find value type for this slice
+									const sliceElements = parentSD.differential?.element ?? [];
+									let sliceValueTypes: string[] = [];
+									let inSlice = false;
+									for (const el of sliceElements) {
+										if (el.path === "Extension.extension" && el.sliceName === slice.sliceName) {
+											inSlice = true;
+											continue;
+										}
+										if (inSlice && el.path === "Extension.extension.value[x]") {
+											sliceValueTypes = el.type?.map((t) => t.code) ?? [];
+											break;
+										}
+										if (inSlice && el.path === "Extension.extension" && el.sliceName) {
+											break; // next slice
+										}
+									}
+									const sliceInfo: ExtensionInfo = {
+										url: slice.fixedUri,
+										name: slice.short,
+										isNested: false,
+										valueTypes: sliceValueTypes,
+										slices: [],
+									};
+									const { text: snippet, cursorOffset } = buildExtensionSnippet(sliceInfo, indent);
+									return {
+										label: slice.fixedUri,
+										...(slice.short ? { info: slice.short } : {}),
+										type: "text",
+										apply: (view: EditorView, _c: Completion, applyFrom: number, applyTo: number) => {
+											view.dispatch({
+												changes: { from: applyFrom, to: applyTo, insert: snippet },
+												selection: { anchor: applyFrom + cursorOffset },
+											});
+											setTimeout(() => startCompletion(view), 0);
+										},
+									};
+								});
+								if (options.length > 0) {
+									return { from: bareWord?.from ?? pos, options, filter: false };
+								}
+							}
+						}
+					} else {
+						// Collect extension URLs from profile SD (priority)
+						const profileUrls = getJsonProfileUrls(doc);
+						const profileExtUrls: string[] = [];
+						for (const pUrl of profileUrls) {
+							const profileSD = await getCachedSD(pUrl, getSDs);
+							if (!profileSD?.differential?.element) continue;
+							for (const el of profileSD.differential.element) {
+								if (el.type?.[0]?.code !== "Extension") continue;
+								for (const t of el.type ?? []) {
+									for (const p of t.profile ?? []) {
+										// Strip version from profile URL
+										const clean = p.includes("|") ? p.slice(0, p.indexOf("|")) : p;
+										if (!profileExtUrls.includes(clean)) profileExtUrls.push(clean);
+									}
+								}
+							}
+						}
+
+						// Determine container type for context filtering
+						// e.g. inside address[].extension → context = [Address, Element]
+						// Root extension → context = [Patient, DomainResource, Resource, Element]
+						const bodyStart = doc.indexOf("\n\n");
+						const jsonStart = bodyStart !== -1 ? bodyStart + 2 : 0;
+						const jsonBody = doc.slice(jsonStart);
+						const posInBody = pos - jsonStart;
+						const fullPath = getJsonPathAtCursor(jsonBody, posInBody);
+
+						let containerType: string | null = null;
+						if (fullPath.length > 0 && resourceType) {
+							let currentRT = resourceType;
+							for (const seg of fullPath) {
+								const elements = await resolveElements([], currentRT, getSDs);
+								const el = elements.find((e) => fieldName(e) === seg);
+								if (el?.type?.[0]?.code) {
+									currentRT = el.type[0].code;
+								} else {
+									break;
+								}
+							}
+							if (currentRT !== resourceType) {
+								containerType = currentRT;
+							}
+						}
+
+						// Build FHIR path for context matching (e.g. "Patient.address")
+						const fhirPath = containerType && resourceType
+							? `${resourceType}.${fullPath.join(".")}`
+							: null;
+						const contextMatchers: string[] | null = containerType
+							? [containerType, "Element", ...(fhirPath ? [fhirPath] : [])]
+							: resourceType
+								? [resourceType, "DomainResource", "Resource", "Element"]
+								: null;
+						const bareWord = context.matchBefore(/[\w.:/-]*/);
+						const filter = bareWord?.text ?? "";
+						const searchParams: StructureDefinitionSearchParams = {
+							type: "Extension",
+							derivation: "constraint",
+							_elements: "url,context",
+							_count: "500",
+						};
+						if (filter) searchParams._ilike = filter;
+						const results = await getCachedSDList(searchParams, getSDs);
+						const contextExts = contextMatchers
+							? results.filter((sd) =>
+								sd.context?.some((c) => c.type === "element" && contextMatchers.includes(c.expression)),
+							)
+							: results;
+
+						// Merge: profile extensions first (only at root level), then context-matched
+						const seen = new Set<string>();
+						const allUrls: { url: string; name?: string | undefined; boost: number }[] = [];
+						if (!containerType) {
+							for (const u of profileExtUrls) {
+								if (seen.has(u)) continue;
+								seen.add(u);
+								allUrls.push({ url: u, boost: 10 });
+							}
+						}
+						for (const sd of contextExts) {
+							const u = sd.url ?? sd.type;
+							if (seen.has(u)) continue;
+							seen.add(u);
+							// Boost extensions whose context matches the container type specifically
+							const isSpecific = containerType && sd.context?.some(
+								(c) => c.type === "element" && (c.expression === containerType || c.expression === fhirPath),
+							);
+							allUrls.push({ url: u, name: sd.name, boost: isSpecific ? 5 : 0 });
+						}
+
+						const lowerFilter = filter.toLowerCase();
+						const filtered = lowerFilter
+							? allUrls.filter((e) => e.url.toLowerCase().includes(lowerFilter) || (e.name?.toLowerCase().includes(lowerFilter) ?? false))
+							: allUrls;
+						if (filtered.length > 0) {
+							const line = state.doc.lineAt(pos);
+							const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
+							const options: Completion[] = filtered.map((ext) => ({
+								label: ext.url,
+								...(ext.name ? { info: ext.name } : {}),
+								type: "text",
+								boost: ext.boost,
+								apply: (view: EditorView, _c: Completion, applyFrom: number, applyTo: number) => {
+									getCachedSD(ext.url, getSDs).then((fullSD) => {
+										const info = fullSD ? analyzeExtensionSD(fullSD) : null;
+										const snippet = info
+											? buildExtensionSnippet(info, indent)
+											: { text: `{\n${indent}"url": "${ext.url}"\n${indent.slice(2)}}`, cursorOffset: 0 };
+										view.dispatch({
+											changes: { from: applyFrom, to: applyTo, insert: snippet.text },
+											selection: { anchor: applyFrom + snippet.cursorOffset },
+										});
+										setTimeout(() => startCompletion(view), 0);
+									});
+								},
+							}));
+							const from = bareWord?.from ?? pos;
+							return { from, options, filter: false };
+						}
+					}
+				}
+			}
+		}
+
+		// Extension object field completion — offer valueXxx fields inside {"url": "...", |}
+		{
+			const textBefore = doc.slice(0, pos);
+			// Check if inside an object that has a "url" key (extension object)
+			const urlInObjMatch = textBefore.match(/"url"\s*:\s*"([^"]+)"[^{}]*$/s);
+			if (urlInObjMatch && (beforeCursor === "" || beforeCursor === '"' || /^"?[\w]*$/.test(beforeCursor))) {
+				const extUrl = urlInObjMatch[1]!;
+				const sd = await getCachedSD(extUrl, getSDs);
+				if (sd) {
+					const info = analyzeExtensionSD(sd);
+					if (info && info.valueTypes.length > 1) {
+						// Multiple value types — offer valueXxx fields
+						const options: Completion[] = info.valueTypes.map((typeCode) => {
+							const vField = extensionValueFieldName(typeCode);
+							const vKind = FHIR_STRING_TYPES.has(typeCode) || typeCode === "code" ? "string"
+								: FHIR_NUMBER_TYPES.has(typeCode) ? "number"
+								: "object";
+							return {
+								label: vField,
+								detail: typeCode,
+								type: "property",
+								apply: (view: EditorView, _c: Completion, applyFrom: number, applyTo: number) => {
+									const d = view.state.doc.toString();
+									let actualFrom = applyFrom;
+									let actualTo = applyTo;
+									if (actualFrom > 0 && d[actualFrom - 1] === '"') actualFrom--;
+									if (actualTo < d.length && d[actualTo] === '"') actualTo++;
+									const lineObj = view.state.doc.lineAt(actualFrom);
+									const indentStr = lineObj.text.match(/^(\s*)/)?.[1] ?? "";
+									const { text, cursorOffset } = buildSnippet(vField, vKind as SnippetKind, indentStr);
+									view.dispatch({
+										changes: { from: actualFrom, to: actualTo, insert: text },
+										selection: { anchor: actualFrom + cursorOffset },
+									});
+									if (vKind === "string") {
+										setTimeout(() => startCompletion(view), 0);
+									}
+								},
+							};
+						});
+						const word = context.matchBefore(/"?\w*/);
+						let from = word?.from ?? pos;
+						if (from < doc.length && doc[from] === '"') from++;
+						return { from, options, validFor: /^\w*$/ };
+					}
+				}
+			}
+		}
+
 		// Property name position — with or without quotes
 		const isPropertyPosition =
 			beforeCursor === "" ||
@@ -779,8 +1407,9 @@ export function fhirCompletionSource(
 
 		if (!isPropertyPosition) return null;
 
-		// Don't offer property completions inside arrays (e.g. "profile": [""])
-		if (isInsideJsonArray(doc, pos)) return null;
+		// Only auto-trigger property completions when the user has started typing a name
+		// Don't auto-trigger after a comma without typing (e.g. "Patient", |)
+		if (!context.explicit && /,\s*"?\s*$/.test(beforeCursor) && !context.matchBefore(/\w+/)) return null;
 
 		const path = getJsonPathAtCursor(doc, pos);
 		const rtMatch = doc.match(/"resourceType"\s*:\s*"([^"]+)"/) ??
@@ -911,6 +1540,10 @@ function toYamlFieldCompletion(element: FhirElement): Completion {
 				changes: { from, to, insert: text },
 				selection: { anchor: from + cursorOffset },
 			});
+
+			if (isArray || isString) {
+				setTimeout(() => startCompletion(view), 0);
+			}
 		},
 	};
 	if (element.short) completion.info = element.short;
@@ -922,6 +1555,7 @@ function toYamlFieldCompletion(element: FhirElement): Completion {
 export function yamlFhirCompletionSource(
 	getSDs: GetStructureDefinitions,
 	resourceTypeHint?: string,
+	expandValueSet?: ExpandValueSet,
 ): CompletionSource {
 	return async (
 		context: CompletionContext,
@@ -976,7 +1610,85 @@ export function yamlFhirCompletionSource(
 			}
 		}
 
+		// Terminology binding value completion
+		if (valueKey && valueKey !== "resourceType" && valueKey !== "reference" && expandValueSet) {
+			const path = getYamlPathAtCursor(doc, pos);
+			const resourceType = getYamlResourceType(doc) ?? resourceTypeHint;
+			if (resourceType) {
+				const profileUrls = getYamlProfileUrls(doc);
+				const valueSetUrl = await findBindingForValue(path, valueKey, resourceType, getSDs, profileUrls, doc, pos);
+				if (valueSetUrl) {
+					const word = context.matchBefore(/[\w-]*/);
+					const filter = word ? doc.slice(word.from, pos) : "";
+					try {
+						const codes = await expandValueSet(valueSetUrl, filter);
+						if (codes.length > 0) {
+							const options: Completion[] = codes.map((c) => ({
+								label: c.code,
+								...(c.display ? { info: c.display } : {}),
+								type: "text",
+							}));
+							return { from: word?.from ?? pos, options, validFor: /^[\w-]*$/ };
+						}
+					} catch {
+						// expand failed — fall through
+					}
+				}
+			}
+		}
+
+		// Canonical array completion in YAML (e.g. meta.profile → StructureDefinition profiles)
+		{
+			const trimmed = beforeCursor.trimStart();
+			const isArrayItem = trimmed === "-" || trimmed === "- " || trimmed.startsWith("- ");
+			if (isArrayItem) {
+				const path = getYamlPathAtCursor(doc, pos);
+				const arrayKey = path[path.length - 1];
+				if (path.length > 0 && arrayKey) {
+					const parentPath = path.slice(0, -1);
+					const resourceType = getYamlResourceType(doc) ?? resourceTypeHint;
+					if (resourceType) {
+						const targetType = await findCanonicalTargetType(parentPath, arrayKey, resourceType, getSDs);
+						if (targetType === "StructureDefinition") {
+							const allSDs = await getCachedSDList(
+								{ type: `${resourceType},DomainResource,Resource`, derivation: "constraint", _elements: "url,name", _count: "50" },
+								getSDs,
+							);
+							const seen = new Set<string>();
+							const uniqueSDs = allSDs.filter((sd) => {
+								const u = sd.url ?? sd.type;
+								if (seen.has(u)) return false;
+								seen.add(u);
+								return true;
+							});
+							if (uniqueSDs.length > 0) {
+								const word = context.matchBefore(/[\w.:/-]*/);
+								const from = word?.from ?? pos;
+								const filter = word?.text.toLowerCase() ?? "";
+								const filtered = filter
+									? uniqueSDs.filter((sd) => sd.name?.toLowerCase().includes(filter) || sd.url?.toLowerCase().includes(filter))
+									: uniqueSDs;
+								const options: Completion[] = filtered.map((sd) => ({
+									label: sd.url ?? sd.type,
+									...(sd.name ? { info: sd.name } : {}),
+									type: "text",
+								}));
+								if (options.length > 0) {
+									return { from, options, filter: false };
+								}
+							}
+						}
+						if (targetType) return null;
+					}
+				}
+			}
+		}
+
 		if (!isYamlPropertyPosition(beforeCursor)) return null;
+
+		// Only auto-trigger property completions when the user has started typing a name
+		// Don't auto-trigger after a comma without typing (e.g. "Patient", |)
+		if (!context.explicit && /,\s*"?\s*$/.test(beforeCursor) && !context.matchBefore(/\w+/)) return null;
 
 		const path = getYamlPathAtCursor(doc, pos);
 		const hasExplicitResourceType = !!getYamlResourceType(doc);
@@ -1097,11 +1809,13 @@ function walkYamlObject(
 		const indent = line.length - trimmed.length;
 		const isArrayItem = trimmed.startsWith("- ");
 		const content = isArrayItem ? trimmed.slice(2) : trimmed;
-		const colonIdx = content.indexOf(":");
+		// Skip array scalar values (quoted strings, URLs, or bare values)
+		if (isArrayItem && (content.startsWith("'") || content.startsWith('"') || !content.includes(": "))) continue;
+		const colonIdx = content.indexOf(": ");
 		if (colonIdx <= 0) continue;
 
 		const key = content.slice(0, colonIdx).trim();
-		const valueAfterColon = content.slice(colonIdx + 1).trim();
+		const valueAfterColon = content.slice(colonIdx + 2).trim();
 
 		// Pop stack to find parent
 		while (stack.length > 1 && stack[stack.length - 1]!.indent >= indent) {
@@ -1145,9 +1859,9 @@ function walkYamlObject(
 
 		// Check for empty strings
 		if (emptyStrings && (valueAfterColon === "''" || valueAfterColon === '""')) {
-			const afterColonStr = content.slice(colonIdx + 1);
+			const afterColonStr = content.slice(colonIdx + 2);
 			const wsLen = afterColonStr.length - afterColonStr.trimStart().length;
-			const emptyFrom = charOffset + keyIndent + colonIdx + 1 + wsLen;
+			const emptyFrom = charOffset + keyIndent + colonIdx + 2 + wsLen;
 			const emptyTo = emptyFrom + 2;
 			emptyStrings.push({ from: emptyFrom, to: emptyTo });
 		}
@@ -1491,9 +2205,18 @@ function buildFhirValidationPlugin(
 		let timeout: ReturnType<typeof setTimeout> | null = null;
 		let destroyed = false;
 
+		function hasActiveDiagnostics() {
+			try {
+				return view.state.field(fhirDiagnosticsField).messages.size > 0;
+			} catch {
+				return false;
+			}
+		}
+
 		function scheduleCheck() {
 			if (timeout) clearTimeout(timeout);
-			timeout = setTimeout(() => check(), 500);
+			const delay = hasActiveDiagnostics() ? 0 : 1500;
+			timeout = setTimeout(() => check(), delay);
 		}
 
 		async function check() {
@@ -1591,12 +2314,33 @@ function buildFhirValidationPlugin(
 export function buildFhirCompletionExtension(
 	getSDs: GetStructureDefinitions,
 	resourceTypeHint?: string,
+	expandValueSet?: ExpandValueSet,
 ): Extension {
-	const jsonSource = fhirCompletionSource(getSDs, resourceTypeHint);
-	const yamlSource = yamlFhirCompletionSource(getSDs, resourceTypeHint);
+	const jsonSource = fhirCompletionSource(getSDs, resourceTypeHint, expandValueSet);
+	const yamlSource = yamlFhirCompletionSource(getSDs, resourceTypeHint, expandValueSet);
+	// Trigger completion on empty lines inside objects (where from === pos
+	// would cause CodeMirror to suppress auto-triggered results)
+	const autoTrigger = EditorView.updateListener.of((update) => {
+		if (!update.docChanged) return;
+		if (completionStatus(update.view.state)) return;
+		const { state } = update.view;
+		const pos = state.selection.main.head;
+		const doc = state.doc.toString();
+		const line = state.doc.lineAt(pos);
+		const beforeCursor = line.text.slice(0, pos - line.from).trimStart();
+		// Empty line, inside [] or inside ""
+		const shouldTrigger =
+			beforeCursor === "" ||
+			(pos > 0 && doc[pos - 1] === "[") ||
+			(pos > 0 && doc[pos - 1] === '"' && pos > 1 && doc[pos - 2] !== "\\");
+		if (!shouldTrigger) return;
+		setTimeout(() => startCompletion(update.view), 0);
+	});
+
 	return [
 		jsonLanguage.data.of({ autocomplete: jsonSource }),
 		yamlLanguage.data.of({ autocomplete: yamlSource }),
+		autoTrigger,
 		fhirDiagnosticsField,
 		fhirLinterTheme,
 		buildFhirValidationPlugin(getSDs, resourceTypeHint),

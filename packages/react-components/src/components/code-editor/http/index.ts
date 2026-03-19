@@ -234,13 +234,25 @@ const HEADER_VALUES: Record<string, Completion[]> = {
 	],
 };
 
-const HTTP_METHODS: Completion[] = [
-	{ label: "GET", type: "keyword", apply: "GET /" },
-	{ label: "POST", type: "keyword", apply: "POST /" },
-	{ label: "PUT", type: "keyword", apply: "PUT /" },
-	{ label: "PATCH", type: "keyword", apply: "PATCH /" },
-	{ label: "DELETE", type: "keyword", apply: "DELETE /" },
-];
+const HTTP_METHODS: Completion[] = ["GET", "POST", "PUT", "PATCH", "DELETE"].map(
+	(method) => ({
+		label: method,
+		type: "keyword" as const,
+		apply: (view: EditorView, _c: Completion, from: number, to: number) => {
+			const line = view.state.doc.lineAt(from);
+			const afterTo = line.text.slice(to - line.from);
+			// Skip whitespace after the method word to avoid double spaces
+			const wsMatch = afterTo.match(/^(\s*)/);
+			const actualTo = to + (wsMatch?.[1]?.length ?? 0);
+			const rest = line.text.slice(actualTo - line.from);
+			const insert = rest.startsWith("/") ? `${method} ` : `${method} /`;
+			view.dispatch({
+				changes: { from, to: actualTo, insert },
+				selection: { anchor: from + insert.length },
+			});
+		},
+	}),
+);
 
 function httpCompletionSource(
 	context: CompletionContext,

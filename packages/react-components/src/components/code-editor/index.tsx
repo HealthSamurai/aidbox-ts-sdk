@@ -5,7 +5,6 @@ import {
 	closeBrackets,
 	closeBracketsKeymap,
 	completionKeymap,
-	completionStatus,
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
@@ -69,6 +68,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 
+import { vim } from "@replit/codemirror-vim";
 import {
 	ComplexTypeIcon,
 	ResourceIcon,
@@ -77,6 +77,7 @@ import {
 } from "../../icons";
 import {
 	buildFhirCompletionExtension,
+	type ExpandValueSet,
 	fhirDiagnosticsField,
 	type GetStructureDefinitions,
 } from "./fhir-completion";
@@ -101,33 +102,89 @@ const setIssueLinesEffect = StateEffect.define<IssueLine[]>();
 
 let errorTooltipEl: HTMLDivElement | null = null;
 
-function showErrorTooltip(message: string, x: number, y: number) {
-	hideErrorTooltip();
+function formatErrorTypeTitle(code: string): string {
+	return code
+		.split("-")
+		.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+		.join(" ");
+}
 
-	const tooltip = document.createElement("div");
-	tooltip.textContent = message;
-	Object.assign(tooltip.style, {
-		position: "fixed",
+function renderErrorCard(msg: string): HTMLElement {
+	const card = document.createElement("div");
+	Object.assign(card.style, {
 		backgroundColor: "var(--color-bg-primary)",
 		border: "1px solid var(--color-border-primary)",
 		borderRadius: "var(--radius-md)",
 		padding: "6px 10px",
+		boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+	});
+	const newlineIdx = msg.indexOf("\n");
+	if (newlineIdx !== -1) {
+		const title = msg.slice(0, newlineIdx);
+		const body = msg.slice(newlineIdx + 1);
+
+		const titleEl = document.createElement("div");
+		titleEl.textContent = formatErrorTypeTitle(title);
+		Object.assign(titleEl.style, { fontWeight: "600" });
+
+		const hr = document.createElement("div");
+		Object.assign(hr.style, {
+			borderTop: "1px solid var(--color-border-primary)",
+			margin: "4px 0",
+		});
+
+		const bodyEl = document.createElement("div");
+		bodyEl.textContent = body;
+		Object.assign(bodyEl.style, { whiteSpace: "pre-wrap" });
+
+		card.append(titleEl, hr, bodyEl);
+	} else {
+		card.textContent = msg;
+		card.style.whiteSpace = "pre-wrap";
+	}
+	return card;
+}
+
+function showErrorTooltip(message: string, x: number, y: number) {
+	hideErrorTooltip();
+
+	const tooltip = document.createElement("div");
+	Object.assign(tooltip.style, {
+		position: "fixed",
 		fontSize: "12px",
 		lineHeight: "1.4",
 		color: "var(--color-text-error-primary)",
 		fontFamily: "var(--font-family-sans)",
-		boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
 		zIndex: "1000",
 		pointerEvents: "none",
 		maxWidth: "400px",
-		whiteSpace: "pre-wrap",
+		display: "flex",
+		flexDirection: "column",
+		gap: "6px",
 	});
+
+	const parts = message.split("\n\x00\n");
+	for (const part of parts) {
+		tooltip.append(renderErrorCard(part ?? ""));
+	}
+
 	document.body.appendChild(tooltip);
 	errorTooltipEl = tooltip;
 
-	const tooltipHeight = tooltip.getBoundingClientRect().height;
+	const tooltipRect = tooltip.getBoundingClientRect();
+	let top = y - tooltipRect.height - 8;
+	// If tooltip goes above viewport, show below cursor instead
+	if (top < 4) {
+		top = y + 20;
+	}
+	// If it still goes below viewport, clamp to bottom
+	if (top + tooltipRect.height > window.innerHeight - 4) {
+		top = window.innerHeight - tooltipRect.height - 4;
+	}
+	// Final clamp to top
+	if (top < 4) top = 4;
 	tooltip.style.left = `${x}px`;
-	tooltip.style.top = `${y - tooltipHeight - 8}px`;
+	tooltip.style.top = `${top}px`;
 }
 
 function hideErrorTooltip() {
@@ -979,12 +1036,14 @@ type CodeEditorProps = {
 	sql?: SqlConfig;
 	getStructureDefinitions?: GetStructureDefinitions;
 	resourceTypeHint?: string;
+	expandValueSet?: ExpandValueSet;
 	getUrlSuggestions?: GetUrlSuggestions;
+	vimMode?: boolean;
 };
 
 export type CodeEditorView = EditorView;
 
-export type { GetStructureDefinitions } from "./fhir-completion";
+export type { ExpandValueSet, GetStructureDefinitions } from "./fhir-completion";
 export type { GetUrlSuggestions } from "./http";
 export type {
 	SqlConfig,
@@ -1009,7 +1068,9 @@ export function CodeEditor({
 	sql,
 	getStructureDefinitions,
 	resourceTypeHint,
+	expandValueSet,
 	getUrlSuggestions,
+	vimMode = false,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
@@ -1035,6 +1096,7 @@ export function CodeEditor({
 	const additionalExtensionsCompartment = React.useRef(new Compartment());
 	const sqlCompletionCompartment = React.useRef(new Compartment());
 	const fhirCompletionCompartment = React.useRef(new Compartment());
+	const vimCompartment = React.useRef(new Compartment());
 	const [sqlFunctions, setSqlFunctions] = React.useState<
 		string[] | undefined
 	>();
@@ -1050,6 +1112,7 @@ export function CodeEditor({
 			state: EditorState.create({
 				doc: initialValue.current,
 				extensions: [
+					vimCompartment.current.of(vimMode ? vim() : []),
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
 					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
 					...(enableLineNumbers ? [lineNumbers()] : []),
@@ -1083,6 +1146,7 @@ export function CodeEditor({
 					autocompletion({
 						icons: false,
 						maxRenderedOptions: 1000,
+						defaultKeymap: false,
 						addToOptions: [{ render: renderCompletionIcon, position: 20 }],
 						optionClass: (_completion) =>
 							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary flex items-center gap-2",
@@ -1103,21 +1167,17 @@ export function CodeEditor({
 								key: "Tab",
 								run: acceptCompletion,
 							},
-							{
-								key: "Enter",
-								run: (v) => completionStatus(v.state) === "active",
-							},
 						]),
 					),
 					themeCompartment.current.of(baseTheme),
 					completionTheme,
 					keymap.of([
 						...closeBracketsKeymap,
+						...completionKeymap.filter((b) => b.key !== "Enter"),
 						...defaultKeymap,
 						...searchKeymap,
 						...historyKeymap,
 						...foldKeymap,
-						...completionKeymap,
 						...lintKeymap,
 					]),
 					issueLinesField,
@@ -1183,7 +1243,7 @@ export function CodeEditor({
 		if (getStructureDefinitions) {
 			safeDispatch({
 				effects: fhirCompletionCompartment.current.reconfigure(
-					buildFhirCompletionExtension(getStructureDefinitions, resourceTypeHint),
+					buildFhirCompletionExtension(getStructureDefinitions, resourceTypeHint, expandValueSet),
 				),
 			});
 		} else {
@@ -1191,7 +1251,7 @@ export function CodeEditor({
 				effects: fhirCompletionCompartment.current.reconfigure([]),
 			});
 		}
-	}, [view, getStructureDefinitions, resourceTypeHint, safeDispatch]);
+	}, [view, getStructureDefinitions, resourceTypeHint, expandValueSet, safeDispatch]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
@@ -1286,6 +1346,17 @@ export function CodeEditor({
 			],
 		});
 	}, [isReadOnlyTheme, view, safeDispatch]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		safeDispatch({
+			effects: [
+				vimCompartment.current.reconfigure(vimMode ? vim() : []),
+			],
+		});
+	}, [vimMode, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
