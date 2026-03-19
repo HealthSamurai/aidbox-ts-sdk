@@ -5,6 +5,8 @@ import {
 	closeBrackets,
 	closeBracketsKeymap,
 	completionKeymap,
+	completionStatus,
+	moveCompletionSelection,
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
@@ -1012,6 +1014,18 @@ function jsonAutoExpandBraces(): Extension {
 		const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
 		const inner = `${indent}  `;
 
+		// Check if { is inside an extension array — insert {"url": ""} snippet
+		const docText = tr.startState.doc.toString();
+		const textBefore = docText.slice(0, braceFrom);
+		const isInExtArray = /"(?:extension|modifierExtension)"\s*:\s*\[\s*(?:\{[\s\S]*?\}\s*,?\s*)*$/s.test(textBefore);
+		if (isInExtArray) {
+			const insert = `{\n${inner}"url": ""\n${indent}}`;
+			return {
+				changes: { from: braceFrom, to: braceTo, insert },
+				selection: { anchor: braceFrom + insert.lastIndexOf('""') + 1 },
+			};
+		}
+
 		return {
 			changes: { from: braceFrom, to: braceTo, insert: `{\n${inner}\n${indent}}` },
 			selection: { anchor: braceFrom + 2 + inner.length },
@@ -1165,7 +1179,30 @@ export function CodeEditor({
 						keymap.of([
 							{
 								key: "Tab",
-								run: acceptCompletion,
+								run: (v) => {
+									if (completionStatus(v.state) === "active") {
+										return moveCompletionSelection(true)(v);
+									}
+									return false;
+								},
+							},
+							{
+								key: "Shift-Tab",
+								run: (v) => {
+									if (completionStatus(v.state) === "active") {
+										return moveCompletionSelection(false)(v);
+									}
+									return false;
+								},
+							},
+							{
+								key: "Enter",
+								run: (v) => {
+									if (completionStatus(v.state) === "active") {
+										return acceptCompletion(v);
+									}
+									return false;
+								},
 							},
 						]),
 					),
