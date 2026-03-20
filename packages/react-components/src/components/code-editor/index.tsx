@@ -82,7 +82,7 @@ import {
 	type ExpandValueSet,
 	fhirDiagnosticsField,
 	type GetStructureDefinitions,
-} from "./fhir-completion";
+} from "./fhir-autocomplete";
 import { type GetUrlSuggestions, http } from "./http";
 import {
 	buildSqlCompletionExtensions,
@@ -1057,7 +1057,7 @@ type CodeEditorProps = {
 
 export type CodeEditorView = EditorView;
 
-export type { ExpandValueSet, GetStructureDefinitions } from "./fhir-completion";
+export type { ExpandValueSet, GetStructureDefinitions } from "./fhir-autocomplete";
 export type { GetUrlSuggestions } from "./http";
 export type {
 	SqlConfig,
