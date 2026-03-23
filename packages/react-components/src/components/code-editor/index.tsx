@@ -5,6 +5,8 @@ import {
 	closeBrackets,
 	closeBracketsKeymap,
 	completionKeymap,
+	completionStatus,
+	moveCompletionSelection,
 } from "@codemirror/autocomplete";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
@@ -17,8 +19,9 @@ import {
 	HighlightStyle,
 	indentOnInput,
 	syntaxHighlighting,
+	syntaxTree,
 } from "@codemirror/language";
-import { linter, lintGutter, lintKeymap } from "@codemirror/lint";
+import { linter, lintKeymap } from "@codemirror/lint";
 import {
 	closeSearchPanel,
 	findNext,
@@ -34,6 +37,7 @@ import {
 	Compartment,
 	EditorState,
 	type Extension,
+	Prec,
 	RangeSet,
 	StateEffect,
 	StateField,
@@ -46,8 +50,6 @@ import {
 	EditorView,
 	GutterMarker,
 	gutterLineClass,
-	highlightActiveLine,
-	highlightActiveLineGutter,
 	highlightSpecialChars,
 	keymap,
 	lineNumbers,
@@ -55,13 +57,37 @@ import {
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import { Braces, ChevronDown, ChevronUp, Terminal, X } from "lucide-react";
+import { vim } from "@replit/codemirror-vim";
+import {
+	ChevronDown,
+	ChevronsRight,
+	ChevronUp,
+	Heading,
+	Table2,
+	Terminal,
+	X,
+} from "lucide-react";
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-
-import { ComplexTypeIcon, SquareFunctionIcon, TypCodeIcon } from "../../icons";
-import { http } from "./http";
+import {
+	ComplexTypeIcon,
+	ResourceIcon,
+	SquareFunctionIcon,
+	TypCodeIcon,
+} from "../../icons";
+import {
+	buildFhirCompletionExtension,
+	type ExpandValueSet,
+	fhirDiagnosticsField,
+	type GetStructureDefinitions,
+} from "./fhir-autocomplete";
+import { type GetUrlSuggestions, http } from "./http";
+import {
+	buildSqlCompletionExtensions,
+	fetchSqlMetadata,
+	type SqlConfig,
+} from "./sql-completion";
 
 // --- Issue lines: gutter highlighting, line background, hover tooltip ---
 
@@ -77,37 +103,89 @@ const setIssueLinesEffect = StateEffect.define<IssueLine[]>();
 
 let errorTooltipEl: HTMLDivElement | null = null;
 
-function showErrorTooltip(anchor: Element, message: string) {
-	hideErrorTooltip();
+function formatErrorTypeTitle(code: string): string {
+	return code
+		.split("-")
+		.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+		.join(" ");
+}
 
-	const tooltip = document.createElement("div");
-	tooltip.textContent = message;
-	Object.assign(tooltip.style, {
-		position: "fixed",
+function renderErrorCard(msg: string): HTMLElement {
+	const card = document.createElement("div");
+	Object.assign(card.style, {
 		backgroundColor: "var(--color-bg-primary)",
 		border: "1px solid var(--color-border-primary)",
 		borderRadius: "var(--radius-md)",
 		padding: "6px 10px",
+		boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+	});
+	const newlineIdx = msg.indexOf("\n");
+	if (newlineIdx !== -1) {
+		const title = msg.slice(0, newlineIdx);
+		const body = msg.slice(newlineIdx + 1);
+
+		const titleEl = document.createElement("div");
+		titleEl.textContent = formatErrorTypeTitle(title);
+		Object.assign(titleEl.style, { fontWeight: "600" });
+
+		const hr = document.createElement("div");
+		Object.assign(hr.style, {
+			borderTop: "1px solid var(--color-border-primary)",
+			margin: "4px 0",
+		});
+
+		const bodyEl = document.createElement("div");
+		bodyEl.textContent = body;
+		Object.assign(bodyEl.style, { whiteSpace: "pre-wrap" });
+
+		card.append(titleEl, hr, bodyEl);
+	} else {
+		card.textContent = msg;
+		card.style.whiteSpace = "pre-wrap";
+	}
+	return card;
+}
+
+function showErrorTooltip(message: string, x: number, y: number) {
+	hideErrorTooltip();
+
+	const tooltip = document.createElement("div");
+	Object.assign(tooltip.style, {
+		position: "fixed",
 		fontSize: "12px",
 		lineHeight: "1.4",
 		color: "var(--color-text-error-primary)",
 		fontFamily: "var(--font-family-sans)",
-		boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
 		zIndex: "1000",
 		pointerEvents: "none",
 		maxWidth: "400px",
-		whiteSpace: "pre-wrap",
+		display: "flex",
+		flexDirection: "column",
+		gap: "6px",
 	});
+
+	const parts = message.split("\n\x00\n");
+	for (const part of parts) {
+		tooltip.append(renderErrorCard(part ?? ""));
+	}
+
 	document.body.appendChild(tooltip);
 	errorTooltipEl = tooltip;
 
-	const guttersEl = anchor.closest(".cm-gutters");
-	const guttersRect = guttersEl
-		? guttersEl.getBoundingClientRect()
-		: anchor.getBoundingClientRect();
-	const anchorRect = anchor.getBoundingClientRect();
-	tooltip.style.left = `${guttersRect.right + 4}px`;
-	tooltip.style.top = `${anchorRect.top}px`;
+	const tooltipRect = tooltip.getBoundingClientRect();
+	let top = y - tooltipRect.height - 8;
+	// If tooltip goes above viewport, show below cursor instead
+	if (top < 4) {
+		top = y + 20;
+	}
+	// If it still goes below viewport, clamp to bottom
+	if (top + tooltipRect.height > window.innerHeight - 4) {
+		top = window.innerHeight - tooltipRect.height - 4;
+	}
+	// Final clamp to top
+	if (top < 4) top = 4;
+	tooltip.style.left = `${x}px`;
+	tooltip.style.top = `${top}px`;
 }
 
 function hideErrorTooltip() {
@@ -157,6 +235,21 @@ const issueLinesField = StateField.define<{
 				};
 			}
 		}
+		if (tr.docChanged) {
+			try {
+				return {
+					gutterMarkers: state.gutterMarkers.map(tr.changes),
+					lineDecorations: state.lineDecorations.map(tr.changes),
+					messages: state.messages,
+				};
+			} catch {
+				return {
+					gutterMarkers: RangeSet.empty,
+					lineDecorations: Decoration.none,
+					messages: new Map(),
+				};
+			}
+		}
 		return state;
 	},
 	provide(field) {
@@ -167,33 +260,59 @@ const issueLinesField = StateField.define<{
 	},
 });
 
-const errorTooltipHandler = EditorView.domEventHandlers({
-	mouseover(event, view) {
-		const target = event.target as HTMLElement;
-		const gutterEl = target.closest(
-			".cm-lineNumbers .cm-gutterElement",
-		) as HTMLElement | null;
-		if (!gutterEl) {
-			hideErrorTooltip();
-			return false;
-		}
+function getErrorMessageForLine(
+	view: EditorView,
+	lineNo: number,
+): string | undefined {
+	const issueMsg = view.state.field(issueLinesField).messages.get(lineNo);
+	if (issueMsg) return issueMsg;
+	try {
+		return view.state.field(fhirDiagnosticsField).messages.get(lineNo);
+	} catch {
+		return undefined;
+	}
+}
 
+function handleErrorTooltipMove(event: Event, view: EditorView) {
+	const target = event.target as HTMLElement;
+	const mouseEvent = event as MouseEvent;
+
+	// Check gutter line number
+	const gutterEl = target.closest(
+		".cm-lineNumbers .cm-gutterElement",
+	) as HTMLElement | null;
+	if (gutterEl) {
 		const lineNo = Number.parseInt(gutterEl.textContent ?? "", 10);
-		if (Number.isNaN(lineNo)) {
-			hideErrorTooltip();
-			return false;
+		if (!Number.isNaN(lineNo)) {
+			const message = getErrorMessageForLine(view, lineNo);
+			if (message) {
+				showErrorTooltip(message, mouseEvent.clientX, mouseEvent.clientY);
+				return false;
+			}
 		}
-
-		const { messages } = view.state.field(issueLinesField);
-		const message = messages.get(lineNo);
-		if (!message) {
-			hideErrorTooltip();
-			return false;
-		}
-
-		showErrorTooltip(gutterEl, message);
+		hideErrorTooltip();
 		return false;
-	},
+	}
+
+	// Check content line (cm-line) — follow cursor
+	const lineEl = target.closest(".cm-line") as HTMLElement | null;
+	if (lineEl) {
+		const pos = view.posAtDOM(lineEl);
+		const lineNo = view.state.doc.lineAt(pos).number;
+		const message = getErrorMessageForLine(view, lineNo);
+		if (message) {
+			showErrorTooltip(message, mouseEvent.clientX, mouseEvent.clientY);
+			return false;
+		}
+	}
+
+	hideErrorTooltip();
+	return false;
+}
+
+const errorTooltipHandler = EditorView.domEventHandlers({
+	mouseover: handleErrorTooltipMove,
+	mousemove: handleErrorTooltipMove,
 	mouseleave() {
 		hideErrorTooltip();
 		return false;
@@ -230,23 +349,39 @@ const baseTheme = EditorView.theme({
 		fontFamily: "var(--font-family-mono)",
 	},
 	".cm-gutters": {
-		backgroundColor: "var(--color-bg-primary)",
+		backgroundColor: "transparent",
 		border: "none",
 	},
 	".cm-lineNumbers": {
-		paddingLeft: "16px",
+		minWidth: "3.5ch",
+	},
+	".cm-lineNumbers .cm-gutterElement": {
+		minWidth: "3.5ch",
+		paddingRight: "4px",
+		color: "var(--color-text-quaternary)",
+	},
+	".cm-lineNumbers .cm-gutterElement.cm-activeLineGutter": {
+		backgroundColor: "var(--color-bg-primary)",
+		color: "var(--color-text-secondary)",
 	},
 	".cm-activeLineGutter": {
-		backgroundColor: "var(--color-bg-primary)",
-		color: "var(--color-text-primary)",
+		backgroundColor: "transparent !important",
 	},
 	".cm-activeLine": {
-		backgroundColor: "rgba(255, 255, 255, 0)",
+		backgroundColor: "transparent !important",
 	},
-	".cm-errorLineGutter": {
+	".cm-lineNumbers .cm-gutterElement.cm-errorLineGutter": {
 		color: "var(--color-text-error-primary)",
 		backgroundColor:
 			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+	},
+	".cm-foldGutter .cm-gutterElement.cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
+		backgroundColor:
+			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	".cm-errorLine": {
 		backgroundColor:
@@ -266,6 +401,14 @@ const completionTheme = EditorView.theme({
 	".cm-completionLabel": {
 		flex: "1",
 		minWidth: "0",
+		fontFamily: "var(--font-family-mono)",
+		fontSize: "var(--font-size-sm)",
+		lineHeight: "var(--font-leading-5)",
+	},
+	".cm-completionMatchedText": {
+		textDecoration: "none",
+		fontWeight: "600",
+		color: "var(--color-text-link)",
 	},
 	".cm-completionDetail": {
 		color: "var(--color-text-tertiary)",
@@ -278,9 +421,10 @@ const completionTheme = EditorView.theme({
 		border: "1px solid var(--color-border-primary)",
 		borderRadius: "var(--radius-md)",
 		color: "var(--color-text-secondary)",
-		fontFamily: "var(--font-family-sans)",
-		fontSize: "12px",
+		fontFamily: "var(--font-family-mono)",
+		fontSize: "14px",
 		padding: "8px 12px",
+		marginLeft: "8px",
 		lineHeight: "1.4",
 		whiteSpace: "normal",
 		maxWidth: "300px",
@@ -326,19 +470,35 @@ const readOnlyTheme = EditorView.theme({
 		border: "none",
 	},
 	".cm-lineNumbers": {
-		paddingLeft: "16px",
+		minWidth: "3.5ch",
+	},
+	".cm-lineNumbers .cm-gutterElement": {
+		minWidth: "3.5ch",
+		paddingRight: "4px",
+		color: "var(--color-text-quaternary)",
+	},
+	".cm-lineNumbers .cm-gutterElement.cm-activeLineGutter": {
+		backgroundColor: "var(--color-bg-secondary)",
+		color: "var(--color-text-secondary)",
 	},
 	".cm-activeLineGutter": {
-		backgroundColor: "var(--color-bg-secondary)",
-		color: "var(--color-text-primary)",
+		backgroundColor: "transparent !important",
 	},
 	".cm-activeLine": {
-		backgroundColor: "rgba(255, 255, 255, 0)",
+		backgroundColor: "transparent !important",
 	},
-	".cm-errorLineGutter": {
+	".cm-lineNumbers .cm-gutterElement.cm-errorLineGutter": {
 		color: "var(--color-text-error-primary)",
 		backgroundColor:
 			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+	},
+	".cm-foldGutter .cm-gutterElement.cm-errorLineGutter": {
+		color: "var(--color-text-error-primary)",
+		backgroundColor:
+			"color-mix(in srgb, var(--color-text-error-primary) 7%, transparent)",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	".cm-errorLine": {
 		backgroundColor:
@@ -426,6 +586,7 @@ function createSearchPanel(view: EditorView) {
 					alignItems: "center",
 					gap: "2px",
 					padding: "6px 8px",
+					marginTop: "4px",
 					backgroundColor: "var(--color-bg-primary)",
 					border: "1px solid var(--color-border-primary)",
 					borderRadius: "var(--radius-md)",
@@ -562,10 +723,10 @@ function createSearchPanel(view: EditorView) {
 	};
 }
 
-const searchPanelTheme = EditorView.baseTheme({
-	".cm-panels-top": {
+const searchPanelTheme = EditorView.theme({
+	"& .cm-panels-top": {
 		position: "absolute",
-		top: "4px",
+		top: "8px",
 		right: "4px",
 		left: "auto",
 		zIndex: "10",
@@ -573,10 +734,13 @@ const searchPanelTheme = EditorView.baseTheme({
 		border: "none",
 	},
 	".cm-searchMatch": {
-		backgroundColor: "#e9f2fc",
+		backgroundColor: "var(--color-blue-200) !important",
 	},
 	".cm-searchMatch-selected": {
-		backgroundColor: "#d0e2f8",
+		backgroundColor: "var(--color-blue-400) !important",
+	},
+	".cm-selectionMatch": {
+		backgroundColor: "var(--color-blue-100) !important",
 	},
 });
 
@@ -690,23 +854,107 @@ const customSQLDialect = SQLDialect.define({
 	builtin: SQL_BUILTIN.join(" "),
 });
 
+function computeYamlNewlineIndent(lineText: string): string {
+	const indent = lineText.match(/^(\s*)/)?.[1] ?? "";
+	const trimmed = lineText.trimEnd();
+
+	if (trimmed.endsWith(":")) {
+		// After "key:" with no value — increase indent
+		// For "  - key:", base indent is at the dash content level
+		const dashMatch = trimmed.match(/^(\s*-\s+)/);
+		const baseIndent = dashMatch?.[1]
+			? " ".repeat(dashMatch[1].length)
+			: indent;
+		return `${baseIndent}  `;
+	}
+	if (/^\s*-\s*$/.test(trimmed)) {
+		// After bare "- " (array item marker only) — align to content after dash
+		const dashMatch = trimmed.match(/^(\s*-\s*)/);
+		return dashMatch?.[1] ? " ".repeat(dashMatch[1].length) : indent;
+	}
+	// Preserve current indent; for "  - key: val" align to key level
+	const dashKeyMatch = trimmed.match(/^(\s*-\s+)\S/);
+	return dashKeyMatch?.[1] ? " ".repeat(dashKeyMatch[1].length) : indent;
+}
+
+function yamlEnterKeymap(): Extension {
+	return keymap.of([
+		{
+			key: "Enter",
+			run: (view) => {
+				const { state } = view;
+				const pos = state.selection.main.head;
+				const line = state.doc.lineAt(pos);
+				const newIndent = computeYamlNewlineIndent(line.text);
+
+				view.dispatch({
+					changes: { from: pos, insert: `\n${newIndent}` },
+					selection: { anchor: pos + 1 + newIndent.length },
+				});
+				return true;
+			},
+		},
+	]);
+}
+
+function httpYamlEnterKeymap(): Extension {
+	return keymap.of([
+		{
+			key: "Enter",
+			run: (view) => {
+				const { state } = view;
+				const pos = state.selection.main.head;
+				const doc = state.doc.toString();
+
+				// Only handle if cursor is in YAML body (after blank line separator)
+				const textBeforeCursor = doc.slice(0, pos);
+				const blankLineIdx = textBeforeCursor.indexOf("\n\n");
+				if (blankLineIdx === -1 || pos <= blankLineIdx + 1) return false;
+
+				// Check if the body looks like YAML (not JSON)
+				const bodyStart = blankLineIdx + 2;
+				const bodyPrefix = doc.slice(bodyStart, bodyStart + 20).trimStart();
+				if (bodyPrefix.startsWith("{") || bodyPrefix.startsWith("["))
+					return false;
+
+				const line = state.doc.lineAt(pos);
+				const newIndent = computeYamlNewlineIndent(line.text);
+
+				view.dispatch({
+					changes: { from: pos, insert: `\n${newIndent}` },
+					selection: { anchor: pos + 1 + newIndent.length },
+				});
+				return true;
+			},
+		},
+	]);
+}
+
 type LanguageMode = "json" | "http" | "sql" | "yaml";
 
-function languageExtensions(mode: LanguageMode, sqlExtraBuiltins?: string[]) {
+function languageExtensions(
+	mode: LanguageMode,
+	sqlExtraBuiltins?: string[],
+	getUrlSuggestions?: GetUrlSuggestions,
+) {
 	if (mode === "http") {
 		const jsonLang = json();
 		const yamlLang = yaml();
 		return [
-			http((ct) =>
-				ct === "application/json"
-					? jsonLang.language
-					: ct === "text/yaml" ||
-							ct === "application/yaml" ||
-							ct === "application/x-yaml"
-						? yamlLang.language
-						: null,
+			http(
+				(ct) =>
+					ct === "application/json"
+						? jsonLang.language
+						: ct === "text/yaml" ||
+								ct === "application/yaml" ||
+								ct === "application/x-yaml"
+							? yamlLang.language
+							: null,
+				getUrlSuggestions,
 			),
 			syntaxHighlighting(customHighlightStyle),
+			jsonAutoExpandBraces(),
+			httpYamlEnterKeymap(),
 		];
 	} else if (mode === "sql") {
 		let dialect = customSQLDialect;
@@ -718,14 +966,79 @@ function languageExtensions(mode: LanguageMode, sqlExtraBuiltins?: string[]) {
 		}
 		return [sql({ dialect }), syntaxHighlighting(customHighlightStyle)];
 	} else if (mode === "yaml") {
-		return [yaml(), syntaxHighlighting(customHighlightStyle)];
+		return [
+			yaml(),
+			syntaxHighlighting(customHighlightStyle),
+			yamlEnterKeymap(),
+		];
 	} else {
 		return [
 			json(),
-			linter(jsonParseLinter(), { delay: 300 }),
+			linter(
+				(view) => {
+					if (!view.state.doc.toString().trim()) return [];
+					return jsonParseLinter()(view);
+				},
+				{ delay: 300 },
+			),
 			syntaxHighlighting(customHighlightStyle),
+			jsonAutoExpandBraces(),
 		];
 	}
+}
+
+function jsonAutoExpandBraces(): Extension {
+	return EditorState.transactionFilter.of((tr) => {
+		if (!tr.docChanged) return tr;
+
+		let braceFrom = -1;
+		let braceTo = -1;
+		let changeCount = 0;
+
+		tr.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
+			changeCount++;
+			if (inserted.toString() === "{}") {
+				braceFrom = fromA;
+				braceTo = toA;
+			}
+		});
+
+		if (changeCount !== 1 || braceFrom === -1) return tr;
+
+		const tree = syntaxTree(tr.startState);
+		const nodeBefore = tree.resolveInner(braceFrom, -1);
+		if (nodeBefore.name === "String" || nodeBefore.parent?.name === "String") {
+			return tr;
+		}
+
+		const line = tr.startState.doc.lineAt(braceFrom);
+		const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
+		const inner = `${indent}  `;
+
+		// Check if { is inside an extension array — insert {"url": ""} snippet
+		const docText = tr.startState.doc.toString();
+		const textBefore = docText.slice(0, braceFrom);
+		const isInExtArray =
+			/"(?:extension|modifierExtension)"\s*:\s*\[\s*(?:\{[\s\S]*?\}\s*,?\s*)*$/s.test(
+				textBefore,
+			);
+		if (isInExtArray) {
+			const insert = `{\n${inner}"url": ""\n${indent}}`;
+			return {
+				changes: { from: braceFrom, to: braceTo, insert },
+				selection: { anchor: braceFrom + insert.lastIndexOf('""') + 1 },
+			};
+		}
+
+		return {
+			changes: {
+				from: braceFrom,
+				to: braceTo,
+				insert: `{\n${inner}\n${indent}}`,
+			},
+			selection: { anchor: braceFrom + 2 + inner.length },
+		};
+	});
 }
 
 type CodeEditorProps = {
@@ -741,12 +1054,27 @@ type CodeEditorProps = {
 	additionalExtensions?: Extension[];
 	issueLineNumbers?: { line: number; message?: string }[];
 	foldGutter?: boolean;
-	lintGutter?: boolean;
 	lineNumbers?: boolean;
-	sqlExtraBuiltins?: string[];
+	sql?: SqlConfig;
+	getStructureDefinitions?: GetStructureDefinitions;
+	resourceTypeHint?: string;
+	expandValueSet?: ExpandValueSet;
+	getUrlSuggestions?: GetUrlSuggestions;
+	vimMode?: boolean;
 };
 
 export type CodeEditorView = EditorView;
+
+export type {
+	ExpandValueSet,
+	GetStructureDefinitions,
+} from "./fhir-autocomplete";
+export type { GetUrlSuggestions } from "./http";
+export type {
+	SqlConfig,
+	SqlMetadata,
+	SqlQueryType,
+} from "./sql-completion";
 
 export function CodeEditor({
 	defaultValue,
@@ -761,12 +1089,27 @@ export function CodeEditor({
 	additionalExtensions,
 	issueLineNumbers,
 	foldGutter: enableFoldGutter = true,
-	lintGutter: enableLintGutter = true,
 	lineNumbers: enableLineNumbers = true,
-	sqlExtraBuiltins,
+	sql,
+	getStructureDefinitions,
+	resourceTypeHint,
+	expandValueSet,
+	getUrlSuggestions,
+	vimMode = false,
 }: CodeEditorProps) {
 	const domRef = React.useRef(null);
 	const [view, setView] = React.useState<EditorView | null>(null);
+
+	const safeDispatch = React.useCallback(
+		(spec: Parameters<EditorView["dispatch"]>[0]) => {
+			try {
+				view?.dispatch(spec);
+			} catch {
+				// Ignore RangeError from stale decoration positions during reconfigure
+			}
+		},
+		[view],
+	);
 
 	const initialValue = React.useRef(defaultValue ?? "");
 
@@ -776,6 +1119,13 @@ export function CodeEditor({
 	const readOnlyCompartment = React.useRef(new Compartment());
 	const themeCompartment = React.useRef(new Compartment());
 	const additionalExtensionsCompartment = React.useRef(new Compartment());
+	const sqlCompletionCompartment = React.useRef(new Compartment());
+	const fhirCompletionCompartment = React.useRef(new Compartment());
+	const vimCompartment = React.useRef(new Compartment());
+	const [sqlFunctions, setSqlFunctions] = React.useState<
+		string[] | undefined
+	>();
+	const executeSqlRef = React.useRef(sql?.executeSql);
 
 	React.useEffect(() => {
 		if (!domRef.current) {
@@ -787,10 +1137,28 @@ export function CodeEditor({
 			state: EditorState.create({
 				doc: initialValue.current,
 				extensions: [
+					vimCompartment.current.of(vimMode ? vim() : []),
 					EditorView.contentAttributes.of({ "data-gramm": "false" }),
 					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
 					...(enableLineNumbers ? [lineNumbers()] : []),
-					...(enableFoldGutter ? [foldGutter()] : []),
+					...(enableFoldGutter
+						? [
+								foldGutter({
+									markerDOM: (open) => {
+										const el = document.createElement("span");
+										el.style.display = "flex";
+										el.style.alignItems = "center";
+										el.style.justifyContent = "center";
+										el.style.width = "100%";
+										el.style.height = "100%";
+										el.innerHTML = open
+											? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
+											: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+										return el;
+									},
+								}),
+							]
+						: []),
 					highlightSpecialChars(),
 					history(),
 					drawSelection(),
@@ -803,6 +1171,7 @@ export function CodeEditor({
 					autocompletion({
 						icons: false,
 						maxRenderedOptions: 1000,
+						defaultKeymap: false,
 						addToOptions: [{ render: renderCompletionIcon, position: 20 }],
 						optionClass: (_completion) =>
 							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary flex items-center gap-2",
@@ -816,27 +1185,58 @@ export function CodeEditor({
 					}),
 					rectangularSelection(),
 					crosshairCursor(),
-					highlightActiveLine(),
-					highlightActiveLineGutter(),
 					highlightSelectionMatches(),
+					Prec.highest(
+						keymap.of([
+							{
+								key: "Tab",
+								run: (v) => {
+									if (completionStatus(v.state) === "active") {
+										return moveCompletionSelection(true)(v);
+									}
+									return false;
+								},
+							},
+							{
+								key: "Shift-Tab",
+								run: (v) => {
+									if (completionStatus(v.state) === "active") {
+										return moveCompletionSelection(false)(v);
+									}
+									return false;
+								},
+							},
+							{
+								key: "Enter",
+								run: (v) => {
+									if (completionStatus(v.state) === "active") {
+										return acceptCompletion(v);
+									}
+									return false;
+								},
+							},
+						]),
+					),
 					themeCompartment.current.of(baseTheme),
 					completionTheme,
 					keymap.of([
 						...closeBracketsKeymap,
+						...completionKeymap.filter((b) => b.key !== "Enter"),
 						...defaultKeymap,
 						...searchKeymap,
 						...historyKeymap,
 						...foldKeymap,
-						...completionKeymap,
 						...lintKeymap,
 					]),
-					...(enableLintGutter ? [lintGutter()] : []),
 					issueLinesField,
 					errorTooltipHandler,
+					EditorView.exceptionSink.of(() => {}),
 					...customSearchExtension,
 					onChangeComparment.current.of([]),
 					onUpdateComparment.current.of([]),
 					additionalExtensionsCompartment.current.of([]),
+					sqlCompletionCompartment.current.of([]),
+					fhirCompletionCompartment.current.of([]),
 				],
 			}),
 		});
@@ -847,7 +1247,69 @@ export function CodeEditor({
 			view.destroy();
 			setView(() => null);
 		};
-	}, [enableFoldGutter, enableLineNumbers, enableLintGutter]);
+	}, [enableFoldGutter, enableLineNumbers, vimMode]);
+
+	React.useEffect(() => {
+		executeSqlRef.current = sql?.executeSql;
+	});
+
+	React.useEffect(() => {
+		if (!view || !sql) {
+			if (view) {
+				safeDispatch({
+					effects: sqlCompletionCompartment.current.reconfigure([]),
+				});
+			}
+			setSqlFunctions(undefined);
+			return;
+		}
+
+		let cancelled = false;
+
+		fetchSqlMetadata(sql.executeSql)
+			.then((metadata) => {
+				if (cancelled) return;
+				setSqlFunctions(metadata.functions);
+				const extensions = buildSqlCompletionExtensions(
+					metadata,
+					(query, type) =>
+						executeSqlRef.current?.(query, type) ?? Promise.resolve([]),
+				);
+				safeDispatch({
+					effects: sqlCompletionCompartment.current.reconfigure(extensions),
+				});
+			})
+			.catch(() => {});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [view, sql, safeDispatch]);
+
+	React.useEffect(() => {
+		if (!view) return;
+		if (getStructureDefinitions) {
+			safeDispatch({
+				effects: fhirCompletionCompartment.current.reconfigure(
+					buildFhirCompletionExtension(
+						getStructureDefinitions,
+						resourceTypeHint,
+						expandValueSet,
+					),
+				),
+			});
+		} else {
+			safeDispatch({
+				effects: fhirCompletionCompartment.current.reconfigure([]),
+			});
+		}
+	}, [
+		view,
+		getStructureDefinitions,
+		resourceTypeHint,
+		expandValueSet,
+		safeDispatch,
+	]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
@@ -856,7 +1318,7 @@ export function CodeEditor({
 	}, [view, viewCallback]);
 
 	React.useEffect(() => {
-		view?.dispatch({
+		safeDispatch({
 			effects: onChangeComparment.current.reconfigure([
 				EditorView.updateListener.of((update) => {
 					if (update.docChanged && onChange) {
@@ -865,10 +1327,10 @@ export function CodeEditor({
 				}),
 			]),
 		});
-	}, [view, onChange]);
+	}, [onChange, safeDispatch]);
 
 	React.useEffect(() => {
-		view?.dispatch({
+		safeDispatch({
 			effects: onUpdateComparment.current.reconfigure([
 				EditorView.updateListener.of((update) => {
 					if (onUpdate) {
@@ -877,7 +1339,7 @@ export function CodeEditor({
 				}),
 			]),
 		});
-	}, [view, onUpdate]);
+	}, [onUpdate, safeDispatch]);
 
 	// FIXME: it is probably better to have CM manage its state.
 	React.useEffect(() => {
@@ -887,7 +1349,7 @@ export function CodeEditor({
 
 		const currentDoc = view.state.doc.toString();
 		if (currentDoc !== currentValue) {
-			view.dispatch({
+			safeDispatch({
 				changes: {
 					from: 0,
 					to: currentDoc.length,
@@ -895,66 +1357,84 @@ export function CodeEditor({
 				},
 			});
 		}
-	}, [currentValue, view]);
+	}, [currentValue, view, safeDispatch]);
+
+	const getUrlSuggestionsRef = React.useRef(getUrlSuggestions);
+	getUrlSuggestionsRef.current = getUrlSuggestions;
+
+	const stableGetUrlSuggestions = React.useMemo(() => {
+		if (!getUrlSuggestions) return undefined;
+		return ((path: string, method: string) =>
+			getUrlSuggestionsRef.current?.(path, method) ?? []) as GetUrlSuggestions;
+	}, [getUrlSuggestions]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: languageCompartment.current.reconfigure(
-				languageExtensions(mode, sqlExtraBuiltins),
+				languageExtensions(mode, sqlFunctions, stableGetUrlSuggestions),
 			),
 		});
-	}, [mode, view, sqlExtraBuiltins]);
+	}, [mode, view, sqlFunctions, stableGetUrlSuggestions, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: [
 				readOnlyCompartment.current.reconfigure(
 					EditorState.readOnly.of(readOnly),
 				),
 			],
 		});
-	}, [readOnly, view]);
+	}, [readOnly, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: [
 				themeCompartment.current.reconfigure(
 					isReadOnlyTheme ? readOnlyTheme : baseTheme,
 				),
 			],
 		});
-	}, [isReadOnlyTheme, view]);
+	}, [isReadOnlyTheme, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
+			effects: [vimCompartment.current.reconfigure(vimMode ? vim() : [])],
+		});
+	}, [vimMode, view, safeDispatch]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		safeDispatch({
 			effects: [
 				additionalExtensionsCompartment.current.reconfigure(
 					additionalExtensions ?? [],
 				),
 			],
 		});
-	}, [additionalExtensions, view]);
+	}, [additionalExtensions, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
 			return;
 		}
-		view.dispatch({
+		safeDispatch({
 			effects: setIssueLinesEffect.of(issueLineNumbers ?? []),
 		});
-	}, [issueLineNumbers, view]);
+	}, [issueLineNumbers, view, safeDispatch]);
 
 	return <div className="h-full w-full" ref={domRef} id={id} />;
 }
@@ -1012,21 +1492,30 @@ const editorInputTheme = EditorView.theme({
 });
 
 const KeywordIcon = () => <Terminal size={16} color="#717684" />;
-const OperatorIcon = () => <Braces size={16} color="#717684" />;
+const OperatorIcon = () => <ChevronsRight size={16} color="#717684" />;
+const TableIcon = () => <Table2 size={16} color="#717684" />;
+const HeaderIcon = () => <Heading size={16} color="#717684" />;
 
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;
 	if (completion.type === "keyword") return KeywordIcon;
 	if (completion.type === "operator") return OperatorIcon;
+	if (completion.type === "table") return TableIcon;
+	if (completion.type === "header") return HeaderIcon;
+	if (completion.type === "text") return TypCodeIcon;
+	if (completion.type === "type") return ResourceIcon;
+	if (completion.type === "search-param") return null;
 	const detail = completion.detail;
 	if (!detail) {
 		if (completion.type === "variable") return SquareFunctionIcon;
-		return null;
+		return TypCodeIcon;
 	}
 	const typeName = detail.replace(/\[\]$/, "");
-	if (!typeName) return null;
+	if (!typeName) return TypCodeIcon;
+	// Search param types (TOKEN, REFERENCE) — no icon
+	if (typeName === typeName.toUpperCase()) return null;
 	const firstChar = typeName[0];
-	if (!firstChar) return null;
+	if (!firstChar) return TypCodeIcon;
 	const isComplex = firstChar === firstChar.toUpperCase();
 	return isComplex ? ComplexTypeIcon : TypCodeIcon;
 }
@@ -1039,6 +1528,8 @@ function renderCompletionIcon(completion: Completion): Node {
 		flushSync(() => {
 			createRoot(container).render(<Icon />);
 		});
+	} else {
+		container.style.display = "none";
 	}
 	return container;
 }

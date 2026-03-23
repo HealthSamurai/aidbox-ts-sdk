@@ -1,54 +1,44 @@
 "use client";
 import { GripVerticalIcon } from "lucide-react";
 import type * as React from "react";
-import { Group, Panel, Separator } from "react-resizable-panels";
+import * as ResizablePrimitive from "react-resizable-panels";
 
 import { cn } from "#shadcn/lib/utils";
 
 function ResizablePanelGroup({
 	className,
-	direction,
-	orientation = direction,
 	...props
-}: React.ComponentProps<typeof Group> & {
-	/** @deprecated Use `orientation` instead */
-	direction?: "horizontal" | "vertical";
-}) {
+}: React.ComponentProps<typeof ResizablePrimitive.PanelGroup>) {
 	return (
-		<Group
+		<ResizablePrimitive.PanelGroup
 			data-slot="resizable-panel-group"
-			className={cn("flex h-full w-full", className)}
-			orientation={orientation}
+			className={cn(
+				"flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
+				className,
+			)}
 			{...props}
 		/>
 	);
 }
 
 function ResizablePanel({
-	style,
 	...props
-}: React.ComponentProps<typeof Panel>) {
-	return (
-		<Panel
-			data-slot="resizable-panel"
-			style={{ overflow: "hidden", ...style }}
-			{...props}
-		/>
-	);
+}: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
+	return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />;
 }
 
 function ResizableHandle({
 	withHandle,
 	className,
 	...props
-}: React.ComponentProps<typeof Separator> & {
+}: React.ComponentProps<typeof ResizablePrimitive.PanelResizeHandle> & {
 	withHandle?: boolean;
 }) {
 	return (
-		<Separator
+		<ResizablePrimitive.PanelResizeHandle
 			data-slot="resizable-handle"
 			className={cn(
-				"bg-border border-x border-border hover:border-bg-link hover:bg-bg-link relative flex w-px items-center justify-center outline-hidden after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 aria-[orientation=horizontal]:h-px aria-[orientation=horizontal]:w-full aria-[orientation=horizontal]:border-x-0 aria-[orientation=horizontal]:border-y aria-[orientation=horizontal]:after:left-0 aria-[orientation=horizontal]:after:h-1 aria-[orientation=horizontal]:after:w-full aria-[orientation=horizontal]:after:translate-x-0 aria-[orientation=horizontal]:after:-translate-y-1/2 [&[aria-orientation=horizontal]>div]:rotate-90",
+				"bg-border border-x border-border hover:border-bg-link hover:bg-bg-link focus-visible:ring-ring relative flex w-px items-center justify-center after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:outline-hidden data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:border-x-0 data-[panel-group-direction=vertical]:border-y data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:translate-x-0 data-[panel-group-direction=vertical]:after:-translate-y-1/2 [&[data-panel-group-direction=vertical]>div]:rotate-90",
 				className,
 			)}
 			{...props}
@@ -58,7 +48,7 @@ function ResizableHandle({
 					<GripVerticalIcon className="size-2.5" />
 				</div>
 			)}
-		</Separator>
+		</ResizablePrimitive.PanelResizeHandle>
 	);
 }
 

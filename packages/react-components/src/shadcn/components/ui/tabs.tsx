@@ -443,16 +443,174 @@ function TabScrollRightButton({
 	);
 }
 
+type DragState = {
+	index: number;
+	startX: number;
+	offsetX: number;
+	currentIndex: number;
+	widths: number[];
+	lefts: number[];
+};
+
+const DRAG_THRESHOLD = 5;
+
+function useTabReorder(
+	onReorder: ((fromIndex: number, toIndex: number) => void) | undefined,
+) {
+	const [drag, setDrag] = React.useState<DragState | null>(null);
+	const dragRef = React.useRef<DragState | null>(null);
+	const pendingRef = React.useRef(false);
+	const itemsRef = React.useRef<(HTMLDivElement | null)[]>([]);
+
+	const handlePointerDown = React.useCallback(
+		(e: React.PointerEvent, index: number) => {
+			if (!onReorder || e.button !== 0) return;
+			const items = itemsRef.current;
+			const widths = items.map((el) => el?.offsetWidth ?? 0);
+			const lefts: number[] = [];
+			let acc = 0;
+			for (const w of widths) {
+				lefts.push(acc);
+				acc += w;
+			}
+			dragRef.current = {
+				index,
+				startX: e.clientX,
+				offsetX: 0,
+				currentIndex: index,
+				widths,
+				lefts,
+			};
+			pendingRef.current = true;
+			(e.target as HTMLElement).setPointerCapture(e.pointerId);
+		},
+		[onReorder],
+	);
+
+	const handlePointerMove = React.useCallback((e: React.PointerEvent) => {
+		const d = dragRef.current;
+		if (!d) return;
+		const dx = e.clientX - d.startX;
+		if (pendingRef.current) {
+			if (Math.abs(dx) < DRAG_THRESHOLD) return;
+			pendingRef.current = false;
+		}
+		const draggedLeft = d.lefts[d.index] ?? 0;
+		const draggedWidth = d.widths[d.index] ?? 0;
+		const draggedRightEdge = draggedLeft + draggedWidth + dx;
+		const draggedLeftEdge = draggedLeft + dx;
+		let newIndex = d.index;
+		const TRIGGER_RATIO = 0.3;
+		for (let i = 0; i < d.lefts.length; i++) {
+			if (i === d.index) continue;
+			const left = d.lefts[i] ?? 0;
+			const width = d.widths[i] ?? 0;
+			if (i > d.index) {
+				// Dragging right: trigger when right edge enters 30% of target
+				if (draggedRightEdge > left + width * TRIGGER_RATIO) newIndex = i;
+			} else {
+				// Dragging left: trigger when left edge enters 30% from right
+				if (draggedLeftEdge < left + width * (1 - TRIGGER_RATIO))
+					newIndex = Math.min(newIndex, i);
+			}
+		}
+		const next: DragState = { ...d, offsetX: dx, currentIndex: newIndex };
+		dragRef.current = next;
+		setDrag(next);
+	}, []);
+
+	const handlePointerUp = React.useCallback(() => {
+		const d = dragRef.current;
+		if (d && !pendingRef.current && d.index !== d.currentIndex) {
+			onReorder?.(d.index, d.currentIndex);
+		}
+		dragRef.current = null;
+		pendingRef.current = false;
+		setDrag(null);
+	}, [onReorder]);
+
+	const getTransform = React.useCallback(
+		(index: number): React.CSSProperties => {
+			if (!drag || pendingRef.current) return {};
+			if (index === drag.index) {
+				return {
+					transform: `translateX(${drag.offsetX}px)`,
+					zIndex: 10,
+					position: "relative",
+					background: "var(--color-bg-primary)",
+					borderLeft: "1px solid var(--color-border-default)",
+				};
+			}
+			const from = drag.index;
+			const to = drag.currentIndex;
+			const draggedWidth = drag.widths[from] ?? 0;
+			if (from < to && index > from && index <= to) {
+				return {
+					transform: `translateX(${-draggedWidth}px)`,
+					transition: "transform 200ms ease",
+				};
+			}
+			if (from > to && index >= to && index < from) {
+				return {
+					transform: `translateX(${draggedWidth}px)`,
+					transition: "transform 200ms ease",
+				};
+			}
+			return { transition: "transform 200ms ease" };
+		},
+		[drag],
+	);
+
+	return {
+		drag,
+		itemsRef,
+		handlePointerDown,
+		handlePointerMove,
+		handlePointerUp,
+		getTransform,
+	};
+}
+
 function TabsBrowserList({
 	className,
 	children,
+	onReorder,
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+}: React.ComponentProps<typeof TabsPrimitive.List> & {
+	onReorder?: (fromIndex: number, toIndex: number) => void;
+}) {
 	const tabsListRef = React.useRef<HTMLDivElement | null>(null);
 
 	const [showScrollButtons, setShowScrollButtons] = React.useState(false);
 	const [canScrollLeft, setCanScrollLeft] = React.useState(false);
 	const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+	const {
+		drag,
+		itemsRef,
+		handlePointerDown,
+		handlePointerMove,
+		handlePointerUp,
+		getTransform,
+	} = useTabReorder(onReorder);
+
+	const wrappedChildren =
+		onReorder && React.Children.count(children) > 1
+			? React.Children.map(children, (child, index) => (
+					<div
+						ref={(el) => {
+							itemsRef.current[index] = el;
+						}}
+						style={getTransform(index)}
+						onPointerDown={(e) => handlePointerDown(e, index)}
+						onPointerMove={handlePointerMove}
+						onPointerUp={handlePointerUp}
+						className={cn(drag?.index === index && "cursor-grabbing")}
+					>
+						{child}
+					</div>
+				))
+			: children;
 
 	return (
 		<React.Fragment>
@@ -506,7 +664,7 @@ function TabsBrowserList({
 				{...props}
 				ref={tabsListRef}
 			>
-				{children}
+				{wrappedChildren}
 			</TabsList>
 
 			{showScrollButtons && (

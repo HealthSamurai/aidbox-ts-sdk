@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  fast-xml-parser: '>=5.5.6'
+
 importers:
 
   .:
@@ -52,11 +55,11 @@ importers:
   packages/aidbox-fhirpath-lsp:
     dependencies:
       '@atomic-ehr/fhirpath':
-        specifier: 0.1.3
-        version: 0.1.3(typescript@5.9.3)
+        specifier: 0.1.4
+        version: 0.1.4(typescript@5.9.3)
       '@atomic-ehr/fhirpath-lsp':
-        specifier: 0.0.6
-        version: 0.0.6(typescript@5.9.3)
+        specifier: 0.0.7
+        version: 0.0.7(typescript@5.9.3)
       '@health-samurai/aidbox-client':
         specifier: workspace:^
         version: link:../aidbox-client
@@ -253,6 +256,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@replit/codemirror-vim':
+        specifier: ^6.3.0
+        version: 6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.2)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/view@6.40.0)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -296,8 +302,8 @@ importers:
         specifier: ^7.71.2
         version: 7.71.2(react@19.2.4)
       react-resizable-panels:
-        specifier: ^4.7.2
-        version: 4.7.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^3.0.6
+        version: 3.0.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       recharts:
         specifier: 3.8.0
         version: 3.8.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react-is@18.3.1)(react@19.2.4)(redux@5.0.1)
@@ -402,11 +408,11 @@ packages:
     peerDependencies:
       typescript: ^5
 
-  '@atomic-ehr/fhirpath-lsp@0.0.6':
-    resolution: {integrity: sha512-G7uvLBESblf4SRTqeC8iCLPPZj+s6tB8eTFUGyT4OPIAbjWqeDI3D16iL6HXiubL+ypC6uIWJw7JfcnAXbbdaw==}
+  '@atomic-ehr/fhirpath-lsp@0.0.7':
+    resolution: {integrity: sha512-rhnf/VrTKSa69cOzlFc9Z3bow1YlvJ2/5AZ4uKX9C769muZZKTbu8atN+NOmCOgSD8m+4q8e6xfRvbRSj7lZxg==}
 
-  '@atomic-ehr/fhirpath@0.1.3':
-    resolution: {integrity: sha512-VoeVRMbHk6i41wErdki82Mp2LLhxsDbE1deJiQx3v+HUWydHyyjg7ZHbuc9d+9Ecu13ZWEmkvcdumH+7bJmsew==}
+  '@atomic-ehr/fhirpath@0.1.4':
+    resolution: {integrity: sha512-A26knB2XGfCiu6vXAfYyusxToxHwdIddRLrkpjrYlI/qZssjspHULQLzANvLVlsQW5uPpOF+bloXIv0r3qOpSQ==}
     peerDependencies:
       typescript: ^5
 
@@ -1869,6 +1875,15 @@ packages:
       react-redux:
         optional: true
 
+  '@replit/codemirror-vim@6.3.0':
+    resolution: {integrity: sha512-aTx931ULAMuJx6xLf7KQDOL7CxD+Sa05FktTDrtLaSy53uj01ll3Zf17JdKsriER248oS55GBzg0CfCTjEneAQ==}
+    peerDependencies:
+      '@codemirror/commands': 6.x.x
+      '@codemirror/language': 6.x.x
+      '@codemirror/search': 6.x.x
+      '@codemirror/state': 6.x.x
+      '@codemirror/view': 6.x.x
+
   '@rolldown/binding-android-arm64@1.0.0-rc.9':
     resolution: {integrity: sha512-lcJL0bN5hpgJfSIz/8PIf02irmyL43P+j1pTCfbD1DbLkmGRuFIA4DD3B3ZOvGqG0XiVvRznbKtN0COQVaKUTg==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -3054,8 +3069,11 @@ packages:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
     engines: {node: '>=8.6.0'}
 
-  fast-xml-parser@5.3.9:
-    resolution: {integrity: sha512-zU0KUuO9U+fLGduTDdxQ6qsQLIxRg4EK5AMduwBNGNCSfCGRSbNS7OpH343NFQlLDg1jxoH68JSbOPAGksIGvg==}
+  fast-xml-builder@1.1.4:
+    resolution: {integrity: sha512-f2jhpN4Eccy0/Uz9csxh3Nu6q4ErKxf0XIsasomfOihuSUa3/xw6w8dnOtCDgEItQFJG8KyXPzQXzcODDrrbOg==}
+
+  fast-xml-parser@5.5.8:
+    resolution: {integrity: sha512-Z7Fh2nVQSb2d+poDViM063ix2ZGt9jmY1nWhPfHBOK2Hgnb/OW3P4Et3P/81SEej0J7QbWtJqxO05h8QYfK7LQ==}
     hasBin: true
 
   fastq@1.20.1:
@@ -3493,6 +3511,10 @@ packages:
     resolution: {integrity: sha512-mlVgR3PGuzlo0MmTdk4cXqXWlwQDLnONTAg6sm62XkMJEiRxN3GL3SffkYvqwonbkJBcrI7Uvv5Zh9yjvn2iUw==}
     engines: {node: '>=12.20'}
 
+  path-expression-matcher@1.2.0:
+    resolution: {integrity: sha512-DwmPWeFn+tq7TiyJ2CxezCAirXjFxvaiD03npak3cRjlP9+OjTmSy1EpIrEbh+l6JgUundniloMLDQ/6VTdhLQ==}
+    engines: {node: '>=14.0.0'}
+
   path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
     engines: {node: '>=8'}
@@ -3639,11 +3661,11 @@ packages:
       '@types/react':
         optional: true
 
-  react-resizable-panels@4.7.2:
-    resolution: {integrity: sha512-1L2vyeBG96hp7N6x6rzYXJ8EjYiDiffMsqj3cd+T9aOKwscvuyCn2CuZ5q3PoUSTIJUM6Q5DgXH1bdDe6uvh2w==}
+  react-resizable-panels@3.0.6:
+    resolution: {integrity: sha512-b3qKHQ3MLqOgSS+FRYKapNkJZf5EQzuf6+RLiq1/IlTHw99YrZ2NJZLk4hQIzTnnIkRg2LUqyVinu6YWWpUYew==}
     peerDependencies:
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
+      react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
   react-style-singleton@2.2.3:
     resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
@@ -4251,9 +4273,9 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  '@atomic-ehr/fhirpath-lsp@0.0.6(typescript@5.9.3)':
+  '@atomic-ehr/fhirpath-lsp@0.0.7(typescript@5.9.3)':
     dependencies:
-      '@atomic-ehr/fhirpath': 0.1.3(typescript@5.9.3)
+      '@atomic-ehr/fhirpath': 0.1.4(typescript@5.9.3)
       '@codemirror/autocomplete': 6.20.1
       '@codemirror/commands': 6.10.3
       '@codemirror/language': 6.12.2
@@ -4268,12 +4290,12 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@atomic-ehr/fhirpath@0.1.3(typescript@5.9.3)':
+  '@atomic-ehr/fhirpath@0.1.4(typescript@5.9.3)':
     dependencies:
       '@atomic-ehr/fhir-canonical-manager': 0.0.11(typescript@5.9.3)
       '@atomic-ehr/fhirschema': 0.0.2(typescript@5.9.3)
       '@atomic-ehr/ucum': 0.2.5(typescript@5.9.3)
-      fast-xml-parser: 5.3.9
+      fast-xml-parser: 5.5.8
       typescript: 5.9.3
 
   '@atomic-ehr/fhirschema@0.0.2(typescript@5.9.3)':
@@ -5721,6 +5743,14 @@ snapshots:
       react: 19.2.4
       react-redux: 9.2.0(@types/react@19.2.14)(react@19.2.4)(redux@5.0.1)
 
+  '@replit/codemirror-vim@6.3.0(@codemirror/commands@6.10.3)(@codemirror/language@6.12.2)(@codemirror/search@6.6.0)(@codemirror/state@6.6.0)(@codemirror/view@6.40.0)':
+    dependencies:
+      '@codemirror/commands': 6.10.3
+      '@codemirror/language': 6.12.2
+      '@codemirror/search': 6.6.0
+      '@codemirror/state': 6.6.0
+      '@codemirror/view': 6.40.0
+
   '@rolldown/binding-android-arm64@1.0.0-rc.9':
     optional: true
 
@@ -6863,8 +6893,14 @@ snapshots:
       merge2: 1.4.1
       micromatch: 4.0.8
 
-  fast-xml-parser@5.3.9:
+  fast-xml-builder@1.1.4:
     dependencies:
+      path-expression-matcher: 1.2.0
+
+  fast-xml-parser@5.5.8:
+    dependencies:
+      fast-xml-builder: 1.1.4
+      path-expression-matcher: 1.2.0
       strnum: 2.2.0
 
   fastq@1.20.1:
@@ -7205,6 +7241,8 @@ snapshots:
 
   p-cancelable@3.0.0: {}
 
+  path-expression-matcher@1.2.0: {}
+
   path-key@3.1.1: {}
 
   path-parse@1.0.7: {}
@@ -7389,7 +7427,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  react-resizable-panels@4.7.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  react-resizable-panels@3.0.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
