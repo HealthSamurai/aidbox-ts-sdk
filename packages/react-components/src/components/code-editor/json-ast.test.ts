@@ -137,6 +137,14 @@ describe("buildJsonDocumentContext", () => {
 			const ctx = buildJsonDocumentContext(doc, pos);
 			expect(ctx.cursorPosition.kind).toBe("property");
 		});
+
+		it("property position after boolean value with comma on same line", () => {
+			const { doc, pos } = at(
+				'{\n  "resourceType": "Patient",\n  "active": true, |\n}',
+			);
+			const ctx = buildJsonDocumentContext(doc, pos);
+			expect(ctx.cursorPosition.kind).toBe("property");
+		});
 	});
 
 	describe("isInsideArray", () => {

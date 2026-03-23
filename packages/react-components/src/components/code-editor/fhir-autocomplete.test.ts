@@ -611,6 +611,18 @@ describe("fhir-autocomplete: jsonCompletionSource", () => {
 			expect(l).toContain("false");
 			expect(l).toHaveLength(2);
 		});
+
+		it("offers property completions (not booleans) on new line after boolean value", async () => {
+			const { cc } = completionAt(
+				'{\n  "resourceType": "Patient",\n  "active": true,\n  |\n}',
+			);
+			const result = await source(cc);
+			const l = labels(result);
+			expect(l).not.toContain("true");
+			expect(l).not.toContain("false");
+			expect(l).toContain("name");
+			expect(l).toContain("gender");
+		});
 	});
 
 	describe("reference target completions", () => {

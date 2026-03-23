@@ -118,6 +118,8 @@ function getJsonPathAtCursor(doc: string, pos: number): string[] {
 // ── Cursor position detection ──────────────────────────────────────────
 
 function isJsonValuePosition(beforeCursor: string): string | null {
+	// Don't match if a comma follows the value (value is complete)
+	if (/,\s*$/.test(beforeCursor)) return null;
 	const match = beforeCursor.match(/"?(\w+)"?\s*:\s*"?([^"]*)?$/);
 	if (match) return match[1] ?? null;
 	return null;
