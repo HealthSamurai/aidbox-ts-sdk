@@ -584,7 +584,7 @@ function TabsBrowserList({
 	const { drag, itemsRef, handlePointerDown, handlePointerMove, handlePointerUp, getTransform } =
 		useTabReorder(onReorder);
 
-	const wrappedChildren = onReorder
+	const wrappedChildren = onReorder && React.Children.count(children) > 1
 		? React.Children.map(children, (child, index) => (
 				<div
 					ref={(el) => { itemsRef.current[index] = el; }}
