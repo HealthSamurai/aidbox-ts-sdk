@@ -4,6 +4,7 @@ export * from "./components/button-dropdown";
 export * from "./components/code-editor";
 export * from "./components/copy-icon";
 export * from "./components/data-table";
+export * from "./components/date-picker-input";
 export * from "./components/fhir-structure-view";
 export * from "./components/icon-button";
 export * from "./components/operation-outcome-view";
