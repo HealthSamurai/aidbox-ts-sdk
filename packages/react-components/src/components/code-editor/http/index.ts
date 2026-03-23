@@ -308,11 +308,12 @@ function httpCompletionSource(
 
 	if (!inHeaderName && !inHeaders && !parentIsHeaders) return null;
 
-	const word = context.matchBefore(/[\w-]*/);
+	const word = context.matchBefore(/[\w-]+/);
+	if (!word) return null;
 	return {
-		from: word?.from ?? pos,
+		from: word.from,
 		options: COMMON_HEADERS,
-		validFor: /^[\w-]*$/,
+		validFor: /^[\w-]+$/,
 	};
 }
 
