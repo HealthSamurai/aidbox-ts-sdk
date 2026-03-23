@@ -976,7 +976,10 @@ function languageExtensions(
 	} else {
 		return [
 			json(),
-			linter(jsonParseLinter(), { delay: 300 }),
+			linter((view) => {
+				if (!view.state.doc.toString().trim()) return [];
+				return jsonParseLinter()(view);
+			}, { delay: 300 }),
 			syntaxHighlighting(customHighlightStyle),
 			jsonAutoExpandBraces(),
 		];
