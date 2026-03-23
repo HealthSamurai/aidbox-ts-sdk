@@ -57,6 +57,7 @@ import {
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
+import { vim } from "@replit/codemirror-vim";
 import {
 	ChevronDown,
 	ChevronsRight,
@@ -69,8 +70,6 @@ import {
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-
-import { vim } from "@replit/codemirror-vim";
 import {
 	ComplexTypeIcon,
 	ResourceIcon,
@@ -287,11 +286,7 @@ function handleErrorTooltipMove(event: Event, view: EditorView) {
 		if (!Number.isNaN(lineNo)) {
 			const message = getErrorMessageForLine(view, lineNo);
 			if (message) {
-				showErrorTooltip(
-					message,
-					mouseEvent.clientX,
-					mouseEvent.clientY,
-				);
+				showErrorTooltip(message, mouseEvent.clientX, mouseEvent.clientY);
 				return false;
 			}
 		}
@@ -306,11 +301,7 @@ function handleErrorTooltipMove(event: Event, view: EditorView) {
 		const lineNo = view.state.doc.lineAt(pos).number;
 		const message = getErrorMessageForLine(view, lineNo);
 		if (message) {
-			showErrorTooltip(
-				message,
-				mouseEvent.clientX,
-				mouseEvent.clientY,
-			);
+			showErrorTooltip(message, mouseEvent.clientX, mouseEvent.clientY);
 			return false;
 		}
 	}
@@ -871,7 +862,9 @@ function computeYamlNewlineIndent(lineText: string): string {
 		// After "key:" with no value — increase indent
 		// For "  - key:", base indent is at the dash content level
 		const dashMatch = trimmed.match(/^(\s*-\s+)/);
-		const baseIndent = dashMatch?.[1] ? " ".repeat(dashMatch[1].length) : indent;
+		const baseIndent = dashMatch?.[1]
+			? " ".repeat(dashMatch[1].length)
+			: indent;
 		return `${baseIndent}  `;
 	}
 	if (/^\s*-\s*$/.test(trimmed)) {
@@ -885,51 +878,56 @@ function computeYamlNewlineIndent(lineText: string): string {
 }
 
 function yamlEnterKeymap(): Extension {
-	return keymap.of([{
-		key: "Enter",
-		run: (view) => {
-			const { state } = view;
-			const pos = state.selection.main.head;
-			const line = state.doc.lineAt(pos);
-			const newIndent = computeYamlNewlineIndent(line.text);
+	return keymap.of([
+		{
+			key: "Enter",
+			run: (view) => {
+				const { state } = view;
+				const pos = state.selection.main.head;
+				const line = state.doc.lineAt(pos);
+				const newIndent = computeYamlNewlineIndent(line.text);
 
-			view.dispatch({
-				changes: { from: pos, insert: `\n${newIndent}` },
-				selection: { anchor: pos + 1 + newIndent.length },
-			});
-			return true;
+				view.dispatch({
+					changes: { from: pos, insert: `\n${newIndent}` },
+					selection: { anchor: pos + 1 + newIndent.length },
+				});
+				return true;
+			},
 		},
-	}]);
+	]);
 }
 
 function httpYamlEnterKeymap(): Extension {
-	return keymap.of([{
-		key: "Enter",
-		run: (view) => {
-			const { state } = view;
-			const pos = state.selection.main.head;
-			const doc = state.doc.toString();
+	return keymap.of([
+		{
+			key: "Enter",
+			run: (view) => {
+				const { state } = view;
+				const pos = state.selection.main.head;
+				const doc = state.doc.toString();
 
-			// Only handle if cursor is in YAML body (after blank line separator)
-			const textBeforeCursor = doc.slice(0, pos);
-			const blankLineIdx = textBeforeCursor.indexOf("\n\n");
-			if (blankLineIdx === -1 || pos <= blankLineIdx + 1) return false;
+				// Only handle if cursor is in YAML body (after blank line separator)
+				const textBeforeCursor = doc.slice(0, pos);
+				const blankLineIdx = textBeforeCursor.indexOf("\n\n");
+				if (blankLineIdx === -1 || pos <= blankLineIdx + 1) return false;
 
-			// Check if the body looks like YAML (not JSON)
-			const bodyStart = blankLineIdx + 2;
-			const bodyPrefix = doc.slice(bodyStart, bodyStart + 20).trimStart();
-			if (bodyPrefix.startsWith("{") || bodyPrefix.startsWith("[")) return false;
+				// Check if the body looks like YAML (not JSON)
+				const bodyStart = blankLineIdx + 2;
+				const bodyPrefix = doc.slice(bodyStart, bodyStart + 20).trimStart();
+				if (bodyPrefix.startsWith("{") || bodyPrefix.startsWith("["))
+					return false;
 
-			const line = state.doc.lineAt(pos);
-			const newIndent = computeYamlNewlineIndent(line.text);
+				const line = state.doc.lineAt(pos);
+				const newIndent = computeYamlNewlineIndent(line.text);
 
-			view.dispatch({
-				changes: { from: pos, insert: `\n${newIndent}` },
-				selection: { anchor: pos + 1 + newIndent.length },
-			});
-			return true;
+				view.dispatch({
+					changes: { from: pos, insert: `\n${newIndent}` },
+					selection: { anchor: pos + 1 + newIndent.length },
+				});
+				return true;
+			},
 		},
-	}]);
+	]);
 }
 
 type LanguageMode = "json" | "http" | "sql" | "yaml";
@@ -976,10 +974,13 @@ function languageExtensions(
 	} else {
 		return [
 			json(),
-			linter((view) => {
-				if (!view.state.doc.toString().trim()) return [];
-				return jsonParseLinter()(view);
-			}, { delay: 300 }),
+			linter(
+				(view) => {
+					if (!view.state.doc.toString().trim()) return [];
+					return jsonParseLinter()(view);
+				},
+				{ delay: 300 },
+			),
 			syntaxHighlighting(customHighlightStyle),
 			jsonAutoExpandBraces(),
 		];
@@ -1006,10 +1007,7 @@ function jsonAutoExpandBraces(): Extension {
 
 		const tree = syntaxTree(tr.startState);
 		const nodeBefore = tree.resolveInner(braceFrom, -1);
-		if (
-			nodeBefore.name === "String" ||
-			nodeBefore.parent?.name === "String"
-		) {
+		if (nodeBefore.name === "String" || nodeBefore.parent?.name === "String") {
 			return tr;
 		}
 
@@ -1020,7 +1018,10 @@ function jsonAutoExpandBraces(): Extension {
 		// Check if { is inside an extension array — insert {"url": ""} snippet
 		const docText = tr.startState.doc.toString();
 		const textBefore = docText.slice(0, braceFrom);
-		const isInExtArray = /"(?:extension|modifierExtension)"\s*:\s*\[\s*(?:\{[\s\S]*?\}\s*,?\s*)*$/s.test(textBefore);
+		const isInExtArray =
+			/"(?:extension|modifierExtension)"\s*:\s*\[\s*(?:\{[\s\S]*?\}\s*,?\s*)*$/s.test(
+				textBefore,
+			);
 		if (isInExtArray) {
 			const insert = `{\n${inner}"url": ""\n${indent}}`;
 			return {
@@ -1030,7 +1031,11 @@ function jsonAutoExpandBraces(): Extension {
 		}
 
 		return {
-			changes: { from: braceFrom, to: braceTo, insert: `{\n${inner}\n${indent}}` },
+			changes: {
+				from: braceFrom,
+				to: braceTo,
+				insert: `{\n${inner}\n${indent}}`,
+			},
 			selection: { anchor: braceFrom + 2 + inner.length },
 		};
 	});
@@ -1060,7 +1065,10 @@ type CodeEditorProps = {
 
 export type CodeEditorView = EditorView;
 
-export type { ExpandValueSet, GetStructureDefinitions } from "./fhir-autocomplete";
+export type {
+	ExpandValueSet,
+	GetStructureDefinitions,
+} from "./fhir-autocomplete";
 export type { GetUrlSuggestions } from "./http";
 export type {
 	SqlConfig,
@@ -1134,23 +1142,23 @@ export function CodeEditor({
 					readOnlyCompartment.current.of(EditorState.readOnly.of(false)),
 					...(enableLineNumbers ? [lineNumbers()] : []),
 					...(enableFoldGutter
-					? [
-							foldGutter({
-								markerDOM: (open) => {
-									const el = document.createElement("span");
-									el.style.display = "flex";
-									el.style.alignItems = "center";
-									el.style.justifyContent = "center";
-									el.style.width = "100%";
-									el.style.height = "100%";
-									el.innerHTML = open
-										? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
-										: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
-									return el;
-								},
-							}),
-						]
-					: []),
+						? [
+								foldGutter({
+									markerDOM: (open) => {
+										const el = document.createElement("span");
+										el.style.display = "flex";
+										el.style.alignItems = "center";
+										el.style.justifyContent = "center";
+										el.style.width = "100%";
+										el.style.height = "100%";
+										el.innerHTML = open
+											? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
+											: '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+										return el;
+									},
+								}),
+							]
+						: []),
 					highlightSpecialChars(),
 					history(),
 					drawSelection(),
@@ -1239,7 +1247,7 @@ export function CodeEditor({
 			view.destroy();
 			setView(() => null);
 		};
-	}, [enableFoldGutter, enableLineNumbers]);
+	}, [enableFoldGutter, enableLineNumbers, vimMode]);
 
 	React.useEffect(() => {
 		executeSqlRef.current = sql?.executeSql;
@@ -1276,14 +1284,18 @@ export function CodeEditor({
 		return () => {
 			cancelled = true;
 		};
-	}, [view, sql]);
+	}, [view, sql, safeDispatch]);
 
 	React.useEffect(() => {
 		if (!view) return;
 		if (getStructureDefinitions) {
 			safeDispatch({
 				effects: fhirCompletionCompartment.current.reconfigure(
-					buildFhirCompletionExtension(getStructureDefinitions, resourceTypeHint, expandValueSet),
+					buildFhirCompletionExtension(
+						getStructureDefinitions,
+						resourceTypeHint,
+						expandValueSet,
+					),
 				),
 			});
 		} else {
@@ -1291,7 +1303,13 @@ export function CodeEditor({
 				effects: fhirCompletionCompartment.current.reconfigure([]),
 			});
 		}
-	}, [view, getStructureDefinitions, resourceTypeHint, expandValueSet, safeDispatch]);
+	}, [
+		view,
+		getStructureDefinitions,
+		resourceTypeHint,
+		expandValueSet,
+		safeDispatch,
+	]);
 
 	React.useEffect(() => {
 		if (viewCallback && view) {
@@ -1309,7 +1327,7 @@ export function CodeEditor({
 				}),
 			]),
 		});
-	}, [view, onChange, safeDispatch]);
+	}, [onChange, safeDispatch]);
 
 	React.useEffect(() => {
 		safeDispatch({
@@ -1321,7 +1339,7 @@ export function CodeEditor({
 				}),
 			]),
 		});
-	}, [view, onUpdate, safeDispatch]);
+	}, [onUpdate, safeDispatch]);
 
 	// FIXME: it is probably better to have CM manage its state.
 	React.useEffect(() => {
@@ -1348,7 +1366,7 @@ export function CodeEditor({
 		if (!getUrlSuggestions) return undefined;
 		return ((path: string, method: string) =>
 			getUrlSuggestionsRef.current?.(path, method) ?? []) as GetUrlSuggestions;
-	}, [!!getUrlSuggestions]);
+	}, [getUrlSuggestions]);
 
 	React.useEffect(() => {
 		if (view === null) {
@@ -1392,9 +1410,7 @@ export function CodeEditor({
 			return;
 		}
 		safeDispatch({
-			effects: [
-				vimCompartment.current.reconfigure(vimMode ? vim() : []),
-			],
+			effects: [vimCompartment.current.reconfigure(vimMode ? vim() : [])],
 		});
 	}, [vimMode, view, safeDispatch]);
 

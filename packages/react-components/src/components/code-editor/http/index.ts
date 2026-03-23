@@ -234,25 +234,29 @@ const HEADER_VALUES: Record<string, Completion[]> = {
 	],
 };
 
-const HTTP_METHODS: Completion[] = ["GET", "POST", "PUT", "PATCH", "DELETE"].map(
-	(method) => ({
-		label: method,
-		type: "keyword" as const,
-		apply: (view: EditorView, _c: Completion, from: number, to: number) => {
-			const line = view.state.doc.lineAt(from);
-			const afterTo = line.text.slice(to - line.from);
-			// Skip whitespace after the method word to avoid double spaces
-			const wsMatch = afterTo.match(/^(\s*)/);
-			const actualTo = to + (wsMatch?.[1]?.length ?? 0);
-			const rest = line.text.slice(actualTo - line.from);
-			const insert = rest.startsWith("/") ? `${method} ` : `${method} /`;
-			view.dispatch({
-				changes: { from, to: actualTo, insert },
-				selection: { anchor: from + insert.length },
-			});
-		},
-	}),
-);
+const HTTP_METHODS: Completion[] = [
+	"GET",
+	"POST",
+	"PUT",
+	"PATCH",
+	"DELETE",
+].map((method) => ({
+	label: method,
+	type: "keyword" as const,
+	apply: (view: EditorView, _c: Completion, from: number, to: number) => {
+		const line = view.state.doc.lineAt(from);
+		const afterTo = line.text.slice(to - line.from);
+		// Skip whitespace after the method word to avoid double spaces
+		const wsMatch = afterTo.match(/^(\s*)/);
+		const actualTo = to + (wsMatch?.[1]?.length ?? 0);
+		const rest = line.text.slice(actualTo - line.from);
+		const insert = rest.startsWith("/") ? `${method} ` : `${method} /`;
+		view.dispatch({
+			changes: { from, to: actualTo, insert },
+			selection: { anchor: from + insert.length },
+		});
+	},
+}));
 
 function httpCompletionSource(
 	context: CompletionContext,
@@ -333,7 +337,9 @@ export type GetUrlSuggestions = (
 function httpUrlCompletionSource(
 	getUrlSuggestions: GetUrlSuggestions,
 ): (context: CompletionContext) => Promise<CompletionResult | null> {
-	return async (context: CompletionContext): Promise<CompletionResult | null> => {
+	return async (
+		context: CompletionContext,
+	): Promise<CompletionResult | null> => {
 		const { state, pos } = context;
 		const tree = syntaxTree(state);
 		const node = tree.resolveInner(pos, -1);
@@ -376,7 +382,10 @@ function httpUrlCompletionSource(
 		const hasQuery = currentPath.includes("?");
 		let from: number;
 		if (hasQuery) {
-			const lastSep = Math.max(currentPath.lastIndexOf("?"), currentPath.lastIndexOf("&"));
+			const lastSep = Math.max(
+				currentPath.lastIndexOf("?"),
+				currentPath.lastIndexOf("&"),
+			);
 			from = pathStart + lastSep + 1;
 		} else {
 			const lastSlash = currentPath.lastIndexOf("/");

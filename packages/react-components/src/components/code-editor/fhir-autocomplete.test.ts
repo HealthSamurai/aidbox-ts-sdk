@@ -1,7 +1,7 @@
 import { CompletionContext } from "@codemirror/autocomplete";
 import { json } from "@codemirror/lang-json";
 import { EditorState } from "@codemirror/state";
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
 	buildParameterSnippet,
 	type ExpandValueSet,
@@ -214,8 +214,18 @@ const BUNDLE_SD = {
 		element: [
 			{ path: "Bundle", min: 0, max: "*" },
 			{ path: "Bundle.type", min: 1, max: "1", type: [{ code: "code" }] },
-			{ path: "Bundle.entry", min: 0, max: "*", type: [{ code: "BackboneElement" }] },
-			{ path: "Bundle.entry.resource", min: 0, max: "1", type: [{ code: "Resource" }] },
+			{
+				path: "Bundle.entry",
+				min: 0,
+				max: "*",
+				type: [{ code: "BackboneElement" }],
+			},
+			{
+				path: "Bundle.entry.resource",
+				min: 0,
+				max: "1",
+				type: [{ code: "Resource" }],
+			},
 		],
 	},
 };
@@ -697,7 +707,11 @@ describe("fhir-autocomplete: jsonCompletionSource", () => {
 		});
 
 		it("offers Observation fields when Bundle resourceType comes from hint (URL)", async () => {
-			const hintSource = jsonCompletionSource(mockGetSDs, "Bundle", mockExpandValueSet);
+			const hintSource = jsonCompletionSource(
+				mockGetSDs,
+				"Bundle",
+				mockExpandValueSet,
+			);
 			const { cc } = completionAt(
 				'{\n  "entry": [\n    {\n      "resource": {\n        "resourceType": "Observation",\n        |\n      }\n    }\n  ]\n}',
 			);
@@ -810,7 +824,11 @@ describe("fhir-autocomplete: jsonCompletionSource", () => {
 		});
 
 		it("offers typed snippet for profile with value[x] constraint", async () => {
-			const typedSource = jsonCompletionSource(mockGetSDs, undefined, mockExpandValueSet);
+			const typedSource = jsonCompletionSource(
+				mockGetSDs,
+				undefined,
+				mockExpandValueSet,
+			);
 			const { cc } = completionAt(
 				'{\n  "resourceType": "Parameters",\n  "meta": {\n    "profile": ["http://example.com/StructureDefinition/typed-params"]\n  },\n  "parameter": [\n    |\n  ]\n}',
 			);
@@ -858,8 +876,8 @@ describe("fhir-autocomplete: jsonCompletionSource", () => {
 			const result = await source(cc);
 			const option = result?.options.find((o) => o.label === "parameter");
 			expect(option).toBeDefined();
-			expect(option!.boost).toBe(-1);
-			expect(option!.info).toBe("Custom parameter");
+			expect(option?.boost).toBe(-1);
+			expect(option?.info).toBe("Custom parameter");
 		});
 	});
 
@@ -885,7 +903,11 @@ describe("fhir-autocomplete: jsonCompletionSource", () => {
 		});
 
 		it("offers Observation fields inside Bundle entry.resource via hint", async () => {
-			const hintSource = jsonCompletionSource(mockGetSDs, "Bundle", mockExpandValueSet);
+			const hintSource = jsonCompletionSource(
+				mockGetSDs,
+				"Bundle",
+				mockExpandValueSet,
+			);
 			const doc =
 				'POST /fhir/Bundle\nContent-Type: application/json\n\n{\n  "entry": [\n    {\n      "resource": {\n        "resourceType": "Observation",\n        |\n      }\n    }\n  ]\n}';
 			const { cc } = completionAt(doc);
@@ -922,7 +944,11 @@ describe("buildParameterSnippet", () => {
 	});
 
 	it("inserts valueInteger for integer-constrained type", () => {
-		const { text, cursorOffset } = buildParameterSnippet("count", ["integer"], "    ");
+		const { text, cursorOffset } = buildParameterSnippet(
+			"count",
+			["integer"],
+			"    ",
+		);
 		expect(text).toContain('"name": "count"');
 		expect(text).toContain('"valueInteger": ');
 		expect(text).not.toContain('"valueString"');
@@ -949,9 +975,9 @@ describe("buildParameterSnippet", () => {
 		// Line 0: {
 		expect(lines[0]).toBe("{");
 		// Line 1: inner indent + "name"
-		expect(lines[1]).toMatch(/^    "name": "test",$/);
+		expect(lines[1]).toMatch(/^ {4}"name": "test",$/);
 		// Line 2: inner indent + "valueString"
-		expect(lines[2]).toMatch(/^    "valueString": ""$/);
+		expect(lines[2]).toMatch(/^ {4}"valueString": ""$/);
 		// Line 3: outer indent + }
 		expect(lines[3]).toBe("  }");
 	});

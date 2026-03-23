@@ -48,9 +48,7 @@ function DatePickerInput({
 }: DatePickerInputProps) {
 	const [open, setOpen] = React.useState(false);
 	const selectedDate = parseDate(value);
-	const [month, setMonth] = React.useState<Date>(
-		selectedDate ?? new Date(),
-	);
+	const [month, setMonth] = React.useState<Date>(selectedDate ?? new Date());
 
 	return (
 		<div className={cn("relative", className)}>
@@ -83,11 +81,7 @@ function DatePickerInput({
 								<CalendarIcon className="size-3.5" />
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent
-							className="w-auto p-0"
-							align="end"
-							sideOffset={10}
-						>
+						<PopoverContent className="w-auto p-0" align="end" sideOffset={10}>
 							<Calendar
 								mode="single"
 								selected={selectedDate}

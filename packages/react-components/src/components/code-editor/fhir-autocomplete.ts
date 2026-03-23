@@ -438,8 +438,8 @@ function buildSnippet(
 	kind: SnippetKind,
 	indent: string,
 ): { text: string; cursorOffset: number } {
-	const inner = indent + "  ";
-	const innerInner = inner + "  ";
+	const inner = `${indent}  `;
+	const innerInner = `${inner}  `;
 	switch (kind) {
 		case "array-complex": {
 			const text = `"${name}": [\n${inner}{\n${innerInner}\n${inner}}\n${indent}]`;
@@ -454,18 +454,16 @@ function buildSnippet(
 		}
 		case "array-primitive": {
 			const text = `"${name}": [\n${inner}\n${indent}]`;
-			return { text, cursorOffset: text.indexOf(inner + "\n") + inner.length };
+			return { text, cursorOffset: text.indexOf(`${inner}\n`) + inner.length };
 		}
 		case "object": {
 			const text = `"${name}": {\n${inner}\n${indent}}`;
-			return { text, cursorOffset: text.indexOf(inner + "\n") + inner.length };
+			return { text, cursorOffset: text.indexOf(`${inner}\n`) + inner.length };
 		}
 		case "string": {
 			const text = `"${name}": ""`;
 			return { text, cursorOffset: text.length - 1 };
 		}
-		case "number":
-		case "bare":
 		default: {
 			const text = `"${name}": `;
 			return { text, cursorOffset: text.length };
@@ -554,8 +552,8 @@ function toParameterPropertyCompletion(element: FhirElement): Completion {
 
 			const line = view.state.doc.lineAt(actualFrom);
 			const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
-			const inner = indent + "  ";
-			const innerInner = inner + "  ";
+			const inner = `${indent}  `;
+			const innerInner = `${inner}  `;
 			const text = `"${name}": [\n${inner}{\n${innerInner}"name": ""\n${inner}}\n${indent}]`;
 			view.dispatch({
 				changes: { from: actualFrom, to: actualTo, insert: text },
@@ -766,7 +764,7 @@ export function buildParameterSnippet(
 	valueTypes: string[],
 	indent: string,
 ): { text: string; cursorOffset: number } {
-	const inner = indent + "  ";
+	const inner = `${indent}  `;
 
 	if (valueTypes.length === 1 && FHIR_STRING_TYPES.has(valueTypes[0]!)) {
 		const tc = valueTypes[0]!;
@@ -786,12 +784,12 @@ export function buildParameterSnippet(
 	if (valueTypes.length === 1) {
 		const tc = valueTypes[0]!;
 		const vf = `value${tc.charAt(0).toUpperCase()}${tc.slice(1)}`;
-		const innerInner = inner + "  ";
+		const innerInner = `${inner}  `;
 		const text = `{\n${inner}"name": "${name}",\n${inner}"${vf}": {\n${innerInner}\n${inner}}\n${indent}}`;
 		return {
 			text,
 			cursorOffset:
-				text.indexOf(innerInner + "\n" + inner + "}") + innerInner.length,
+				text.indexOf(`${innerInner}\n${inner}}`) + innerInner.length,
 		};
 	}
 	// Default to valueString when no value type constraint
@@ -869,7 +867,7 @@ async function findExtensionBinding(
 		) {
 			const parentUrlMatches = [
 				...textBefore
-					.slice(0, urlMatches[i]!.index)
+					.slice(0, urlMatches[i]?.index)
 					.matchAll(/"url"\s*:\s*"([^"]+)"/g),
 			];
 			for (let j = parentUrlMatches.length - 1; j >= 0; j--) {
@@ -1222,12 +1220,7 @@ async function handleValueCompletion(
 				detail: slice.min > 0 ? "required" : "optional",
 				boost: slice.min > 0 ? 2 : 0,
 				...(slice.short ? { info: slice.short } : {}),
-				apply: (
-					view: EditorView,
-					_c: Completion,
-					from: number,
-					to: number,
-				) => {
+				apply: (view: EditorView, _c: Completion, from: number, to: number) => {
 					const d = view.state.doc.toString();
 					let actualTo = to;
 					if (actualTo < d.length && d[actualTo] === '"') actualTo++;
@@ -1261,11 +1254,9 @@ async function handleValueCompletion(
 								ins = `,\n${ind}"${vf}": `;
 								cOff = ins.length;
 							} else {
-								const inner = ind + "  ";
+								const inner = `${ind}  `;
 								ins = `,\n${ind}"${vf}": {\n${inner}\n${ind}}`;
-								cOff =
-									ins.indexOf(inner + "\n" + ind + "}") +
-									inner.length;
+								cOff = ins.indexOf(`${inner}\n${ind}}`) + inner.length;
 							}
 							view.dispatch({
 								changes: { from: cp, insert: ins },
@@ -1295,12 +1286,7 @@ async function handleValueCompletion(
 				label: fixedVal,
 				type: "text",
 				boost: 10,
-				apply: (
-					view: EditorView,
-					_c: Completion,
-					from: number,
-					to: number,
-				) => {
+				apply: (view: EditorView, _c: Completion, from: number, to: number) => {
 					const d = view.state.doc.toString();
 					let actualTo = to;
 					if (actualTo < d.length && d[actualTo] === '"') actualTo++;
@@ -1311,7 +1297,11 @@ async function handleValueCompletion(
 				},
 			};
 			const word = completionContext.matchBefore(/[\w.:/-]*/);
-			return { from: word?.from ?? pos, options: [option], validFor: /^[\w.:/-]*$/ };
+			return {
+				from: word?.from ?? pos,
+				options: [option],
+				validFor: /^[\w.:/-]*$/,
+			};
 		}
 	}
 
@@ -1359,17 +1349,12 @@ async function handleValueCompletion(
 	if (resourceType) {
 		const elements = await resolveElements(effectivePath, resourceType, getSDs);
 		const el = elements.find((e) => fieldName(e) === valueKey);
-		if (el?.type?.length === 1 && el.type[0]!.code === "boolean") {
+		if (el?.type?.length === 1 && el.type[0]?.code === "boolean") {
 			const word = completionContext.matchBefore(/[\w]*/);
 			const options: Completion[] = ["true", "false"].map((v) => ({
 				label: v,
 				type: "keyword",
-				apply: (
-					view: EditorView,
-					_c: Completion,
-					from: number,
-					to: number,
-				) => {
+				apply: (view: EditorView, _c: Completion, from: number, to: number) => {
 					const d = view.state.doc.toString();
 					let actualFrom = from;
 					let actualTo = to;
@@ -1653,8 +1638,8 @@ async function handleExtensionUrlCompletion(
 					let ins: string;
 					let cOff: number;
 					if (extInfo.isNested) {
-						const inner = ind + "  ";
-						const innerInner = inner + "  ";
+						const inner = `${ind}  `;
+						const innerInner = `${inner}  `;
 						ins = `,\n${ind}"extension": [\n${inner}{\n${innerInner}"url": ""\n${inner}}\n${ind}]`;
 						cOff = ins.lastIndexOf('""') + 1;
 					} else if (extInfo.valueTypes.length === 1) {
@@ -1667,9 +1652,9 @@ async function handleExtensionUrlCompletion(
 							ins = `,\n${ind}"${vf}": `;
 							cOff = ins.length;
 						} else {
-							const inner = ind + "  ";
+							const inner = `${ind}  `;
 							ins = `,\n${ind}"${vf}": {\n${inner}\n${ind}}`;
-							cOff = ins.indexOf(inner + "\n" + ind) + inner.length;
+							cOff = ins.indexOf(`${inner}\n${ind}`) + inner.length;
 						}
 					} else {
 						return;
@@ -1757,9 +1742,9 @@ async function handleNestedExtensionSlices(
 							ins = `,\n${ind}"${vf}": `;
 							cOff = ins.length;
 						} else {
-							const inner = ind + "  ";
+							const inner = `${ind}  `;
 							ins = `,\n${ind}"${vf}": {\n${inner}\n${ind}}`;
-							cOff = ins.indexOf(inner + "\n" + ind) + inner.length;
+							cOff = ins.indexOf(`${inner}\n${ind}`) + inner.length;
 						}
 						view.dispatch({
 							changes: { from: cp, insert: ins },
@@ -1806,17 +1791,11 @@ async function handleArrayItemCompletion(
 			options.push({
 				label: slice.fixedName,
 				type: "text",
-				detail: slice.min > 0
-					? `${slice.min}..${slice.max}`
-					: `0..${slice.max}`,
+				detail:
+					slice.min > 0 ? `${slice.min}..${slice.max}` : `0..${slice.max}`,
 				boost: slice.min > 0 ? 2 : 0,
 				...(slice.short ? { info: slice.short } : {}),
-				apply: (
-					view: EditorView,
-					_c: Completion,
-					from: number,
-					to: number,
-				) => {
+				apply: (view: EditorView, _c: Completion, from: number, to: number) => {
 					const line = view.state.doc.lineAt(from);
 					const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
 					const { text, cursorOffset } = buildParameterSnippet(
@@ -1840,12 +1819,7 @@ async function handleArrayItemCompletion(
 			type: "text",
 			boost: -1,
 			info: "Custom parameter",
-			apply: (
-				view: EditorView,
-				_c: Completion,
-				from: number,
-				to: number,
-			) => {
+			apply: (view: EditorView, _c: Completion, from: number, to: number) => {
 				const line = view.state.doc.lineAt(from);
 				const indent = line.text.match(/^(\s*)/)?.[1] ?? "";
 				const { text, cursorOffset } = buildParameterSnippet("", [], indent);

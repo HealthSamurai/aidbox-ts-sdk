@@ -273,6 +273,7 @@ function findStringArrayInObject(
 	const urls: string[] = [];
 	const re = /"([^"]+)"/g;
 	let m: RegExpExecArray | null;
+	// biome-ignore lint/suspicious/noAssignInExpressions: standard regex exec loop
 	while ((m = re.exec(match[1])) !== null) {
 		if (m[1]) urls.push(m[1]);
 	}

@@ -487,40 +487,37 @@ function useTabReorder(
 		[onReorder],
 	);
 
-	const handlePointerMove = React.useCallback(
-		(e: React.PointerEvent) => {
-			const d = dragRef.current;
-			if (!d) return;
-			const dx = e.clientX - d.startX;
-			if (pendingRef.current) {
-				if (Math.abs(dx) < DRAG_THRESHOLD) return;
-				pendingRef.current = false;
+	const handlePointerMove = React.useCallback((e: React.PointerEvent) => {
+		const d = dragRef.current;
+		if (!d) return;
+		const dx = e.clientX - d.startX;
+		if (pendingRef.current) {
+			if (Math.abs(dx) < DRAG_THRESHOLD) return;
+			pendingRef.current = false;
+		}
+		const draggedLeft = d.lefts[d.index] ?? 0;
+		const draggedWidth = d.widths[d.index] ?? 0;
+		const draggedRightEdge = draggedLeft + draggedWidth + dx;
+		const draggedLeftEdge = draggedLeft + dx;
+		let newIndex = d.index;
+		const TRIGGER_RATIO = 0.3;
+		for (let i = 0; i < d.lefts.length; i++) {
+			if (i === d.index) continue;
+			const left = d.lefts[i] ?? 0;
+			const width = d.widths[i] ?? 0;
+			if (i > d.index) {
+				// Dragging right: trigger when right edge enters 30% of target
+				if (draggedRightEdge > left + width * TRIGGER_RATIO) newIndex = i;
+			} else {
+				// Dragging left: trigger when left edge enters 30% from right
+				if (draggedLeftEdge < left + width * (1 - TRIGGER_RATIO))
+					newIndex = Math.min(newIndex, i);
 			}
-			const draggedLeft = d.lefts[d.index] ?? 0;
-			const draggedWidth = d.widths[d.index] ?? 0;
-			const draggedRightEdge = draggedLeft + draggedWidth + dx;
-			const draggedLeftEdge = draggedLeft + dx;
-			let newIndex = d.index;
-			const TRIGGER_RATIO = 0.3;
-			for (let i = 0; i < d.lefts.length; i++) {
-				if (i === d.index) continue;
-				const left = d.lefts[i] ?? 0;
-				const width = d.widths[i] ?? 0;
-				if (i > d.index) {
-					// Dragging right: trigger when right edge enters 30% of target
-					if (draggedRightEdge > left + width * TRIGGER_RATIO) newIndex = i;
-				} else {
-					// Dragging left: trigger when left edge enters 30% from right
-					if (draggedLeftEdge < left + width * (1 - TRIGGER_RATIO))
-						newIndex = Math.min(newIndex, i);
-				}
-			}
-			const next: DragState = { ...d, offsetX: dx, currentIndex: newIndex };
-			dragRef.current = next;
-			setDrag(next);
-		},
-		[],
-	);
+		}
+		const next: DragState = { ...d, offsetX: dx, currentIndex: newIndex };
+		dragRef.current = next;
+		setDrag(next);
+	}, []);
 
 	const handlePointerUp = React.useCallback(() => {
 		const d = dragRef.current;
@@ -564,7 +561,14 @@ function useTabReorder(
 		[drag],
 	);
 
-	return { drag, itemsRef, handlePointerDown, handlePointerMove, handlePointerUp, getTransform };
+	return {
+		drag,
+		itemsRef,
+		handlePointerDown,
+		handlePointerMove,
+		handlePointerUp,
+		getTransform,
+	};
 }
 
 function TabsBrowserList({
@@ -581,25 +585,32 @@ function TabsBrowserList({
 	const [canScrollLeft, setCanScrollLeft] = React.useState(false);
 	const [canScrollRight, setCanScrollRight] = React.useState(false);
 
-	const { drag, itemsRef, handlePointerDown, handlePointerMove, handlePointerUp, getTransform } =
-		useTabReorder(onReorder);
+	const {
+		drag,
+		itemsRef,
+		handlePointerDown,
+		handlePointerMove,
+		handlePointerUp,
+		getTransform,
+	} = useTabReorder(onReorder);
 
-	const wrappedChildren = onReorder && React.Children.count(children) > 1
-		? React.Children.map(children, (child, index) => (
-				<div
-					ref={(el) => { itemsRef.current[index] = el; }}
-					style={getTransform(index)}
-					onPointerDown={(e) => handlePointerDown(e, index)}
-					onPointerMove={handlePointerMove}
-					onPointerUp={handlePointerUp}
-					className={cn(
-						drag?.index === index && "cursor-grabbing",
-					)}
-				>
-					{child}
-				</div>
-			))
-		: children;
+	const wrappedChildren =
+		onReorder && React.Children.count(children) > 1
+			? React.Children.map(children, (child, index) => (
+					<div
+						ref={(el) => {
+							itemsRef.current[index] = el;
+						}}
+						style={getTransform(index)}
+						onPointerDown={(e) => handlePointerDown(e, index)}
+						onPointerMove={handlePointerMove}
+						onPointerUp={handlePointerUp}
+						className={cn(drag?.index === index && "cursor-grabbing")}
+					>
+						{child}
+					</div>
+				))
+			: children;
 
 	return (
 		<React.Fragment>
