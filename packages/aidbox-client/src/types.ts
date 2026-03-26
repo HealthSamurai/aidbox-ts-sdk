@@ -202,6 +202,12 @@ export type BatchOptions<TBundle> = {
 	};
 };
 
+/** Result of a ViewDefinition $materialize operation. */
+export type MaterializeResult = {
+	resourceType: "Parameters";
+	parameter?: Array<{ name: string; valueString?: string; valueCode?: string }>;
+};
+
 export type TransactionOptions<TBundle> = {
 	format: string;
 	bundle: TBundle & {
