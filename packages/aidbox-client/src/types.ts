@@ -180,14 +180,16 @@ export type HistoryTypeOptions = {
 
 export type HistorySystemOptions = Record<string, never>;
 
-export type OperationOptions<T> = {
+export type OperationOptions<T = unknown> = {
 	type: string;
 	id?: string;
 	operation: `$${string}`;
 	resource?: T;
 };
 
-export type ValidateOptions<T> = Omit<OperationOptions<T>, "operation">;
+export type ValidateOptions<T> = Omit<OperationOptions<T>, "operation"> & {
+	resource: T;
+};
 
 export type CapabilitiesOptions = {
 	mode: "full" | "normative" | "terminology";

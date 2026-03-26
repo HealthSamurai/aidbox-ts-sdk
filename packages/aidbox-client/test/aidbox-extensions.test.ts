@@ -2,7 +2,9 @@ import { BasicAuthProvider } from "src/auth-providers";
 import { AidboxClient } from "src/client";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
 import type { User } from "src/types";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+
+const originalFetch = globalThis.fetch;
 
 function mockFetch(response: unknown, status = 200) {
 	return vi.fn().mockResolvedValue({
@@ -24,6 +26,10 @@ describe("Aidbox extensions", () => {
 			baseUrl,
 			new BasicAuthProvider(baseUrl, "admin", "secret"),
 		);
+	});
+
+	afterEach(() => {
+		globalThis.fetch = originalFetch;
 	});
 
 	describe("sql", () => {
@@ -57,6 +63,20 @@ describe("Aidbox extensions", () => {
 				`${baseUrl}/$sql`,
 				expect.objectContaining({
 					body: JSON.stringify(["SELECT * FROM patient WHERE id = ?", "pt-1"]),
+				}),
+			);
+		});
+
+		it("should handle empty params array", async () => {
+			const mockRows = [{ cnt: 0 }];
+			globalThis.fetch = mockFetch(mockRows);
+
+			await client.sql("SELECT 1", []);
+
+			expect(fetch).toHaveBeenCalledWith(
+				`${baseUrl}/$sql`,
+				expect.objectContaining({
+					body: JSON.stringify(["SELECT 1"]),
 				}),
 			);
 		});

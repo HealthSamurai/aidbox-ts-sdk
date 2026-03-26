@@ -32,6 +32,12 @@ import type {
 import { ErrorResponse, RequestError } from "./types";
 import { coerceBody } from "./utils";
 
+/** Result of a ViewDefinition $materialize operation. */
+export type MaterializeResult = {
+	resourceType: "Parameters";
+	parameter?: Array<{ name: string; valueString?: string; valueCode?: string }>;
+};
+
 type InternalAidboxErrorResponse = {
 	error?: unknown;
 	duration: number;
@@ -930,19 +936,29 @@ export class AidboxClient<
 	 *
 	 * Example usage:
 	 *
+	 * **Important:** Always use parameterized queries to prevent SQL injection.
+	 * Pass user-supplied values via `params`, never interpolate them into the query string.
+	 *
 	 * ```typescript
+	 * // Good — parameterized
 	 * const result = await client.sql<{ cnt: number }>(
-	 *   "SELECT count(*) as cnt FROM patient"
+	 *   "SELECT count(*) as cnt FROM patient WHERE id = ?", [patientId]
 	 * );
+	 *
+	 * // Bad — SQL injection risk
+	 * const result = await client.sql(`SELECT * FROM patient WHERE id = '${patientId}'`);
 	 * ```
+	 *
+	 * Note: `$sql` is an Aidbox-specific endpoint (not part of the FHIR spec).
+	 * The URL uses the Aidbox-native prefix (`/$sql`), not the FHIR prefix (`/fhir/$sql`).
 	 *
 	 * @group Aidbox methods
 	 */
 	public async sql<T>(
 		query: string,
-		params?: unknown[],
+		params?: Array<string | number | boolean | null>,
 	): Promise<Result<ResourceResponse<T[]>, ResourceResponse<TOperationOutcome>>> {
-		const body = params ? [query, ...params] : [query];
+		const body = params?.length ? [query, ...params] : [query];
 		return await this.request<T[]>({
 			url: "/$sql",
 			method: "POST",
@@ -970,8 +986,8 @@ export class AidboxClient<
 	public async materialize(
 		viewDefinitionId: string,
 		type: "table" | "view" | "materialized-view" = "materialized-view",
-	): Promise<Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>> {
-		return await this.request<unknown>({
+	): Promise<Result<ResourceResponse<MaterializeResult>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<MaterializeResult>({
 			url: makeUrl([basePath, "ViewDefinition", viewDefinitionId, "$materialize"]),
 			method: "POST",
 			body: JSON.stringify({
