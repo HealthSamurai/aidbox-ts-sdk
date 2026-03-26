@@ -180,15 +180,16 @@ export type HistoryTypeOptions = {
 
 export type HistorySystemOptions = Record<string, never>;
 
-// FIXME: resource -> params
-export type OperationOptions<T> = {
+export type OperationOptions<T = unknown> = {
 	type: string;
 	id?: string;
-	operation: "$run" | "$validate";
-	resource: T;
+	operation: `$${string}`;
+	resource?: T;
 };
 
-export type ValidateOptions<T> = Omit<OperationOptions<T>, "operation">;
+export type ValidateOptions<T> = Omit<OperationOptions<T>, "operation"> & {
+	resource: T;
+};
 
 export type CapabilitiesOptions = {
 	mode: "full" | "normative" | "terminology";
@@ -199,6 +200,12 @@ export type BatchOptions<TBundle> = {
 	bundle: TBundle & {
 		type: "batch";
 	};
+};
+
+/** Result of a ViewDefinition $materialize operation. */
+export type MaterializeResult = {
+	resourceType: "Parameters";
+	parameter?: Array<{ name: string; valueString?: string; valueCode?: string }>;
 };
 
 export type TransactionOptions<TBundle> = {
