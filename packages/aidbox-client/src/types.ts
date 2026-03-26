@@ -180,12 +180,11 @@ export type HistoryTypeOptions = {
 
 export type HistorySystemOptions = Record<string, never>;
 
-// FIXME: resource -> params
 export type OperationOptions<T> = {
 	type: string;
 	id?: string;
-	operation: "$run" | "$validate";
-	resource: T;
+	operation: `$${string}`;
+	resource?: T;
 };
 
 export type ValidateOptions<T> = Omit<OperationOptions<T>, "operation">;
