@@ -917,6 +917,70 @@ export class AidboxClient<
 		});
 	}
 
+	/// Aidbox-specific methods
+
+	/**
+	 * Execute a raw SQL query against the Aidbox database.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/$sql
+	 * ```
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = await client.sql<{ cnt: number }>(
+	 *   "SELECT count(*) as cnt FROM patient"
+	 * );
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async sql<T>(
+		query: string,
+		params?: unknown[],
+	): Promise<Result<ResourceResponse<T[]>, ResourceResponse<TOperationOutcome>>> {
+		const body = params ? [query, ...params] : [query];
+		return await this.request<T[]>({
+			url: "/$sql",
+			method: "POST",
+			body: JSON.stringify(body),
+		});
+	}
+
+	/**
+	 * Materialize a ViewDefinition into a flat table.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/fhir/ViewDefinition/[id]/$materialize
+	 * ```
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = await client.materialize("view-def-id", "materialized-view");
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async materialize(
+		viewDefinitionId: string,
+		type: "table" | "view" | "materialized-view" = "materialized-view",
+	): Promise<Result<ResourceResponse<unknown>, ResourceResponse<TOperationOutcome>>> {
+		return await this.request<unknown>({
+			url: makeUrl([basePath, "ViewDefinition", viewDefinitionId, "$materialize"]),
+			method: "POST",
+			body: JSON.stringify({
+				resourceType: "Parameters",
+				parameter: [{ name: "type", valueCode: type }],
+			}),
+		});
+	}
+
 	/**
 	 * Performs a request to `/auth/userinfo`.
 	 *
