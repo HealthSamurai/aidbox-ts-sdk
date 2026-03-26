@@ -31,12 +31,7 @@ import type {
 } from "./types";
 import { ErrorResponse, RequestError } from "./types";
 import { coerceBody } from "./utils";
-
-/** Result of a ViewDefinition $materialize operation. */
-export type MaterializeResult = {
-	resourceType: "Parameters";
-	parameter?: Array<{ name: string; valueString?: string; valueCode?: string }>;
-};
+import type { MaterializeResult } from "./types";
 
 type InternalAidboxErrorResponse = {
 	error?: unknown;
