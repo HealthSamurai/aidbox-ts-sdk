@@ -62,6 +62,7 @@ import {
 	ChevronDown,
 	ChevronsRight,
 	ChevronUp,
+	Columns2,
 	Heading,
 	Table2,
 	Terminal,
@@ -1495,6 +1496,7 @@ const KeywordIcon = () => <Terminal size={16} color="#717684" />;
 const OperatorIcon = () => <ChevronsRight size={16} color="#717684" />;
 const TableIcon = () => <Table2 size={16} color="#717684" />;
 const HeaderIcon = () => <Heading size={16} color="#717684" />;
+const ColumnIcon = () => <Columns2 size={16} color="#717684" />;
 
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;
@@ -1507,9 +1509,10 @@ function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "search-param") return null;
 	const detail = completion.detail;
 	if (!detail) {
-		if (completion.type === "variable") return SquareFunctionIcon;
+		if (completion.type === "variable") return ColumnIcon;
 		return TypCodeIcon;
 	}
+	if (completion.type === "variable") return ColumnIcon;
 	const typeName = detail.replace(/\[\]$/, "");
 	if (!typeName) return TypCodeIcon;
 	// Search param types (TOKEN, REFERENCE) — no icon
