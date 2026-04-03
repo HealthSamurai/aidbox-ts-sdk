@@ -58,7 +58,7 @@ const buttonVariants = cva(baseButtonStyles, {
 			),
 		},
 		size: {
-			regular: cn("h-9", "px-4", "typo-label"),
+			regular: cn("h-9", "px-4", "typo-body"),
 			small: cn("h-6", "px-2", "gap-1", "typo-button-label-xs"),
 		},
 		danger: {

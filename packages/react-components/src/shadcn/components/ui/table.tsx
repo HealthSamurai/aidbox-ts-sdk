@@ -58,7 +58,7 @@ const tableHeadStyles = cn(
 	"py-2",
 	"text-left",
 	"align-middle",
-	"typo-label-xs",
+	"typo-body-xs",
 	"whitespace-nowrap",
 	"transition-colors",
 	"duration-150",
@@ -81,7 +81,7 @@ const tableCellStyles = cn(
 	"align-middle",
 	"whitespace-nowrap",
 	"text-sm",
-	"text-text-primary",
+	"text-grey-700",
 	"[&:has([role=checkbox])]:pr-0",
 );
 
