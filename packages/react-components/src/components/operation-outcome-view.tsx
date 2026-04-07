@@ -191,6 +191,7 @@ export function OperationOutcomeView({
 								"flex items-center gap-2 px-4 h-8",
 								"[&>svg]:size-4 [&>svg]:shrink-0",
 								"typo-body",
+								"sticky top-0 z-10",
 								config.header,
 							)}
 						>
