@@ -2,6 +2,7 @@ name: Test Aidbox Client
 
 on:
   push:
+  pull_request:
 
 jobs:
   e2e:
