@@ -1,0 +1,24 @@
+{
+	"name": "@health-samurai/create-react-app",
+	"version": "0.0.0-alpha.1",
+	"description": "Scaffold a React app with Health Samurai components",
+	"type": "module",
+	"bin": "./index.js",
+	"files": [
+		"index.js",
+		"template"
+	],
+	"keywords": [
+		"health-samurai",
+		"react",
+		"create",
+		"scaffold",
+		"fhir"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk",
+		"directory": "packages/create-react-app"
+	}
+}
