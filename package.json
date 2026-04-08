@@ -18,8 +18,8 @@
 		}
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.6",
-		"@swc/cli": "^0.8.0",
-		"@swc/core": "^1.15.18"
+		"@biomejs/biome": "2.4.10",
+		"@swc/cli": "^0.8.1",
+		"@swc/core": "^1.15.24"
 	}
 }
