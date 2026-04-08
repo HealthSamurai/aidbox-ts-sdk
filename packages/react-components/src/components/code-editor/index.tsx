@@ -350,7 +350,7 @@ const baseTheme = EditorView.theme({
 		fontFamily: "var(--font-family-mono)",
 	},
 	".cm-gutters": {
-		backgroundColor: "var(--color-bg-primary)",
+		backgroundColor: "transparent",
 		border: "none",
 	},
 	".cm-lineNumbers": {
