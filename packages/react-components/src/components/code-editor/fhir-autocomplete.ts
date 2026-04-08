@@ -1068,6 +1068,7 @@ async function fhirComplete(
 	// boundary detection — the inner RT will be picked up via getScope later.
 	if (!resourceType) {
 		resourceType = resourceTypeHint;
+		rtScope = ctx.getScope(ctx.fullPath.length);
 	} else if (resourceTypeHint && ctx.fullPath.length > 0) {
 		// Check if the found RT is actually from an inner scope, not the root.
 		// If the root scope has no RT but hint is available, use hint as the
@@ -2128,13 +2129,13 @@ function buildFhirValidationPlugin(
 			if (destroyed) return;
 			if (view.state.doc.toString() !== currentDoc) return;
 
-			for (const es of emptyStrings) {
-				rawDiags.push({
-					from: es.from,
-					to: es.to,
-					message: "Value must not be empty",
-				});
-			}
+			// for (const es of emptyStrings) {
+			// 	rawDiags.push({
+			// 		from: es.from,
+			// 		to: es.to,
+			// 		message: "Value must not be empty",
+			// 	});
+			// }
 
 			const diags: FhirDiagnosticWithLine[] = rawDiags.map((d) => ({
 				...d,

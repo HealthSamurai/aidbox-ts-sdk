@@ -113,8 +113,8 @@ const prefixClasses = cn(
 	"border-r-0",
 
 	// Background & Colors
-	"bg-bg-tertiary",
-	"text-text-tertiary",
+	"bg-bg-primary",
+	"text-text-secondary",
 
 	// Layout & Flexbox
 	"flex",

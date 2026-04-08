@@ -492,7 +492,7 @@ const baseSidebarMenuButtonStyles = cn(
 	"px-[0.44rem]",
 	// Typography
 	"typo-body",
-	"text-text-primary",
+	"text-fg-secondary",
 	// Interaction
 	"outline-hidden",
 	"transition-all",
@@ -505,9 +505,9 @@ const baseSidebarMenuButtonStyles = cn(
 	"hover:text-text-primary",
 	// Active
 	"active:bg-bg-quaternary",
-	"data-[active=true]:bg-bg-brand-secondary",
+	"data-[active=true]:bg-bg-brand-primary",
 	"data-[active=true]:text-text-primary",
-	"data-[active=true]:[&>svg]:text-text-brand-primary",
+	"data-[active=true]:[&>svg]:text-fg-brand-primary",
 	// Open state
 	"data-[state=open]:hover:bg-bg-secondary",
 	"data-[state=open]:hover:text-text-primary",
