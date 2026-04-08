@@ -883,8 +883,10 @@ function sqlCompletionOverride(): Extension {
 					};
 				}
 
-				const aliasColumnResult = results.find((r) =>
-					r.options.length > 0 && r.options.every((o) => o.type === "variable"),
+				const aliasColumnResult = results.find(
+					(r) =>
+						r.options.length > 0 &&
+						r.options.every((o) => o.type === "variable"),
 				);
 				if (aliasColumnResult) return aliasColumnResult;
 
