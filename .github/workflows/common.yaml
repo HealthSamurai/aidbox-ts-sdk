@@ -1,6 +1,7 @@
 name: Aidbox TS SDK
 on:
   push:
+  pull_request:
 
 jobs:
   lint:
