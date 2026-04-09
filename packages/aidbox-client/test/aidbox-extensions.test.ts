@@ -2,7 +2,7 @@ import { BasicAuthProvider } from "src/auth-providers";
 import { AidboxClient } from "src/client";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
 import type { User } from "src/types";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const originalFetch = globalThis.fetch;
 
@@ -37,7 +37,9 @@ describe("Aidbox extensions", () => {
 			const mockRows = [{ cnt: 42 }];
 			globalThis.fetch = mockFetch(mockRows);
 
-			const result = await client.sql<{ cnt: number }>("SELECT count(*) as cnt FROM patient");
+			const result = await client.sql<{ cnt: number }>(
+				"SELECT count(*) as cnt FROM patient",
+			);
 
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
@@ -84,7 +86,9 @@ describe("Aidbox extensions", () => {
 		it("should return Err on server error", async () => {
 			const outcome: OperationOutcome = {
 				resourceType: "OperationOutcome",
-				issue: [{ severity: "error", code: "exception", diagnostics: "SQL error" }],
+				issue: [
+					{ severity: "error", code: "exception", diagnostics: "SQL error" },
+				],
 			};
 			globalThis.fetch = mockFetch(outcome, 500);
 
@@ -98,7 +102,9 @@ describe("Aidbox extensions", () => {
 		it("should materialize a ViewDefinition", async () => {
 			const mockResult = {
 				resourceType: "Parameters",
-				parameter: [{ name: "viewName", valueString: "mira_backend.encounter_flat" }],
+				parameter: [
+					{ name: "viewName", valueString: "mira_backend.encounter_flat" },
+				],
 			};
 			globalThis.fetch = mockFetch(mockResult);
 

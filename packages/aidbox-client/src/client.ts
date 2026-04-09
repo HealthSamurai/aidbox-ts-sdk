@@ -14,6 +14,7 @@ import type {
 	HistoryInstanceOptions,
 	HistorySystemOptions,
 	HistoryTypeOptions,
+	MaterializeResult,
 	OperationOptions,
 	PatchOptions,
 	ReadOptions,
@@ -31,7 +32,6 @@ import type {
 } from "./types";
 import { ErrorResponse, RequestError } from "./types";
 import { coerceBody } from "./utils";
-import type { MaterializeResult } from "./types";
 
 type InternalAidboxErrorResponse = {
 	error?: unknown;
@@ -952,7 +952,9 @@ export class AidboxClient<
 	public async sql<T>(
 		query: string,
 		params?: Array<string | number | boolean | null>,
-	): Promise<Result<ResourceResponse<T[]>, ResourceResponse<TOperationOutcome>>> {
+	): Promise<
+		Result<ResourceResponse<T[]>, ResourceResponse<TOperationOutcome>>
+	> {
 		const body = params?.length ? [query, ...params] : [query];
 		return await this.request<T[]>({
 			url: "/$sql",
@@ -981,9 +983,19 @@ export class AidboxClient<
 	public async materialize(
 		viewDefinitionId: string,
 		type: "table" | "view" | "materialized-view" = "materialized-view",
-	): Promise<Result<ResourceResponse<MaterializeResult>, ResourceResponse<TOperationOutcome>>> {
+	): Promise<
+		Result<
+			ResourceResponse<MaterializeResult>,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
 		return await this.request<MaterializeResult>({
-			url: makeUrl([basePath, "ViewDefinition", viewDefinitionId, "$materialize"]),
+			url: makeUrl([
+				basePath,
+				"ViewDefinition",
+				viewDefinitionId,
+				"$materialize",
+			]),
 			method: "POST",
 			body: JSON.stringify({
 				resourceType: "Parameters",
