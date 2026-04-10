@@ -1,6 +1,7 @@
 name: Aidbox TS SDK
 on:
   push:
+    branches: [master]
   pull_request:
 
 jobs:
