@@ -2,7 +2,8 @@ name: Test Aidbox Client
 
 on:
   push:
-  pull_request:
+    branches: [master]
+  pull_request_target:
 
 jobs:
   e2e:
@@ -11,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
