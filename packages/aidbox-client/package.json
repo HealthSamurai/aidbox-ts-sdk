@@ -1,6 +1,6 @@
 {
 	"name": "@health-samurai/aidbox-client",
-	"version": "0.0.0-alpha.5",
+	"version": "0.0.0-alpha.6",
 	"description": "A client library for communicating with Aidbox",
 	"author": "Health Samurai",
 	"type": "module",
