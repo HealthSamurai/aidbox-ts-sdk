@@ -14,6 +14,7 @@ import type {
 	HistoryInstanceOptions,
 	HistorySystemOptions,
 	HistoryTypeOptions,
+	MaterializeResult,
 	OperationOptions,
 	PatchOptions,
 	ReadOptions,
@@ -914,6 +915,92 @@ export class AidboxClient<
 		return await this.operation<T, TOperationOutcome>({
 			operation: "$validate",
 			...opts,
+		});
+	}
+
+	/// Aidbox-specific methods
+
+	/**
+	 * Execute a raw SQL query against the Aidbox database.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/$sql
+	 * ```
+	 *
+	 * Example usage:
+	 *
+	 * **Important:** Always use parameterized queries to prevent SQL injection.
+	 * Pass user-supplied values via `params`, never interpolate them into the query string.
+	 *
+	 * ```typescript
+	 * // Good — parameterized
+	 * const result = await client.sql<{ cnt: number }>(
+	 *   "SELECT count(*) as cnt FROM patient WHERE id = ?", [patientId]
+	 * );
+	 *
+	 * // Bad — SQL injection risk
+	 * const result = await client.sql(`SELECT * FROM patient WHERE id = '${patientId}'`);
+	 * ```
+	 *
+	 * Note: `$sql` is an Aidbox-specific endpoint (not part of the FHIR spec).
+	 * The URL uses the Aidbox-native prefix (`/$sql`), not the FHIR prefix (`/fhir/$sql`).
+	 *
+	 * @group Aidbox methods
+	 */
+	public async sql<T>(
+		query: string,
+		params?: Array<string | number | boolean | null>,
+	): Promise<
+		Result<ResourceResponse<T[]>, ResourceResponse<TOperationOutcome>>
+	> {
+		const body = params?.length ? [query, ...params] : [query];
+		return await this.request<T[]>({
+			url: "/$sql",
+			method: "POST",
+			body: JSON.stringify(body),
+		});
+	}
+
+	/**
+	 * Materialize a ViewDefinition into a flat table.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/fhir/ViewDefinition/[id]/$materialize
+	 * ```
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = await client.materialize("view-def-id", "materialized-view");
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async materialize(
+		viewDefinitionId: string,
+		type: "table" | "view" | "materialized-view" = "materialized-view",
+	): Promise<
+		Result<
+			ResourceResponse<MaterializeResult>,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
+		return await this.request<MaterializeResult>({
+			url: makeUrl([
+				basePath,
+				"ViewDefinition",
+				viewDefinitionId,
+				"$materialize",
+			]),
+			method: "POST",
+			body: JSON.stringify({
+				resourceType: "Parameters",
+				parameter: [{ name: "type", valueCode: type }],
+			}),
 		});
 	}
 

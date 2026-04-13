@@ -20,5 +20,8 @@
 		"type": "git",
 		"url": "https://github.com/HealthSamurai/aidbox-ts-sdk",
 		"directory": "packages/create-react-app"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }
