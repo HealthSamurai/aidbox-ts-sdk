@@ -6,11 +6,11 @@ export class BrowserAuthProvider implements AuthProvider {
 	public baseUrl: string;
 
 	constructor(baseUrl: string) {
-		this.baseUrl = baseUrl;
+		this.baseUrl = baseUrl.replace(/\/+$/, "");
 	}
 
 	async #checkSession() {
-		const response = await fetch(new URL("/auth/userinfo", this.baseUrl), {
+		const response = await fetch(`${this.baseUrl}/auth/userinfo`, {
 			method: "GET",
 			headers: {
 				"content-type": "application/json",
@@ -36,7 +36,7 @@ export class BrowserAuthProvider implements AuthProvider {
 	 * Sends a POST request to `baseurl/auth/logout`.
 	 */
 	public async revokeSession() {
-		await fetch(new URL("/auth/logout", this.baseUrl), {
+		await fetch(`${this.baseUrl}/auth/logout`, {
 			method: "POST",
 			headers: {
 				"content-type": "application/json",
@@ -78,7 +78,7 @@ export class BasicAuthProvider implements AuthProvider {
 	#authHeader: string;
 
 	constructor(baseUrl: string, username: string, password: string) {
-		this.baseUrl = baseUrl;
+		this.baseUrl = baseUrl.replace(/\/+$/, "");
 		// Create Base64-encoded credentials for Basic Auth header (RFC 7617: UTF-8 encoded)
 		const credentials = `${username}:${password}`;
 		const utf8Bytes = new TextEncoder().encode(credentials);
