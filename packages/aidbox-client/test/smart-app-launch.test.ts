@@ -46,7 +46,9 @@ afterEach(() => {
 
 describe("fetchSmartConfiguration", () => {
 	it("should fetch and return the SMART configuration document", async () => {
-		const mockFetch = vi.fn().mockResolvedValue(jsonResponse(buildSmartConfig()));
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(jsonResponse(buildSmartConfig()));
 		globalThis.fetch = mockFetch;
 
 		const config = await fetchSmartConfiguration(ISS);
@@ -59,7 +61,9 @@ describe("fetchSmartConfiguration", () => {
 	});
 
 	it("should strip trailing slash from iss before requesting", async () => {
-		const mockFetch = vi.fn().mockResolvedValue(jsonResponse(buildSmartConfig()));
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(jsonResponse(buildSmartConfig()));
 		globalThis.fetch = mockFetch;
 
 		await fetchSmartConfiguration(`${ISS}/`);
@@ -199,11 +203,13 @@ describe("authorize", () => {
 	});
 
 	it("should throw when pkceMode is 'required' but server doesn't advertise S256", async () => {
-		globalThis.fetch = vi.fn().mockResolvedValue(
-			jsonResponse(
-				buildSmartConfig({ code_challenge_methods_supported: undefined }),
-			),
-		);
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(
+				jsonResponse(
+					buildSmartConfig({ code_challenge_methods_supported: undefined }),
+				),
+			);
 
 		await expect(
 			authorize({
@@ -220,7 +226,9 @@ describe("authorize", () => {
 		globalThis.fetch = vi
 			.fn()
 			.mockResolvedValue(
-				jsonResponse(buildSmartConfig({ code_challenge_methods_supported: [] })),
+				jsonResponse(
+					buildSmartConfig({ code_challenge_methods_supported: [] }),
+				),
 			);
 
 		const result = await authorize({
@@ -469,7 +477,9 @@ describe("revokeSession", () => {
 	});
 
 	it("should POST refresh token to revocation endpoint", async () => {
-		const mockFetch = vi.fn().mockResolvedValue(new Response("", { status: 200 }));
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(new Response("", { status: 200 }));
 		globalThis.fetch = mockFetch;
 
 		await revokeSession(baseSession());
@@ -524,7 +534,9 @@ describe("SmartAppLaunchAuthProvider", () => {
 	};
 
 	it("should attach Bearer header to outgoing requests", async () => {
-		const mockFetch = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(new Response("{}", { status: 200 }));
 		globalThis.fetch = mockFetch;
 
 		const store = makeStore(freshSession());
@@ -743,7 +755,9 @@ describe("SmartAppLaunchAuthProvider", () => {
 	});
 
 	it("should call revocation endpoint on revokeSession", async () => {
-		const mockFetch = vi.fn().mockResolvedValue(new Response("", { status: 200 }));
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(new Response("", { status: 200 }));
 		globalThis.fetch = mockFetch;
 
 		const store = makeStore(freshSession());

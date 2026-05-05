@@ -459,7 +459,10 @@ export async function refreshSession(
 	const next = sessionFromTokenResponse(session, token);
 	if (!next.refreshToken && session.refreshToken) {
 		next.refreshToken = session.refreshToken;
-		next.tokenResponse = { ...next.tokenResponse, refresh_token: session.refreshToken };
+		next.tokenResponse = {
+			...next.tokenResponse,
+			refresh_token: session.refreshToken,
+		};
 	}
 	return next;
 }
@@ -578,10 +581,7 @@ export class SmartAppLaunchAuthProvider implements AuthProvider {
 		await revokeSession(session);
 	}
 
-	async fetch(
-		input: RequestInfo | URL,
-		init?: RequestInit,
-	): Promise<Response> {
+	async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
 		validateBaseUrl(input, this.baseUrl);
 
 		let session = await this.#getSession();
