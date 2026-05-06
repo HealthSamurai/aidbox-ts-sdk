@@ -12,6 +12,7 @@ import { mergeHeaders, validateBaseUrl } from "./utils";
  * @see https://hl7.org/fhir/smart-app-launch/conformance.html#smart-configuration
  */
 export type SmartConfiguration = {
+	issuer?: string | undefined;
 	authorization_endpoint: string;
 	token_endpoint: string;
 	revocation_endpoint?: string | undefined;
@@ -76,6 +77,7 @@ export type PendingAuthorization = {
 	clientSecret?: string | undefined;
 	redirectUri: string;
 	scope: string;
+	authorizationServerIssuer?: string | undefined;
 	authorizeUri: string;
 	tokenUri: string;
 	revocationUri?: string | undefined;
@@ -284,6 +286,7 @@ export async function authorize(
 		clientSecret: config.clientSecret,
 		redirectUri: config.redirectUri,
 		scope,
+		authorizationServerIssuer: smartConfig.issuer,
 		authorizeUri: smartConfig.authorization_endpoint,
 		tokenUri: smartConfig.token_endpoint,
 		revocationUri: smartConfig.revocation_endpoint,
@@ -297,6 +300,22 @@ export async function authorize(
 		pending,
 	};
 }
+
+const validateAuthorizationResponseIssuer = (
+	url: URL,
+	pending: Pick<PendingAuthorization, "authorizationServerIssuer">,
+): void => {
+	const responseIss = url.searchParams.get("iss");
+	if (!responseIss) return;
+	if (
+		pending.authorizationServerIssuer &&
+		responseIss !== pending.authorizationServerIssuer
+	) {
+		throw new Error(
+			`Callback \`iss\` does not match expected authorization server issuer: ${responseIss}`,
+		);
+	}
+};
 
 const buildBasicAuth = (clientId: string, clientSecret: string): string => {
 	const creds = `${encodeURIComponent(clientId)}:${encodeURIComponent(clientSecret)}`;
@@ -352,6 +371,11 @@ export async function exchangeCode(
 	params: ExchangeCodeParams,
 ): Promise<SmartSession> {
 	const url = new URL(params.url);
+	const returnedState = url.searchParams.get("state");
+	if (!returnedState || returnedState !== params.pending.stateNonce) {
+		throw new Error("Callback `state` does not match pending authorization");
+	}
+	validateAuthorizationResponseIssuer(url, params.pending);
 
 	const oauthError = url.searchParams.get("error");
 	if (oauthError) {
@@ -362,12 +386,8 @@ export async function exchangeCode(
 	}
 
 	const code = url.searchParams.get("code");
-	const returnedState = url.searchParams.get("state");
 	if (!code) {
 		throw new Error("Callback URL is missing `code` query parameter");
-	}
-	if (!returnedState || returnedState !== params.pending.stateNonce) {
-		throw new Error("Callback `state` does not match pending authorization");
 	}
 
 	const body = new URLSearchParams();
