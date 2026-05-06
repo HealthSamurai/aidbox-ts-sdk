@@ -374,6 +374,37 @@ describe("exchangeCode", () => {
 		expect(body.get("client_id")).toBeNull();
 	});
 
+	it("should accept callback iss matching the expected authorization server issuer", async () => {
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(jsonResponse({ access_token: "a", expires_in: 60 }));
+		globalThis.fetch = mockFetch;
+
+		await exchangeCode({
+			url: `${REDIRECT_URI}?code=c&state=nonce-123&iss=${encodeURIComponent("https://auth.example.com")}`,
+			pending: {
+				...basePending(),
+				authorizationServerIssuer: "https://auth.example.com",
+			},
+		});
+
+		expect(mockFetch).toHaveBeenCalledOnce();
+	});
+
+	it("should reject callback iss that does not match the expected authorization server issuer", async () => {
+		globalThis.fetch = vi.fn().mockResolvedValue(jsonResponse({}));
+
+		await expect(
+			exchangeCode({
+				url: `${REDIRECT_URI}?code=c&state=nonce-123&iss=${encodeURIComponent("https://evil.example.com")}`,
+				pending: {
+					...basePending(),
+					authorizationServerIssuer: "https://auth.example.com",
+				},
+			}),
+		).rejects.toThrow(/does not match expected authorization server issuer/);
+	});
+
 	it("should reject when state nonce does not match", async () => {
 		globalThis.fetch = vi.fn().mockResolvedValue(jsonResponse({}));
 
