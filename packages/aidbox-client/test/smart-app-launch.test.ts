@@ -184,6 +184,23 @@ describe("authorize", () => {
 		expect(scopes.filter((s) => s === "launch").length).toBe(1);
 	});
 
+	it("should append `launch` when only `launch/patient` scope is present", async () => {
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(jsonResponse(buildSmartConfig()));
+
+		const result = await authorize({
+			clientId: CLIENT_ID,
+			scope: "launch/patient openid",
+			redirectUri: REDIRECT_URI,
+			launchUrl: `https://x/launch?iss=${encodeURIComponent(ISS)}&launch=l1`,
+		});
+		const url = new URL(result.redirectUrl);
+		const scopes = url.searchParams.get("scope")?.split(" ") ?? [];
+		expect(scopes).toContain("launch/patient");
+		expect(scopes).toContain("launch");
+	});
+
 	it("should disable PKCE when pkceMode is 'disabled'", async () => {
 		globalThis.fetch = vi
 			.fn()

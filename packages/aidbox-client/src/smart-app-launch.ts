@@ -252,7 +252,7 @@ export async function authorize(
 	);
 
 	let scope = config.scope;
-	if (launch && !/\blaunch\b/.test(scope)) {
+	if (launch && !scope.split(/\s+/).includes("launch")) {
 		scope = `${scope} launch`.trim();
 	}
 
