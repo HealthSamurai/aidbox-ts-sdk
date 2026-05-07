@@ -336,6 +336,8 @@ For provider-facing applications that authenticate users via [SMART App Launch](
 
 The provider holds no session state of its own — your application stores the `SmartSession` (in a cookie session, Redis, `sessionStorage`, etc.) and supplies `getSession` / `setSession` callbacks. This works the same way in a browser SPA and in a server app.
 
+`exchangeCode()` stores token endpoint data in the session. When Aidbox includes `userinfo` in the token response, it is available as `session.userinfo`.
+
 The flow has three stages, each backed by a top-level function:
 
 1. `authorize(config)` — at the launch URL, returns `{ redirectUrl, pending }`. Persist `pending` keyed by `pending.stateNonce`, then redirect the user-agent to `redirectUrl`.
@@ -460,7 +462,7 @@ const refreshed = await refreshSession(session);  // returns a new SmartSession
 await revokeSession(session);                     // best-effort revocation at the auth server
 ```
 
-> **Security note:** when scope includes `openid`, the token response carries an `id_token` JWT. This library does **not** validate the JWT signature, `iss`, `aud`, or `exp` — it stores the raw token in `session.idToken`. If you use `session.fhirUser` (or any id_token claim) for authorization decisions, validate the JWT yourself first.
+> **Security note:** when scope includes `openid`, the token response carries an `id_token` JWT. This library does **not** validate the JWT signature, `iss`, `aud`, or `exp` — it stores the raw token in `session.idToken`. If you use id_token claims for authorization decisions, validate the JWT yourself first.
 
 ### Custom Auth Provider
 

@@ -18,9 +18,19 @@ export type AuthProvider = {
 	establishSession: () => void;
 };
 
+export type AidboxReference = {
+	id: string;
+	resourceType: string;
+};
+
 // FIXME: sansara#6557 Generate from IG
-export type User = Resource & {
+export type User = Omit<Resource, "resourceType"> & {
+	resourceType: "User";
 	email?: string;
+};
+
+export type UserInfo = Omit<User, "fhirUser"> & {
+	fhirUser?: AidboxReference;
 };
 
 export type RequestParams = {

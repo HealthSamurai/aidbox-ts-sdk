@@ -1,4 +1,4 @@
-import type { AuthProvider } from "./types";
+import type { AuthProvider, UserInfo } from "./types";
 import { mergeHeaders, validateBaseUrl } from "./utils";
 
 /// IMPORTANT:
@@ -25,11 +25,12 @@ export type SmartConfiguration = {
 /**
  * Token bundle returned by `exchangeCode`.
  *
- * SMART App Launch token responses extend OAuth 2.0 with launch context (`patient`, `encounter`, `fhirUser`, `id_token`).
+ * SMART App Launch token responses extend OAuth 2.0 with launch context (`patient`, `encounter`, `id_token`).
+ * Aidbox token responses may also include `userinfo`, containing the Aidbox `User` resource.
  *
- * `id_token` (when scope includes `openid`) is **not** validated by this library — callers that rely on `fhirUser` for authorization decisions must verify the JWT signature, `iss`, `aud`, and `exp` themselves.
+ * `id_token` (when scope includes `openid`) is **not** validated by this library — callers that rely on id_token claims for authorization decisions must verify the JWT signature, `iss`, `aud`, and `exp` themselves.
  */
-export type SmartTokenResponse = {
+export type SmartTokenResponse<TUser = UserInfo> = {
 	access_token: string;
 	token_type?: string;
 	refresh_token?: string;
@@ -38,7 +39,7 @@ export type SmartTokenResponse = {
 	id_token?: string;
 	patient?: string;
 	encounter?: string;
-	fhirUser?: string;
+	userinfo?: TUser;
 	[key: string]: unknown;
 };
 
@@ -60,7 +61,7 @@ export type SmartRefreshTokenResponse = Required<
  * Hosts persist this object in their session store (cookie session, Redis, etc.).
  * `accessToken` is always present; `expiresAt` is an absolute Unix timestamp in milliseconds, computed locally on receipt.
  */
-export type SmartSession = {
+export type SmartSession<TUser = UserInfo> = {
 	serverUrl: string;
 	clientId: string;
 	tokenUri: string;
@@ -72,8 +73,8 @@ export type SmartSession = {
 	scope?: string | undefined;
 	patient?: string | undefined;
 	encounter?: string | undefined;
-	fhirUser?: string | undefined;
 	idToken?: string | undefined;
+	userinfo?: TUser | undefined;
 };
 
 /**
@@ -335,13 +336,13 @@ const buildBasicAuth = (clientId: string, clientSecret: string): string => {
 	return `Basic ${base64}`;
 };
 
-const sessionFromTokenResponse = (
+const sessionFromTokenResponse = <TUser = UserInfo>(
 	pending: Pick<
 		PendingAuthorization,
 		"serverUrl" | "clientId" | "clientSecret" | "tokenUri" | "revocationUri"
 	>,
-	token: SmartTokenResponse,
-): SmartSession => {
+	token: SmartTokenResponse<TUser>,
+): SmartSession<TUser> => {
 	const expiresAt =
 		token.expires_in !== undefined
 			? Date.now() + token.expires_in * 1000
@@ -358,8 +359,8 @@ const sessionFromTokenResponse = (
 		scope: token.scope,
 		patient: token.patient,
 		encounter: token.encounter,
-		fhirUser: token.fhirUser,
 		idToken: token.id_token,
+		userinfo: token.userinfo,
 	};
 };
 
@@ -377,9 +378,9 @@ export type ExchangeCodeParams = {
  * Validates the `state` query parameter against `pending.stateNonce`.
  * Surfaces `error`/`error_description` from the callback URL as a thrown `Error`.
  */
-export async function exchangeCode(
+export async function exchangeCode<TUser = UserInfo>(
 	params: ExchangeCodeParams,
-): Promise<SmartSession> {
+): Promise<SmartSession<TUser>> {
 	const url = new URL(params.url);
 	const returnedState = url.searchParams.get("state");
 	if (!returnedState || returnedState !== params.pending.stateNonce) {
@@ -435,7 +436,7 @@ export async function exchangeCode(
 		);
 	}
 
-	const token = (await response.json()) as SmartTokenResponse;
+	const token = (await response.json()) as SmartTokenResponse<TUser>;
 	return sessionFromTokenResponse(params.pending, token);
 }
 
@@ -446,9 +447,9 @@ export async function exchangeCode(
  * Returns a new session — the original is not mutated.
  * If the server omits `refresh_token` in the response, the previous one is preserved.
  */
-export async function refreshSession(
-	session: SmartSession,
-): Promise<SmartSession> {
+export async function refreshSession<TUser = UserInfo>(
+	session: SmartSession<TUser>,
+): Promise<SmartSession<TUser>> {
 	if (!session.refreshToken) {
 		throw new Error("Cannot refresh — no refreshToken in session");
 	}
@@ -509,7 +510,9 @@ export async function refreshSession(
  * No-op if the session has no `revocationUri`.
  * Errors are swallowed — revocation is best-effort.
  */
-export async function revokeSession(session: SmartSession): Promise<void> {
+export async function revokeSession<TUser = UserInfo>(
+	session: SmartSession<TUser>,
+): Promise<void> {
 	if (!session.revocationUri) return;
 
 	const body = new URLSearchParams();
@@ -544,13 +547,13 @@ export async function revokeSession(session: SmartSession): Promise<void> {
  * The provider holds no session state of its own — it asks the host for the current session on every request via `getSession`, and reports refreshed sessions back via `setSession`.
  * This makes the host's session store the single source of truth and avoids cache-coherence bugs across multiple provider instances or processes.
  */
-export type SmartAppLaunchAuthProviderConfig = {
+export type SmartAppLaunchAuthProviderConfig<TUser = UserInfo> = {
 	/** FHIR server base URL — used for `validateBaseUrl` and exposed as `provider.baseUrl`. */
 	baseUrl: string;
 	/** Called on every request to retrieve the current session. */
-	getSession: () => SmartSession | Promise<SmartSession>;
+	getSession: () => SmartSession<TUser> | Promise<SmartSession<TUser>>;
 	/** Called whenever the provider obtains a new session (after refresh). The host must persist it. */
-	setSession: (session: SmartSession) => void | Promise<void>;
+	setSession: (session: SmartSession<TUser>) => void | Promise<void>;
 	/** Refresh the token this many seconds before expiry (default: 30). */
 	tokenExpirationBuffer?: number;
 };
@@ -561,27 +564,29 @@ export type SmartAppLaunchAuthProviderConfig = {
  * Adds `Authorization: Bearer ...` to outgoing requests, refreshes proactively before expiry, retries once on 401, and deduplicates concurrent refreshes.
  * The provider never caches the session — the host's `getSession`/`setSession` callbacks are the single source of truth.
  */
-export class SmartAppLaunchAuthProvider implements AuthProvider {
+export class SmartAppLaunchAuthProvider<TUser = UserInfo>
+	implements AuthProvider
+{
 	public baseUrl: string;
 
-	#getSession: () => SmartSession | Promise<SmartSession>;
-	#setSession: (session: SmartSession) => void | Promise<void>;
+	#getSession: () => SmartSession<TUser> | Promise<SmartSession<TUser>>;
+	#setSession: (session: SmartSession<TUser>) => void | Promise<void>;
 	#expirationBuffer: number;
-	#pendingRefresh: Promise<SmartSession> | null = null;
+	#pendingRefresh: Promise<SmartSession<TUser>> | null = null;
 
-	constructor(config: SmartAppLaunchAuthProviderConfig) {
+	constructor(config: SmartAppLaunchAuthProviderConfig<TUser>) {
 		this.baseUrl = config.baseUrl;
 		this.#getSession = config.getSession;
 		this.#setSession = config.setSession;
 		this.#expirationBuffer = config.tokenExpirationBuffer ?? 30;
 	}
 
-	#isFresh(session: SmartSession): boolean {
+	#isFresh(session: SmartSession<TUser>): boolean {
 		if (session.expiresAt === undefined) return true;
 		return session.expiresAt > Date.now() + this.#expirationBuffer * 1000;
 	}
 
-	async #refresh(session: SmartSession): Promise<SmartSession> {
+	async #refresh(session: SmartSession<TUser>): Promise<SmartSession<TUser>> {
 		if (this.#pendingRefresh) return this.#pendingRefresh;
 		this.#pendingRefresh = (async () => {
 			const next = await refreshSession(session);
