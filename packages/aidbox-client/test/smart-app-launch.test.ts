@@ -327,7 +327,12 @@ describe("exchangeCode", () => {
 				token_type: "Bearer",
 				patient: "Patient/123",
 				scope: "openid fhirUser",
-				fhirUser: "Practitioner/abc",
+				userinfo: {
+					resourceType: "User",
+					id: "user-1",
+					email: "user@example.com",
+					fhirUser: { id: "abc", resourceType: "Practitioner" },
+				},
 			}),
 		);
 		globalThis.fetch = mockFetch;
@@ -351,7 +356,11 @@ describe("exchangeCode", () => {
 		expect(session.accessToken).toBe("access-1");
 		expect(session.refreshToken).toBe("refresh-1");
 		expect(session.patient).toBe("Patient/123");
-		expect(session.fhirUser).toBe("Practitioner/abc");
+		expect(session.userinfo?.email).toBe("user@example.com");
+		expect(session.userinfo?.fhirUser).toEqual({
+			id: "abc",
+			resourceType: "Practitioner",
+		});
 		expect(session.expiresAt).toBeGreaterThan(Date.now());
 	});
 
@@ -463,8 +472,13 @@ describe("refreshSession", () => {
 		scope: "openid",
 		patient: "patient-1",
 		encounter: "encounter-1",
-		fhirUser: "Practitioner/1",
 		idToken: "id-token-1",
+		userinfo: {
+			resourceType: "User",
+			id: "user-1",
+			email: "user@example.com",
+			fhirUser: { id: "1", resourceType: "Practitioner" },
+		},
 	});
 
 	it("should post refresh_token grant and return a fresh session", async () => {
@@ -535,8 +549,11 @@ describe("refreshSession", () => {
 		expect(next.scope).toBe("openid");
 		expect(next.patient).toBe("patient-1");
 		expect(next.encounter).toBe("encounter-1");
-		expect(next.fhirUser).toBe("Practitioner/1");
 		expect(next.idToken).toBe("id-token-1");
+		expect(next.userinfo?.fhirUser).toEqual({
+			id: "1",
+			resourceType: "Practitioner",
+		});
 	});
 
 	it("should throw when no refreshToken is present", async () => {
