@@ -353,7 +353,6 @@ describe("exchangeCode", () => {
 		expect(session.patient).toBe("Patient/123");
 		expect(session.fhirUser).toBe("Practitioner/abc");
 		expect(session.expiresAt).toBeGreaterThan(Date.now());
-		expect(session.tokenResponse.access_token).toBe("access-1");
 	});
 
 	it("should use Basic auth when clientSecret is set, omit client_id from body", async () => {
@@ -462,20 +461,20 @@ describe("refreshSession", () => {
 		refreshToken: "old-refresh",
 		expiresAt: Date.now() + 3_600_000,
 		scope: "openid",
-		tokenResponse: {
-			access_token: "old-access",
-			refresh_token: "old-refresh",
-			expires_in: 3600,
-			scope: "openid",
-		},
+		patient: "patient-1",
+		encounter: "encounter-1",
+		fhirUser: "Practitioner/1",
+		idToken: "id-token-1",
 	});
 
 	it("should post refresh_token grant and return a fresh session", async () => {
 		const mockFetch = vi.fn().mockResolvedValue(
 			jsonResponse({
 				access_token: "new-access",
-				refresh_token: "new-refresh",
+				token_type: "Bearer",
 				expires_in: 3600,
+				scope: "openid",
+				patient: "patient-1",
 			}),
 		);
 		globalThis.fetch = mockFetch;
@@ -489,19 +488,55 @@ describe("refreshSession", () => {
 		expect(body.get("client_id")).toBe(CLIENT_ID);
 
 		expect(next.accessToken).toBe("new-access");
-		expect(next.refreshToken).toBe("new-refresh");
+		expect(next.refreshToken).toBe("old-refresh");
 	});
 
 	it("should preserve previous refreshToken if response omits it", async () => {
-		globalThis.fetch = vi
-			.fn()
-			.mockResolvedValue(
-				jsonResponse({ access_token: "new-access", expires_in: 60 }),
-			);
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			jsonResponse({
+				access_token: "new-access",
+				token_type: "Bearer",
+				expires_in: 60,
+				scope: "openid",
+				patient: "patient-1",
+			}),
+		);
 
 		const next = await refreshSession(sessionWithRefresh());
 		expect(next.refreshToken).toBe("old-refresh");
-		expect(next.tokenResponse.refresh_token).toBe("old-refresh");
+	});
+
+	it("should clear expiresAt if refresh response omits expires_in", async () => {
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			jsonResponse({
+				access_token: "new-access",
+				token_type: "Bearer",
+				scope: "openid",
+				patient: "patient-1",
+			}),
+		);
+
+		const next = await refreshSession(sessionWithRefresh());
+		expect(next.expiresAt).toBeUndefined();
+	});
+
+	it("should preserve launch context fields omitted by refresh response", async () => {
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			jsonResponse({
+				access_token: "new-access",
+				token_type: "Bearer",
+				expires_in: 60,
+				scope: "openid",
+				patient: "patient-1",
+			}),
+		);
+
+		const next = await refreshSession(sessionWithRefresh());
+		expect(next.scope).toBe("openid");
+		expect(next.patient).toBe("patient-1");
+		expect(next.encounter).toBe("encounter-1");
+		expect(next.fhirUser).toBe("Practitioner/1");
+		expect(next.idToken).toBe("id-token-1");
 	});
 
 	it("should throw when no refreshToken is present", async () => {
@@ -521,7 +556,6 @@ describe("revokeSession", () => {
 		accessToken: "a",
 		refreshToken: "r",
 		expiresAt: Date.now() + 3_600_000,
-		tokenResponse: { access_token: "a", refresh_token: "r" },
 	});
 
 	it("should POST refresh token to revocation endpoint", async () => {
@@ -563,11 +597,6 @@ describe("SmartAppLaunchAuthProvider", () => {
 		accessToken: "access-fresh",
 		refreshToken: "refresh-1",
 		expiresAt: Date.now() + 3_600_000,
-		tokenResponse: {
-			access_token: "access-fresh",
-			refresh_token: "refresh-1",
-			expires_in: 3600,
-		},
 	});
 
 	const makeStore = (initial: SmartSession) => {
@@ -626,7 +655,7 @@ describe("SmartAppLaunchAuthProvider", () => {
 			if (url === TOKEN_URL) {
 				return jsonResponse({
 					access_token: "fresh-after-refresh",
-					refresh_token: "refresh-2",
+					token_type: "Bearer",
 					expires_in: 3600,
 				});
 			}
@@ -646,6 +675,7 @@ describe("SmartAppLaunchAuthProvider", () => {
 		expect(mockFetch).toHaveBeenCalledTimes(2);
 		expect(store.setSession).toHaveBeenCalledOnce();
 		expect(store.current().accessToken).toBe("fresh-after-refresh");
+		expect(store.current().refreshToken).toBe("refresh-1");
 
 		const fhirCall = mockFetch.mock.calls.find(
 			(c) => (typeof c[0] === "string" ? c[0] : c[0].toString()) !== TOKEN_URL,
@@ -661,7 +691,7 @@ describe("SmartAppLaunchAuthProvider", () => {
 			if (url === TOKEN_URL) {
 				return jsonResponse({
 					access_token: "post-401-token",
-					refresh_token: "refresh-2",
+					token_type: "Bearer",
 					expires_in: 3600,
 				});
 			}
@@ -684,6 +714,7 @@ describe("SmartAppLaunchAuthProvider", () => {
 		expect(r.ok).toBe(true);
 		expect(callsToFhir).toBe(2);
 		expect(store.current().accessToken).toBe("post-401-token");
+		expect(store.current().refreshToken).toBe("refresh-1");
 	});
 
 	it("should not retry after 401 if no refresh token is available", async () => {
@@ -723,7 +754,13 @@ describe("SmartAppLaunchAuthProvider", () => {
 				return new Promise<Response>((resolve) =>
 					setTimeout(
 						() =>
-							resolve(jsonResponse({ access_token: "new", expires_in: 3600 })),
+							resolve(
+								jsonResponse({
+									access_token: "new",
+									token_type: "Bearer",
+									expires_in: 3600,
+								}),
+							),
 						10,
 					),
 				);
@@ -767,11 +804,13 @@ describe("SmartAppLaunchAuthProvider", () => {
 			...freshSession(),
 			expiresAt: Date.now() + 1_000,
 		};
-		globalThis.fetch = vi
-			.fn()
-			.mockResolvedValue(
-				jsonResponse({ access_token: "via-establish", expires_in: 3600 }),
-			);
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			jsonResponse({
+				access_token: "via-establish",
+				token_type: "Bearer",
+				expires_in: 3600,
+			}),
+		);
 
 		const store = makeStore(stale);
 		const provider = new SmartAppLaunchAuthProvider({

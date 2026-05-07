@@ -23,7 +23,7 @@ export type SmartConfiguration = {
 };
 
 /**
- * Token bundle returned by `exchangeCode` and `refreshSession`.
+ * Token bundle returned by `exchangeCode`.
  *
  * SMART App Launch token responses extend OAuth 2.0 with launch context (`patient`, `encounter`, `fhirUser`, `id_token`).
  *
@@ -41,6 +41,18 @@ export type SmartTokenResponse = {
 	fhirUser?: string;
 	[key: string]: unknown;
 };
+
+/**
+ * Token bundle returned by `refreshSession`.
+ *
+ * This implementation expects the core SMART/OAuth refresh fields.
+ */
+export type SmartRefreshTokenResponse = Required<
+	Pick<SmartTokenResponse, "access_token">
+> &
+	Pick<SmartTokenResponse, "expires_in" | "scope" | "patient"> & {
+		token_type: "Bearer";
+	};
 
 /**
  * The session established after a successful SMART App Launch.
@@ -62,7 +74,6 @@ export type SmartSession = {
 	encounter?: string | undefined;
 	fhirUser?: string | undefined;
 	idToken?: string | undefined;
-	tokenResponse: SmartTokenResponse;
 };
 
 /**
@@ -349,7 +360,6 @@ const sessionFromTokenResponse = (
 		encounter: token.encounter,
 		fhirUser: token.fhirUser,
 		idToken: token.id_token,
-		tokenResponse: token,
 	};
 };
 
@@ -475,16 +485,22 @@ export async function refreshSession(
 		);
 	}
 
-	const token = (await response.json()) as SmartTokenResponse;
-	const next = sessionFromTokenResponse(session, token);
-	if (!next.refreshToken && session.refreshToken) {
-		next.refreshToken = session.refreshToken;
-		next.tokenResponse = {
-			...next.tokenResponse,
-			refresh_token: session.refreshToken,
-		};
-	}
-	return next;
+	const token = (await response.json()) as SmartRefreshTokenResponse;
+	const refreshToken = session.refreshToken;
+	const expiresAt =
+		token.expires_in !== undefined
+			? Date.now() + token.expires_in * 1000
+			: undefined;
+	const scope = token.scope ?? session.scope;
+	const patient = token.patient ?? session.patient;
+	return {
+		...session,
+		accessToken: token.access_token,
+		refreshToken,
+		expiresAt,
+		scope,
+		patient,
+	};
 }
 
 /**
