@@ -336,12 +336,14 @@ For provider-facing applications that authenticate users via [SMART App Launch](
 
 The provider holds no session state of its own — your application stores the `SmartSession` (in a cookie session, Redis, `sessionStorage`, etc.) and supplies `getSession` / `setSession` callbacks. This works the same way in a browser SPA and in a server app.
 
+For confidential SMART clients, the `clientSecret` is intentionally **not** stored in `PendingAuthorization` or `SmartSession`. Persist those objects freely, but pass the secret separately in server-side code when calling `exchangeCode`, `refreshSession`, `revokeSession`, or `SmartAppLaunchAuthProvider`.
+
 `exchangeCode()` stores token endpoint data in the session. When Aidbox includes `userinfo` in the token response, it is available as `session.userinfo`.
 
 The flow has three stages, each backed by a top-level function:
 
 1. `authorize(config)` — at the launch URL, returns `{ redirectUrl, pending }`. Persist `pending` keyed by `pending.stateNonce`, then redirect the user-agent to `redirectUrl`.
-2. `exchangeCode({ url, pending })` — at the redirect URL, exchanges the `?code=...` for a `SmartSession`. Look up the previously stored `pending` using the `?state=...` query parameter.
+2. `exchangeCode({ url, pending })` — at the redirect URL, exchanges the `?code=...` for a `SmartSession`. Look up the previously stored `pending` using the `?state=...` query parameter. Confidential clients also pass `clientSecret` here.
 3. `new SmartAppLaunchAuthProvider(...)` — for subsequent FHIR requests. Adds `Authorization: Bearer ...`, refreshes proactively before expiry, retries once on 401.
 
 Features:
@@ -349,7 +351,7 @@ Features:
 - PKCE with `S256` (configurable: `ifSupported` / `required` / `disabled`)
 - Standalone and EHR launch detected by inspecting the launch URL
 - Optional `issMatch` allow-list for the resolved `iss` (CSRF-style protection)
-- Confidential clients (`clientSecret`) supported via HTTP Basic on the token endpoint
+- Confidential clients (`clientSecret`) supported via HTTP Basic on the token endpoint without persisting secrets in `pending` or `session`
 - Token refresh deduplication — concurrent FHIR requests share a single refresh
 
 #### Server-side example (Express-style pseudocode)
@@ -370,6 +372,7 @@ app.get("/launch", async (req, res) => {
   const { redirectUrl, pending } = await authorize({
     iss: "https://fhir.example.com", // fallback for standalone; query iss wins for EHR
     clientId: process.env.SMART_CLIENT_ID,
+    clientSecret: process.env.SMART_CLIENT_SECRET, // sets usesClientSecret without persisting the secret
     scope: "launch openid fhirUser patient/*.read offline_access",
     redirectUri: `${process.env.BASE_URL}/callback`,
     launchUrl: req.url, // lets the helper extract iss/launch from query params
@@ -386,7 +389,11 @@ app.get("/callback", async (req, res) => {
   const pending: PendingAuthorization = req.session.pending?.[stateNonce!];
   if (!pending) return res.status(400).send("Unknown state");
 
-  const session = await exchangeCode({ url: req.url, pending });
+  const session = await exchangeCode({
+    url: req.url,
+    pending,
+    clientSecret: process.env.SMART_CLIENT_SECRET,
+  });
 
   req.session.smart = session;
   delete req.session.pending;
@@ -402,6 +409,7 @@ app.get("/app", async (req, res) => {
     baseUrl: session.serverUrl,
     getSession: () => req.session.smart,
     setSession: (s) => { req.session.smart = s; },
+    getClientSecret: () => process.env.SMART_CLIENT_SECRET,
   });
 
   const client = new AidboxClient(session.serverUrl, auth);
@@ -412,7 +420,7 @@ app.get("/app", async (req, res) => {
 
 #### Browser SPA example
 
-The same three calls work in the browser — only the storage backend changes (here `sessionStorage`):
+The same three calls work in the browser — only the storage backend changes (here `sessionStorage`). Browser apps must use public SMART clients; confidential client secrets belong on the server only:
 
 ```typescript
 import {
@@ -460,6 +468,14 @@ import { refreshSession, revokeSession } from "@health-samurai/aidbox-client";
 
 const refreshed = await refreshSession(session);  // returns a new SmartSession
 await revokeSession(session);                     // best-effort revocation at the auth server
+
+// Confidential clients pass the secret explicitly in server-side code:
+const refreshedConfidential = await refreshSession(session, {
+  clientSecret: process.env.SMART_CLIENT_SECRET,
+});
+await revokeSession(session, {
+  clientSecret: process.env.SMART_CLIENT_SECRET,
+});
 ```
 
 > **Security note:** when scope includes `openid`, the token response carries an `id_token` JWT. This library does **not** validate the JWT signature, `iss`, `aud`, or `exp` — it stores the raw token in `session.idToken`. If you use id_token claims for authorization decisions, validate the JWT yourself first.

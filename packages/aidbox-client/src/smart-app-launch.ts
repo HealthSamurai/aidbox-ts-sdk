@@ -51,7 +51,10 @@ export type SmartTokenResponse<TUser = UserInfo> = {
 export type SmartRefreshTokenResponse = Required<
 	Pick<SmartTokenResponse, "access_token">
 > &
-	Pick<SmartTokenResponse, "expires_in" | "scope" | "patient" | "refresh_token"> & {
+	Pick<
+		SmartTokenResponse,
+		"expires_in" | "scope" | "patient" | "refresh_token"
+	> & {
 		token_type: "Bearer";
 	};
 
@@ -60,13 +63,14 @@ export type SmartRefreshTokenResponse = Required<
  *
  * Hosts persist this object in their session store (cookie session, Redis, etc.).
  * `accessToken` is always present; `expiresAt` is an absolute Unix timestamp in milliseconds, computed locally on receipt.
+ * Confidential client secrets are intentionally not stored here — supply them separately when refreshing or revoking.
  */
 export type SmartSession<TUser = UserInfo> = {
 	serverUrl: string;
 	clientId: string;
 	tokenUri: string;
 	revocationUri?: string | undefined;
-	clientSecret?: string | undefined;
+	usesClientSecret?: true | undefined;
 	accessToken: string;
 	refreshToken?: string | undefined;
 	expiresAt?: number | undefined;
@@ -82,11 +86,12 @@ export type SmartSession<TUser = UserInfo> = {
  *
  * Hosts persist this object briefly (typically in a server-side session, keyed by `stateNonce`) between the authorize redirect and the callback.
  * Lifetime is seconds-to-minutes; once `exchangeCode` succeeds it can be discarded.
+ * Confidential client secrets are intentionally not stored here — only the `usesClientSecret` flag is persisted.
  */
 export type PendingAuthorization = {
 	serverUrl: string;
 	clientId: string;
-	clientSecret?: string | undefined;
+	usesClientSecret?: true | undefined;
 	redirectUri: string;
 	scope: string;
 	authorizationServerIssuer?: string | undefined;
@@ -115,8 +120,8 @@ export type AuthorizeConfig = {
 	scope: string;
 	/** Absolute redirect URI registered with the authorization server. */
 	redirectUri: string;
-	/** Confidential client secret (server-side only). When set, token requests use HTTP Basic client auth. */
-	clientSecret?: string;
+	/** Confidential client secret (server-side only). Not persisted in `pending` or `session`; pass it again to token refresh/revocation helpers. */
+	clientSecret?: string | undefined;
 	/**
 	 * PKCE behavior.
 	 *
@@ -295,7 +300,7 @@ export async function authorize(
 	const pending: PendingAuthorization = {
 		serverUrl: iss,
 		clientId: config.clientId,
-		clientSecret: config.clientSecret,
+		usesClientSecret: config.clientSecret ? true : undefined,
 		redirectUri: config.redirectUri,
 		scope,
 		authorizationServerIssuer: smartConfig.issuer,
@@ -336,10 +341,27 @@ const buildBasicAuth = (clientId: string, clientSecret: string): string => {
 	return `Basic ${base64}`;
 };
 
+type ClientSecretRequirement = {
+	usesClientSecret?: true | undefined;
+};
+
+const resolveClientSecret = (
+	value: ClientSecretRequirement,
+	usage: string,
+	providedClientSecret?: string,
+): string | undefined => {
+	if (value.usesClientSecret && !providedClientSecret) {
+		throw new Error(
+			`${usage} requires clientSecret when usesClientSecret is true`,
+		);
+	}
+	return providedClientSecret;
+};
+
 const sessionFromTokenResponse = <TUser = UserInfo>(
 	pending: Pick<
 		PendingAuthorization,
-		"serverUrl" | "clientId" | "clientSecret" | "tokenUri" | "revocationUri"
+		"serverUrl" | "clientId" | "usesClientSecret" | "tokenUri" | "revocationUri"
 	>,
 	token: SmartTokenResponse<TUser>,
 ): SmartSession<TUser> => {
@@ -350,7 +372,7 @@ const sessionFromTokenResponse = <TUser = UserInfo>(
 	return {
 		serverUrl: pending.serverUrl,
 		clientId: pending.clientId,
-		clientSecret: pending.clientSecret,
+		usesClientSecret: pending.usesClientSecret,
 		tokenUri: pending.tokenUri,
 		revocationUri: pending.revocationUri,
 		accessToken: token.access_token,
@@ -370,6 +392,8 @@ export type ExchangeCodeParams = {
 	url: string | URL;
 	/** Pending authorization previously persisted by the host, looked up via the callback `state` query parameter. */
 	pending: PendingAuthorization;
+	/** Confidential client secret (server-side only). Required when `pending.usesClientSecret` is true. */
+	clientSecret?: string | undefined;
 };
 
 /**
@@ -414,10 +438,16 @@ export async function exchangeCode<TUser = UserInfo>(
 		accept: "application/json",
 	};
 
-	if (params.pending.clientSecret) {
+	const clientSecret = resolveClientSecret(
+		params.pending,
+		"exchangeCode()",
+		params.clientSecret,
+	);
+
+	if (clientSecret) {
 		headers.authorization = buildBasicAuth(
 			params.pending.clientId,
-			params.pending.clientSecret,
+			clientSecret,
 		);
 	} else {
 		body.set("client_id", params.pending.clientId);
@@ -437,7 +467,16 @@ export async function exchangeCode<TUser = UserInfo>(
 	}
 
 	const token = (await response.json()) as SmartTokenResponse<TUser>;
-	return sessionFromTokenResponse(params.pending, token);
+	return sessionFromTokenResponse(
+		{
+			serverUrl: params.pending.serverUrl,
+			clientId: params.pending.clientId,
+			usesClientSecret: params.pending.usesClientSecret,
+			tokenUri: params.pending.tokenUri,
+			revocationUri: params.pending.revocationUri,
+		},
+		token,
+	);
 }
 
 /**
@@ -449,6 +488,10 @@ export async function exchangeCode<TUser = UserInfo>(
  */
 export async function refreshSession<TUser = UserInfo>(
 	session: SmartSession<TUser>,
+	options?: {
+		/** Confidential client secret (server-side only). Required when `session.usesClientSecret` is true. */
+		clientSecret?: string | undefined;
+	},
 ): Promise<SmartSession<TUser>> {
 	if (!session.refreshToken) {
 		throw new Error("Cannot refresh — no refreshToken in session");
@@ -464,11 +507,13 @@ export async function refreshSession<TUser = UserInfo>(
 		accept: "application/json",
 	};
 
-	if (session.clientSecret) {
-		headers.authorization = buildBasicAuth(
-			session.clientId,
-			session.clientSecret,
-		);
+	const clientSecret = resolveClientSecret(
+		session,
+		"refreshSession()",
+		options?.clientSecret,
+	);
+	if (clientSecret) {
+		headers.authorization = buildBasicAuth(session.clientId, clientSecret);
 	} else {
 		body.set("client_id", session.clientId);
 	}
@@ -492,8 +537,8 @@ export async function refreshSession<TUser = UserInfo>(
 			? Date.now() + token.expires_in * 1000
 			: undefined;
 	const scope = token.scope ?? session.scope;
-  const patient = token.patient ?? session.patient;
-  const refreshToken = token.refresh_token ?? session.refreshToken;
+	const patient = token.patient ?? session.patient;
+	const refreshToken = token.refresh_token ?? session.refreshToken;
 	return {
 		...session,
 		accessToken: token.access_token,
@@ -512,6 +557,10 @@ export async function refreshSession<TUser = UserInfo>(
  */
 export async function revokeSession<TUser = UserInfo>(
 	session: SmartSession<TUser>,
+	options?: {
+		/** Confidential client secret (server-side only). Required when `session.usesClientSecret` is true. */
+		clientSecret?: string | undefined;
+	},
 ): Promise<void> {
 	if (!session.revocationUri) return;
 
@@ -521,11 +570,13 @@ export async function revokeSession<TUser = UserInfo>(
 	const headers: Record<string, string> = {
 		"content-type": "application/x-www-form-urlencoded",
 	};
-	if (session.clientSecret) {
-		headers.authorization = buildBasicAuth(
-			session.clientId,
-			session.clientSecret,
-		);
+	const clientSecret = resolveClientSecret(
+		session,
+		"revokeSession()",
+		options?.clientSecret,
+	);
+	if (clientSecret) {
+		headers.authorization = buildBasicAuth(session.clientId, clientSecret);
 	} else {
 		body.set("client_id", session.clientId);
 	}
@@ -554,6 +605,10 @@ export type SmartAppLaunchAuthProviderConfig<TUser = UserInfo> = {
 	getSession: () => SmartSession<TUser> | Promise<SmartSession<TUser>>;
 	/** Called whenever the provider obtains a new session (after refresh). The host must persist it. */
 	setSession: (session: SmartSession<TUser>) => void | Promise<void>;
+	/** Resolves the confidential client secret server-side. Required when sessions use `usesClientSecret`. */
+	getClientSecret?: (
+		session: SmartSession<TUser>,
+	) => string | undefined | Promise<string | undefined>;
 	/** Refresh the token this many seconds before expiry (default: 30). */
 	tokenExpirationBuffer?: number;
 };
@@ -571,6 +626,11 @@ export class SmartAppLaunchAuthProvider<TUser = UserInfo>
 
 	#getSession: () => SmartSession<TUser> | Promise<SmartSession<TUser>>;
 	#setSession: (session: SmartSession<TUser>) => void | Promise<void>;
+	#getClientSecret:
+		| ((
+				session: SmartSession<TUser>,
+		  ) => string | undefined | Promise<string | undefined>)
+		| undefined;
 	#expirationBuffer: number;
 	#pendingRefresh: Promise<SmartSession<TUser>> | null = null;
 
@@ -578,6 +638,7 @@ export class SmartAppLaunchAuthProvider<TUser = UserInfo>
 		this.baseUrl = config.baseUrl;
 		this.#getSession = config.getSession;
 		this.#setSession = config.setSession;
+		this.#getClientSecret = config.getClientSecret;
 		this.#expirationBuffer = config.tokenExpirationBuffer ?? 30;
 	}
 
@@ -589,7 +650,8 @@ export class SmartAppLaunchAuthProvider<TUser = UserInfo>
 	async #refresh(session: SmartSession<TUser>): Promise<SmartSession<TUser>> {
 		if (this.#pendingRefresh) return this.#pendingRefresh;
 		this.#pendingRefresh = (async () => {
-			const next = await refreshSession(session);
+			const clientSecret = await this.#getClientSecret?.(session);
+			const next = await refreshSession(session, { clientSecret });
 			await this.#setSession(next);
 			return next;
 		})();
@@ -619,7 +681,8 @@ export class SmartAppLaunchAuthProvider<TUser = UserInfo>
 	 */
 	async revokeSession(): Promise<void> {
 		const session = await this.#getSession();
-		await revokeSession(session);
+		const clientSecret = await this.#getClientSecret?.(session);
+		await revokeSession(session, { clientSecret });
 	}
 
 	async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
