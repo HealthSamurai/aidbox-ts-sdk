@@ -51,7 +51,7 @@ export type SmartTokenResponse<TUser = UserInfo> = {
 export type SmartRefreshTokenResponse = Required<
 	Pick<SmartTokenResponse, "access_token">
 > &
-	Pick<SmartTokenResponse, "expires_in" | "scope" | "patient"> & {
+	Pick<SmartTokenResponse, "expires_in" | "scope" | "patient" | "refresh_token"> & {
 		token_type: "Bearer";
 	};
 
@@ -487,13 +487,13 @@ export async function refreshSession<TUser = UserInfo>(
 	}
 
 	const token = (await response.json()) as SmartRefreshTokenResponse;
-	const refreshToken = session.refreshToken;
 	const expiresAt =
 		token.expires_in !== undefined
 			? Date.now() + token.expires_in * 1000
 			: undefined;
 	const scope = token.scope ?? session.scope;
-	const patient = token.patient ?? session.patient;
+  const patient = token.patient ?? session.patient;
+  const refreshToken = token.refresh_token ?? session.refreshToken;
 	return {
 		...session,
 		accessToken: token.access_token,

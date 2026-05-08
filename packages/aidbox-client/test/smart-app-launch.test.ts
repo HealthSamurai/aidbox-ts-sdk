@@ -484,7 +484,7 @@ describe("refreshSession", () => {
 	it("should post refresh_token grant and return a fresh session", async () => {
 		const mockFetch = vi.fn().mockResolvedValue(
 			jsonResponse({
-				access_token: "new-access",
+        access_token: "new-access",
 				token_type: "Bearer",
 				expires_in: 3600,
 				scope: "openid",
@@ -518,6 +518,22 @@ describe("refreshSession", () => {
 
 		const next = await refreshSession(sessionWithRefresh());
 		expect(next.refreshToken).toBe("old-refresh");
+	});
+
+	it("should get refreshToken if response has it", async () => {
+		globalThis.fetch = vi.fn().mockResolvedValue(
+			jsonResponse({
+				access_token: "new-access",
+				refresh_token: "new-refresh",
+				token_type: "Bearer",
+				expires_in: 60,
+				scope: "openid",
+				patient: "patient-1",
+			}),
+		);
+
+		const next = await refreshSession(sessionWithRefresh());
+		expect(next.refreshToken).toBe("new-refresh");
 	});
 
 	it("should clear expiresAt if refresh response omits expires_in", async () => {
