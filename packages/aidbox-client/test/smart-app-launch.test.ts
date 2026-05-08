@@ -121,6 +121,25 @@ describe("authorize", () => {
 		expect(result.pending.serverUrl).toBe(ISS);
 		expect(result.pending.tokenUri).toBe(TOKEN_URL);
 		expect(result.pending.revocationUri).toBe(REVOCATION_URL);
+		expect(result.pending.usesClientSecret).toBeUndefined();
+		expect("clientSecret" in result.pending).toBe(false);
+	});
+
+	it("should mark confidential clients without persisting the secret", async () => {
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(jsonResponse(buildSmartConfig()));
+
+		const result = await authorize({
+			iss: ISS,
+			clientId: CLIENT_ID,
+			clientSecret: "secret",
+			scope: "openid",
+			redirectUri: REDIRECT_URI,
+		});
+
+		expect(result.pending.usesClientSecret).toBe(true);
+		expect("clientSecret" in result.pending).toBe(false);
 	});
 
 	it("should produce different stateNonce and codeVerifier on each call", async () => {
@@ -370,9 +389,13 @@ describe("exchangeCode", () => {
 			.mockResolvedValue(jsonResponse({ access_token: "a", expires_in: 60 }));
 		globalThis.fetch = mockFetch;
 
-		await exchangeCode({
+		const session = await exchangeCode({
 			url: `${REDIRECT_URI}?code=c&state=nonce-123`,
-			pending: { ...basePending(), clientSecret: "secret" },
+			pending: {
+				...basePending(),
+				usesClientSecret: true,
+			},
+			clientSecret: "secret",
 		});
 
 		const init = mockFetch.mock.calls[0]?.[1];
@@ -380,6 +403,21 @@ describe("exchangeCode", () => {
 		expect(headers.get("authorization")?.startsWith("Basic ")).toBe(true);
 		const body = new URLSearchParams(init.body as string);
 		expect(body.get("client_id")).toBeNull();
+		expect(session.usesClientSecret).toBe(true);
+	});
+
+	it("should require explicit clientSecret when pending uses client secret", async () => {
+		globalThis.fetch = vi.fn();
+
+		await expect(
+			exchangeCode({
+				url: `${REDIRECT_URI}?code=c&state=nonce-123`,
+				pending: {
+					...basePending(),
+					usesClientSecret: true,
+				},
+			}),
+		).rejects.toThrow(/exchangeCode\(\).*clientSecret/);
 	});
 
 	it("should accept callback iss matching the expected authorization server issuer", async () => {
@@ -484,7 +522,7 @@ describe("refreshSession", () => {
 	it("should post refresh_token grant and return a fresh session", async () => {
 		const mockFetch = vi.fn().mockResolvedValue(
 			jsonResponse({
-        access_token: "new-access",
+				access_token: "new-access",
 				token_type: "Bearer",
 				expires_in: 3600,
 				scope: "openid",
@@ -503,6 +541,29 @@ describe("refreshSession", () => {
 
 		expect(next.accessToken).toBe("new-access");
 		expect(next.refreshToken).toBe("old-refresh");
+	});
+
+	it("should use Basic auth when session uses client secret", async () => {
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(
+				jsonResponse({ access_token: "new-access", token_type: "Bearer" }),
+			);
+		globalThis.fetch = mockFetch;
+
+		await refreshSession(
+			{
+				...sessionWithRefresh(),
+				usesClientSecret: true,
+			},
+			{ clientSecret: "secret" },
+		);
+
+		const init = mockFetch.mock.calls[0]?.[1];
+		const headers = new Headers(init.headers);
+		expect(headers.get("authorization")?.startsWith("Basic ")).toBe(true);
+		const body = new URLSearchParams(init.body as string);
+		expect(body.get("client_id")).toBeNull();
 	});
 
 	it("should preserve previous refreshToken if response omits it", async () => {
@@ -578,6 +639,17 @@ describe("refreshSession", () => {
 
 		await expect(refreshSession(session)).rejects.toThrow(/no refreshToken/);
 	});
+
+	it("should require explicit clientSecret when session uses client secret", async () => {
+		globalThis.fetch = vi.fn();
+
+		await expect(
+			refreshSession({
+				...sessionWithRefresh(),
+				usesClientSecret: true,
+			}),
+		).rejects.toThrow(/refreshSession\(\).*clientSecret/);
+	});
 });
 
 describe("revokeSession", () => {
@@ -603,6 +675,27 @@ describe("revokeSession", () => {
 		expect(url).toBe(REVOCATION_URL);
 		const body = new URLSearchParams(init.body as string);
 		expect(body.get("token")).toBe("r");
+	});
+
+	it("should use Basic auth for revocation when session uses client secret", async () => {
+		const mockFetch = vi
+			.fn()
+			.mockResolvedValue(new Response("", { status: 200 }));
+		globalThis.fetch = mockFetch;
+
+		await revokeSession(
+			{
+				...baseSession(),
+				usesClientSecret: true,
+			},
+			{ clientSecret: "secret" },
+		);
+
+		const init = mockFetch.mock.calls[0]?.[1];
+		const headers = new Headers(init.headers);
+		expect(headers.get("authorization")?.startsWith("Basic ")).toBe(true);
+		const body = new URLSearchParams(init.body as string);
+		expect(body.get("client_id")).toBeNull();
 	});
 
 	it("should be a no-op when revocationUri is missing", async () => {
@@ -715,6 +808,42 @@ describe("SmartAppLaunchAuthProvider", () => {
 		);
 		const headers = fhirCall?.[1].headers as Headers;
 		expect(headers.get("Authorization")).toBe("Bearer fresh-after-refresh");
+	});
+
+	it("should use getClientSecret when refreshing confidential client sessions", async () => {
+		const stale: SmartSession = {
+			...freshSession(),
+			usesClientSecret: true,
+			expiresAt: Date.now() + 1_000,
+		};
+
+		const mockFetch = vi.fn().mockImplementation(async (input, init) => {
+			const url = typeof input === "string" ? input : input.toString();
+			if (url === TOKEN_URL) {
+				const headers = new Headers(init?.headers);
+				expect(headers.get("authorization")?.startsWith("Basic ")).toBe(true);
+				return jsonResponse({
+					access_token: "fresh-after-refresh",
+					token_type: "Bearer",
+					expires_in: 3600,
+				});
+			}
+			return new Response("{}", { status: 200 });
+		});
+		globalThis.fetch = mockFetch;
+
+		const getClientSecret = vi.fn(async () => "secret");
+		const store = makeStore(stale);
+		const provider = new SmartAppLaunchAuthProvider({
+			baseUrl: ISS,
+			getSession: store.getSession,
+			setSession: store.setSession,
+			getClientSecret,
+		});
+		const response = await provider.fetch(`${ISS}/Patient`);
+
+		expect(response.ok).toBe(true);
+		expect(getClientSecret).toHaveBeenCalledOnce();
 	});
 
 	it("should retry once after 401 with refreshed token", async () => {
