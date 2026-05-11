@@ -45,7 +45,7 @@
 		"directory": "packages/aidbox-client"
 	},
 	"devDependencies": {
-		"@atomic-ehr/codegen": "^0.0.8",
+		"@atomic-ehr/codegen": "latest",
 		"@types/node": "^25.4.0",
 		"tsx": "^4.21.0",
 		"typedoc": "^0.28.17",
