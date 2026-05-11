@@ -32,8 +32,8 @@
 	},
 	"dependencies": {
 		"@types/json-patch": "^0.0.33",
-		"oauth4webapi": "^3.8.5",
-		"yaml": "^2.8.3"
+		"oauth4webapi": "^3.8.6",
+		"yaml": "^2.9.0"
 	},
 	"publishConfig": {
 		"access": "public"
