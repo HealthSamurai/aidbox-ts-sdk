@@ -15,3 +15,4 @@
 - [ ] `@health-samurai/aidbox-client`
 - [ ] `@health-samurai/react-components`
 - [ ] `@health-samurai/aidbox-fhirpath-lsp`
+- [ ] `@health-samurai/create-react-app`

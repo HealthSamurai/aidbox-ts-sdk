@@ -1,6 +1,6 @@
 {
 	"name": "@health-samurai/create-react-app",
-	"version": "0.0.0-alpha.1",
+	"version": "0.0.0-alpha.2",
 	"description": "Scaffold a React app with Health Samurai components",
 	"type": "module",
 	"bin": "./index.js",
