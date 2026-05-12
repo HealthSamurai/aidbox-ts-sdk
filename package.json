@@ -1,27 +1,28 @@
 {
-	"name": "aidbox-ts-sdk",
-	"scripts": {
-		"hooks": "cp .hooks/* .git/hooks/"
-	},
-	"private": true,
-	"workspaces": [
-		"packages/*"
-	],
-	"packageManager": "pnpm@10.21.0",
-	"pnpm": {
-		"overrides": {
-			"fast-xml-parser": ">=5.5.6",
-			"yaml": ">=2.8.3",
-			"picomatch": ">=4.0.4",
-			"file-type": ">=21.3.2",
-			"brace-expansion": ">=2.0.3 <3",
-			"defu": ">=6.1.5",
-			"vite": ">=7.3.2"
-		}
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.4.6",
-		"@swc/cli": "^0.8.0",
-		"@swc/core": "^1.15.18"
+  "name": "aidbox-ts-sdk",
+  "scripts": {
+	"hooks": "cp .hooks/* .git/hooks/"
+  },
+  "private": true,
+  "workspaces": [
+	"packages/*"
+  ],
+  "packageManager": "pnpm@10.21.0",
+  "pnpm": {
+	"overrides": {
+	  "fast-xml-parser": ">=5.5.6",
+	  "fast-xml-builder": ">=1.1.7",
+	  "yaml": ">=2.8.3",
+	  "picomatch": ">=4.0.4",
+	  "file-type": ">=21.3.2",
+	  "brace-expansion": ">=2.0.3 <3",
+	  "defu": ">=6.1.5",
+	  "vite": ">=7.3.2"
 	}
+  },
+  "devDependencies": {
+	"@biomejs/biome": "2.4.6",
+	"@swc/cli": "^0.8.0",
+	"@swc/core": "^1.15.18"
+  }
 }
