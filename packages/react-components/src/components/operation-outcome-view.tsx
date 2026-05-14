@@ -224,9 +224,16 @@ export function OperationOutcomeView({
 										>
 											{codeLabel}
 										</span>
-										<span className="pr-4 py-1 typo-body text-text-primary whitespace-nowrap">
-											{expressionText ?? ""}
-										</span>
+										{expressionText && (
+											<span className="pr-4 py-1 typo-body text-text-primary whitespace-nowrap">
+												{expressionText}
+											</span>
+										)}
+										{issue.diagnostics && (
+											<span className="flex-1 min-w-0 pr-4 py-1 typo-body text-text-secondary truncate">
+												{issue.diagnostics}
+											</span>
+										)}
 									</button>
 								);
 
