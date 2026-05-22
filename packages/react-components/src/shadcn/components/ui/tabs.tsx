@@ -698,7 +698,10 @@ export function TabsListDropdown({
 	return (
 		<Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="link" className="bg-bg-secondary h-full border-b pr-6">
+				<Button
+					variant="link"
+					className="bg-bg-secondary h-full border-b border-l pr-6 rounded-none"
+				>
 					<ChevronDownIcon className="size-4" />
 				</Button>
 			</PopoverTrigger>
