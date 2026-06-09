@@ -27,6 +27,11 @@ const selectContentStyles = cn(
 	"p-0",
 	// Radix viewport reset
 	"[&_[data-radix-select-viewport]]:p-0",
+	// Radix sets viewport height to --radix-select-trigger-height for the
+	// stock <Select> use case. Safari honors it strictly and clips the embedded
+	// <Command> (search input + list) to ~30px. Chromium/Firefox grow the flex
+	// child past the constraint, so the bug is invisible there.
+	"[&_[data-radix-select-viewport]]:h-auto",
 );
 
 const commandStyles = cn(
