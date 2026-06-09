@@ -339,6 +339,7 @@ const baseTheme = EditorView.theme({
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
 		padding: "0",
+		paddingRight: "400px",
 	},
 	"&.cm-focused": {
 		outline: "none",
@@ -350,8 +351,9 @@ const baseTheme = EditorView.theme({
 		fontFamily: "var(--font-family-mono)",
 	},
 	".cm-gutters": {
-		backgroundColor: "transparent",
+		backgroundColor: "var(--color-bg-primary)",
 		border: "none",
+		boxShadow: "4px 0 6px var(--color-bg-primary)",
 	},
 	".cm-lineNumbers": {
 		minWidth: "3.5ch",
@@ -459,6 +461,7 @@ const readOnlyTheme = EditorView.theme({
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
 		padding: "0",
+		paddingRight: "400px",
 	},
 	"&.cm-focused": {
 		outline: "none",
