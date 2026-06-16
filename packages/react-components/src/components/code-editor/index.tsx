@@ -53,6 +53,7 @@ import {
 	highlightSpecialChars,
 	keymap,
 	lineNumbers,
+	placeholder,
 	rectangularSelection,
 	type ViewUpdate,
 } from "@codemirror/view";
@@ -1365,6 +1366,7 @@ type CodeEditorProps = {
 	isReadOnlyTheme?: boolean;
 	defaultValue?: string;
 	currentValue?: string;
+	placeholder?: string;
 	onChange?: (value: string) => void;
 	onUpdate?: (update: ViewUpdate) => void;
 	id?: string;
@@ -1398,6 +1400,7 @@ export type {
 export function CodeEditor({
 	defaultValue,
 	currentValue,
+	placeholder: placeholderText,
 	onChange,
 	onUpdate,
 	viewCallback,
@@ -1441,6 +1444,7 @@ export function CodeEditor({
 	const sqlCompletionCompartment = React.useRef(new Compartment());
 	const fhirCompletionCompartment = React.useRef(new Compartment());
 	const vimCompartment = React.useRef(new Compartment());
+	const placeholderCompartment = React.useRef(new Compartment());
 	const [sqlFunctions, setSqlFunctions] = React.useState<
 		string[] | undefined
 	>();
@@ -1556,6 +1560,7 @@ export function CodeEditor({
 					additionalExtensionsCompartment.current.of([]),
 					sqlCompletionCompartment.current.of([]),
 					fhirCompletionCompartment.current.of([]),
+					placeholderCompartment.current.of([]),
 				],
 			}),
 		});
@@ -1745,6 +1750,19 @@ export function CodeEditor({
 			],
 		});
 	}, [additionalExtensions, view, safeDispatch]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		safeDispatch({
+			effects: [
+				placeholderCompartment.current.reconfigure(
+					placeholderText ? placeholder(placeholderText) : [],
+				),
+			],
+		});
+	}, [placeholderText, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
