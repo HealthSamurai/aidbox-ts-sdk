@@ -1,6 +1,17 @@
 import type { AuthProvider } from "./types";
 import { mergeHeaders, validateBaseUrl } from "./utils";
 
+function hasAuthorizationHeader(headers: HeadersInit | undefined): boolean {
+	if (!headers) return false;
+	if (headers instanceof Headers) return headers.has("authorization");
+	if (Array.isArray(headers)) {
+		return headers.some(([key]) => key.toLowerCase() === "authorization");
+	}
+	return Object.keys(headers).some(
+		(key) => key.toLowerCase() === "authorization",
+	);
+}
+
 export class BrowserAuthProvider implements AuthProvider {
 	/** @ignore */
 	public baseUrl: string;
@@ -59,16 +70,16 @@ export class BrowserAuthProvider implements AuthProvider {
 		validateBaseUrl(input, this.baseUrl);
 
 		const requestInit = init ?? {};
-		requestInit.credentials = "include";
+		const explicitAuth = hasAuthorizationHeader(requestInit.headers);
+		requestInit.credentials = explicitAuth ? "omit" : "include";
 
 		const response = await fetch(input, requestInit);
 
-		if (response.status === 401) {
+		if (response.status === 401 && !explicitAuth) {
 			await this.establishSession();
 			throw new Error("unauthorized");
-		} else {
-			return response;
 		}
+		return response;
 	}
 }
 
