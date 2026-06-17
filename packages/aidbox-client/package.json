@@ -46,10 +46,10 @@
 	},
 	"devDependencies": {
 		"@atomic-ehr/codegen": "latest",
-		"@types/node": "^25.4.0",
-		"tsx": "^4.21.0",
-		"typedoc": "^0.28.17",
-		"typescript": "~5.9.3",
-		"vitest": "^4.0.18"
+		"@types/node": "^25.9.3",
+		"tsx": "^4.22.4",
+		"typedoc": "^0.28.19",
+		"typescript": "~6.0.3",
+		"vitest": "^4.1.9"
 	}
 }
