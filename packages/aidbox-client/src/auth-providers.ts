@@ -75,9 +75,15 @@ export class BrowserAuthProvider implements AuthProvider {
 
 		const response = await fetch(input, requestInit);
 
-		if (response.status === 401 && !explicitAuth) {
-			await this.establishSession();
-			throw new Error("unauthorized");
+		if (!explicitAuth) {
+			if (response.status === 401) {
+				await this.establishSession();
+				throw new Error("unauthorized");
+			}
+			if (response.redirected) {
+				window.location.href = response.url;
+				throw new Error("unauthorized");
+			}
 		}
 		return response;
 	}
