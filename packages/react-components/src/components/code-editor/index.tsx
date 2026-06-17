@@ -8,7 +8,13 @@ import {
 	completionStatus,
 	moveCompletionSelection,
 } from "@codemirror/autocomplete";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+	defaultKeymap,
+	history,
+	historyKeymap,
+	indentLess,
+	insertTab,
+} from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { SQLDialect, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
@@ -18,6 +24,7 @@ import {
 	foldKeymap,
 	HighlightStyle,
 	indentOnInput,
+	indentUnit,
 	syntaxHighlighting,
 	syntaxTree,
 } from "@codemirror/language";
@@ -43,6 +50,7 @@ import {
 	StateField,
 } from "@codemirror/state";
 import {
+	type Command,
 	crosshairCursor,
 	Decoration,
 	drawSelection,
@@ -442,6 +450,19 @@ const completionTheme = EditorView.theme({
 		flexShrink: "0",
 	},
 });
+
+const smartIndentLess: Command = (view) => {
+	const { state } = view;
+	const sel = state.selection.main;
+	if (!sel.empty) return indentLess(view);
+	const line = state.doc.lineAt(sel.head);
+	const firstNonWs = line.text.search(/\S/);
+	const cursorCol = sel.head - line.from;
+	if (firstNonWs === -1 || cursorCol <= firstNonWs) {
+		return indentLess(view);
+	}
+	return true;
+};
 
 const readOnlyTheme = EditorView.theme({
 	"&": {
@@ -1488,6 +1509,7 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
+					indentUnit.of("\t"),
 					languageCompartment.current.of([]),
 					bracketMatching(),
 					closeBrackets(),
@@ -1517,7 +1539,8 @@ export function CodeEditor({
 									if (completionStatus(v.state) === "active") {
 										return moveCompletionSelection(true)(v);
 									}
-									return false;
+									if (v.state.readOnly) return false;
+									return insertTab(v);
 								},
 							},
 							{
@@ -1526,7 +1549,8 @@ export function CodeEditor({
 									if (completionStatus(v.state) === "active") {
 										return moveCompletionSelection(false)(v);
 									}
-									return false;
+									if (v.state.readOnly) return false;
+									return smartIndentLess(v);
 								},
 							},
 							{
