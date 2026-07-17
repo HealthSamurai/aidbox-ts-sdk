@@ -20,7 +20,7 @@ Dark mode support and a design token system are included.
 ## How to use
 
 ```bash
-pnpm add @health-samurai/react-components
+pnpm add @health-samurai/react-components@alpha
 ```
 
 Requires `react` and `react-dom` 19+.
