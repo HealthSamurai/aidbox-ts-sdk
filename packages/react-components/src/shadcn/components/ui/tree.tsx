@@ -1,6 +1,6 @@
 import type { ItemInstance } from "@headless-tree/core";
+import { Slot } from "@radix-ui/react-slot";
 import { ChevronDownIcon } from "lucide-react";
-import { Slot } from "radix-ui";
 import * as React from "react";
 
 import { cn } from "#shadcn/lib/utils";
@@ -93,7 +93,7 @@ function TreeItem<T = any>({
 		"--tree-padding": `${item.getItemMeta().level * indent}px`,
 	} as React.CSSProperties;
 
-	const Comp = asChild ? Slot.Root : "span";
+	const Comp = asChild ? Slot : "span";
 
 	return (
 		<TreeContext.Provider value={{ indent, currentItem: item }}>
@@ -133,7 +133,7 @@ function TreeItem<T = any>({
 				{...Object.fromEntries(
 					Object.entries(otherProps).filter(([key]) => key !== "onDragStart"),
 				)}
-				onDragStart={(e) => {
+				onDragStart={(e: React.DragEvent<HTMLElement>) => {
 					if ((e.target as HTMLElement).dataset.slot === "drag-handle") {
 						item.getProps().onDragStart?.(e);
 					}

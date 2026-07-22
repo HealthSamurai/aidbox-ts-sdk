@@ -264,13 +264,14 @@ Both methods can throw the `RequestError` class if the error happened before the
 
 ## Authentication Providers
 
-Authentication is managed via the `AuthProvider` interface. The client ships with three built-in providers:
+Authentication is managed via the `AuthProvider` interface. The client ships with four built-in providers:
 
 | Provider | Environment | Auth Method |
 |----------|-------------|-------------|
 | `BrowserAuthProvider` | Browser | Cookie-based sessions |
 | `BasicAuthProvider` | Any | HTTP Basic Auth |
 | `SmartBackendServicesAuthProvider` | Server-side | OAuth 2.0 client_credentials with JWT bearer |
+| `SmartAppLaunchAuthProvider` | Browser or server | SMART App Launch (OAuth 2.0 authorization_code with PKCE) |
 
 ### BrowserAuthProvider
 
@@ -328,6 +329,156 @@ const auth = new SmartBackendServicesAuthProvider({
 
 const client = new AidboxClient("https://fhir-server.address", auth);
 ```
+
+### SmartAppLaunchAuthProvider
+
+For provider-facing applications that authenticate users via [SMART App Launch](https://hl7.org/fhir/smart-app-launch/) (OAuth 2.0 authorization_code grant). Supports both **standalone launch** (user opens your app and selects a FHIR server) and **EHR launch** (the EHR opens your app via `?iss=...&launch=...`).
+
+The provider holds no session state of its own — your application stores the `SmartSession` (in a cookie session, Redis, `sessionStorage`, etc.) and supplies `getSession` / `setSession` callbacks. This works the same way in a browser SPA and in a server app.
+
+For confidential SMART clients, the `clientSecret` is intentionally **not** stored in `PendingAuthorization` or `SmartSession`. Persist those objects freely, but pass the secret separately in server-side code when calling `exchangeCode`, `refreshSession`, `revokeSession`, or `SmartAppLaunchAuthProvider`.
+
+`exchangeCode()` stores token endpoint data in the session. When Aidbox includes `userinfo` in the token response, it is available as `session.userinfo`.
+
+The flow has three stages, each backed by a top-level function:
+
+1. `authorize(config)` — at the launch URL, returns `{ redirectUrl, pending }`. Persist `pending` keyed by `pending.stateNonce`, then redirect the user-agent to `redirectUrl`.
+2. `exchangeCode({ url, pending })` — at the redirect URL, exchanges the `?code=...` for a `SmartSession`. Look up the previously stored `pending` using the `?state=...` query parameter. Confidential clients also pass `clientSecret` here.
+3. `new SmartAppLaunchAuthProvider(...)` — for subsequent FHIR requests. Adds `Authorization: Bearer ...`, refreshes proactively before expiry, retries once on 401.
+
+Features:
+- Discovery via `.well-known/smart-configuration`
+- PKCE with `S256` (configurable: `ifSupported` / `required` / `disabled`)
+- Standalone and EHR launch detected by inspecting the launch URL
+- Optional `issMatch` allow-list for the resolved `iss` (CSRF-style protection)
+- Confidential clients (`clientSecret`) supported via HTTP Basic on the token endpoint without persisting secrets in `pending` or `session`
+- Token refresh deduplication — concurrent FHIR requests share a single refresh
+
+#### Server-side example (Express-style pseudocode)
+
+```typescript
+import {
+  authorize,
+  exchangeCode,
+  AidboxClient,
+  SmartAppLaunchAuthProvider,
+  type PendingAuthorization,
+  type SmartSession,
+} from "@health-samurai/aidbox-client";
+
+// 1. Launch route — both standalone and EHR launches arrive here.
+//    For EHR launch the EHR appends `?iss=...&launch=...` to this URL.
+app.get("/launch", async (req, res) => {
+  const { redirectUrl, pending } = await authorize({
+    iss: "https://fhir.example.com", // fallback for standalone; query iss wins for EHR
+    clientId: process.env.SMART_CLIENT_ID,
+    clientSecret: process.env.SMART_CLIENT_SECRET, // sets usesClientSecret without persisting the secret
+    scope: "launch openid fhirUser patient/*.read offline_access",
+    redirectUri: `${process.env.BASE_URL}/callback`,
+    launchUrl: req.url, // lets the helper extract iss/launch from query params
+    issMatch: /^https:\/\/(fhir|aidbox)\.example\.com$/,
+  });
+
+  req.session.pending = { [pending.stateNonce]: pending };
+  res.redirect(redirectUrl);
+});
+
+// 2. Callback route — exchange the code for a session.
+app.get("/callback", async (req, res) => {
+  const stateNonce = new URL(req.url, process.env.BASE_URL).searchParams.get("state");
+  const pending: PendingAuthorization = req.session.pending?.[stateNonce!];
+  if (!pending) return res.status(400).send("Unknown state");
+
+  const session = await exchangeCode({
+    url: req.url,
+    pending,
+    clientSecret: process.env.SMART_CLIENT_SECRET,
+  });
+
+  req.session.smart = session;
+  delete req.session.pending;
+  res.redirect("/app");
+});
+
+// 3. Application route — use the provider for FHIR requests.
+app.get("/app", async (req, res) => {
+  const session: SmartSession | undefined = req.session.smart;
+  if (!session) return res.redirect("/launch");
+
+  const auth = new SmartAppLaunchAuthProvider({
+    baseUrl: session.serverUrl,
+    getSession: () => req.session.smart,
+    setSession: (s) => { req.session.smart = s; },
+    getClientSecret: () => process.env.SMART_CLIENT_SECRET,
+  });
+
+  const client = new AidboxClient(session.serverUrl, auth);
+  const result = await client.read({ type: "Patient", id: session.patient! });
+  res.json(result.value.resource);
+});
+```
+
+#### Browser SPA example
+
+The same three calls work in the browser — only the storage backend changes (here `sessionStorage`). Browser apps must use public SMART clients; confidential client secrets belong on the server only:
+
+```typescript
+import {
+  authorize,
+  exchangeCode,
+  AidboxClient,
+  SmartAppLaunchAuthProvider,
+  type SmartSession,
+} from "@health-samurai/aidbox-client";
+
+// On the launch page (e.g. /launch.html)
+const { redirectUrl, pending } = await authorize({
+  iss: new URL(location.href).searchParams.get("iss") ?? "https://fhir.example.com",
+  launchUrl: location.href,
+  clientId: "my-spa",
+  scope: "launch openid fhirUser patient/*.read",
+  redirectUri: `${location.origin}/callback.html`,
+});
+sessionStorage.setItem(`smart:pending:${pending.stateNonce}`, JSON.stringify(pending));
+location.href = redirectUrl;
+
+// On the callback page (e.g. /callback.html)
+const stateNonce = new URL(location.href).searchParams.get("state")!;
+const pending = JSON.parse(sessionStorage.getItem(`smart:pending:${stateNonce}`)!);
+const session = await exchangeCode({ url: location.href, pending });
+sessionStorage.setItem("smart:session", JSON.stringify(session));
+sessionStorage.removeItem(`smart:pending:${stateNonce}`);
+location.href = "/app.html";
+
+// On any application page
+const auth = new SmartAppLaunchAuthProvider({
+  baseUrl: JSON.parse(sessionStorage.getItem("smart:session")!).serverUrl,
+  getSession: () => JSON.parse(sessionStorage.getItem("smart:session")!) as SmartSession,
+  setSession: (s) => sessionStorage.setItem("smart:session", JSON.stringify(s)),
+});
+const client = new AidboxClient(auth.baseUrl, auth);
+```
+
+#### Manual session management
+
+`authorize`, `exchangeCode`, `refreshSession`, and `revokeSession` are exported as standalone functions and can be used without `SmartAppLaunchAuthProvider` if you want to manage tokens manually:
+
+```typescript
+import { refreshSession, revokeSession } from "@health-samurai/aidbox-client";
+
+const refreshed = await refreshSession(session);  // returns a new SmartSession
+await revokeSession(session);                     // best-effort revocation at the auth server
+
+// Confidential clients pass the secret explicitly in server-side code:
+const refreshedConfidential = await refreshSession(session, {
+  clientSecret: process.env.SMART_CLIENT_SECRET,
+});
+await revokeSession(session, {
+  clientSecret: process.env.SMART_CLIENT_SECRET,
+});
+```
+
+> **Security note:** when scope includes `openid`, the token response carries an `id_token` JWT. This library does **not** validate the JWT signature, `iss`, `aud`, or `exp` — it stores the raw token in `session.idToken`. If you use id_token claims for authorization decisions, validate the JWT yourself first.
 
 ### Custom Auth Provider
 

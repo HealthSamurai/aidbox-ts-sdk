@@ -1,6 +1,6 @@
 {
 	"name": "@health-samurai/aidbox-client",
-	"version": "0.0.0-alpha.6",
+	"version": "0.0.0-alpha.7",
 	"description": "A client library for communicating with Aidbox",
 	"author": "Health Samurai",
 	"type": "module",
@@ -50,6 +50,6 @@
 		"tsx": "^4.21.0",
 		"typedoc": "^0.28.17",
 		"typescript": "~5.9.3",
-		"vitest": "^4.0.18"
+		"vitest": "^4.1.0"
 	}
 }
