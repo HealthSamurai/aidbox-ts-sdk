@@ -688,7 +688,10 @@ export function createCodeMirrorLsp(
 		const response = await client.request<Bundle>({
 			method: "GET",
 			url: "/fhir/StructureDefinition",
-			params: [["kind", kind]],
+			params: [
+				["kind", kind],
+				["_count", "1000"],
+			],
 		});
 
 		if (!response.ok) {

@@ -8,7 +8,13 @@ import {
 	completionStatus,
 	moveCompletionSelection,
 } from "@codemirror/autocomplete";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+	defaultKeymap,
+	history,
+	historyKeymap,
+	indentLess,
+	insertTab,
+} from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { SQLDialect, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
@@ -18,6 +24,7 @@ import {
 	foldKeymap,
 	HighlightStyle,
 	indentOnInput,
+	indentUnit,
 	syntaxHighlighting,
 	syntaxTree,
 } from "@codemirror/language";
@@ -43,6 +50,7 @@ import {
 	StateField,
 } from "@codemirror/state";
 import {
+	type Command,
 	crosshairCursor,
 	Decoration,
 	drawSelection,
@@ -53,6 +61,7 @@ import {
 	highlightSpecialChars,
 	keymap,
 	lineNumbers,
+	placeholder,
 	rectangularSelection,
 	type ViewUpdate,
 } from "@codemirror/view";
@@ -339,6 +348,7 @@ const baseTheme = EditorView.theme({
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
 		padding: "0",
+		paddingRight: "400px",
 	},
 	"&.cm-focused": {
 		outline: "none",
@@ -350,8 +360,9 @@ const baseTheme = EditorView.theme({
 		fontFamily: "var(--font-family-mono)",
 	},
 	".cm-gutters": {
-		backgroundColor: "transparent",
+		backgroundColor: "var(--color-bg-primary)",
 		border: "none",
+		boxShadow: "4px 0 6px var(--color-bg-primary)",
 	},
 	".cm-lineNumbers": {
 		minWidth: "3.5ch",
@@ -440,6 +451,19 @@ const completionTheme = EditorView.theme({
 	},
 });
 
+const smartIndentLess: Command = (view) => {
+	const { state } = view;
+	const sel = state.selection.main;
+	if (!sel.empty) return indentLess(view);
+	const line = state.doc.lineAt(sel.head);
+	const firstNonWs = line.text.search(/\S/);
+	const cursorCol = sel.head - line.from;
+	if (firstNonWs === -1 || cursorCol <= firstNonWs) {
+		return indentLess(view);
+	}
+	return true;
+};
+
 const readOnlyTheme = EditorView.theme({
 	"&": {
 		backgroundColor: "var(--color-bg-secondary)",
@@ -459,6 +483,7 @@ const readOnlyTheme = EditorView.theme({
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
 		padding: "0",
+		paddingRight: "400px",
 	},
 	"&.cm-focused": {
 		outline: "none",
@@ -1362,6 +1387,7 @@ type CodeEditorProps = {
 	isReadOnlyTheme?: boolean;
 	defaultValue?: string;
 	currentValue?: string;
+	placeholder?: string;
 	onChange?: (value: string) => void;
 	onUpdate?: (update: ViewUpdate) => void;
 	id?: string;
@@ -1395,6 +1421,7 @@ export type {
 export function CodeEditor({
 	defaultValue,
 	currentValue,
+	placeholder: placeholderText,
 	onChange,
 	onUpdate,
 	viewCallback,
@@ -1438,6 +1465,7 @@ export function CodeEditor({
 	const sqlCompletionCompartment = React.useRef(new Compartment());
 	const fhirCompletionCompartment = React.useRef(new Compartment());
 	const vimCompartment = React.useRef(new Compartment());
+	const placeholderCompartment = React.useRef(new Compartment());
 	const [sqlFunctions, setSqlFunctions] = React.useState<
 		string[] | undefined
 	>();
@@ -1481,6 +1509,7 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
+					indentUnit.of("\t"),
 					languageCompartment.current.of([]),
 					bracketMatching(),
 					closeBrackets(),
@@ -1510,7 +1539,8 @@ export function CodeEditor({
 									if (completionStatus(v.state) === "active") {
 										return moveCompletionSelection(true)(v);
 									}
-									return false;
+									if (v.state.readOnly) return false;
+									return insertTab(v);
 								},
 							},
 							{
@@ -1519,7 +1549,8 @@ export function CodeEditor({
 									if (completionStatus(v.state) === "active") {
 										return moveCompletionSelection(false)(v);
 									}
-									return false;
+									if (v.state.readOnly) return false;
+									return smartIndentLess(v);
 								},
 							},
 							{
@@ -1553,6 +1584,7 @@ export function CodeEditor({
 					additionalExtensionsCompartment.current.of([]),
 					sqlCompletionCompartment.current.of([]),
 					fhirCompletionCompartment.current.of([]),
+					placeholderCompartment.current.of([]),
 				],
 			}),
 		});
@@ -1742,6 +1774,19 @@ export function CodeEditor({
 			],
 		});
 	}, [additionalExtensions, view, safeDispatch]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		safeDispatch({
+			effects: [
+				placeholderCompartment.current.reconfigure(
+					placeholderText ? placeholder(placeholderText) : [],
+				),
+			],
+		});
+	}, [placeholderText, view, safeDispatch]);
 
 	React.useEffect(() => {
 		if (view === null) {
