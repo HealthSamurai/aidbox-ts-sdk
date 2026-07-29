@@ -198,12 +198,16 @@ function TableRow({
 type TableHeadProps = React.ComponentProps<"th"> & {
 	sortable?: boolean | undefined;
 	sorted?: "asc" | "desc" | false | undefined;
+	reverseIcon?: boolean | undefined;
+	contentStyle?: React.CSSProperties | undefined;
 };
 
 function TableHead({
 	className,
 	sortable = false,
 	sorted = false,
+	reverseIcon = false,
+	contentStyle,
 	children,
 	...props
 }: TableHeadProps) {
@@ -214,25 +218,45 @@ function TableHead({
 				? ArrowDownIcon
 				: ArrowUpDownIcon;
 
+	const sortIcon = (
+		<SortIcon
+			className={cn(
+				tableSortIconStyles,
+				sorted ? "opacity-100" : "opacity-0 group-hover/head:opacity-30",
+			)}
+		/>
+	);
+
 	return (
 		<th
 			data-slot="table-head"
 			className={cn(
 				tableHeadStyles,
+				reverseIcon && "text-right",
 				sortable && "cursor-pointer select-none",
 				className,
 			)}
 			{...props}
 		>
 			{sortable ? (
-				<div className="flex items-center gap-1">
-					{children}
-					<SortIcon
-						className={cn(
-							tableSortIconStyles,
-							sorted ? "opacity-100" : "opacity-0 group-hover/head:opacity-30",
-						)}
-					/>
+				<div
+					className={cn(
+						"flex items-center gap-1",
+						reverseIcon && "justify-end",
+					)}
+					style={contentStyle}
+				>
+					{reverseIcon ? (
+						<>
+							{sortIcon}
+							{children}
+						</>
+					) : (
+						<>
+							{children}
+							{sortIcon}
+						</>
+					)}
 				</div>
 			) : (
 				children

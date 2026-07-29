@@ -27,6 +27,11 @@ const selectContentStyles = cn(
 	"p-0",
 	// Radix viewport reset
 	"[&_[data-radix-select-viewport]]:p-0",
+	// Radix sets viewport height to --radix-select-trigger-height for the
+	// stock <Select> use case. Safari honors it strictly and clips the embedded
+	// <Command> (search input + list) to ~30px. Chromium/Firefox grow the flex
+	// child past the constraint, so the bug is invisible there.
+	"[&_[data-radix-select-viewport]]:h-auto",
 );
 
 const commandStyles = cn(
@@ -114,13 +119,17 @@ export function Combobox({
 	const selectedOption = options.find((option) => option.value === value);
 
 	const changeOpen = (newOpen: boolean) => {
-		if (!newOpen) {
-			setSearchValue("");
-		} else {
-			inputRef.current?.focus();
-		}
+		if (!newOpen) setSearchValue("");
 		setOpen(newOpen);
 	};
+
+	React.useEffect(() => {
+		if (!open) return;
+		const frame = requestAnimationFrame(() => {
+			inputRef.current?.focus();
+		});
+		return () => cancelAnimationFrame(frame);
+	}, [open]);
 
 	return (
 		<Select
@@ -225,13 +234,17 @@ export function MultiCombobox({
 	};
 
 	const changeOpen = (newOpen: boolean) => {
-		if (!newOpen) {
-			setSearchValue("");
-		} else {
-			inputRef.current?.focus();
-		}
+		if (!newOpen) setSearchValue("");
 		setOpen(newOpen);
 	};
+
+	React.useEffect(() => {
+		if (!open) return;
+		const frame = requestAnimationFrame(() => {
+			inputRef.current?.focus();
+		});
+		return () => cancelAnimationFrame(frame);
+	}, [open]);
 
 	const hasValue = selectedOptions.length > 0;
 	const displayedOptions = selectedOptions.slice(0, maxDisplay);

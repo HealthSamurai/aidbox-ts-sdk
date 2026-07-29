@@ -1,16 +1,27 @@
 import type { AuthProvider } from "./types";
 import { mergeHeaders, validateBaseUrl } from "./utils";
 
+function hasAuthorizationHeader(headers: HeadersInit | undefined): boolean {
+	if (!headers) return false;
+	if (headers instanceof Headers) return headers.has("authorization");
+	if (Array.isArray(headers)) {
+		return headers.some(([key]) => key.toLowerCase() === "authorization");
+	}
+	return Object.keys(headers).some(
+		(key) => key.toLowerCase() === "authorization",
+	);
+}
+
 export class BrowserAuthProvider implements AuthProvider {
 	/** @ignore */
 	public baseUrl: string;
 
 	constructor(baseUrl: string) {
-		this.baseUrl = baseUrl;
+		this.baseUrl = baseUrl.replace(/\/+$/, "");
 	}
 
 	async #checkSession() {
-		const response = await fetch(new URL("/auth/userinfo", this.baseUrl), {
+		const response = await fetch(`${this.baseUrl}/auth/userinfo`, {
 			method: "GET",
 			headers: {
 				"content-type": "application/json",
@@ -36,7 +47,7 @@ export class BrowserAuthProvider implements AuthProvider {
 	 * Sends a POST request to `baseurl/auth/logout`.
 	 */
 	public async revokeSession() {
-		await fetch(new URL("/auth/logout", this.baseUrl), {
+		await fetch(`${this.baseUrl}/auth/logout`, {
 			method: "POST",
 			headers: {
 				"content-type": "application/json",
@@ -59,16 +70,22 @@ export class BrowserAuthProvider implements AuthProvider {
 		validateBaseUrl(input, this.baseUrl);
 
 		const requestInit = init ?? {};
-		requestInit.credentials = "include";
+		const explicitAuth = hasAuthorizationHeader(requestInit.headers);
+		requestInit.credentials = explicitAuth ? "omit" : "include";
 
 		const response = await fetch(input, requestInit);
 
-		if (response.status === 401) {
-			await this.establishSession();
-			throw new Error("unauthorized");
-		} else {
-			return response;
+		if (!explicitAuth) {
+			if (response.status === 401) {
+				await this.establishSession();
+				throw new Error("unauthorized");
+			}
+			if (response.redirected) {
+				window.location.href = response.url;
+				throw new Error("unauthorized");
+			}
 		}
+		return response;
 	}
 }
 
@@ -78,7 +95,7 @@ export class BasicAuthProvider implements AuthProvider {
 	#authHeader: string;
 
 	constructor(baseUrl: string, username: string, password: string) {
-		this.baseUrl = baseUrl;
+		this.baseUrl = baseUrl.replace(/\/+$/, "");
 		// Create Base64-encoded credentials for Basic Auth header (RFC 7617: UTF-8 encoded)
 		const credentials = `${username}:${password}`;
 		const utf8Bytes = new TextEncoder().encode(credentials);
