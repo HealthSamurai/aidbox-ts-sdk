@@ -315,6 +315,10 @@ async function resolveElements(
 
 	let currentPath = resourceType;
 	let currentElements = result.elements;
+	// Whether the element the path currently points into is a BackboneElement
+	// (or a resource, at the root). BackboneElements and resources allow
+	// `modifierExtension`; plain complex datatypes (e.g. HumanName) do not.
+	let isBackbone = path.length === 0;
 
 	for (const key of path) {
 		if (key === "resourceType") return [];
@@ -324,6 +328,7 @@ async function resolveElements(
 
 		if (el.contentReference) {
 			currentPath = el.contentReference.replace(/^#/, "");
+			isBackbone = true;
 			continue;
 		}
 
@@ -332,6 +337,7 @@ async function resolveElements(
 
 		if (typeCode === "BackboneElement") {
 			currentPath = el.path;
+			isBackbone = true;
 			continue;
 		}
 
@@ -339,6 +345,7 @@ async function resolveElements(
 		if (!typeResult) return [];
 		currentPath = typeResult.basePath;
 		currentElements = typeResult.elements;
+		isBackbone = false;
 	}
 
 	const children = directChildren(currentElements, currentPath);
@@ -362,7 +369,34 @@ async function resolveElements(
 		}
 	}
 
+	// Every FHIR element allows `id` and `extension`; BackboneElements and
+	// resources additionally allow `modifierExtension`. StructureDefinition
+	// differentials don't repeat these inherited base-type elements for nested
+	// backbone/complex elements, so add them here (unless already present) so
+	// both autocomplete and validation see them.
+	appendUniversalElements(expanded, currentPath, isBackbone);
+
 	return expanded;
+}
+
+function appendUniversalElements(
+	elements: FhirElement[],
+	basePath: string,
+	isBackbone: boolean,
+): void {
+	const present = new Set(elements.map((el) => fieldName(el)));
+	const universal: { name: string; type: string }[] = [
+		{ name: "id", type: "string" },
+		{ name: "extension", type: "Extension" },
+	];
+	if (isBackbone) {
+		universal.push({ name: "modifierExtension", type: "Extension" });
+	}
+	for (const { name, type } of universal) {
+		if (!present.has(name)) {
+			elements.push({ path: `${basePath}.${name}`, type: [{ code: type }] });
+		}
+	}
 }
 
 async function findResourceBoundary(
