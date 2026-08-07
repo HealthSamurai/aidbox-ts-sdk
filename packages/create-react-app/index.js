@@ -15,7 +15,7 @@ Usage: pnpm create @health-samurai/react-app <project-name> [options]
 Options:
   --aidbox    Include @health-samurai/aidbox-client
   --codegen   Include FHIR type generation (scripts/generate-types.ts)
-  --skills    Include Claude Code skills and CLAUDE.md
+  --skills    Add CLAUDE.md + a postinstall that syncs the design-system skills
   --help, -h  Show this help message
 `);
 	process.exit(0);
@@ -42,13 +42,18 @@ mkdirSync(targetDir, { recursive: true });
 cpSync(templateDir, targetDir, { recursive: true });
 
 if (!flags.has("--skills")) {
-	rmSync(join(targetDir, ".claude"), { recursive: true, force: true });
 	rmSync(join(targetDir, "CLAUDE.md"), { force: true });
 }
 
 const pkgPath = join(targetDir, "package.json");
 const pkg = JSON.parse(readFileSync(pkgPath, "utf-8"));
 pkg.name = basename(targetDir);
+
+if (flags.has("--skills")) {
+	// Skills ship inside @health-samurai/react-components; sync them into
+	// .claude/skills/ on install so they always match the package version.
+	pkg.scripts = { postinstall: "hs-react-components sync-skills", ...pkg.scripts };
+}
 
 if (!flags.has("--aidbox")) {
 	delete pkg.dependencies["@health-samurai/aidbox-client"];

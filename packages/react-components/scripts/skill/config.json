@@ -1,0 +1,550 @@
+{
+	"components": [
+		{
+			"name": "button",
+			"title": "Button",
+			"description": "Actions with a text label, optionally with an icon.",
+			"source": "src/shadcn/components/ui/button.tsx",
+			"story": "src/shadcn/components/ui/button.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-button--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=118-2563"
+		},
+		{
+			"name": "icon-button",
+			"title": "IconButton",
+			"description": "Icon-only actions without a text label.",
+			"source": "src/components/icon-button.tsx",
+			"story": "src/components/icon-button.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-iconbutton--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2322-17314"
+		},
+		{
+			"name": "split-button",
+			"title": "SplitButton",
+			"description": "A primary action with alternative options behind a dropdown.",
+			"source": "src/components/split-button.tsx",
+			"story": "src/components/split-button.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-splitbutton--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4004-313"
+		},
+		{
+			"name": "button-dropdown",
+			"title": "ButtonDropdown",
+			"description": "Picking one value from a searchable list of options.",
+			"source": "src/components/button-dropdown.tsx",
+			"story": "src/components/button-dropdown.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-buttondropdown--docs"
+		},
+		{
+			"name": "input",
+			"title": "Input",
+			"description": "Single-line text or password entry.",
+			"source": "src/shadcn/components/ui/input.tsx",
+			"story": "src/shadcn/components/ui/input.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-input--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2592-4975"
+		},
+		{
+			"name": "select",
+			"title": "Select",
+			"description": "Choosing one option from a fixed dropdown list.",
+			"source": "src/shadcn/components/ui/select.tsx",
+			"story": "src/shadcn/components/ui/select.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-select--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2592-7048"
+		},
+		{
+			"name": "combobox",
+			"title": "Combobox / MultiCombobox",
+			"description": "Choosing one or multiple options with search/filtering.",
+			"source": "src/shadcn/components/ui/combobox.tsx",
+			"story": "src/shadcn/components/ui/combobox.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-combobox--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-46833"
+		},
+		{
+			"name": "checkbox",
+			"title": "Checkbox",
+			"description": "Toggling an independent boolean option on or off.",
+			"source": "src/shadcn/components/ui/checkbox.tsx",
+			"story": "src/shadcn/components/ui/checkbox.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-checkbox--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2692-27333"
+		},
+		{
+			"name": "switch",
+			"title": "Switch",
+			"description": "Toggling a setting that takes effect immediately.",
+			"source": "src/shadcn/components/ui/switch.tsx",
+			"story": "src/shadcn/components/ui/switch.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-switch--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4141-18679"
+		},
+		{
+			"name": "radio-group",
+			"title": "RadioGroup",
+			"description": "Choosing exactly one option from a small set.",
+			"source": "src/shadcn/components/ui/radio-group.tsx",
+			"story": "src/shadcn/components/ui/radio-button-group.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-radio-button-group--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-60972"
+		},
+		{
+			"name": "radio-button-group",
+			"title": "RadioButtonGroup",
+			"description": "Button-style radio group for visual selection.",
+			"source": "src/shadcn/components/ui/radio-button-group.tsx",
+			"story": "src/shadcn/components/ui/radio-button-group.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-radiobuttongroup--docs"
+		},
+		{
+			"name": "textarea",
+			"title": "Textarea",
+			"description": "Multi-line text entry.",
+			"source": "src/shadcn/components/ui/textarea.tsx",
+			"story": "src/shadcn/components/ui/textarea.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-textarea--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2649-4521"
+		},
+		{
+			"name": "label",
+			"title": "Label",
+			"description": "Accessible text label for a form control.",
+			"source": "src/shadcn/components/ui/label.tsx",
+			"story": "src/shadcn/components/ui/label.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-label--docs"
+		},
+		{
+			"name": "input-otp",
+			"title": "InputOTP",
+			"description": "Entering a one-time verification code digit by digit.",
+			"source": "src/shadcn/components/ui/input-otp.tsx",
+			"story": "src/shadcn/components/ui/input-otp.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-input-otp--docs"
+		},
+		{
+			"name": "form",
+			"title": "Form",
+			"description": "Wrapping form fields with validation and error state management.",
+			"source": "src/shadcn/components/ui/form.tsx",
+			"story": "src/shadcn/components/ui/form.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-form--docs"
+		},
+		{
+			"name": "table",
+			"title": "Table",
+			"description": "Rendering tabular data with basic markup (thead, tbody, tr, td).",
+			"source": "src/shadcn/components/ui/table.tsx",
+			"story": "src/shadcn/components/ui/table.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-table--docs"
+		},
+		{
+			"name": "data-table",
+			"title": "DataTable",
+			"description": "TanStack Table wrapper with sticky header support.",
+			"source": "src/components/data-table.tsx",
+			"story": "src/components/data-table.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-datatable--docs"
+		},
+		{
+			"name": "tag",
+			"title": "Tag",
+			"description": "Colored label with shape, size, and vibrance variants.",
+			"source": "src/components/tag.tsx",
+			"story": "src/components/tag.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-tag--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2690-23388"
+		},
+		{
+			"name": "badge",
+			"title": "Badge",
+			"description": "Compact status indicator (default, secondary, destructive, outline).",
+			"source": "src/shadcn/components/ui/badge.tsx",
+			"story": "src/shadcn/components/ui/badge.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-badge--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-24619"
+		},
+		{
+			"name": "tile",
+			"title": "Tile",
+			"description": "Displaying a labeled key-value pair with an optional icon.",
+			"source": "src/components/tile.tsx",
+			"story": "src/components/tile.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-tile--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2728-22171"
+		},
+		{
+			"name": "skeleton",
+			"title": "Skeleton",
+			"description": "Placeholder pulse animation while content is loading.",
+			"source": "src/shadcn/components/ui/skeleton.tsx",
+			"story": "src/shadcn/components/ui/skeleton.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-skeleton--docs"
+		},
+		{
+			"name": "progress",
+			"title": "Progress",
+			"description": "Showing completion percentage as a filled bar.",
+			"source": "src/shadcn/components/ui/progress.tsx",
+			"story": "src/shadcn/components/ui/progress.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-progress--docs"
+		},
+		{
+			"name": "card",
+			"title": "Card",
+			"description": "Grouping related content into a bordered container with header and footer.",
+			"source": "src/shadcn/components/ui/card.tsx",
+			"story": "src/shadcn/components/ui/card.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-card--docs"
+		},
+		{
+			"name": "avatar",
+			"title": "Avatar",
+			"description": "Showing a user photo or initials in a circle.",
+			"source": "src/shadcn/components/ui/avatar.tsx",
+			"story": "src/shadcn/components/ui/avatar.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-avatar--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-25106"
+		},
+		{
+			"name": "dialog",
+			"title": "Dialog",
+			"description": "Modal window for forms or content that requires focus.",
+			"source": "src/shadcn/components/ui/dialog.tsx",
+			"story": "src/shadcn/components/ui/dialog.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-dialog--docs"
+		},
+		{
+			"name": "sheet",
+			"title": "Sheet",
+			"description": "Panel that slides in from a screen edge for secondary content.",
+			"source": "src/shadcn/components/ui/sheet.tsx",
+			"story": "src/shadcn/components/ui/sheet.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-sheet--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4130-5012"
+		},
+		{
+			"name": "alert-dialog",
+			"title": "AlertDialog",
+			"description": "Modal confirmation before a destructive or irreversible action.",
+			"source": "src/shadcn/components/ui/alert-dialog.tsx",
+			"story": "src/shadcn/components/ui/alert-dialog.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-alert-dialog--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2728-22326"
+		},
+		{
+			"name": "drawer",
+			"title": "Drawer",
+			"description": "Draggable panel from any screen edge, with swipe-to-dismiss.",
+			"source": "src/shadcn/components/ui/drawer.tsx",
+			"story": "src/shadcn/components/ui/drawer.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-drawer--docs"
+		},
+		{
+			"name": "dropdown-menu",
+			"title": "DropdownMenu",
+			"description": "Context actions triggered by a button click.",
+			"source": "src/shadcn/components/ui/dropdown-menu.tsx",
+			"story": "src/shadcn/components/ui/dropdown-menu.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-dropdown-menu--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4117-19110"
+		},
+		{
+			"name": "context-menu",
+			"title": "ContextMenu",
+			"description": "Context actions triggered by right-click.",
+			"source": "src/shadcn/components/ui/context-menu.tsx",
+			"story": "src/shadcn/components/ui/context-menu.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-context-menu--docs"
+		},
+		{
+			"name": "tabs",
+			"title": "Tabs",
+			"description": "Switching between views in the same context.",
+			"source": "src/shadcn/components/ui/tabs.tsx",
+			"story": "src/shadcn/components/ui/tabs.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-tabs--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4130-8929"
+		},
+		{
+			"name": "popover",
+			"title": "Popover",
+			"description": "Floating panel with interactive content anchored to a trigger.",
+			"source": "src/shadcn/components/ui/popover.tsx",
+			"story": "src/shadcn/components/ui/popover.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-popover--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2726-81311"
+		},
+		{
+			"name": "tooltip",
+			"title": "Tooltip",
+			"description": "Brief text hint on hover, non-interactive.",
+			"source": "src/shadcn/components/ui/tooltip.tsx",
+			"story": "src/shadcn/components/ui/tooltip.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-tooltip--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2733-25716"
+		},
+		{
+			"name": "hover-card",
+			"title": "HoverCard",
+			"description": "Rich preview content on hover (heavier than Tooltip).",
+			"source": "src/shadcn/components/ui/hover-card.tsx",
+			"story": "src/shadcn/components/ui/hover-card.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-hover-card--docs"
+		},
+		{
+			"name": "breadcrumb",
+			"title": "Breadcrumb",
+			"description": "Showing the current page location in a hierarchy.",
+			"source": "src/shadcn/components/ui/breadcrumb.tsx",
+			"story": "src/shadcn/components/ui/breadcrumb.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-breadcrumb--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-43379"
+		},
+		{
+			"name": "pagination",
+			"title": "Pagination",
+			"description": "Navigating between pages of a list.",
+			"source": "src/shadcn/components/ui/pagination.tsx",
+			"story": "src/shadcn/components/ui/pagination.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-pagination--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-42029"
+		},
+		{
+			"name": "navigation-menu",
+			"title": "NavigationMenu",
+			"description": "Top-level site navigation with dropdown sections.",
+			"source": "src/shadcn/components/ui/navigation-menu.tsx",
+			"story": "src/shadcn/components/ui/navigation-menu.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-navigation-menu--docs"
+		},
+		{
+			"name": "menubar",
+			"title": "Menubar",
+			"description": "Application menu bar with nested items, checkboxes, and shortcuts.",
+			"source": "src/shadcn/components/ui/menubar.tsx",
+			"story": "src/shadcn/components/ui/menubar.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-menubar--docs"
+		},
+		{
+			"name": "sidebar",
+			"title": "Sidebar",
+			"description": "Collapsible side navigation panel for the app shell.",
+			"source": "src/shadcn/components/ui/sidebar.tsx",
+			"story": "src/shadcn/components/ui/sidebar.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-sidebar--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2735-26402"
+		},
+		{
+			"name": "alert",
+			"title": "Alert",
+			"description": "Persistent inline message: info, warning, critical, success.",
+			"source": "src/shadcn/components/ui/alert.tsx",
+			"story": "src/shadcn/components/ui/alert.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-alert--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2692-26863"
+		},
+		{
+			"name": "sonner",
+			"title": "Toast / Sonner",
+			"description": "Temporary dismissible notification that appears and auto-hides.",
+			"source": "src/shadcn/components/ui/sonner.tsx",
+			"story": "src/shadcn/components/ui/sonner.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-sonner--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4078-1072"
+		},
+		{
+			"name": "accordion",
+			"title": "Accordion",
+			"description": "Expanding/collapsing multiple titled sections in a list.",
+			"source": "src/shadcn/components/ui/accordion.tsx",
+			"story": "src/shadcn/components/ui/accordion.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-accordion--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2692-26553"
+		},
+		{
+			"name": "collapsible",
+			"title": "Collapsible",
+			"description": "Expanding/collapsing a single content block.",
+			"source": "src/shadcn/components/ui/collapsible.tsx",
+			"story": "src/shadcn/components/ui/collapsible.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-collapsible--docs"
+		},
+		{
+			"name": "resizable",
+			"title": "Resizable",
+			"description": "Panels with draggable dividers for user-adjustable layout.",
+			"source": "src/shadcn/components/ui/resizable.tsx",
+			"story": "src/shadcn/components/ui/resizable.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-resizable--docs"
+		},
+		{
+			"name": "scroll-area",
+			"title": "ScrollArea",
+			"description": "Scrollable container with custom styled scrollbars.",
+			"source": "src/shadcn/components/ui/scroll-area.tsx",
+			"story": "src/shadcn/components/ui/scroll-area.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-scroll-area--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2696-23356"
+		},
+		{
+			"name": "separator",
+			"title": "Separator",
+			"description": "Horizontal or vertical divider line between content.",
+			"source": "src/shadcn/components/ui/separator.tsx",
+			"story": "src/shadcn/components/ui/separator.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-separator--docs"
+		},
+		{
+			"name": "aspect-ratio",
+			"title": "AspectRatio",
+			"description": "Maintaining a fixed width-to-height ratio on an element.",
+			"source": "src/shadcn/components/ui/aspect-ratio.tsx",
+			"story": "src/shadcn/components/ui/aspect-ratio.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-aspect-ration--docs"
+		},
+		{
+			"name": "carousel",
+			"title": "Carousel",
+			"description": "Swiping through a horizontal set of slides.",
+			"source": "src/shadcn/components/ui/carousel.tsx",
+			"story": "src/shadcn/components/ui/carousel.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-carousel--docs"
+		},
+		{
+			"name": "slider",
+			"title": "Slider",
+			"description": "Selecting a numeric value from a continuous range.",
+			"source": "src/shadcn/components/ui/slider.tsx",
+			"story": "src/shadcn/components/ui/slider.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-slider--docs"
+		},
+		{
+			"name": "toggle",
+			"title": "Toggle",
+			"description": "On/off button for toggling a state.",
+			"source": "src/shadcn/components/ui/toggle.tsx",
+			"story": "src/shadcn/components/ui/toggle.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-toggle--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2692-31001"
+		},
+		{
+			"name": "toggle-group",
+			"title": "ToggleGroup",
+			"description": "Exclusive selection within a button group.",
+			"source": "src/shadcn/components/ui/toggle-group.tsx",
+			"story": "src/shadcn/components/ui/toggle-group.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-togglegroup--docs"
+		},
+		{
+			"name": "calendar",
+			"title": "Calendar",
+			"description": "Picking a date or date range from a month view.",
+			"source": "src/shadcn/components/ui/calendar.tsx",
+			"story": "src/shadcn/components/ui/calendar.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-calendar--docs"
+		},
+		{
+			"name": "date-picker-input",
+			"title": "DatePickerInput",
+			"description": "Date input field with a calendar popover.",
+			"source": "src/components/date-picker-input.tsx",
+			"story": "src/components/date-picker-input.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-datepickerinput--docs"
+		},
+		{
+			"name": "chart",
+			"title": "Chart",
+			"description": "Data visualization with themed Recharts wrapper.",
+			"source": "src/shadcn/components/ui/chart.tsx",
+			"story": "src/shadcn/components/ui/chart.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-chart--docs"
+		},
+		{
+			"name": "command",
+			"title": "Command",
+			"description": "Searchable command palette (Cmd+K style).",
+			"source": "src/shadcn/components/ui/command.tsx",
+			"story": "src/shadcn/components/ui/command.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-command--docs"
+		},
+		{
+			"name": "code-editor",
+			"title": "CodeEditor",
+			"description": "Editing code or structured text with syntax highlighting.",
+			"source": "src/components/code-editor/index.tsx",
+			"story": "src/components/code-editor.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-editor--docs"
+		},
+		{
+			"name": "segment-control",
+			"title": "SegmentControl",
+			"description": "Switching between a small fixed set of views (tab-like but inline).",
+			"source": "src/components/segment-control.tsx",
+			"story": "src/components/segment-control.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-segmentcontrol--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=2691-25774"
+		},
+		{
+			"name": "toolbar",
+			"title": "Toolbar",
+			"description": "Horizontal bar grouping action buttons and controls.",
+			"source": "src/components/toolbar.tsx",
+			"story": "src/components/toolbar.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-toolbar--docs"
+		},
+		{
+			"name": "copy-icon",
+			"title": "CopyIcon",
+			"description": "One-click copy-to-clipboard button.",
+			"source": "src/components/copy-icon.tsx"
+		},
+		{
+			"name": "tree",
+			"title": "Tree",
+			"description": "Low-level tree component (shadcn primitive).",
+			"source": "src/shadcn/components/ui/tree.tsx"
+		},
+		{
+			"name": "tree-view",
+			"title": "TreeView",
+			"description": "Displaying and navigating hierarchical nested data.",
+			"source": "src/components/tree-view.tsx",
+			"story": "src/components/tree-view.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-tree-view--docs",
+			"figma": "https://www.figma.com/design/VooyJnoC1F0Z4R8fSchMfk/HS-Design-System-CLEAN--WIP?node-id=4124-31818"
+		},
+		{
+			"name": "sandbox",
+			"title": "Sandbox",
+			"description": "Container with visibility toggle and copy-to-clipboard.",
+			"source": "src/components/sandbox.tsx",
+			"story": "src/components/sandbox.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-sandbox--docs"
+		},
+		{
+			"name": "fhir-structure-view",
+			"title": "FhirStructureView",
+			"description": "Viewing FHIR resource definitions as a tree with types and cardinality.",
+			"source": "src/components/fhir-structure-view.tsx",
+			"story": "src/components/fhir-structure-view.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-fhirstructureview--docs"
+		},
+		{
+			"name": "operation-outcome-view",
+			"title": "OperationOutcomeView",
+			"description": "Displaying FHIR OperationOutcome errors and warnings.",
+			"source": "src/components/operation-outcome-view.tsx",
+			"story": "src/components/operation-outcome-view.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-operationoutcomeview--docs"
+		},
+		{
+			"name": "request-line-editor",
+			"title": "RequestLineEditor",
+			"description": "Editing an HTTP method + path for REST API requests.",
+			"source": "src/components/request-line-editor.tsx",
+			"story": "src/components/request-line-editor.stories.tsx",
+			"storybook": "https://healthsamurai.github.io/aidbox-ts-sdk/react-components/?path=/docs/component-request-line-editor--docs"
+		}
+	]
+}

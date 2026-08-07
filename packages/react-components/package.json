@@ -1,11 +1,16 @@
 {
 	"name": "@health-samurai/react-components",
-	"version": "0.0.0-alpha.21",
+	"version": "0.0.0-alpha.22",
 	"type": "module",
 	"files": [
 		"dist",
-		"src"
+		"src",
+		"skills",
+		"bin"
 	],
+	"bin": {
+		"hs-react-components": "./bin/cli.mjs"
+	},
 	"exports": {
 		".": {
 			"types": "./dist/src/index.d.ts",
@@ -24,6 +29,8 @@
 		"build:watch": "tsx scripts/watch.node.ts",
 		"build-storybook": "storybook build",
 		"format": "biome format",
+		"generate-skill": "node scripts/skill/generate.mjs",
+		"check-skill": "node scripts/skill/generate.mjs --check",
 		"format:check": "biome format",
 		"format:fix": "biome format --write",
 		"lint": "biome check",
