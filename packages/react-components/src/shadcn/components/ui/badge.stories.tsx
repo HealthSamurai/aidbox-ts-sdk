@@ -18,6 +18,17 @@ export const Demo = {
 				<Badge variant="destructive">Destructive</Badge>
 				<Badge variant="outline">Outline</Badge>
 			</div>
+			<div className="flex w-full flex-wrap items-center gap-2">
+				<Badge size="regular">Regular</Badge>
+				<Badge size="large">Large</Badge>
+				<Badge size="large" variant="secondary">
+					<BadgeCheckIcon />
+					Large with icon
+				</Badge>
+				<Badge size="large" variant="outline">
+					Large outline
+				</Badge>
+			</div>
 			<div className="flex w-full flex-wrap gap-2">
 				<Badge
 					variant="secondary"
