@@ -2,18 +2,26 @@ name: Test Aidbox Client
 
 on:
   push:
-    branches: [master]
-  pull_request_target:
+    branches: [master, development]
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   e2e:
+    # Secrets are not exposed to fork pull requests and Aidbox needs BOX_LICENSE to boot.
+    # Fork changes get covered by the push run after they land.
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -27,17 +35,20 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: packages/aidbox-client
 
+      # The value reaches docker compose through the environment, so it never lands on disk.
       - name: Activate Aidbox
         run: |
-          cat > docker-compose.override.yml << EOF
+          cat > docker-compose.override.yml <<'EOF'
           services:
             aidbox:
               environment:
-                BOX_LICENSE: ${{ secrets.BOX_LICENSE }}
+                BOX_LICENSE: ${BOX_LICENSE}
           EOF
         working-directory: packages/aidbox-client
 
       - name: Run aidbox
+        env:
+          BOX_LICENSE: ${{ secrets.BOX_LICENSE }}
         run: docker compose up --wait
         working-directory: packages/aidbox-client
 
