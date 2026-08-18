@@ -111,7 +111,14 @@ export class AidboxClient<
 				request: requestParams,
 			};
 
-		const { method, url, headers = {}, params = [], body } = requestParams;
+		const {
+			method,
+			url,
+			headers = {},
+			params = [],
+			body,
+			redirect = "follow",
+		} = requestParams;
 
 		const urlObj = joinUrl(baseUrl, url);
 
@@ -144,6 +151,7 @@ export class AidboxClient<
 					headers: requestHeaders,
 					body: body || null,
 					cache: "no-store",
+					redirect,
 				},
 			);
 			const responseHeaders: Record<string, string> = {};

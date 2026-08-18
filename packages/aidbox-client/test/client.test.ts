@@ -76,4 +76,79 @@ describe("AidboxClient", () => {
 			}
 		});
 	});
+	describe("redirect mode", () => {
+		const baseUrl = "http://localhost:8080";
+
+		function client() {
+			return new AidboxClient<Bundle, OperationOutcome, User>(
+				baseUrl,
+				new BrowserAuthProvider(baseUrl),
+			);
+		}
+
+		it("follows redirects by default", async () => {
+			globalThis.fetch = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				statusText: "OK",
+				redirected: false,
+				headers: new Headers(),
+				text: async () => "",
+			});
+
+			await client().rawRequest({ method: "GET", url: "/Patient" });
+
+			expect(fetch).toHaveBeenCalledWith(
+				`${baseUrl}/Patient`,
+				expect.objectContaining({ redirect: "follow" }),
+			);
+		});
+
+		it("passes the requested redirect mode to fetch", async () => {
+			globalThis.fetch = vi.fn().mockResolvedValue({
+				ok: false,
+				status: 0,
+				statusText: "",
+				type: "opaqueredirect",
+				redirected: false,
+				headers: new Headers(),
+				text: async () => "",
+			});
+
+			await expect(
+				client().rawRequest({
+					method: "GET",
+					url: "/",
+					redirect: "manual",
+				}),
+			).rejects.toThrow("HTTP 0");
+
+			expect(fetch).toHaveBeenCalledWith(
+				`${baseUrl}/`,
+				expect.objectContaining({ redirect: "manual" }),
+			);
+		});
+
+		it("leaves the page alone when an unfollowed redirect comes back opaque", async () => {
+			const win = { location: { href: `${baseUrl}/u/rest` } };
+			vi.stubGlobal("window", win);
+			globalThis.fetch = vi.fn().mockResolvedValue({
+				ok: false,
+				status: 0,
+				statusText: "",
+				type: "opaqueredirect",
+				redirected: false,
+				url: "",
+				headers: new Headers(),
+				text: async () => "",
+			});
+
+			await expect(
+				client().rawRequest({ method: "GET", url: "/", redirect: "manual" }),
+			).rejects.toThrow("HTTP 0");
+
+			expect(win.location.href).toBe(`${baseUrl}/u/rest`);
+			vi.unstubAllGlobals();
+		});
+	});
 });
