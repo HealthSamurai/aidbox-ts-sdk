@@ -39,6 +39,7 @@ export type RequestParams = {
 	headers?: Headers;
 	params?: Parameters;
 	body?: string;
+	redirect?: RequestRedirect;
 };
 
 export type ResponseWithMeta = {
