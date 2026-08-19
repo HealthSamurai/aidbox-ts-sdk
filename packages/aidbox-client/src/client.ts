@@ -181,6 +181,42 @@ export class AidboxClient<
 		}
 	}
 
+	async #toResult<T>(
+		response: ResponseWithMeta,
+	): Promise<
+		Result<ResourceResponse<T | undefined>, ResourceResponse<TOperationOutcome>>
+	> {
+		// Aidbox labels its 204 responses `content-type: text/html`, so the status is the only dependable signal that there is no body.
+		if (response.response.status === 204)
+			return Ok({ resource: undefined, ...response });
+
+		const body = await coerceBody<T | TOperationOutcome>(response);
+
+		if (!response.response.ok) {
+			if ((body as OperationOutcome).resourceType === "OperationOutcome")
+				return Err({ resource: body as TOperationOutcome, ...response });
+
+			throw new ErrorResponse(
+				`HTTP ${response.response.status}: ${response.response.statusText}`,
+				response,
+			);
+		}
+
+		return Ok({ resource: body as T, ...response });
+	}
+
+	async #requestMaybeEmpty<T>(
+		params: RequestParams,
+	): Promise<
+		Result<ResourceResponse<T | undefined>, ResourceResponse<TOperationOutcome>>
+	> {
+		const response = await this.#internalRawRequest(params);
+
+		if (isInternalErrorResponse(response)) throw response.error;
+
+		return await this.#toResult<T>(response);
+	}
+
 	/// FHIR HTTP methods
 
 	/**
@@ -589,29 +625,10 @@ export class AidboxClient<
 	): Promise<
 		Result<ResourceResponse<T | undefined>, ResourceResponse<TOperationOutcome>>
 	> {
-		const response = await this.#internalRawRequest({
+		return await this.#requestMaybeEmpty<T>({
 			url: makeUrl([basePath, opts.type, opts.id]),
 			method: "DELETE",
 		});
-
-		if (isInternalErrorResponse(response)) throw response.error;
-
-		if (response.response.status === 204)
-			return Ok({ resource: undefined, ...response });
-
-		const body = await coerceBody<T | TOperationOutcome>(response);
-
-		if (!response.response.ok) {
-			if ((body as OperationOutcome).resourceType === "OperationOutcome")
-				return Err({ resource: body as TOperationOutcome, ...response });
-
-			throw new ErrorResponse(
-				`HTTP ${response.response.status}: ${response.response.statusText}`,
-				response,
-			);
-		}
-
-		return Ok({ resource: body as T, ...response });
 	}
 
 	/**
@@ -677,7 +694,9 @@ export class AidboxClient<
 	 */
 	public async conditionalDelete<T>(
 		opts: ConditionalDeleteOptions,
-	): Promise<Result<ResourceResponse<T>, ResourceResponse<TOperationOutcome>>> {
+	): Promise<
+		Result<ResourceResponse<T | undefined>, ResourceResponse<TOperationOutcome>>
+	> {
 		const url = [basePath];
 		if (opts.type) url.push(opts.type);
 
@@ -687,7 +706,7 @@ export class AidboxClient<
 			params: opts.searchParameters,
 		};
 
-		return await this.request<T>(requestParams);
+		return await this.#requestMaybeEmpty<T>(requestParams);
 	}
 
 	/**
@@ -1077,19 +1096,18 @@ export class AidboxClient<
 
 		if (isInternalErrorResponse(response)) throw response.error;
 
-		const body = await coerceBody<T | TOperationOutcome>(response);
+		const result = await this.#toResult<T>(response);
 
-		if (!response.response.ok) {
-			if ((body as OperationOutcome).resourceType === "OperationOutcome")
-				return Err({ resource: body as TOperationOutcome, ...response });
-
+		if (result.isOk() && result.value.resource === undefined)
 			throw new ErrorResponse(
-				`HTTP ${response.response.status}: ${response.response.statusText}`,
+				`HTTP ${response.response.status}: response carries no body, use rawRequest for this interaction`,
 				response,
 			);
-		}
 
-		return Ok({ resource: body as T, ...response });
+		return result as Result<
+			ResourceResponse<T>,
+			ResourceResponse<TOperationOutcome>
+		>;
 	}
 
 	/**
