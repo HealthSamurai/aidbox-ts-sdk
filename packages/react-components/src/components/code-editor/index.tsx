@@ -1852,11 +1852,13 @@ const editorInputTheme = EditorView.theme({
 	},
 });
 
-const KeywordIcon = () => <Terminal size={16} color="#717684" />;
-const OperatorIcon = () => <ChevronsRight size={16} color="#717684" />;
-const TableIcon = () => <Table2 size={16} color="#717684" />;
-const HeaderIcon = () => <Heading size={16} color="#717684" />;
-const ColumnIcon = () => <Columns2 size={16} color="#717684" />;
+const KeywordIcon = () => <Terminal size={16} className="text-fg-tertiary" />;
+const OperatorIcon = () => (
+	<ChevronsRight size={16} className="text-fg-tertiary" />
+);
+const TableIcon = () => <Table2 size={16} className="text-fg-tertiary" />;
+const HeaderIcon = () => <Heading size={16} className="text-fg-tertiary" />;
+const ColumnIcon = () => <Columns2 size={16} className="text-fg-tertiary" />;
 
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;

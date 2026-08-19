@@ -103,7 +103,7 @@ function Switch({
 						size={size === "small" ? 8 : 10}
 						strokeWidth={2.5}
 						style={{ strokeWidth: 2.5 }}
-						className="text-neutral-600"
+						className="text-fg-secondary"
 					/>
 				)}
 			</SwitchPrimitive.Thumb>

@@ -81,7 +81,7 @@ const tableCellStyles = cn(
 	"align-middle",
 	"whitespace-nowrap",
 	"text-sm",
-	"text-grey-700",
+	"text-text-primary",
 	"[&:has([role=checkbox])]:pr-0",
 );
 

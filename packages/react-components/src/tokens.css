@@ -177,10 +177,8 @@
 	--color-code-red: var(--color-red-600);
 	--color-code-blue: var(--color-blue-500);
 	--color-logo-readable: var(--color-neutral-800);
-	--color-elements-links: var(--color-brand-600);
 	--color-elements-info: var(--color-brand-600);
 	--color-elements-alert: var(--color-red-600);
-	--color-illustrations-solid: var(--color-brand-600);
 }
 
 /* Semantic tokens that need dark mode overrides — use @theme inline + :root so .dark can override */
@@ -194,6 +192,8 @@
 	--color-surface-selected: var(--hs-surface-selected);
 	--color-border-default: var(--hs-border-default);
 	--color-separator: var(--hs-separator);
+	--color-elements-links: var(--hs-elements-links);
+	--color-illustrations-solid: var(--hs-illustrations-solid);
 }
 
 :root {
@@ -206,4 +206,6 @@
 	--hs-surface-selected: var(--color-neutral-200);
 	--hs-border-default: var(--color-neutral-200);
 	--hs-separator: var(--color-neutral-200);
+	--hs-elements-links: var(--color-brand-600);
+	--hs-illustrations-solid: var(--color-brand-600);
 }
