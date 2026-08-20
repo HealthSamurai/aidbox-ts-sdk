@@ -10,8 +10,7 @@ import {
 	type SmartSession,
 } from "src/smart-app-launch";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-const AIDBOX_BASE_URL = "http://localhost:8080";
+import { baseUrl as AIDBOX_BASE_URL } from "./config";
 
 const ISS = "https://fhir.example.com";
 const AUTHORIZE_URL = "https://auth.example.com/authorize";

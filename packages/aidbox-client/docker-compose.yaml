@@ -20,7 +20,7 @@ services:
     depends_on:
     - postgres
     ports:
-    - 8080:8080
+    - "${AIDBOX_PORT:-8080}:8080"
     volumes:
       - "./resources/bundle.json:/tmp/bundle.json:z"
     environment:
@@ -47,9 +47,10 @@ services:
       BOX_SECURITY_AUDIT_LOG_ENABLED: 'true'
       BOX_SECURITY_DEV_MODE: 'true'
       BOX_SETTINGS_MODE: read-write
-      BOX_WEB_BASE_URL: http://localhost:8080
+      BOX_WEB_BASE_URL: ${AIDBOX_BASE_URL:-http://localhost:${AIDBOX_PORT:-8080}}
       BOX_WEB_PORT: 8080
       BOX_INIT_BUNDLE: file:///tmp/bundle.json
+      BOX_LICENSE: ${BOX_LICENSE:-}
     healthcheck:
       test: curl -f http://localhost:8080/health || exit 1
       interval: 5s

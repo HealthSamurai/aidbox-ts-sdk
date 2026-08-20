@@ -10,6 +10,8 @@ export default defineConfig({
 		// Note: sequence.concurrent only affects tests within a file, not between files.
 		// Note: pool: 'forks' with singleFork breaks native fetch in CI (returns undefined).
 		fileParallelism: false,
+		globalSetup: ["./test/global-setup.ts"],
+		teardownTimeout: 60_000,
 	},
 	resolve: {
 		alias: {

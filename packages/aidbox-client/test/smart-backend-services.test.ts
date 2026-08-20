@@ -8,8 +8,8 @@ import type {
 import { SmartBackendServicesAuthProvider } from "src/smart-backend-services";
 import type { User } from "src/types";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { baseUrl as AIDBOX_BASE_URL } from "./config";
 
-const AIDBOX_BASE_URL = "http://localhost:8080";
 const SMART_CLIENT_ID = "smart-backend-test";
 
 /**

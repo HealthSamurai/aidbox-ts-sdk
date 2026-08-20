@@ -40,6 +40,19 @@ pnpm -r run build   # initial build (required for cross-package types)
    pnpm test
    ```
 
+   The suite starts its own Aidbox on a free port and removes it afterwards, so
+   nothing needs to be running first and no port can be taken. `BOX_LICENSE` has
+   to be in the environment for that instance to activate.
+
+   Booting an instance costs about a minute. To iterate against one you keep
+   running, point the suite at it:
+   ```bash
+   AIDBOX_PORT=18080 docker compose up --wait
+   AIDBOX_BASE_URL=http://localhost:18080 pnpm test
+   ```
+   The tests truncate tables, so an instance given this way is checked against
+   `resources/bundle.json` first and the run is refused if it does not match.
+
 4. **Preview UI changes** with Storybook:
    ```bash
    cd packages/react-components
