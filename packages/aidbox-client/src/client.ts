@@ -22,6 +22,7 @@ import type {
 	ResourceResponse,
 	ResponseWithMeta,
 	SearchCompartmentOptions,
+	SearchPageOptions,
 	SearchSystemOptions,
 	SearchTypeOptions,
 	TransactionOptions,
@@ -370,6 +371,145 @@ export class AidboxClient<
 		};
 
 		return await this.request<TBundle>(requestParams);
+	}
+
+	/**
+	 * Resolve a server-supplied continuation URL against the configured FHIR base and refuse anything that leaves it.
+	 *
+	 * The continuation may be relative or absolute.
+	 * It is accepted only when it uses `http`/`https`, carries no userinfo, has exactly the origin of the configured base URL, and stays on or below the FHIR base path.
+	 * Origins are compared as parsed origins rather than string prefixes, so hosts such as `localhost:8080.example.org` and userinfo tricks such as `http://localhost:8080@example.org/` are rejected.
+	 * A resolved path that carries an encoded path separator, or that would be read as a network-path reference when it is resolved again to send the request, is rejected as well.
+	 */
+	#resolveContinuation(continuation: string): URL {
+		const request: RequestParams = { method: "GET", url: continuation };
+
+		const refuse = (reason: string): never => {
+			throw new RequestError(
+				`refused to follow the continuation URL: ${reason}`,
+				{ request },
+			);
+		};
+
+		// The base URL is normalized to a directory so that a deployment path
+		// prefix is kept instead of being replaced by the FHIR base path.
+		const configuredBase = this.getBaseUrl();
+		const fhirBase = new URL(
+			`${basePath}/`,
+			configuredBase.endsWith("/") ? configuredBase : `${configuredBase}/`,
+		);
+
+		let resolved: URL;
+		try {
+			resolved = new URL(continuation, fhirBase);
+		} catch (cause) {
+			throw new RequestError(
+				"refused to follow the continuation URL: it is not a valid URL",
+				{ cause, request },
+			);
+		}
+
+		if (resolved.protocol !== "http:" && resolved.protocol !== "https:")
+			refuse(`unsupported scheme "${resolved.protocol}"`);
+
+		if (resolved.username || resolved.password)
+			refuse("it carries credentials");
+
+		if (resolved.origin !== fhirBase.origin)
+			refuse(`it points to ${resolved.origin} instead of ${fhirBase.origin}`);
+
+		const basePathname = fhirBase.pathname.replace(/\/$/, "");
+		if (
+			resolved.pathname !== basePathname &&
+			!resolved.pathname.startsWith(`${basePathname}/`)
+		)
+			refuse(`it points outside the ${basePathname} base path`);
+
+		// The resolved path is re-resolved against the base URL when the request is
+		// sent, where a leading "//" would be read as a network-path reference and
+		// silently retarget the request at another host.
+		if (resolved.pathname.startsWith("//"))
+			refuse("it would be reinterpreted as a network-path reference");
+
+		// An encoded separator is not a segment delimiter here, so it survives the
+		// checks above, but a server or proxy may decode it before routing.
+		if (/%2f|%5c/i.test(resolved.pathname))
+			refuse("it contains an encoded path separator");
+
+		return resolved;
+	}
+
+	/**
+	 * Follow one FHIR search continuation link and read the page it points to.
+	 *
+	 * A search response is a Bundle whose `link` entries carry the URLs of the neighbouring pages.
+	 * Pass that Bundle to read one further page, or pass a continuation URL that was selected elsewhere.
+	 *
+	 * ```
+	 * GET [base]/[continuation-url]
+	 * ```
+	 *
+	 * Exactly one page is read per call: this method never follows more than one link, and pages are not loaded automatically.
+	 *
+	 * The continuation URL is supplied by the server, so it is resolved and checked before the request is made.
+	 * A URL that leaves the configured origin or the FHIR base path is rejected with a `RequestError`, and no request is sent.
+	 *
+	 * FHIR Reference: https://hl7.org/fhir/http.html#paging
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const firstPage = await client.searchType({
+	 *   type: "Patient",
+	 *   query: [["_count", "20"]],
+	 * });
+	 *
+	 * if (firstPage.isOk()) {
+	 *   const secondPage = await client.searchPage({
+	 *     bundle: firstPage.value.resource,
+	 *     relation: "next",
+	 *   });
+	 * }
+	 * ```
+	 *
+	 * @group Search Continuation
+	 */
+	public async searchPage(
+		opts: SearchPageOptions,
+	): Promise<
+		Result<ResourceResponse<TBundle>, ResourceResponse<TOperationOutcome>>
+	> {
+		let continuation: string;
+
+		if ("url" in opts) {
+			continuation = opts.url;
+		} else {
+			const relation = opts.relation ?? "next";
+			const link = opts.bundle.link?.find(
+				(candidate) => candidate.relation === relation,
+			);
+
+			if (!link) {
+				// No request is made, so the self link is reported instead as the
+				// most useful context a consumer can log.
+				const self = opts.bundle.link?.find(
+					(candidate) => candidate.relation === "self",
+				);
+				throw new RequestError(
+					`the bundle has no "${relation}" link to follow`,
+					{ request: { method: "GET", url: self?.url ?? "" } },
+				);
+			}
+
+			continuation = link.url;
+		}
+
+		const resolved = this.#resolveContinuation(continuation);
+
+		return await this.request<TBundle>({
+			method: "GET",
+			url: `${resolved.pathname}${resolved.search}`,
+		});
 	}
 
 	/**

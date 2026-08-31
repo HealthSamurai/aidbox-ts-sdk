@@ -114,6 +114,27 @@ export type SearchCompartmentOptions = {
 	compartmentId: string;
 };
 
+/**
+ * The `Bundle.link` relation of the page to follow.
+ */
+export type SearchPageRelation =
+	| "next"
+	| "previous"
+	| "prev"
+	| "first"
+	| "last";
+
+/**
+ * The minimal shape of a searchset `Bundle` a continuation link is read from.
+ */
+export type SearchPageBundle = {
+	link?: { relation: string; url: string }[];
+};
+
+export type SearchPageOptions =
+	| { url: string }
+	| { bundle: SearchPageBundle; relation?: SearchPageRelation };
+
 export type CreateOptions<T> = {
 	type: string;
 	resource: T;

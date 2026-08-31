@@ -103,6 +103,8 @@ This client provides a set of methods to work with a FHIR server in a more conve
   - `search` - Search across all resource types based on some filter criteria.
 - Compartment Interaction
   - `search` - Search resources associated with a specific compartment instance (see [Search Contexts](https://build.fhir.org/search.html#searchcontexts) and [Compartments](https://build.fhir.org/compartmentdefinition.html))
+- Search Continuation
+  - `searchPage` - Follow one continuation link of a search result Bundle to read the page it points to.
 - Operations Framework
   - `operation` - Perform an operation as defined by an `OperationDefinition`.
   - `validate` - Perform the Validate Operation.
@@ -175,6 +177,42 @@ if (deleteResult.isErr())
     cause: deleteResult.value.resource,
   });
 ```
+
+### Paging Through Search Results
+
+A search response is a Bundle whose `link` entries carry the URLs of the neighbouring pages.
+`searchPage` follows exactly one of those links:
+
+```typescript
+const firstPage = await client.searchType({
+  type: "Patient",
+  query: [["_count", "20"]],
+});
+
+if (firstPage.isErr())
+  throw new Error("search failed", { cause: firstPage.value.resource });
+
+const secondPage = await client.searchPage({
+  bundle: firstPage.value.resource,
+  relation: "next", // the default; "previous", "prev", "first" and "last" also work
+});
+```
+
+`relation` defaults to `next`, and a Bundle without a link for the requested relation is refused, so the end of a
+result set is reported instead of being retried.
+A continuation URL that was selected elsewhere can be passed directly as `await client.searchPage({ url })`,
+relative to the FHIR base or absolute.
+
+The client does not page automatically: one call reads one page, and following further pages is up to the caller.
+It also does not interpret the returned Bundle, so `Bundle.entry.search.mode` and profile-aware typing stay with the
+caller.
+
+Continuation URLs come from the server, so they are resolved and checked before a request is made.
+A URL that resolves outside the configured origin or outside the `/fhir` base path of the configured base URL is
+rejected with a `RequestError` and no request is sent, which keeps the credentials of the auth provider from being
+sent to another host.
+The same applies to a URL that only looks confined, such as one carrying credentials, an encoded path separator, or a
+path that would be re-read as a reference to another host.
 
 ### Return data format
 
