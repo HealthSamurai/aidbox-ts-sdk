@@ -264,12 +264,13 @@ Both methods can throw the `RequestError` class if the error happened before the
 
 ## Authentication Providers
 
-Authentication is managed via the `AuthProvider` interface. The client ships with four built-in providers:
+Authentication is managed via the `AuthProvider` interface. The client ships with five built-in providers:
 
 | Provider | Environment | Auth Method |
 |----------|-------------|-------------|
 | `BrowserAuthProvider` | Browser | Cookie-based sessions |
 | `BasicAuthProvider` | Any | HTTP Basic Auth |
+| `ClientCredentialsAuthProvider` | Server-side | OAuth 2.0 client_credentials with a shared client secret |
 | `SmartBackendServicesAuthProvider` | Server-side | OAuth 2.0 client_credentials with JWT bearer |
 | `SmartAppLaunchAuthProvider` | Browser or server | SMART App Launch (OAuth 2.0 authorization_code with PKCE) |
 
@@ -297,6 +298,55 @@ const client = new AidboxClient(
   new BasicAuthProvider(baseUrl, "username", "password"),
 );
 ```
+
+### ClientCredentialsAuthProvider
+
+For confidential server applications that hold a client ID and a shared client secret (Aidbox `Client.secret`). Uses the OAuth 2.0 client_credentials grant against `<baseUrl>/auth/token`.
+
+Features:
+- Token caching with proactive refresh before expiry
+- Thundering herd prevention — concurrent requests share a single token fetch
+- Automatic retry on 401 with a fresh token, as long as the request body is replayable
+- Client secret and access token live in private fields, are never serialized, and are redacted from token endpoint errors
+
+```typescript
+import { AidboxClient, ClientCredentialsAuthProvider } from "@health-samurai/aidbox-client";
+
+const auth = new ClientCredentialsAuthProvider({
+  baseUrl: "https://fhir-server.address",
+  clientId: "my-service",
+  clientSecret: process.env.AIDBOX_CLIENT_SECRET as string,
+  // scope: "system/*.read",                  // Optional: sent only when supplied
+  // tokenEndpoint: "https://fhir-server.address/auth/token", // Optional: defaults to `<baseUrl>/auth/token`
+  // clientAuthentication: "basic",           // Optional: "basic" (default) or "body"
+  // tokenExpirationBuffer: 30,               // Optional: seconds before expiry to refresh (default: 30)
+  // allowInsecureRequests: false,            // Optional: development only, permits a plain http token endpoint
+});
+
+const client = new AidboxClient("https://fhir-server.address", auth);
+```
+
+`clientAuthentication` selects how the client authenticates at the token endpoint. `"basic"` sends an `Authorization: Basic` header holding the base64 of the raw UTF-8 `clientId:clientSecret`, `"body"` sends `client_id` and `client_secret` as form fields. Credentials are never placed in a URL. Aidbox accepts both forms.
+
+The token endpoint receives the client secret, so it is validated at construction time: it has to be an absolute `https:` URL without userinfo or fragment, and the token request is sent with `redirect: "manual"` so a redirect can never replay the credentials to another origin. Plain `http:` is refused unless `allowInsecureRequests` is set, which is meant for local development against `http://localhost` only.
+
+When `baseUrl` carries a path prefix (for example `https://host/aidbox`), the default endpoint still resolves against the host root — `https://host/auth/token` — so set `tokenEndpoint` explicitly for path-prefixed deployments.
+
+The Aidbox `Client` resource has to allow the grant:
+
+```json
+{
+  "resourceType": "Client",
+  "id": "my-service",
+  "secret": "your-client-secret",
+  "grant_types": ["client_credentials"],
+  "auth": { "client_credentials": { "access_token_expiration": 300 } }
+}
+```
+
+Aidbox omits `expires_in` from the token response unless `auth.client_credentials.access_token_expiration` is set; the provider then assumes a 300 second lifetime.
+
+**`ClientCredentialsAuthProvider` vs `SmartBackendServicesAuthProvider`:** both use the OAuth 2.0 client_credentials grant, but they prove client identity differently. `ClientCredentialsAuthProvider` presents a shared secret that both sides store, which is the simplest option for a service you deploy and configure yourself. `SmartBackendServicesAuthProvider` presents a private-key JWT assertion, so no secret ever leaves your process and only the public key is registered on the server — that is what the SMART Backend Services specification requires and what you need when talking to third-party FHIR servers.
 
 ### SmartBackendServicesAuthProvider
 
