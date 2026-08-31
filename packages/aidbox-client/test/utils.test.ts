@@ -85,4 +85,148 @@ describe("validateBaseUrl", () => {
 			),
 		).toThrow("URL of the request must start with baseUrl");
 	});
+
+	it("should throw when userinfo makes the request target another host", () => {
+		expect(() =>
+			validateBaseUrl(
+				"http://localhost:8080@evil.example/fhir/Patient",
+				"http://localhost:8080",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw for a URL instance whose userinfo targets another host", () => {
+		expect(() =>
+			validateBaseUrl(
+				new URL("http://localhost:8080@evil.example/fhir/Patient"),
+				"http://localhost:8080",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw when the request carries userinfo on the base origin", () => {
+		expect(() =>
+			validateBaseUrl(
+				"http://admin:secret@localhost:8080/fhir/Patient",
+				"http://localhost:8080",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw when the request host only has the base host as a suffix", () => {
+		expect(() =>
+			validateBaseUrl(
+				"https://example.com.evil.example/fhir/Patient",
+				"https://example.com",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw for a Request whose host only has the base host as a suffix", () => {
+		const request = new Request(
+			"https://example.com.evil.example/fhir/Patient",
+		);
+		expect(() => validateBaseUrl(request, "https://example.com")).toThrow(
+			"URL of the request must start with baseUrl",
+		);
+	});
+
+	it("should throw when the port differs from the base URL port", () => {
+		expect(() =>
+			validateBaseUrl("http://localhost:8081/fhir", "http://localhost:8080"),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw when the scheme differs from the base URL scheme", () => {
+		expect(() =>
+			validateBaseUrl("https://localhost:8080/fhir", "http://localhost:8080"),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw for a relative URL", () => {
+		expect(() =>
+			validateBaseUrl("/fhir/Patient", "http://localhost:8080"),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should not throw when the base URL has a trailing slash", () => {
+		expect(() =>
+			validateBaseUrl(
+				"http://localhost:8080/fhir/Patient",
+				"http://localhost:8080/",
+			),
+		).not.toThrow();
+	});
+
+	it("should not throw when the request states the default port explicitly", () => {
+		expect(() =>
+			validateBaseUrl("https://example.com:443/fhir", "https://example.com"),
+		).not.toThrow();
+	});
+
+	it("should not throw when the request host differs only in case", () => {
+		expect(() =>
+			validateBaseUrl(
+				"HTTP://LOCALHOST:8080/fhir/Patient",
+				"http://localhost:8080",
+			),
+		).not.toThrow();
+	});
+
+	it("should throw when the path only has the base path as a textual prefix", () => {
+		expect(() =>
+			validateBaseUrl(
+				"https://example.com/fhir-evil/Patient",
+				"https://example.com/fhir",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw when the path leaves the base path", () => {
+		expect(() =>
+			validateBaseUrl(
+				"https://example.com/Patient",
+				"https://example.com/fhir",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should not throw when the request path equals the base path", () => {
+		expect(() =>
+			validateBaseUrl("https://example.com/fhir", "https://example.com/fhir"),
+		).not.toThrow();
+	});
+
+	it("should not throw for a sub-path with a query string", () => {
+		expect(() =>
+			validateBaseUrl(
+				"https://example.com/fhir/Patient?name=x",
+				"https://example.com/fhir",
+			),
+		).not.toThrow();
+	});
+
+	it("should not throw when the base path has a trailing slash", () => {
+		expect(() =>
+			validateBaseUrl(
+				"https://example.com/fhir/Patient",
+				"https://example.com/fhir/",
+			),
+		).not.toThrow();
+	});
+
+	it("should throw for a blob URL that inherits the base origin", () => {
+		expect(() =>
+			validateBaseUrl(
+				"blob:https://example.com/some-id",
+				"https://example.com",
+			),
+		).toThrow("URL of the request must start with baseUrl");
+	});
+
+	it("should throw for opaque origins even when both sides use the same scheme", () => {
+		expect(() =>
+			validateBaseUrl("foo://evil/fhir", "foo://server/fhir"),
+		).toThrow("URL of the request must start with baseUrl");
+	});
 });
