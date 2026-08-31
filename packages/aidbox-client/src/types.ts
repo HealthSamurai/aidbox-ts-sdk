@@ -224,3 +224,65 @@ export type TransactionOptions<TBundle> = {
 		type: "transaction";
 	};
 };
+
+/** A single file to be imported by an Aidbox bulk import operation. */
+export type BulkImportInput = {
+	url: string;
+	resourceType: string;
+};
+
+/** Body of an Aidbox `POST /v2/fhir/$import` submission. */
+export type BulkImportRequest = {
+	/** Caller-supplied operation id; Aidbox generates one when omitted. */
+	id?: string;
+	contentEncoding?: "gzip" | "plain";
+	inputs: BulkImportInput[];
+	update?: boolean;
+	allowedRetryCount?: number;
+};
+
+/** Handle of an accepted bulk import operation. */
+export type BulkImportHandle = {
+	id: string;
+	/** Absolute, same-origin `/v2/$import/<id>` status location returned by the server. */
+	statusUrl: string;
+};
+
+/**
+ * Server-reported state of a single bulk import input.
+ *
+ * Unknown server fields are preserved as-is.
+ *
+ * `status` is optional: the server may not have assigned one yet right after the submission.
+ * Beside the listed values, further server states such as `requested` and `ready` have been observed, so any string may appear.
+ */
+export type BulkImportInputStatus = {
+	url: string;
+	resourceType: string;
+	status?: "waiting" | "in-progress" | "done" | (string & {});
+	outcome?: "succeeded" | "failed" | (string & {});
+	result?: { "imported-resources"?: number } & Record<string, unknown>;
+	error?: { message?: string } & Record<string, unknown>;
+} & Record<string, unknown>;
+
+/**
+ * Server-reported state of a bulk import operation.
+ *
+ * Unknown server fields are preserved as-is.
+ *
+ * Beside the listed `status` values, further server states such as `requested` and `ready` have been observed, so any string may appear.
+ */
+export type BulkImportStatus = {
+	type?: string;
+	status: "in-progress" | "done" | (string & {});
+	outcome?: "succeeded" | "failed" | (string & {});
+	contentEncoding?: string;
+	allowedRetryCount?: number;
+	inputs: BulkImportInputStatus[];
+	result?: {
+		message?: string;
+		"total-files"?: number;
+		"total-imported-resources"?: number;
+	} & Record<string, unknown>;
+	error?: { message?: string } & Record<string, unknown>;
+} & Record<string, unknown>;

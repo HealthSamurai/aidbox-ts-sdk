@@ -3,6 +3,9 @@ import { Err, Ok, type Result } from "./result";
 import type {
 	AuthProvider,
 	BatchOptions,
+	BulkImportHandle,
+	BulkImportRequest,
+	BulkImportStatus,
 	CapabilitiesOptions,
 	ConditionalCreateOptions,
 	ConditionalDeleteOptions,
@@ -50,6 +53,49 @@ const makeUrl = (parts: string[]): string => {
 };
 
 const basePath = "fhir";
+
+const bulkImportPath = "/v2/fhir/$import";
+
+/** Build the Aidbox status path of a bulk import operation. */
+const bulkImportStatusPath = (id: string): string =>
+	`/v2/$import/${encodeURIComponent(id)}`;
+
+/**
+ * Resolve a bulk import status location against the client's base URL.
+ *
+ * Returns `null` unless the location is same-origin, free of credentials, a query and a fragment, and addresses exactly one `/v2/$import/<id>` operation whose id carries no path separator.
+ */
+const confineBulkImportLocation = (
+	location: string,
+	baseUrl: string,
+): BulkImportHandle | null => {
+	let segments: string[];
+	try {
+		const url = new URL(location, baseUrl);
+		if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+		if (url.username || url.password) return null;
+		if (url.origin !== new URL(baseUrl).origin) return null;
+		if (url.search !== "" || url.hash !== "") return null;
+		segments = url.pathname
+			.split("/")
+			.slice(1)
+			.map((segment) => decodeURIComponent(segment));
+	} catch {
+		return null;
+	}
+
+	if (segments.length !== 3) return null;
+	const [prefix, operation, id] = segments;
+	if (prefix !== "v2" || operation !== "$import" || !id) return null;
+	// Aidbox decodes the id before routing, so an id carrying a path separator
+	// cannot address an import and must not be re-sent in encoded form.
+	if (id.includes("/") || id.includes("\\")) return null;
+
+	return {
+		id,
+		statusUrl: new URL(bulkImportStatusPath(id), baseUrl).toString(),
+	};
+};
 
 /// IMPORTANT:
 ///
@@ -1001,6 +1047,139 @@ export class AidboxClient<
 				resourceType: "Parameters",
 				parameter: [{ name: "type", valueCode: type }],
 			}),
+		});
+	}
+
+	/**
+	 * Submit an Aidbox bulk import operation.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/v2/fhir/$import
+	 * ```
+	 *
+	 * Only the fields supplied by the caller are sent.
+	 * Aidbox imports are not idempotent, so the client never retries a submission: an ambiguous response is returned to the caller as it is.
+	 * An auth provider may still re-send a request that the server rejected as unauthenticated (HTTP 401) before processing it.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const submission = await client.bulkImport({
+	 *   contentEncoding: "plain",
+	 *   inputs: [{ resourceType: "Patient", url: "https://storage.example.com/patients.ndjson" }],
+	 * });
+	 *
+	 * if (submission.isOk()) {
+	 *   const { id, statusUrl } = submission.value;
+	 * }
+	 * ```
+	 *
+	 * Note: `$import` is an Aidbox-specific endpoint (not part of the FHIR spec).
+	 *
+	 * @group Aidbox methods
+	 */
+	public async bulkImport(
+		request: BulkImportRequest,
+	): Promise<
+		Result<
+			BulkImportHandle & ResponseWithMeta,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
+		const body: Record<string, unknown> = {};
+		if (request.id !== undefined) body.id = request.id;
+		if (request.contentEncoding !== undefined)
+			body.contentEncoding = request.contentEncoding;
+		body.inputs = request.inputs;
+		if (request.update !== undefined) body.update = request.update;
+		if (request.allowedRetryCount !== undefined)
+			body.allowedRetryCount = request.allowedRetryCount;
+
+		const result = await this.request<unknown>({
+			url: bulkImportPath,
+			method: "POST",
+			body: JSON.stringify(body),
+		});
+
+		if (result.isErr()) return result;
+
+		const { resource: _resource, ...meta } = result.value;
+		const location = meta.responseHeaders["content-location"];
+		const handle = location
+			? confineBulkImportLocation(location, this.getBaseUrl())
+			: null;
+
+		if (!handle)
+			throw new ErrorResponse(
+				`bulk import was accepted, but the server did not supply a usable operation status location: ${location ?? "<no content-location header>"}`,
+				meta,
+			);
+
+		if (request.id !== undefined && handle.id !== request.id)
+			throw new ErrorResponse(
+				`bulk import was accepted, but the server reported the status location of another operation: ${handle.id}`,
+				meta,
+			);
+
+		return Ok({ ...handle, ...meta });
+	}
+
+	/**
+	 * Read the server-reported state of a bulk import operation.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/v2/$import/[id]
+	 * ```
+	 *
+	 * Accepts either the handle returned by `bulkImport` or a bare operation id.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const status = await client.bulkImportStatus(handle);
+	 *
+	 * if (status.isOk()) {
+	 *   const { inputs, outcome } = status.value.resource;
+	 * }
+	 * ```
+	 *
+	 * The client does not poll: a caller decides when and how often to ask again.
+	 *
+	 * @group Aidbox methods
+	 */
+	public async bulkImportStatus(
+		handle: BulkImportHandle | { id: string },
+	): Promise<
+		Result<
+			ResourceResponse<BulkImportStatus>,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
+		const location =
+			"statusUrl" in handle
+				? handle.statusUrl
+				: bulkImportStatusPath(handle.id);
+		const confined = confineBulkImportLocation(location, this.getBaseUrl());
+
+		if (!confined)
+			throw new RequestError(
+				"bulk import status location must be a same-origin /v2/$import/<id> path without credentials, a query, a fragment, or a path separator in the id",
+				{ request: { method: "GET", url: location } },
+			);
+
+		if ("statusUrl" in handle && confined.id !== handle.id)
+			throw new RequestError(
+				"bulk import handle is inconsistent: its status location addresses another operation",
+				{ request: { method: "GET", url: location } },
+			);
+
+		return await this.request<BulkImportStatus>({
+			url: bulkImportStatusPath(confined.id),
+			method: "GET",
 		});
 	}
 

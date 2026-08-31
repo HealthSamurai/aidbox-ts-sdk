@@ -262,6 +262,40 @@ if (result.isErr()) {
 
 Both methods can throw the `RequestError` class if the error happened before the request was actually made.
 
+## Aidbox-specific methods
+
+Beside the FHIR interactions, the client exposes methods for Aidbox-specific endpoints.
+
+### Bulk import (`/v2/fhir/$import`)
+
+`bulkImport` submits an import operation and returns a handle to it.
+`bulkImportStatus` reads the state the server reports for that operation.
+
+```typescript
+const submission = await client.bulkImport({
+  contentEncoding: "plain",
+  inputs: [
+    { resourceType: "Patient", url: "https://storage.example.com/patients.ndjson" },
+  ],
+});
+
+if (submission.isErr())
+  throw new Error("import was rejected", { cause: submission.value.resource });
+
+const { id, statusUrl } = submission.value;
+
+const status = await client.bulkImportStatus({ id, statusUrl });
+
+if (status.isOk()) {
+  const { status: state, outcome, inputs, result } = status.value.resource;
+  // state is "in-progress" or "done"; inputs keeps the per-file outcome, counts, and errors.
+}
+```
+
+These are primitives, not a workflow. The client does not poll, retry, validate resources, or interpret partial results — a caller decides when to ask again, what a partial failure means, and whether a submission may be repeated. Aidbox imports are not idempotent, so a submission is never retried by the client; an ambiguous response is returned to the caller as it is. Note that an auth provider may re-send a request that the server rejected as unauthenticated (HTTP 401) before processing it, after refreshing its credentials.
+
+Only a same-origin `/v2/$import/<id>` status location is followed. A missing, malformed, foreign-origin, credential-bearing, or off-path `Content-Location`, one carrying a query or a fragment, or one addressing another operation id than the caller supplied, makes `bulkImport` throw `ErrorResponse` with the server response attached; a tampered or inconsistent handle makes `bulkImportStatus` throw `RequestError` before any authenticated request is sent. Operation ids containing `/` or `\` are refused as well, because Aidbox decodes them before routing and the status path would then not address the import.
+
 ## Authentication Providers
 
 Authentication is managed via the `AuthProvider` interface. The client ships with four built-in providers:
