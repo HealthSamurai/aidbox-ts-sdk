@@ -25,7 +25,10 @@
 			"ws@>=8.0.0 <8.21.0": "8.21.1",
 			"@babel/core@<=7.29.0": "7.29.7",
 			"brace-expansion@>=2.0.0 <2.1.4": "2.1.4",
-			"brace-expansion@>=3.0.0 <5.0.9": "5.0.9"
+			"brace-expansion@>=3.0.0 <5.0.9": "5.0.9",
+			"postcss": ">=8.5.23",
+			"valibot": ">=1.4.2",
+			"nanoid@<3.3.18": ">=3.3.18 <4"
 		}
 	},
 	"devDependencies": {

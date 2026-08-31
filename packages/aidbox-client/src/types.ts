@@ -224,3 +224,123 @@ export type TransactionOptions<TBundle> = {
 		type: "transaction";
 	};
 };
+
+/// Aidbox $batch-validate
+
+/**
+ * A raw FHIR `Parameters.parameter` entry.
+ *
+ * Additional members are kept as-is so that server or client parameters this SDK does not model are preserved.
+ */
+export type FhirParameter = { name: string } & Record<string, unknown>;
+
+/** A raw FHIR `Parameters` resource. */
+export type ParametersResource = {
+	resourceType: "Parameters";
+	parameter?: FhirParameter[];
+} & Record<string, unknown>;
+
+/**
+ * Start options of the Aidbox `$batch-validate` operation.
+ *
+ * `since` is required by the operation and is sent as the `_since` `valueInstant` parameter.
+ * `parameters` is a pass-through list of additional `Parameters.parameter` entries for options this SDK does not model.
+ */
+export type BatchValidateRequest = {
+	type: string;
+	since: string;
+	until?: string;
+	profiles?: string[];
+	respondAsync?: boolean;
+	parameters?: FhirParameter[];
+};
+
+/**
+ * One aggregated validation issue of a `$batch-validate` summary.
+ *
+ * Parts that this client does not model stay reachable through the summary's raw `parameters`.
+ */
+export type BatchValidateIssue = {
+	id?: string;
+	code?: string;
+	expression?: string;
+	count?: number;
+	diagnostics?: string;
+	invalidResourcesUrl?: string;
+};
+
+/**
+ * A `$batch-validate` summary report.
+ *
+ * `parameters` keeps the raw `Parameters` resource, so parameters this SDK does not model stay reachable.
+ */
+export type BatchValidateSummary = {
+	taskId: string;
+	validated?: number;
+	valid?: number;
+	invalid?: number;
+	bytes?: number;
+	invalidResourcesUrl?: string;
+	issues: BatchValidateIssue[];
+	parameters: ParametersResource;
+};
+
+/** A handle of an asynchronous `$batch-validate` task. */
+export type BatchValidateTaskHandle = {
+	taskId: string;
+	statusUrl: string;
+};
+
+/**
+ * The state of a `$batch-validate` task.
+ *
+ * Aidbox answers a status request of an unfinished task with an informational `OperationOutcome` that carries the progress, and only a finished task with a summary.
+ */
+export type BatchValidateStatus =
+	| { kind: "summary"; summary: BatchValidateSummary }
+	| { kind: "in-progress"; outcome: unknown };
+
+/** The outcome of starting `$batch-validate`: a finished summary, or a handle of an accepted asynchronous task. */
+export type BatchValidateStart =
+	| { kind: "summary"; summary: BatchValidateSummary }
+	| { kind: "task"; handle: BatchValidateTaskHandle };
+
+/**
+ * One invalid resource of a `$batch-validate` drill-down report.
+ *
+ * Parts that this client does not model stay reachable through the report's raw `parameters`.
+ */
+export type BatchValidateInvalidResource = {
+	fullUrl?: string;
+	resource?: unknown;
+	outcome?: unknown;
+};
+
+/** A page of the `$batch-validate` invalid-resources report. */
+export type BatchValidateInvalidResourcesReport = {
+	total?: number;
+	selfUrl?: string;
+	/** Present only when the server supplies a `next` parameter. */
+	nextUrl?: string;
+	resources: BatchValidateInvalidResource[];
+	parameters: ParametersResource;
+};
+
+/**
+ * Selection of a `$batch-validate` invalid-resources page.
+ *
+ * Either a task handle with paging options, or a `self`, `next` or `invalid-resources` URL taken from a summary or report.
+ */
+export type BatchValidateInvalidResourcesOptions =
+	| {
+			handle: BatchValidateTaskHandle;
+			count?: number;
+			page?: number;
+			issues?: string[];
+	  }
+	| { url: string };
+
+/** The result of cancelling a `$batch-validate` task, with the server's response body preserved. */
+export type BatchValidateCancelResult = ResponseWithMeta & {
+	outcome?: unknown;
+};

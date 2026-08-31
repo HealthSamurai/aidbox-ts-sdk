@@ -3,6 +3,16 @@ import { Err, Ok, type Result } from "./result";
 import type {
 	AuthProvider,
 	BatchOptions,
+	BatchValidateCancelResult,
+	BatchValidateInvalidResource,
+	BatchValidateInvalidResourcesOptions,
+	BatchValidateInvalidResourcesReport,
+	BatchValidateIssue,
+	BatchValidateRequest,
+	BatchValidateStart,
+	BatchValidateStatus,
+	BatchValidateSummary,
+	BatchValidateTaskHandle,
 	CapabilitiesOptions,
 	ConditionalCreateOptions,
 	ConditionalDeleteOptions,
@@ -11,11 +21,14 @@ import type {
 	CreateOptions,
 	DeleteHistoryVersionOptions,
 	DeleteOptions,
+	FhirParameter,
 	HistoryInstanceOptions,
 	HistorySystemOptions,
 	HistoryTypeOptions,
 	MaterializeResult,
 	OperationOptions,
+	Parameters,
+	ParametersResource,
 	PatchOptions,
 	ReadOptions,
 	RequestParams,
@@ -50,6 +63,213 @@ const makeUrl = (parts: string[]): string => {
 };
 
 const basePath = "fhir";
+
+const batchValidateOperation = "$batch-validate";
+
+const invalidResourcesSegment = "invalid-resources";
+
+/** Build an object from the given members, dropping the ones that are `undefined`. */
+const compact = <T>(members: Record<string, unknown>): T => {
+	const result: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(members)) {
+		if (value !== undefined) result[key] = value;
+	}
+	return result as T;
+};
+
+/** Read the `Parameters.parameter` entries of a raw `Parameters` resource. */
+const parameterEntries = (resource: ParametersResource): FhirParameter[] =>
+	Array.isArray(resource.parameter) ? resource.parameter : [];
+
+/** Read the value of the given member of the first parameter with the given name. */
+const parameterValue = (
+	entries: FhirParameter[],
+	name: string,
+	member: string,
+): unknown => entries.find((entry) => entry.name === name)?.[member];
+
+const stringParameter = (
+	entries: FhirParameter[],
+	name: string,
+	member: string,
+): string | undefined => {
+	const value = parameterValue(entries, name, member);
+	return typeof value === "string" ? value : undefined;
+};
+
+const numberParameter = (
+	entries: FhirParameter[],
+	name: string,
+	member: string,
+): number | undefined => {
+	const value = parameterValue(entries, name, member);
+	return typeof value === "number" ? value : undefined;
+};
+
+/** Read the `part` entries of a raw `Parameters.parameter` entry. */
+const partEntries = (entry: FhirParameter): FhirParameter[] =>
+	Array.isArray(entry.part) ? (entry.part as FhirParameter[]) : [];
+
+/** Map a raw `$batch-validate` `Parameters` resource to a summary. */
+const toBatchValidateSummary = (
+	resource: ParametersResource,
+	fallbackTaskId?: string,
+): BatchValidateSummary => {
+	const entries = parameterEntries(resource);
+
+	const issues = entries
+		.filter((entry) => entry.name === "issue")
+		.map((entry) => {
+			const parts = partEntries(entry);
+			return compact<BatchValidateIssue>({
+				id: stringParameter(parts, "id", "valueString"),
+				code: stringParameter(parts, "code", "valueCode"),
+				expression: stringParameter(parts, "expression", "valueString"),
+				count: numberParameter(parts, "count", "valueUnsignedInt"),
+				diagnostics: stringParameter(parts, "diagnostics", "valueString"),
+				invalidResourcesUrl: stringParameter(
+					parts,
+					"invalid-resources",
+					"valueUrl",
+				),
+			});
+		});
+
+	return compact<BatchValidateSummary>({
+		taskId:
+			stringParameter(entries, "task-id", "valueString") ??
+			fallbackTaskId ??
+			"",
+		validated: numberParameter(entries, "validated", "valueUnsignedInt"),
+		valid: numberParameter(entries, "valid", "valueUnsignedInt"),
+		invalid: numberParameter(entries, "invalid", "valueUnsignedInt"),
+		bytes: numberParameter(entries, "bytes", "valueDecimal"),
+		invalidResourcesUrl: stringParameter(
+			entries,
+			"invalid-resources",
+			"valueUrl",
+		),
+		issues,
+		parameters: resource,
+	});
+};
+
+/** Read a response header by its name, ignoring case. */
+const responseHeader = (
+	headers: Record<string, string>,
+	name: string,
+): string | undefined => {
+	const wanted = name.toLowerCase();
+	for (const [header, value] of Object.entries(headers)) {
+		if (header.toLowerCase() === wanted) return value;
+	}
+	return undefined;
+};
+
+const decodeSegment = (segment: string): string | undefined => {
+	try {
+		return decodeURIComponent(segment);
+	} catch {
+		return undefined;
+	}
+};
+
+/** A `$batch-validate` URL confined to this client's own server and to the operation's own paths. */
+type ConfinedBatchValidateUrl = {
+	taskId: string;
+	url: string;
+	search: string;
+};
+
+/**
+ * Confine a `$batch-validate` URL to this client's own origin and to the operation's own paths.
+ *
+ * The client resolves every request path from the origin root, so a base URL is assumed to be the server root and its own path plays no part here.
+ * Returns `undefined` for anything that is not a same-origin `http(s)` URL without userinfo whose decoded path is exactly
+ * `/fhir/$batch-validate/<task-id>`, optionally followed by the given tail segment.
+ */
+const confineBatchValidateUrl = (
+	rawUrl: string,
+	baseUrl: string,
+	tail?: typeof invalidResourcesSegment,
+): ConfinedBatchValidateUrl | undefined => {
+	let target: URL;
+	let base: URL;
+	try {
+		base = new URL(baseUrl);
+		target = new URL(rawUrl, baseUrl);
+	} catch {
+		return undefined;
+	}
+
+	if (target.protocol !== "http:" && target.protocol !== "https:")
+		return undefined;
+	if (target.username !== "" || target.password !== "") return undefined;
+	if (target.origin !== base.origin) return undefined;
+
+	const segments = target.pathname.split("/").slice(1).map(decodeSegment);
+
+	if (segments.includes(undefined)) return undefined;
+	if (segments.length !== (tail === undefined ? 3 : 4)) return undefined;
+	if (segments[0] !== basePath) return undefined;
+	if (segments[1] !== batchValidateOperation) return undefined;
+	if (tail !== undefined && segments[3] !== tail) return undefined;
+
+	const taskId = segments[2];
+	if (taskId === undefined || taskId === "" || taskId.includes("/"))
+		return undefined;
+
+	const parts = [basePath, batchValidateOperation, taskId];
+	if (tail !== undefined) parts.push(tail);
+
+	return { taskId, url: makeUrl(parts), search: target.search };
+};
+
+/** Map a raw `$batch-validate` `Parameters` resource to an invalid-resources report. */
+const toBatchValidateInvalidResourcesReport = (
+	resource: ParametersResource,
+): BatchValidateInvalidResourcesReport => {
+	const entries = parameterEntries(resource);
+
+	const resources = entries
+		.filter((entry) => entry.name === "resource")
+		.map((entry) => {
+			const parts = partEntries(entry);
+			return compact<BatchValidateInvalidResource>({
+				fullUrl: stringParameter(parts, "fullUrl", "valueUrl"),
+				resource: parameterValue(parts, "resource", "resource"),
+				outcome: parameterValue(parts, "outcome", "resource"),
+			});
+		});
+
+	return compact<BatchValidateInvalidResourcesReport>({
+		total: numberParameter(entries, "total", "valueUnsignedInt"),
+		selfUrl: stringParameter(entries, "self", "valueUrl"),
+		nextUrl: stringParameter(entries, "next", "valueUrl"),
+		resources,
+		parameters: resource,
+	});
+};
+
+/**
+ * Check that a `$batch-validate` response carries one of the operation's documented success states.
+ *
+ * `200` carries a `Parameters` report, and `202` an accepted or an unfinished task; no other success code belongs to this operation.
+ */
+const isBatchValidateSuccessStatus = (status: number): boolean =>
+	status === 200 || status === 202;
+
+/** Check that a response body is an `OperationOutcome` resource. */
+const isOperationOutcomeBody = (body: unknown): boolean =>
+	typeof body === "object" &&
+	body !== null &&
+	(body as { resourceType?: unknown }).resourceType === "OperationOutcome";
+
+/** Check that a response body is a raw `Parameters` resource. */
+const isParametersResource = (body: unknown): body is ParametersResource =>
+	typeof body === "object" &&
+	body !== null &&
+	(body as { resourceType?: unknown }).resourceType === "Parameters";
 
 /// IMPORTANT:
 ///
@@ -1002,6 +1222,326 @@ export class AidboxClient<
 				parameter: [{ name: "type", valueCode: type }],
 			}),
 		});
+	}
+
+	/**
+	 * Start the Aidbox `$batch-validate` operation for one resource type.
+	 *
+	 * The interaction is performed by an HTTP POST command as shown:
+	 *
+	 * ```
+	 * POST [base]/fhir/[type]/$batch-validate
+	 * ```
+	 *
+	 * Requires Aidbox 2607 or later.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const result = await client.batchValidate({
+	 *   type: "Patient",
+	 *   since: "2020-01-01T00:00:00Z",
+	 * });
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async batchValidate(
+		request: BatchValidateRequest,
+	): Promise<
+		Result<
+			BatchValidateStart & ResponseWithMeta,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
+		const parameter: FhirParameter[] = [
+			{ name: "_since", valueInstant: request.since },
+		];
+		if (request.until !== undefined)
+			parameter.push({ name: "_until", valueInstant: request.until });
+		for (const profile of request.profiles ?? [])
+			parameter.push({ name: "profile", valueCanonical: profile });
+		for (const passThrough of request.parameters ?? [])
+			parameter.push(passThrough);
+
+		const requestParams: RequestParams = {
+			url: makeUrl([basePath, request.type, batchValidateOperation]),
+			method: "POST",
+			body: JSON.stringify({ resourceType: "Parameters", parameter }),
+		};
+		if (request.respondAsync)
+			requestParams.headers = { Prefer: "respond-async" };
+
+		if (request.since === "")
+			throw new RequestError("`since` must not be empty", {
+				request: requestParams,
+			});
+
+		const result = await this.request<unknown>(requestParams);
+		if (result.isErr()) return result;
+
+		const { resource, ...meta } = result.value;
+
+		if (!isBatchValidateSuccessStatus(meta.response.status))
+			throw new ErrorResponse(
+				`$batch-validate answered with the unexpected status HTTP ${meta.response.status}`,
+				meta,
+			);
+
+		if (meta.response.status === 202) {
+			const location = responseHeader(meta.responseHeaders, "content-location");
+			const confined =
+				location === undefined
+					? undefined
+					: confineBatchValidateUrl(location, this.getBaseUrl());
+			if (confined === undefined)
+				throw new ErrorResponse(
+					"$batch-validate accepted the task but did not return a usable Content-Location",
+					meta,
+				);
+
+			return Ok({
+				kind: "task",
+				handle: {
+					taskId: confined.taskId,
+					statusUrl: new URL(confined.url, this.getBaseUrl()).toString(),
+				},
+				...meta,
+			});
+		}
+
+		if (isOperationOutcomeBody(resource))
+			return Err({ resource: resource as TOperationOutcome, ...meta });
+
+		if (!isParametersResource(resource))
+			throw new ErrorResponse(
+				"$batch-validate returned an unexpected body: a Parameters resource was expected",
+				meta,
+			);
+
+		const summary = toBatchValidateSummary(resource);
+		if (summary.taskId === "")
+			throw new ErrorResponse(
+				"$batch-validate returned a summary without a task-id parameter",
+				meta,
+			);
+
+		return Ok({ kind: "summary", summary, ...meta });
+	}
+
+	/**
+	 * Read the current state of an asynchronous `$batch-validate` task.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/fhir/$batch-validate/[task-id]
+	 * ```
+	 *
+	 * An unfinished task is reported as `in-progress` with the server's informational `OperationOutcome`; a finished task is reported as a `summary`.
+	 * This method performs exactly one request and never waits for a task to finish.
+	 *
+	 * Only same-origin `$batch-validate` handles are followed; anything else is refused with a `RequestError` before the request is sent.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const status = await client.batchValidateStatus(handle);
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async batchValidateStatus(
+		handle: BatchValidateTaskHandle,
+	): Promise<
+		Result<
+			BatchValidateStatus & ResponseWithMeta,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
+		const confined = this.#confineBatchValidateHandle(handle, "GET");
+
+		const result = await this.request<unknown>({
+			url: confined.url,
+			method: "GET",
+		});
+		if (result.isErr()) return result;
+
+		const { resource, ...meta } = result.value;
+
+		if (!isBatchValidateSuccessStatus(meta.response.status))
+			throw new ErrorResponse(
+				`$batch-validate answered with the unexpected status HTTP ${meta.response.status}`,
+				meta,
+			);
+
+		if (meta.response.status === 202)
+			return Ok({ kind: "in-progress", outcome: resource, ...meta });
+
+		if (isOperationOutcomeBody(resource))
+			return Err({ resource: resource as TOperationOutcome, ...meta });
+
+		if (!isParametersResource(resource))
+			throw new ErrorResponse(
+				"$batch-validate returned an unexpected body: a Parameters resource was expected",
+				meta,
+			);
+
+		const reportedTaskId = stringParameter(
+			parameterEntries(resource),
+			"task-id",
+			"valueString",
+		);
+		if (
+			reportedTaskId !== undefined &&
+			reportedTaskId !== "" &&
+			reportedTaskId !== confined.taskId
+		)
+			throw new ErrorResponse(
+				"$batch-validate returned a summary of a different task than the polled one",
+				meta,
+			);
+
+		return Ok({
+			kind: "summary",
+			summary: toBatchValidateSummary(resource, confined.taskId),
+			...meta,
+		});
+	}
+
+	/**
+	 * Cancel an asynchronous `$batch-validate` task.
+	 *
+	 * The interaction is performed by an HTTP DELETE command as shown:
+	 *
+	 * ```
+	 * DELETE [base]/fhir/$batch-validate/[task-id]
+	 * ```
+	 *
+	 * Only same-origin `$batch-validate` handles are followed; anything else is refused with a `RequestError` before the request is sent.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const cancelled = await client.batchValidateCancel(handle);
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async batchValidateCancel(
+		handle: BatchValidateTaskHandle,
+	): Promise<
+		Result<BatchValidateCancelResult, ResourceResponse<TOperationOutcome>>
+	> {
+		const confined = this.#confineBatchValidateHandle(handle, "DELETE");
+
+		const result = await this.request<unknown>({
+			url: confined.url,
+			method: "DELETE",
+		});
+		if (result.isErr()) return result;
+
+		const { resource, ...meta } = result.value;
+		return Ok({ outcome: resource, ...meta });
+	}
+
+	/**
+	 * Read one page of the invalid-resources report of a `$batch-validate` task.
+	 *
+	 * The interaction is performed by an HTTP GET command as shown:
+	 *
+	 * ```
+	 * GET [base]/fhir/$batch-validate/[task-id]/invalid-resources{?_count=&_page=&_issue=}
+	 * ```
+	 *
+	 * A task handle builds the query from `count`, `page` and the repeatable `issues` filter.
+	 * A `self`, `next` or `invalid-resources` URL taken from a summary or report is followed with its query string unchanged.
+	 * Only same-origin `$batch-validate` links are followed; anything else is refused with a `RequestError` before the request is sent.
+	 *
+	 * Example usage:
+	 *
+	 * ```typescript
+	 * const page = await client.batchValidateInvalidResources({ handle, count: 100, page: 1 });
+	 * ```
+	 *
+	 * @group Aidbox methods
+	 */
+	public async batchValidateInvalidResources(
+		opts: BatchValidateInvalidResourcesOptions,
+	): Promise<
+		Result<
+			ResourceResponse<BatchValidateInvalidResourcesReport>,
+			ResourceResponse<TOperationOutcome>
+		>
+	> {
+		const requestParams: RequestParams = { url: "", method: "GET" };
+
+		if ("url" in opts) {
+			const confined = confineBatchValidateUrl(
+				opts.url,
+				this.getBaseUrl(),
+				invalidResourcesSegment,
+			);
+			if (confined === undefined)
+				throw new RequestError(
+					"batch validation report link is not a $batch-validate URL of this server",
+					{ request: { url: opts.url, method: "GET" } },
+				);
+			requestParams.url = `${confined.url}${confined.search}`;
+		} else {
+			const confined = this.#confineBatchValidateHandle(opts.handle, "GET");
+			const params: Parameters = [];
+			if (opts.count !== undefined) params.push(["_count", String(opts.count)]);
+			if (opts.page !== undefined) params.push(["_page", String(opts.page)]);
+			for (const issue of opts.issues ?? []) params.push(["_issue", issue]);
+
+			requestParams.url = `${confined.url}/${invalidResourcesSegment}`;
+			requestParams.params = params;
+		}
+
+		const result = await this.request<unknown>(requestParams);
+		if (result.isErr()) return result;
+
+		const { resource, ...meta } = result.value;
+		if (isOperationOutcomeBody(resource))
+			return Err({ resource: resource as TOperationOutcome, ...meta });
+
+		if (!isParametersResource(resource))
+			throw new ErrorResponse(
+				"$batch-validate returned an unexpected body: a Parameters resource was expected",
+				meta,
+			);
+
+		return Ok({
+			resource: toBatchValidateInvalidResourcesReport(resource),
+			...meta,
+		});
+	}
+
+	/**
+	 * Confine a task handle to this client's own server, or refuse it before any request is sent.
+	 *
+	 * A handle whose task id disagrees with its own status URL is refused as well, so that a tampered handle cannot address another task.
+	 */
+	#confineBatchValidateHandle(
+		handle: BatchValidateTaskHandle,
+		method: RequestParams["method"],
+	): ConfinedBatchValidateUrl {
+		const confined = confineBatchValidateUrl(
+			handle.statusUrl,
+			this.getBaseUrl(),
+		);
+		if (confined === undefined)
+			throw new RequestError(
+				"batch validation task handle is not a $batch-validate URL of this server",
+				{ request: { url: handle.statusUrl, method } },
+			);
+		if (confined.taskId !== handle.taskId)
+			throw new RequestError(
+				"batch validation task handle addresses a different task than its own task id",
+				{ request: { url: handle.statusUrl, method } },
+			);
+		return confined;
 	}
 
 	/**

@@ -262,6 +262,120 @@ if (result.isErr()) {
 
 Both methods can throw the `RequestError` class if the error happened before the request was actually made.
 
+## Aidbox-specific methods
+
+Beside the FHIR interactions, the client exposes a few Aidbox-specific endpoints, such as `sql`, `materialize`, `userinfo` and `logout`.
+
+### Batch validation (`$batch-validate`, Aidbox 2607+)
+
+Requires Aidbox 2607 or later.
+
+`$batch-validate` validates resources that are already stored, for one resource type and a required time window.
+Aidbox answers a synchronous run with a summary, and an asynchronous run with a task that can be polled, drilled down into, and cancelled.
+
+This API only exposes the operation and its reports.
+It does not decide when to validate, it does not poll or time out, and it does not repair, tag, or quarantine resources.
+Deciding what to do with a finding is left to the caller.
+Only same-origin `/fhir/$batch-validate/...` links are followed: a task handle or a report link that points anywhere else is refused with a `RequestError` before any authenticated request is sent.
+
+Start a run and read the summary:
+
+```typescript
+const started = await client.batchValidate({
+  type: "Patient",
+  since: "2024-01-01T00:00:00Z", // required, sent as the _since parameter
+  until: "2024-02-01T00:00:00Z", // optional
+  profiles: ["http://hl7.org/fhir/StructureDefinition/Patient"], // optional, sent as repeated profile parameters
+});
+
+if (started.isOk() && started.value.kind === "summary") {
+  const { summary } = started.value;
+  console.log(summary.validated, summary.valid, summary.invalid);
+  for (const issue of summary.issues) {
+    console.log(issue.code, issue.expression, issue.count, issue.diagnostics);
+  }
+  // summary.parameters keeps the raw Parameters resource
+}
+```
+
+Start the same run asynchronously, then read its state:
+
+```typescript
+const accepted = await client.batchValidate({
+  type: "Patient",
+  since: "2024-01-01T00:00:00Z",
+  respondAsync: true, // sends the Prefer: respond-async header
+});
+
+if (accepted.isOk() && accepted.value.kind === "task") {
+  const { handle } = accepted.value; // { taskId, statusUrl }
+
+  const status = await client.batchValidateStatus(handle);
+  if (status.isOk() && status.value.kind === "in-progress") {
+    // the task is still running; the server's informational OperationOutcome
+    // is available as status.value.outcome
+  }
+  if (status.isOk() && status.value.kind === "summary") {
+    console.log(status.value.summary.invalid);
+  }
+}
+```
+
+Read the invalid resources of a task, page by page:
+
+```typescript
+const report = await client.batchValidateInvalidResources({
+  handle,
+  count: 100,
+  page: 1,
+  issues: ["7809a723232eecba055729af1049e127"], // optional, repeated _issue filter
+});
+
+if (report.isOk()) {
+  for (const invalid of report.value.resource.resources) {
+    console.log(invalid.fullUrl); // versioned URL of the offending resource
+    console.log(invalid.resource); // the stored resource, as sent by the server
+    console.log(invalid.outcome); // the OperationOutcome of that resource
+  }
+}
+```
+
+Walk the pages with `count` and `page`, up to the reported `total`:
+
+```typescript
+const count = 100;
+for (let page = 1; ; page++) {
+  const page_ = await client.batchValidateInvalidResources({ handle, count, page });
+  if (!page_.isOk()) break;
+
+  const { resources, total } = page_.value.resource;
+  if (resources.length === 0) break;
+  // work with resources
+  if (total !== undefined && page * count >= total) break;
+}
+```
+
+`selfUrl` and `nextUrl` carry the links of the report itself.
+`nextUrl` is present only when the server supplies a `next` parameter; a link taken from a report can be followed as-is:
+
+```typescript
+const { nextUrl } = report.value.resource;
+if (nextUrl) await client.batchValidateInvalidResources({ url: nextUrl });
+```
+
+Cancel a task:
+
+```typescript
+const cancelled = await client.batchValidateCancel(handle);
+if (cancelled.isOk()) {
+  console.log(cancelled.value.outcome); // the server's OperationOutcome
+}
+```
+
+Every summary and invalid-resources report keeps the raw `Parameters` resource under `parameters`, so parameters and parts this client does not model stay available; task, in-progress, and cancel results carry the server's `OperationOutcome` under `outcome`.
+Options this client does not model can be sent as raw `Parameters.parameter` entries through the `parameters` field of the start request.
+The Aidbox build this was written against accepts exactly `_since`, `_until` and `profile`, and answers an unknown parameter name with HTTP 422.
+
 ## Authentication Providers
 
 Authentication is managed via the `AuthProvider` interface. The client ships with four built-in providers:
