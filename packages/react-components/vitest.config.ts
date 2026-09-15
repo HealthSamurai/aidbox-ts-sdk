@@ -3,11 +3,12 @@ import { fileURLToPath } from "node:url";
 
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
-import { defineConfig } from "vitest/config";
+import { mergeConfig } from "vitest/config";
+import viteConfig from "./vite.config";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig({
+export default mergeConfig(viteConfig, {
 	test: {
 		projects: [
 			{
