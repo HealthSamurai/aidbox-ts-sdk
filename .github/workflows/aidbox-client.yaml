@@ -4,16 +4,39 @@ on:
   push:
     branches: [master]
   pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
+
+    # actions/checkout@v6 refuses to check out fork pull-request code under
+    # pull_request_target, so every external contribution fails at the
+    # checkout step before running anything. Fork PRs therefore run only on
+    # the `labeled` event for the safe-to-test label: a maintainer reviews
+    # the diff, applies the label, and exactly that reviewed state runs with
+    # secrets. Pushes to master and same-repository pull requests run
+    # unconditionally, as before. New commits on a fork PR drop the label
+    # (see reset-approval below) and show this job as skipped, not failed.
+    if: >-
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request_target' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.action != 'labeled') ||
+      (github.event_name == 'pull_request_target' &&
+       github.event.pull_request.head.repo.full_name != github.repository &&
+       github.event.action == 'labeled' &&
+       github.event.label.name == 'safe-to-test')
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Reviewed opt-in for fork PRs: this step only runs after a
+          # maintainer applied the safe-to-test label to the exact head SHA
+          # being checked out (see the job-level `if`).
+          allow-unsafe-pr-checkout: true
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -44,3 +67,24 @@ jobs:
       - name: Run tests
         run: pnpm test
         working-directory: packages/aidbox-client
+
+  # A maintainer's safe-to-test approval covers one reviewed state. When new
+  # commits arrive on a fork pull request, remove the label so the next run
+  # needs a fresh review instead of silently executing unreviewed code with
+  # secrets.
+  reset-approval:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'synchronize' &&
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'safe-to-test')
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Require fresh approval after new commits
+        run: gh pr edit "$PR" --repo "$GH_REPO" --remove-label safe-to-test
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
