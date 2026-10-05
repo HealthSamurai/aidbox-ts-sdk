@@ -205,10 +205,9 @@ export class AidboxClient<
 			url: makeUrl([basePath, opts.type, opts.id]),
 			method: "GET",
 		};
-		if (opts.mimeType)
-			requestParams.headers = {
-				accept: opts.mimeType,
-			};
+		requestParams.headers = {
+			accept: opts.mimeType ?? "application/fhir+json",
+		};
 		return await this.request(requestParams);
 	}
 
@@ -242,10 +241,9 @@ export class AidboxClient<
 			url: makeUrl([basePath, opts.type, opts.id, "_history", opts.vid]),
 			method: "GET",
 		};
-		if (opts.mimeType)
-			requestParams.headers = {
-				accept: opts.mimeType,
-			};
+		requestParams.headers = {
+			accept: opts.mimeType ?? "application/fhir+json",
+		};
 		return await this.request(requestParams);
 	}
 
