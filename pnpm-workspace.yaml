@@ -6,3 +6,28 @@ onlyBuiltDependencies:
   - '@swc/core'
   - '@tailwindcss/oxide'
   - esbuild
+
+overrides:
+  '@babel/core@<=7.29.0': 7.29.7
+  '@vitest/mocker@>=4.0.0 <4.1.11': ^4.1.11
+  '@xhmikosr/decompress@<10.2.1': 10.2.1
+  '@xhmikosr/decompress@>=11.0.0 <11.1.4': ^11.1.4
+  brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
+  brace-expansion@>=3.0.0 <5.0.12: ^5.0.12
+  browserslist: '>=4.28.7'
+  defu: '>=6.1.5'
+  esbuild@>=0.27.3 <0.28.1: 0.28.1
+  fast-xml-builder: '>=1.1.7'
+  fast-xml-parser: ^5.10.1
+  file-type: '>=21.3.2'
+  linkify-it@<=5.0.0: 5.0.2
+  markdown-it@<14.3.1: ^14.3.1
+  nanoid: '>=3.3.18'
+  picomatch: '>=4.0.4'
+  piscina@<4.9.4: ^4.9.4
+  postcss@<=8.5.22: ^8.5.23
+  valibot@<=1.4.1: ^1.4.2
+  vite: ^8.1.5
+  vitest@>=4.0.0 <4.1.11: ^4.1.11
+  ws@>=8.0.0 <8.21.0: 8.21.1
+  yaml: '>=2.8.3'
