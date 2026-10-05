@@ -9,6 +9,7 @@ const baseSelectTriggerStyles = cn(
 	// Layout
 	"flex",
 	"w-full",
+	"min-w-0",
 	"items-center",
 	"justify-between",
 	"gap-2",
@@ -160,6 +161,8 @@ function SelectContent({
 					"data-[side=top]:slide-in-from-bottom-2",
 					position === "popper" &&
 						cn(
+							"max-w-(--radix-select-content-available-width)",
+							"min-w-[min(max(8rem,var(--radix-select-trigger-width)),var(--radix-select-content-available-width))]",
 							"data-[side=bottom]:translate-y-1",
 							"data-[side=left]:-translate-x-1",
 							"data-[side=right]:translate-x-1",
@@ -178,7 +181,7 @@ function SelectContent({
 							cn(
 								"h-[var(--radix-select-trigger-height)]",
 								"w-full",
-								"min-w-[var(--radix-select-trigger-width)]",
+								"min-w-0",
 								"scroll-my-1",
 							),
 					)}
@@ -215,6 +218,10 @@ function SelectItem({
 	children,
 	...props
 }: React.ComponentProps<typeof SelectPrimitive.Item>) {
+	const label =
+		typeof children === "string" || typeof children === "number"
+			? String(children)
+			: undefined;
 	return (
 		<SelectPrimitive.Item
 			data-slot="select-item"
@@ -259,6 +266,8 @@ function SelectItem({
 				"[&_svg:not([class*='size-'])]:size-4",
 				// Span styles
 				"*:[span]:last:flex",
+				"*:[span]:last:min-w-0",
+				"*:[span]:last:flex-1",
 				"*:[span]:last:items-center",
 				"*:[span]:last:gap-2",
 				className,
@@ -279,7 +288,15 @@ function SelectItem({
 					<CheckIcon className="size-4" />
 				</SelectPrimitive.ItemIndicator>
 			</span>
-			<SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+			<SelectPrimitive.ItemText>
+				{label === undefined ? (
+					children
+				) : (
+					<span className="truncate" title={props.title ?? label}>
+						{children}
+					</span>
+				)}
+			</SelectPrimitive.ItemText>
 		</SelectPrimitive.Item>
 	);
 }
