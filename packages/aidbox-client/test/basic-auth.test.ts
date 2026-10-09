@@ -3,8 +3,7 @@ import { AidboxClient } from "src/client.js";
 import type { Bundle, OperationOutcome } from "src/fhir-types/hl7-fhir-r4-core";
 import type { User } from "src/types";
 import { describe, expect, it } from "vitest";
-
-const baseUrl = "http://localhost:8080";
+import { baseUrl } from "./config";
 
 describe("BasicAuthProvider", () => {
 	describe("restricted access policy", () => {
