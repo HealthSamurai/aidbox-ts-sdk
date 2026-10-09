@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildJsonDocumentContext } from "./json-ast";
+import { buildJsonDocumentContext, requestFormat } from "./json-ast";
 
 // Helpers
 const at = (doc: string, marker = "|") => {
@@ -226,5 +226,126 @@ describe("buildJsonDocumentContext", () => {
 			const ctx = buildJsonDocumentContext(doc, pos);
 			expect(ctx.getScope(0).getStringArray("meta", "profile")).toEqual([]);
 		});
+	});
+});
+
+describe("buildJsonDocumentContext: object boundaries", () => {
+	it("getKeys ignores keys of sibling objects", () => {
+		const { doc, pos } = at(
+			'{\n  "name": [\n    {\n      |\n    },\n    {\n      "family": "Smith"\n    }\n  ]\n}',
+		);
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.getScope(0).getKeys()).toEqual([]);
+		expect(ctx.getScope(0).getString("family")).toBe(null);
+	});
+
+	it("getString does not read the next Bundle entry", () => {
+		const { doc, pos } = at(
+			'{\n  "resourceType": "Bundle",\n  "entry": [\n    {"resource": {\n      |\n    }},\n    {"resource": {"resourceType": "Observation"}}\n  ]\n}',
+		);
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.getScope(0).getString("resourceType")).toBe(null);
+		expect(ctx.getScope(2).getString("resourceType")).toBe("Bundle");
+	});
+
+	it("getStringArray reads meta.profile of the current object only", () => {
+		const { doc, pos } = at(
+			'{\n  "resourceType": "Patient",\n  |\n  "contained": [\n    {"resourceType": "Patient", "meta": {"profile": ["http://example.com/p"]}}\n  ]\n}',
+		);
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.getScope(0).getStringArray("meta", "profile")).toEqual([]);
+	});
+
+	it("getKeys skips the key being typed", () => {
+		const { doc, pos } = at('{\n  "resourceType": "Patient",\n  "gender|"\n}');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.getScope(0).getKeys()).toEqual(["resourceType"]);
+	});
+});
+
+describe("buildJsonDocumentContext: cursor position", () => {
+	it("property inside a one-line object", () => {
+		const { doc, pos } = at('{"name": [{ "period": { | } }]}');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("property");
+		expect(ctx.fullPath).toEqual(["name", "period"]);
+	});
+
+	it("array-item after an object item", () => {
+		const { doc, pos } = at(
+			'{\n  "parameter": [\n    {"name": "a"},\n    |\n  ]\n}',
+		);
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition).toEqual({
+			kind: "array-item",
+			parentKey: "parameter",
+			prefix: "",
+		});
+	});
+
+	it("property on a new line after a value without a comma", () => {
+		const { doc, pos } = at('{\n  "active": true\n  |\n}');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("property");
+	});
+
+	it("nothing right after a complete value", () => {
+		const { doc, pos } = at('{\n  "gender": "male" |\n}');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("none");
+	});
+
+	it("unterminated string ends at the line break", () => {
+		const { doc, pos } = at('{\n  "a": "x,\n  "|"\n}');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("property");
+	});
+
+	it("nothing inside HTTP headers", () => {
+		const { doc, pos } = at(
+			"POST /fhir/Patient\nContent-|Type: application/json\n\n{\n}",
+		);
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("none");
+	});
+});
+
+describe("buildJsonDocumentContext: top level", () => {
+	it("property in an empty HTTP body", () => {
+		const { doc, pos } = at('GET /\nContent-Type: application/json\n\n"|"');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("property");
+		expect(ctx.isTopLevel()).toBe(true);
+	});
+
+	it("nothing in front of an existing object", () => {
+		const { doc, pos } = at('|\n{\n  "a": 1\n}');
+		const ctx = buildJsonDocumentContext(doc, pos);
+		expect(ctx.cursorPosition.kind).toBe("none");
+	});
+});
+
+describe("requestFormat", () => {
+	it("FHIR under /fhir", () => {
+		expect(requestFormat("POST /fhir/Patient\n\n{}")).toBe("fhir");
+		expect(requestFormat("GET http://localhost:8765/fhir/Patient?x=1")).toBe(
+			"fhir",
+		);
+	});
+
+	it("FHIR behind an OrgBAC prefix", () => {
+		expect(requestFormat("POST /Organization/org-a/fhir/Patient")).toBe("fhir");
+	});
+
+	it("the Aidbox format elsewhere", () => {
+		expect(requestFormat("POST /Patient\n\n{}")).toBe("aidbox");
+		expect(requestFormat("GET /fhirish")).toBe("aidbox");
+		expect(requestFormat("POST /Organization/org-a/aidbox/Patient")).toBe(
+			"aidbox",
+		);
+	});
+
+	it("nothing for a plain document", () => {
+		expect(requestFormat('{"resourceType": "Patient"}')).toBe(null);
 	});
 });
