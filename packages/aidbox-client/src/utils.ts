@@ -72,6 +72,7 @@ export const coerceBody = async <T>(meta: ResponseWithMeta): Promise<T> => {
 			case "application/fhir+json":
 				return await responseCopy.json();
 			case "text/yaml":
+			case "application/yaml":
 				return YAML.parse(await responseCopy.text());
 		}
 	} catch (e) {
