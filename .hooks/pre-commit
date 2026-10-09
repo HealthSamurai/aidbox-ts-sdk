@@ -2,3 +2,4 @@
 set -e
 pnpm -r run lint:check
 pnpm -r run tsc:check
+pnpm --filter @health-samurai/react-components run check-skill

@@ -37,6 +37,34 @@ Add the fonts to the `<head>` of the page:
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 ```
 
+## AI skills (Claude Code)
+
+This package ships **Claude Code skills** so your AI assistant knows the design
+system: every component with its states/variants, the design tokens, the
+styling rules, and recommended layout patterns.
+
+Sync them into your project's `.claude/skills/`:
+
+```bash
+pnpm hs-react-components sync-skills
+```
+
+To keep the skills matched to the installed package version, wire the command to
+your project's `postinstall` — then they re-sync on every `pnpm install`:
+
+```json
+{
+  "scripts": {
+    "postinstall": "hs-react-components sync-skills"
+  }
+}
+```
+
+This installs two skills: `hs:react-components` (component/token/rule lookup) and
+`hs:layouts` (recommended page & app layout patterns). The synced folders are a
+derived artifact of the package and are added to `.gitignore` automatically. Pass
+`--symlink` to link against `node_modules` instead of copying.
+
 ## 60+ components
 
 The library ships with a full set of UI primitives (based on [shadcn/ui](https://ui.shadcn.com/)) alongside custom components built specifically for healthcare developer tooling.

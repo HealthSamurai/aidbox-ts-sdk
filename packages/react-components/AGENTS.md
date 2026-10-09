@@ -24,6 +24,35 @@ src/
 - **Tokens**: Always use design tokens (`bg-bg-primary`, `text-text-secondary`, etc.) — never hardcoded colors
 - **Stories**: Every component has a `.stories.tsx` file next to it
 
+## Claude skill (`hs-react-components`)
+
+The consumer-facing skills ship **inside this package** (`skills/`) and are
+**generated from the source**, so component docs never drift from the code.
+Consumers get them via `hs-react-components sync-skills` (see the package
+README). Two skills live under `skills/`:
+`hs-react-components/` (generated) and `hs-layouts/` (hand-authored layout
+recommendations).
+
+- Source of truth for curated metadata (title, description, Figma link):
+  `scripts/skill/config.json`.
+- Everything technical (variants, states, defaults, exports, props type) is
+  extracted from the `.tsx` source + stories by `scripts/skill/generate.mjs`.
+- Hand-written references: `references/patterns.md` (rules/checklist).
+
+### When you add or change a component
+
+```bash
+pnpm generate-skill   # regenerate the skill docs
+```
+
+- **Adding a component**: first add an entry to `scripts/skill/config.json`
+  (`name`, `title`, `description`, `source`, `story`, optional `figma`), then run
+  the command. The generator **errors** if a component exists in `src/` but is
+  missing from the config — so the skill can never fall out of sync.
+- **Changing variants/props/exports**: just run `pnpm generate-skill`; the tables
+  update from the `cva` config and story `argTypes` automatically.
+- CI / pre-publish: `pnpm check-skill` fails if the committed skill is stale.
+
 ## Button Components
 
 ### Button (`src/shadcn/components/ui/button.tsx`)
