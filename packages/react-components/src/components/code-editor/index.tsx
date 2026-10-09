@@ -63,6 +63,7 @@ import {
 	lineNumbers,
 	placeholder,
 	rectangularSelection,
+	tooltips,
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
@@ -87,12 +88,17 @@ import {
 	TypCodeIcon,
 } from "../../icons";
 import {
+	completionTooltipSpace,
+	positionCompletionInfo,
+} from "./completion-position";
+import {
 	buildFhirCompletionExtension,
 	type ExpandValueSet,
 	fhirDiagnosticsField,
 	type GetStructureDefinitions,
+	type ResourceFormat,
 } from "./fhir-autocomplete";
-import { type GetUrlSuggestions, http } from "./http";
+import { bodyFormat, type GetUrlSuggestions, http } from "./http";
 import {
 	buildSqlCompletionExtensions,
 	fetchSqlMetadata,
@@ -1282,17 +1288,12 @@ function languageExtensions(
 		const jsonLang = json();
 		const yamlLang = yaml();
 		return [
-			http(
-				(ct) =>
-					ct === "application/json"
-						? jsonLang.language
-						: ct === "text/yaml" ||
-								ct === "application/yaml" ||
-								ct === "application/x-yaml"
-							? yamlLang.language
-							: null,
-				getUrlSuggestions,
-			),
+			http((contentType) => {
+				const format = bodyFormat(contentType);
+				if (format === "json") return jsonLang.language;
+				if (format === "yaml") return yamlLang.language;
+				return null;
+			}, getUrlSuggestions),
 			syntaxHighlighting(customHighlightStyle),
 			jsonAutoExpandBraces(),
 			httpYamlEnterKeymap(),
@@ -1400,6 +1401,8 @@ type CodeEditorProps = {
 	sql?: SqlConfig;
 	getStructureDefinitions?: GetStructureDefinitions;
 	resourceTypeHint?: string;
+	// Format of the edited resources; an HTTP request tells it by its path
+	resourceFormat?: ResourceFormat;
 	expandValueSet?: ExpandValueSet;
 	getUrlSuggestions?: GetUrlSuggestions;
 	vimMode?: boolean;
@@ -1408,8 +1411,11 @@ type CodeEditorProps = {
 export type CodeEditorView = EditorView;
 
 export type {
+	ExpandedCode,
 	ExpandValueSet,
 	GetStructureDefinitions,
+	ResourceFormat,
+	ValueSetExpansion,
 } from "./fhir-autocomplete";
 export type { GetUrlSuggestions } from "./http";
 export type {
@@ -1436,6 +1442,7 @@ export function CodeEditor({
 	sql,
 	getStructureDefinitions,
 	resourceTypeHint,
+	resourceFormat,
 	expandValueSet,
 	getUrlSuggestions,
 	vimMode = false,
@@ -1517,6 +1524,7 @@ export function CodeEditor({
 						icons: false,
 						maxRenderedOptions: 1000,
 						defaultKeymap: false,
+						positionInfo: positionCompletionInfo,
 						addToOptions: [{ render: renderCompletionIcon, position: 20 }],
 						optionClass: (_completion) =>
 							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary flex items-center gap-2",
@@ -1528,6 +1536,7 @@ export function CodeEditor({
 							return aIsProperty - bIsProperty;
 						},
 					}),
+					tooltips({ tooltipSpace: completionTooltipSpace }),
 					rectangularSelection(),
 					crosshairCursor(),
 					highlightSelectionMatches(),
@@ -1643,6 +1652,7 @@ export function CodeEditor({
 						getStructureDefinitions,
 						resourceTypeHint,
 						expandValueSet,
+						resourceFormat,
 					),
 				),
 			});
@@ -1655,6 +1665,7 @@ export function CodeEditor({
 		view,
 		getStructureDefinitions,
 		resourceTypeHint,
+		resourceFormat,
 		expandValueSet,
 		safeDispatch,
 	]);

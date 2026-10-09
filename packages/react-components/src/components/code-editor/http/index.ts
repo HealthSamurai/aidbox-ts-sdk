@@ -20,6 +20,26 @@ import type { LRParser } from "@lezer/lr";
 import { parser } from "./grammar/http";
 import { HttpRequestMethod } from "./grammar/http.terms";
 
+const YAML_MEDIA_TYPES = new Set([
+	"text/yaml",
+	"application/yaml",
+	"application/x-yaml",
+]);
+
+// Format of a request body by its Content-Type: JSON for application/json and
+// any +json type (application/fhir+json, application/json-patch+json), with
+// parameters such as charset or fhirVersion ignored.
+function bodyFormat(contentType: string): "json" | "yaml" | null {
+	const mediaType = (contentType.split(";")[0] ?? "").trim().toLowerCase();
+	if (mediaType === "application/json" || mediaType.endsWith("+json")) {
+		return "json";
+	}
+	if (YAML_MEDIA_TYPES.has(mediaType) || mediaType.endsWith("+yaml")) {
+		return "yaml";
+	}
+	return null;
+}
+
 function makeParser(
 	bodyLanguages: (contentType: string) => Language | null,
 ): LRParser {
@@ -421,4 +441,4 @@ function http(
 	return new LanguageSupport(language, extensions);
 }
 
-export { http };
+export { bodyFormat, http };
