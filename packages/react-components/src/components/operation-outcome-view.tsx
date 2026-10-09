@@ -1,4 +1,4 @@
-import { Check, Copy, Info, TriangleAlert } from "lucide-react";
+import { Check, ChevronRight, Copy, Info, TriangleAlert } from "lucide-react";
 import React from "react";
 import {
 	Tooltip,
@@ -6,6 +6,7 @@ import {
 	TooltipTrigger,
 } from "../shadcn/components/ui/tooltip";
 import { cn } from "../shadcn/lib/utils";
+import { CodeEditor } from "./code-editor";
 
 type OperationOutcomeSeverity = "fatal" | "error" | "warning" | "information";
 
@@ -121,6 +122,24 @@ function getIssueCodeLabel(code: string): string {
 	return issueCodeLabels[code] ?? code;
 }
 
+// Keys come from the issue itself rather than its position, so an issue
+// unfolded to its JSON stays open while the same problem persists across
+// fresh outcomes. Identical issues get an occurrence suffix.
+function keyIssues(issues: OperationOutcomeIssue[]) {
+	const seen = new Map<string, number>();
+	return issues.map((issue) => {
+		const id = JSON.stringify([
+			issue.severity,
+			issue.code,
+			issue.expression,
+			issue.diagnostics,
+		]);
+		const occurrence = (seen.get(id) ?? 0) + 1;
+		seen.set(id, occurrence);
+		return { issue, key: occurrence === 1 ? id : `${id}#${occurrence}` };
+	});
+}
+
 function groupIssuesBySeverity(issues: OperationOutcomeIssue[]) {
 	const groups = new Map<OperationOutcomeSeverity, OperationOutcomeIssue[]>();
 	for (const issue of issues) {
@@ -171,6 +190,14 @@ export function OperationOutcomeView({
 	...props
 }: OperationOutcomeViewProps) {
 	const groups = groupIssuesBySeverity(resource.issue);
+	const [expanded, setExpanded] = React.useState<Set<string>>(() => new Set());
+	const toggleExpanded = (key: string) =>
+		setExpanded((prev) => {
+			const next = new Set(prev);
+			if (next.has(key)) next.delete(key);
+			else next.add(key);
+			return next;
+		});
 
 	return (
 		<div
@@ -200,56 +227,62 @@ export function OperationOutcomeView({
 							<CopyButton resource={resource} />
 						</div>
 						<div className="flex flex-col py-1 bg-bg-primary">
-							{issues.map((issue) => {
+							{keyIssues(issues).map(({ issue, key }) => {
 								const expressionText = issue.expression?.join(", ");
 								const codeLabel = getIssueCodeLabel(getIssueCode(issue));
-								const key = `${issue.severity}-${getIssueCode(issue)}-${expressionText ?? ""}`;
-
-								const row = (
-									<button
-										type="button"
-										key={key}
-										className={cn(
-											"flex cursor-pointer hover:bg-bg-secondary w-full text-left",
-										)}
-										onClick={
-											onIssueClick ? () => onIssueClick(issue) : undefined
-										}
-									>
-										<span
-											className={cn(
-												"px-4 py-1 typo-body font-medium whitespace-nowrap",
-												config.text,
-											)}
-										>
-											{codeLabel}
-										</span>
-										{expressionText && (
-											<span className="pr-4 py-1 typo-body text-text-primary whitespace-nowrap">
-												{expressionText}
-											</span>
-										)}
-										{issue.diagnostics && (
-											<span className="flex-1 min-w-0 pr-4 py-1 typo-body text-text-secondary truncate">
-												{issue.diagnostics}
-											</span>
-										)}
-									</button>
-								);
-
-								if (!issue.diagnostics) return row;
+								const isExpanded = expanded.has(key);
 
 								return (
-									<Tooltip key={key}>
-										<TooltipTrigger asChild>{row}</TooltipTrigger>
-										<TooltipContent
-											side="bottom"
-											align="start"
-											className="max-w-lg whitespace-pre-wrap"
+									<div key={key} className="flex flex-col">
+										{/* One click both jumps to the issue and unfolds its JSON. */}
+										<button
+											type="button"
+											aria-expanded={isExpanded}
+											className="group flex items-start w-full cursor-pointer text-left hover:bg-bg-secondary"
+											onClick={() => {
+												toggleExpanded(key);
+												onIssueClick?.(issue);
+											}}
 										>
-											{issue.diagnostics}
-										</TooltipContent>
-									</Tooltip>
+											<span className="shrink-0 pl-4 pr-2 py-1.5 text-text-tertiary group-hover:text-text-primary">
+												<ChevronRight
+													className={cn(
+														"size-4 transition-transform",
+														isExpanded && "rotate-90",
+													)}
+												/>
+											</span>
+											<span
+												className={cn(
+													"pr-4 py-1 typo-body font-medium whitespace-nowrap",
+													config.text,
+												)}
+											>
+												{codeLabel}
+											</span>
+											{expressionText && (
+												<span className="pr-4 py-1 typo-body text-text-primary whitespace-nowrap">
+													{expressionText}
+												</span>
+											)}
+											{issue.diagnostics && (
+												// The full text is in the unfolded JSON below.
+												<span className="flex-1 min-w-0 pr-4 py-1 typo-body text-text-secondary truncate">
+													{issue.diagnostics}
+												</span>
+											)}
+										</button>
+										{isExpanded && (
+											// No fixed height: the editor grows to fit the issue.
+											<div className="border-y border-border-secondary">
+												<CodeEditor
+													readOnly
+													mode="json"
+													currentValue={JSON.stringify(issue, null, 2)}
+												/>
+											</div>
+										)}
+									</div>
 								);
 							})}
 						</div>
