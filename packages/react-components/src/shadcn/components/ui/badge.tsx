@@ -19,14 +19,9 @@ const baseBadgeStyles = cn(
 	"rounded-md",
 	// Borders
 	"border",
-	// Spacing
-	"px-2",
-	"py-0.5",
 	// Typography
-	"text-xs",
 	"font-medium",
 	// SVG
-	"[&>svg]:size-3",
 	"[&>svg]:pointer-events-none",
 	// Transitions
 	"transition-[color,box-shadow]",
@@ -68,15 +63,25 @@ const badgeVariants = cva(baseBadgeStyles, {
 				"[a&]:hover:text-text-primary",
 			),
 		},
+		// `regular` reproduces the previous hard-coded spacing and type, so
+		// existing usages render identically. `large` is for badges that sit
+		// beside a heading or carry a page-level status, where text-xs is too
+		// quiet to read as a peer of the title next to it.
+		size: {
+			regular: cn("px-2", "py-0.5", "text-xs", "[&>svg]:size-3"),
+			large: cn("px-2.5", "py-1", "text-sm", "[&>svg]:size-3.5"),
+		},
 	},
 	defaultVariants: {
 		variant: "default",
+		size: "regular",
 	},
 });
 
 function Badge({
 	className,
 	variant,
+	size,
 	asChild = false,
 	...props
 }: React.ComponentProps<"span"> &
@@ -86,7 +91,7 @@ function Badge({
 	return (
 		<Comp
 			data-slot="badge"
-			className={cn(badgeVariants({ variant }), className)}
+			className={cn(badgeVariants({ variant, size }), className)}
 			{...props}
 		/>
 	);
