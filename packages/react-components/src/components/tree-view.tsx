@@ -187,7 +187,7 @@ function TreeView<T>({
 			hotkeysCoreFeature,
 			selectionFeature,
 			renamingFeature,
-			dragAndDropFeature,
+			...(canReorder ? [dragAndDropFeature] : []),
 			customClickBehavior,
 		],
 		canReorder: canReorder ?? false,
@@ -235,10 +235,12 @@ function TreeView<T>({
 					</TreeItem>
 				);
 			})}
-			<div
-				style={tree.getDragLineStyle()}
-				className="h-px bg-bg-link z-100 mx-4"
-			/>
+			{canReorder && (
+				<div
+					style={tree.getDragLineStyle()}
+					className="h-px bg-bg-link z-100 mx-4"
+				/>
+			)}
 		</Tree>
 	);
 }

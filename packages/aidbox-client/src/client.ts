@@ -31,7 +31,7 @@ import type {
 	VReadOptions,
 } from "./types";
 import { ErrorResponse, RequestError } from "./types";
-import { coerceBody } from "./utils";
+import { coerceBody, joinUrl } from "./utils";
 
 type InternalAidboxErrorResponse = {
 	error?: unknown;
@@ -91,7 +91,7 @@ export class AidboxClient<
 	public authProvider: AuthProvider;
 
 	constructor(baseUrl: string, authProvider: AuthProvider) {
-		this.baseUrl = baseUrl;
+		this.baseUrl = baseUrl.replace(/\/+$/, "");
 		this.authProvider = authProvider;
 	}
 
@@ -111,9 +111,16 @@ export class AidboxClient<
 				request: requestParams,
 			};
 
-		const { method, url, headers = {}, params = [], body } = requestParams;
+		const {
+			method,
+			url,
+			headers = {},
+			params = [],
+			body,
+			redirect = "follow",
+		} = requestParams;
 
-		const urlObj = new URL(url, baseUrl);
+		const urlObj = joinUrl(baseUrl, url);
 
 		params.forEach(([key, value]) => {
 			urlObj.searchParams.append(key, value);
@@ -144,6 +151,7 @@ export class AidboxClient<
 					headers: requestHeaders,
 					body: body || null,
 					cache: "no-store",
+					redirect,
 				},
 			);
 			const responseHeaders: Record<string, string> = {};

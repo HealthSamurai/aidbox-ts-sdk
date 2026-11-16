@@ -20,12 +20,19 @@ export interface DocumentContext {
 		| { kind: "none" };
 	getScope(levelsUp: number): ScopeView;
 	isInsideArray(): boolean;
+	// The cursor is outside any object or array (an empty document or body)
+	isTopLevel(): boolean;
 }
 
 export interface PropertyInfo {
 	name: string;
+	// Keys leading from the root object to the property's object
 	path: string[];
+	// resourceType of the root object, or the hint
 	resourceType: string;
+	// resourceType of each object on the path, the root first (null if none);
+	// nested resources are told apart by element types, not by this key alone
+	scopes: (string | null)[];
 	from: number;
 	to: number;
 }
@@ -39,6 +46,21 @@ export interface EmptyStringInfo {
 
 const HTTP_METHOD_RE = /^(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\s/;
 
+// Format of a request's resources: FHIR JSON under /fhir (also behind an
+// OrgBAC prefix, /Organization/<id>/fhir), the Aidbox format in the rest of
+// the Aidbox API. null when the document is not a request.
+const FHIR_API_PATH = /^\/?(Organization\/[^/?]+\/)?fhir(\/|\?|$)/;
+
+export function requestFormat(doc: string): "fhir" | "aidbox" | null {
+	const firstLine = doc.slice(0, doc.indexOf("\n") >>> 0).trim();
+	const match = /^(?:GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\s+(\S+)/.exec(
+		firstLine,
+	);
+	if (!match?.[1]) return null;
+	const path = match[1].replace(/^[a-z]+:\/\/[^/]*/i, "");
+	return FHIR_API_PATH.test(path) ? "fhir" : "aidbox";
+}
+
 function detectJsonStart(doc: string): number {
 	const firstLine = doc.slice(0, doc.indexOf("\n") >>> 0).trimStart();
 	if (HTTP_METHOD_RE.test(firstLine)) {
@@ -49,357 +71,295 @@ function detectJsonStart(doc: string): number {
 	return 0;
 }
 
-// ── JSON path at cursor ────────────────────────────────────────────────
+// ── Tokens ─────────────────────────────────────────────────────────────
 
-function getJsonPathAtCursor(doc: string, pos: number): string[] {
-	const path: string[] = [];
-	const arrayKeyStack: string[] = [];
-	let inString = false;
-	let isEscaped = false;
-	let currentKey = "";
-	let collectingKey = false;
-	let lastKey = "";
+const DELIMITER = /[\s"{}[\]:,]/;
+const WHITESPACE = /\s/;
 
-	for (let i = 0; i < pos; i++) {
-		const ch = doc[i];
+function lineEnd(text: string, from: number): number {
+	const end = text.indexOf("\n", from);
+	return end === -1 ? text.length : end;
+}
 
-		if (isEscaped) {
-			if (collectingKey) currentKey += ch;
-			isEscaped = false;
-			continue;
-		}
-		if (ch === "\\") {
-			isEscaped = true;
-			if (collectingKey) currentKey += ch;
-			continue;
-		}
-		if (ch === '"') {
-			if (!inString) {
-				inString = true;
-				collectingKey = true;
-				currentKey = "";
-			} else {
-				inString = false;
-				if (collectingKey) {
-					lastKey = currentKey;
-					collectingKey = false;
-				}
+// JSON strings cannot span lines, so an unterminated string stops at the line
+// break instead of swallowing the rest of the document.
+function stringEnd(text: string, start: number): number {
+	for (let i = start + 1; i < text.length; i++) {
+		const ch = text[i];
+		if (ch === "\\") i++;
+		else if (ch === '"') return i;
+		else if (ch === "\n") return -1;
+	}
+	return -1;
+}
+
+// Offset right after the string, container or literal starting at `start`.
+function skipValue(text: string, start: number): number {
+	const ch = text[start];
+	if (ch === '"') {
+		const end = stringEnd(text, start);
+		return end === -1 ? lineEnd(text, start) : end + 1;
+	}
+	if (ch === "{" || ch === "[") {
+		let depth = 0;
+		for (let i = start; i < text.length; i++) {
+			const c = text[i];
+			if (c === '"') {
+				i = skipValue(text, i) - 1;
+			} else if (c === "{" || c === "[") {
+				depth++;
+			} else if (c === "}" || c === "]") {
+				depth--;
+				if (depth === 0) return i + 1;
 			}
-			continue;
 		}
-		if (inString) {
-			if (collectingKey) currentKey += ch;
-			continue;
-		}
-		if (ch === "[") {
-			arrayKeyStack.push(lastKey);
-			lastKey = "";
-		} else if (ch === "]") {
-			arrayKeyStack.pop();
-			lastKey = "";
-		} else if (ch === "{") {
-			const key =
-				lastKey ||
-				(arrayKeyStack.length > 0
-					? (arrayKeyStack[arrayKeyStack.length - 1] ?? "")
-					: "");
-			if (key) path.push(key);
-			lastKey = "";
-		} else if (ch === "}") {
-			path.pop();
-			lastKey = "";
-		} else if (ch === ",") {
-			lastKey = "";
-		}
+		return text.length;
 	}
-	return path;
+	let end = start;
+	while (end < text.length && !DELIMITER.test(text[end] ?? "")) end++;
+	return end;
 }
 
-// ── Cursor position detection ──────────────────────────────────────────
-
-function isJsonValuePosition(beforeCursor: string): string | null {
-	// Don't match if a comma follows the value (value is complete)
-	if (/,\s*$/.test(beforeCursor)) return null;
-	const match = beforeCursor.match(/"?(\w+)"?\s*:\s*"?([^"]*)?$/);
-	if (match) return match[1] ?? null;
-	return null;
+function tokenText(text: string, start: number, end: number): string {
+	if (text[start] !== '"') return text.slice(start, end);
+	const close = stringEnd(text, start);
+	return text.slice(start + 1, close === -1 ? end : close);
 }
 
-function isJsonPropertyPosition(beforeCursor: string): boolean {
-	if (beforeCursor === "" || beforeCursor === '"') return true;
-	if (/^"?[\w]*$/.test(beforeCursor)) return true;
-	if (/[{,]\s*"?[\w]*$/.test(beforeCursor)) return true;
-	return false;
+// ── Cursor scan ────────────────────────────────────────────────────────
+
+type Expect = "key" | "colon" | "value" | "comma";
+
+interface Frame {
+	kind: "object" | "array";
+	start: number;
+	// Property the container is the value of; array items share the array's key
+	key: string;
+	expect: Expect;
+	// Property whose value is being read (objects only)
+	member: string;
+	// Offset right after the last complete value
+	valueEnd: number;
 }
 
-function isInsideJsonArray(doc: string, pos: number): boolean {
-	let depth = 0;
-	let inStr = false;
-	let escaped = false;
-	for (let i = pos - 1; i >= 0; i--) {
-		const ch = doc[i];
-		if (escaped) {
-			escaped = false;
-			continue;
-		}
-		if (ch === "\\") {
-			escaped = true;
-			continue;
-		}
-		if (ch === '"') {
-			inStr = !inStr;
-			continue;
-		}
-		if (inStr) continue;
-		if (ch === "}" || ch === "]") {
-			depth++;
-		} else if (ch === "{") {
-			if (depth === 0) return false;
-			depth--;
-		} else if (ch === "[") {
-			if (depth === 0) return true;
-			depth--;
-		}
-	}
-	return false;
+interface CursorScan {
+	// Containers enclosing the cursor, outermost first
+	frames: Frame[];
+	// Unfinished string or literal the cursor is in
+	token: { start: number; isString: boolean } | null;
 }
 
-// ── Array-item detection ───────────────────────────────────────────────
-
-function detectArrayItemContext(
-	doc: string,
-	pos: number,
-): { parentKey: string; prefix: string } | null {
-	const textBefore = doc.slice(0, pos);
-	const arrayMatch = textBefore.match(
-		/"(\w+)"\s*:\s*\[\s*(?:"[^"]*"\s*,\s*)*"?([^"]*)$/s,
-	);
-	if (!arrayMatch) return null;
-	// If there are unmatched { after [, cursor is inside a nested object, not directly in array
-	const afterBracket = arrayMatch[2] ?? "";
-	let braceDepth = 0;
-	for (const ch of afterBracket) {
-		if (ch === "{") braceDepth++;
-		else if (ch === "}") braceDepth--;
-	}
-	if (braceDepth > 0) return null;
-	return { parentKey: arrayMatch[1]!, prefix: afterBracket };
+function completeValue(frame: Frame | undefined, end: number): void {
+	if (!frame) return;
+	frame.expect = "comma";
+	frame.valueEnd = end;
 }
 
-// ── Scope view (find values in ancestor objects) ───────────────────────
-
-function findStringValueInObject(
-	doc: string,
-	objStart: number,
-	limit: number,
-	targetKey: string,
-): string | null {
-	let fd = 0;
-	let fs = false;
-	let fe = false;
-	let lastKey = "";
-	let collecting = false;
-	let current = "";
-	let afterColon = false;
-
-	for (let i = objStart + 1; i < limit; i++) {
-		const ch = doc[i];
-		if (fe) {
-			if (collecting) current += ch;
-			fe = false;
-			continue;
-		}
-		if (ch === "\\") {
-			fe = true;
-			if (collecting) current += ch;
-			continue;
-		}
-		if (ch === '"') {
-			if (!fs) {
-				fs = true;
-				if (fd === 0) {
-					collecting = true;
-					current = "";
-				}
-			} else {
-				fs = false;
-				if (collecting) {
-					if (afterColon) {
-						if (lastKey === targetKey) return current;
-						afterColon = false;
-					} else {
-						lastKey = current;
-					}
-					collecting = false;
-				}
-			}
-			continue;
-		}
-		if (fs) {
-			if (collecting) current += ch;
-			continue;
-		}
-		if (ch === "{" || ch === "[") fd++;
-		else if (ch === "}" || ch === "]") fd--;
-		else if (ch === ":" && fd === 0) afterColon = true;
-		else if (ch === "," && fd === 0) {
-			afterColon = false;
-			lastKey = "";
-		}
-	}
-	return null;
-}
-
-function findStringArrayInObject(
-	doc: string,
-	objStart: number,
-	limit: number,
-	parentKey: string,
-	arrayKey: string,
-): string[] {
-	// Find "parentKey": { ... "arrayKey": ["v1", "v2"] ... }
-	// or if parentKey is empty, find "arrayKey": [...] at top level
-	const searchDoc = doc.slice(objStart, limit);
-	let pattern: RegExp;
-	if (parentKey) {
-		pattern = new RegExp(
-			`"${parentKey}"\\s*:\\s*\\{[\\s\\S]*?"${arrayKey}"\\s*:\\s*\\[([\\s\\S]*?)\\]`,
-		);
+function completeToken(frame: Frame | undefined, text: string, end: number) {
+	if (frame?.kind === "object" && frame.expect === "key") {
+		frame.member = text;
+		frame.expect = "colon";
 	} else {
-		pattern = new RegExp(`"${arrayKey}"\\s*:\\s*\\[([\\s\\S]*?)\\]`);
+		completeValue(frame, end);
 	}
-	const match = searchDoc.match(pattern);
-	if (!match?.[1]) return [];
-	const urls: string[] = [];
-	const re = /"([^"]+)"/g;
-	let m: RegExpExecArray | null;
-	// biome-ignore lint/suspicious/noAssignInExpressions: standard regex exec loop
-	while ((m = re.exec(match[1])) !== null) {
-		if (m[1]) urls.push(m[1]);
-	}
-	return urls;
 }
 
-function findKeysInObject(
-	doc: string,
-	objStart: number,
-	limit: number,
-): string[] {
-	const keys: string[] = [];
-	let fd = 0;
-	let fs = false;
-	let fe = false;
-	let collecting = false;
-	let current = "";
-	let afterColon = false;
-
-	for (let i = objStart + 1; i < limit; i++) {
-		const ch = doc[i];
-		if (fe) {
-			if (collecting) current += ch;
-			fe = false;
-			continue;
-		}
-		if (ch === "\\") {
-			fe = true;
-			if (collecting) current += ch;
-			continue;
-		}
-		if (ch === '"') {
-			if (!fs) {
-				fs = true;
-				if (fd === 0) {
-					collecting = true;
-					current = "";
-				}
-			} else {
-				fs = false;
-				if (collecting) {
-					if (!afterColon) {
-						keys.push(current);
-					}
-					collecting = false;
-				}
+function scanToCursor(text: string, pos: number): CursorScan {
+	const frames: Frame[] = [];
+	const top = () => frames[frames.length - 1];
+	let i = 0;
+	while (i < pos) {
+		const ch = text[i] ?? "";
+		if (WHITESPACE.test(ch)) {
+			i++;
+		} else if (ch === "{" || ch === "[") {
+			const parent = top();
+			let key = "";
+			if (parent?.kind === "object" && parent.expect === "value") {
+				key = parent.member;
+			} else if (parent?.kind === "array" && ch === "{") {
+				key = parent.key;
 			}
-			continue;
-		}
-		if (fs) {
-			if (collecting) current += ch;
-			continue;
-		}
-		if (ch === "{" || ch === "[") fd++;
-		else if (ch === "}" || ch === "]") fd--;
-		else if (ch === ":" && fd === 0) afterColon = true;
-		else if (ch === "," && fd === 0) {
-			afterColon = false;
+			frames.push({
+				kind: ch === "{" ? "object" : "array",
+				start: i,
+				key,
+				expect: ch === "{" ? "key" : "value",
+				member: "",
+				valueEnd: -1,
+			});
+			i++;
+		} else if (ch === "}" || ch === "]") {
+			frames.pop();
+			completeValue(top(), i + 1);
+			i++;
+		} else if (ch === ":") {
+			const frame = top();
+			if (frame?.kind === "object" && frame.expect === "colon") {
+				frame.expect = "value";
+			}
+			i++;
+		} else if (ch === ",") {
+			const frame = top();
+			if (frame) {
+				frame.expect = frame.kind === "object" ? "key" : "value";
+				frame.member = "";
+			}
+			i++;
+		} else {
+			const isString = ch === '"';
+			const close = isString ? stringEnd(text, i) : -1;
+			const end = skipValue(text, i);
+			const containsCursor =
+				isString && close !== -1 ? close >= pos : end >= pos;
+			if (containsCursor) return { frames, token: { start: i, isString } };
+			completeToken(top(), tokenText(text, i, end), end);
+			i = end;
 		}
 	}
-	return keys;
+	return { frames, token: null };
 }
 
-function buildScopeView(doc: string, pos: number, levelsUp: number): ScopeView {
-	// Forward scan to find enclosing objects — avoids string-tracking bugs
-	// from backward scanning when cursor is inside an unclosed string.
-	const objectStack: number[] = [];
-	let inString = false;
-	let isEscaped = false;
+function cursorPositionOf(
+	text: string,
+	pos: number,
+	{ frames, token }: CursorScan,
+): DocumentContext["cursorPosition"] {
+	const tokenStart = token?.start ?? pos;
+	const prefix = token
+		? text.slice(token.isString ? token.start + 1 : token.start, pos)
+		: "";
+	const frame = frames[frames.length - 1];
+	if (!frame) {
+		// Empty document: the members of the resource object to create. Nothing
+		// is offered next to existing content (e.g. before an object).
+		const tokenEnd = token ? skipValue(text, token.start) : pos;
+		const empty =
+			text.slice(0, tokenStart).trim() === "" &&
+			text.slice(tokenEnd).trim() === "";
+		return empty ? { kind: "property", prefix } : { kind: "none" };
+	}
+	// A complete value followed by a line break: the comma is missing, but the
+	// user is starting the next entry.
+	const nextEntry =
+		frame.expect === "comma" &&
+		text.slice(frame.valueEnd, tokenStart).includes("\n");
+	if (frame.kind === "object") {
+		if (frame.expect === "key" || nextEntry)
+			return { kind: "property", prefix };
+		if (frame.expect === "value") {
+			return { kind: "value", key: frame.member, prefix };
+		}
+		return { kind: "none" };
+	}
+	if (frame.expect === "value" || nextEntry) {
+		return { kind: "array-item", parentKey: frame.key, prefix };
+	}
+	return { kind: "none" };
+}
 
-	for (let i = 0; i < pos; i++) {
-		const ch = doc[i];
-		if (isEscaped) {
-			isEscaped = false;
-			continue;
+// ── Scope view (values of an enclosing object) ─────────────────────────
+
+interface Member {
+	key: string;
+	// Key token range, quotes included
+	from: number;
+	to: number;
+	// Offset of the value, -1 when missing
+	valueAt: number;
+}
+
+// Members of the object opening at `start`, up to its closing brace.
+function readMembers(text: string, start: number): Member[] {
+	const members: Member[] = [];
+	let expect: Expect = "key";
+	let member: Member | null = null;
+	let i = start + 1;
+	while (i < text.length) {
+		const ch = text[i] ?? "";
+		if (ch === "}" || ch === "]") break;
+		if (WHITESPACE.test(ch)) {
+			i++;
+		} else if (ch === ":") {
+			if (expect === "colon") expect = "value";
+			i++;
+		} else if (ch === ",") {
+			expect = "key";
+			member = null;
+			i++;
+		} else {
+			const end = skipValue(text, i);
+			if (expect === "key") {
+				member = {
+					key: tokenText(text, i, end),
+					from: i,
+					to: end,
+					valueAt: -1,
+				};
+				members.push(member);
+				expect = "colon";
+			} else {
+				if (expect === "value" && member) member.valueAt = i;
+				expect = "comma";
+			}
+			i = Math.max(end, i + 1);
 		}
-		if (ch === "\\") {
-			isEscaped = true;
-			continue;
-		}
+	}
+	return members;
+}
+
+function readStrings(text: string, start: number): string[] {
+	const values: string[] = [];
+	let i = start + 1;
+	while (i < text.length) {
+		const ch = text[i] ?? "";
+		if (ch === "]" || ch === "}") break;
+		const end = skipValue(text, i);
 		if (ch === '"') {
-			inString = !inString;
-			continue;
+			const value = tokenText(text, i, end);
+			if (value) values.push(value);
 		}
-		if (inString) continue;
-		if (ch === "{") {
-			objectStack.push(i);
-		} else if (ch === "}") {
-			objectStack.pop();
-		}
+		i = Math.max(end, i + 1);
 	}
+	return values;
+}
 
-	// objectStack[last] is innermost, objectStack[last - levelsUp] is target
-	const targetIdx = objectStack.length - 1 - levelsUp;
-	if (targetIdx < 0) {
-		return {
-			getString() {
-				return null;
-			},
-			getStringArray() {
-				return [];
-			},
-			getKeys() {
-				return [];
-			},
-		};
-	}
+const EMPTY_SCOPE: ScopeView = {
+	getString: () => null,
+	getStringArray: () => [],
+	getKeys: () => [],
+};
 
-	const objStart = objectStack[targetIdx]!;
-	const scopeEnd = doc.length;
-
+function objectScope(text: string, start: number, cursor: number): ScopeView {
+	let cached: Member[] | undefined;
+	const members = () => {
+		cached ??= readMembers(text, start);
+		return cached;
+	};
+	const memberWith = (from: Member[], key: string, opening: string) =>
+		from.find((m) => m.key === key && text[m.valueAt] === opening);
 	return {
 		getString(key: string): string | null {
-			return findStringValueInObject(doc, objStart, scopeEnd, key);
+			const member = memberWith(members(), key, '"');
+			return member
+				? tokenText(text, member.valueAt, skipValue(text, member.valueAt))
+				: null;
 		},
 		getStringArray(parentKey: string, arrayKey: string): string[] {
-			return findStringArrayInObject(
-				doc,
-				objStart,
-				scopeEnd,
-				parentKey,
-				arrayKey,
-			);
+			let owner = members();
+			if (parentKey) {
+				const parent = memberWith(owner, parentKey, "{");
+				if (!parent) return [];
+				owner = readMembers(text, parent.valueAt);
+			}
+			const array = memberWith(owner, arrayKey, "[");
+			return array ? readStrings(text, array.valueAt) : [];
 		},
 		getKeys(): string[] {
-			return findKeysInObject(doc, objStart, scopeEnd);
+			// The key being typed at the cursor is not an existing property
+			return members()
+				.filter((m) => cursor < m.from || cursor > m.to)
+				.map((m) => m.key);
 		},
 	};
 }
@@ -411,50 +371,27 @@ export function buildJsonDocumentContext(
 	pos: number,
 ): DocumentContext {
 	const jsonStart = detectJsonStart(doc);
-	const jsonBody = doc.slice(jsonStart);
-	const posInBody = pos - jsonStart;
-
-	const fullPath = getJsonPathAtCursor(jsonBody, posInBody);
-
-	// Determine cursor position kind
-	const lineStart = doc.lastIndexOf("\n", pos - 1) + 1;
-	const beforeCursor = doc.slice(lineStart, pos).trimStart();
-
-	let cursorPosition: DocumentContext["cursorPosition"];
-
-	const valueKey = isJsonValuePosition(beforeCursor);
-	if (valueKey) {
-		cursorPosition = { kind: "value", key: valueKey, prefix: "" };
-		const wordMatch = beforeCursor.match(/"?(\w+)"?\s*:\s*"?([^"]*)?$/);
-		if (wordMatch?.[2] != null) {
-			cursorPosition.prefix = wordMatch[2];
-		}
-	} else {
-		const arrayItem = detectArrayItemContext(doc.slice(jsonStart), posInBody);
-		if (arrayItem) {
-			cursorPosition = {
-				kind: "array-item",
-				parentKey: arrayItem.parentKey,
-				prefix: arrayItem.prefix,
-			};
-		} else if (isJsonPropertyPosition(beforeCursor)) {
-			const wordMatch = beforeCursor.match(/"?(\w*)$/);
-			cursorPosition = { kind: "property", prefix: wordMatch?.[1] ?? "" };
-		} else {
-			cursorPosition = { kind: "none" };
-		}
-	}
+	const body = doc.slice(jsonStart);
+	const cursor = pos - jsonStart;
+	const scan: CursorScan =
+		cursor >= 0 ? scanToCursor(body, cursor) : { frames: [], token: null };
+	const objects = scan.frames.filter((f) => f.kind === "object");
 
 	return {
-		fullPath,
+		fullPath: objects.filter((f) => f.key !== "").map((f) => f.key),
 		pos,
 		doc,
-		cursorPosition,
+		cursorPosition:
+			cursor >= 0 ? cursorPositionOf(body, cursor, scan) : { kind: "none" },
 		getScope(levelsUp: number): ScopeView {
-			return buildScopeView(jsonBody, posInBody, levelsUp);
+			const frame = objects[objects.length - 1 - levelsUp];
+			return frame ? objectScope(body, frame.start, cursor) : EMPTY_SCOPE;
 		},
 		isInsideArray(): boolean {
-			return isInsideJsonArray(jsonBody, posInBody);
+			return scan.frames[scan.frames.length - 1]?.kind === "array";
+		},
+		isTopLevel(): boolean {
+			return cursor >= 0 && scan.frames.length === 0;
 		},
 	};
 }
@@ -470,11 +407,15 @@ export function walkJsonProperties(
 	const emptyStrings: EmptyStringInfo[] = [];
 
 	const rootObj = findRootJsonObject(doc, tree);
-	if (rootObj) {
+	const resourceType = rootObj
+		? (ownResourceType(rootObj, doc) ?? resourceTypeHint)
+		: null;
+	if (rootObj && resourceType) {
 		walkJsonObject(
 			rootObj,
 			[],
-			resourceTypeHint,
+			[],
+			resourceType,
 			doc,
 			properties,
 			emptyStrings,
@@ -512,35 +453,33 @@ export function findRootJsonObject(
 	return null;
 }
 
-function walkJsonObject(
-	node: SyntaxNode,
-	parentPath: string[],
-	parentResourceType: string | null,
-	doc: string,
-	result: PropertyInfo[],
-	emptyStrings?: EmptyStringInfo[],
-): void {
-	let ownResourceType: string | null = null;
+function ownResourceType(node: SyntaxNode, doc: string): string | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.name !== "Property") continue;
 		const nameNode = child.getChild("PropertyName");
 		if (!nameNode) continue;
 		const keyName = doc.slice(nameNode.from, nameNode.to).replace(/^"|"$/g, "");
-		if (keyName === "resourceType") {
-			for (let v = child.firstChild; v; v = v.nextSibling) {
-				if (v.name === "String") {
-					ownResourceType = doc.slice(v.from, v.to).replace(/^"|"$/g, "");
-					break;
-				}
+		if (keyName !== "resourceType") continue;
+		for (let v = child.firstChild; v; v = v.nextSibling) {
+			if (v.name === "String") {
+				return doc.slice(v.from, v.to).replace(/^"|"$/g, "");
 			}
-			break;
 		}
+		return null;
 	}
+	return null;
+}
 
-	const resourceType = ownResourceType ?? parentResourceType;
-	const path = ownResourceType ? [] : parentPath;
-
-	if (!resourceType) return;
+function walkJsonObject(
+	node: SyntaxNode,
+	path: string[],
+	parentScopes: (string | null)[],
+	resourceType: string,
+	doc: string,
+	result: PropertyInfo[],
+	emptyStrings?: EmptyStringInfo[],
+): void {
+	const scopes = [...parentScopes, ownResourceType(node, doc)];
 
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.name !== "Property") continue;
@@ -552,6 +491,7 @@ function walkJsonObject(
 			name,
 			path: [...path],
 			resourceType,
+			scopes,
 			from: nameNode.from,
 			to: nameNode.to,
 		});
@@ -561,6 +501,7 @@ function walkJsonObject(
 				walkJsonObject(
 					v,
 					[...path, name],
+					scopes,
 					resourceType,
 					doc,
 					result,
@@ -572,6 +513,7 @@ function walkJsonObject(
 						walkJsonObject(
 							item,
 							[...path, name],
+							scopes,
 							resourceType,
 							doc,
 							result,

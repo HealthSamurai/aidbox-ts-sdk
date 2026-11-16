@@ -3,6 +3,18 @@ import type { ResponseWithMeta } from "./types";
 import { ErrorResponse } from "./types";
 
 /**
+ * Join a base URL (which may include a path component) with a path.
+ *
+ * `new URL("/foo", "http://host/bar")` drops `/bar` because absolute paths
+ * replace the entire path of the base. This preserves the base path.
+ */
+export function joinUrl(baseUrl: string, path: string): URL {
+	const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+	const suffix = path.startsWith("/") ? path : `/${path}`;
+	return new URL(`${base}${suffix}`);
+}
+
+/**
  * Validate that fetch input URL starts with baseUrl.
  * Throws if the URL doesn't match baseUrl.
  */

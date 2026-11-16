@@ -52,6 +52,20 @@ pnpm -r run build   # initial build (required for cross-package types)
 
 6. **Open a pull request** against `development`.
 
+## Integration tests
+
+The `aidbox-client` suite talks to a real Aidbox started from
+`packages/aidbox-client/docker-compose.yaml`. That container serves no API until
+it is activated, so a `BOX_LICENSE` is required. Without one it still boots and
+reports itself healthy, but redirects every request to its activation screen.
+Ask a maintainer if you need a license for local work.
+
+On CI the `Test Aidbox Client` workflow runs only for branches in this
+repository. GitHub does not expose secrets to pull requests opened from a fork,
+so `BOX_LICENSE` is unavailable there and the job is skipped. Changes from a
+fork get their integration run once they land on `development`, and a maintainer
+can push the branch here to see the suite before merging.
+
 ## Code style
 
 All formatting and linting is handled by [Biome](https://biomejs.dev/).

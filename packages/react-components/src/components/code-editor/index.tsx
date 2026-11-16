@@ -8,7 +8,13 @@ import {
 	completionStatus,
 	moveCompletionSelection,
 } from "@codemirror/autocomplete";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+	defaultKeymap,
+	history,
+	historyKeymap,
+	indentLess,
+	indentMore,
+} from "@codemirror/commands";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { SQLDialect, sql } from "@codemirror/lang-sql";
 import { yaml } from "@codemirror/lang-yaml";
@@ -18,6 +24,7 @@ import {
 	foldKeymap,
 	HighlightStyle,
 	indentOnInput,
+	indentUnit,
 	syntaxHighlighting,
 	syntaxTree,
 } from "@codemirror/language";
@@ -43,6 +50,7 @@ import {
 	StateField,
 } from "@codemirror/state";
 import {
+	type Command,
 	crosshairCursor,
 	Decoration,
 	drawSelection,
@@ -53,7 +61,9 @@ import {
 	highlightSpecialChars,
 	keymap,
 	lineNumbers,
+	placeholder,
 	rectangularSelection,
+	tooltips,
 	type ViewUpdate,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
@@ -78,12 +88,17 @@ import {
 	TypCodeIcon,
 } from "../../icons";
 import {
+	completionTooltipSpace,
+	positionCompletionInfo,
+} from "./completion-position";
+import {
 	buildFhirCompletionExtension,
 	type ExpandValueSet,
 	fhirDiagnosticsField,
 	type GetStructureDefinitions,
+	type ResourceFormat,
 } from "./fhir-autocomplete";
-import { type GetUrlSuggestions, http } from "./http";
+import { bodyFormat, type GetUrlSuggestions, http } from "./http";
 import {
 	buildSqlCompletionExtensions,
 	fetchSqlMetadata,
@@ -339,6 +354,7 @@ const baseTheme = EditorView.theme({
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
 		padding: "0",
+		paddingRight: "400px",
 	},
 	"&.cm-focused": {
 		outline: "none",
@@ -350,8 +366,9 @@ const baseTheme = EditorView.theme({
 		fontFamily: "var(--font-family-mono)",
 	},
 	".cm-gutters": {
-		backgroundColor: "transparent",
+		backgroundColor: "var(--color-bg-primary)",
 		border: "none",
+		boxShadow: "4px 0 6px var(--color-bg-primary)",
 	},
 	".cm-lineNumbers": {
 		minWidth: "3.5ch",
@@ -440,6 +457,19 @@ const completionTheme = EditorView.theme({
 	},
 });
 
+const smartIndentLess: Command = (view) => {
+	const { state } = view;
+	const sel = state.selection.main;
+	if (!sel.empty) return indentLess(view);
+	const line = state.doc.lineAt(sel.head);
+	const firstNonWs = line.text.search(/\S/);
+	const cursorCol = sel.head - line.from;
+	if (firstNonWs === -1 || cursorCol <= firstNonWs) {
+		return indentLess(view);
+	}
+	return true;
+};
+
 const readOnlyTheme = EditorView.theme({
 	"&": {
 		backgroundColor: "var(--color-bg-secondary)",
@@ -459,6 +489,7 @@ const readOnlyTheme = EditorView.theme({
 	".cm-content": {
 		fontFamily: "var(--font-family-mono)",
 		padding: "0",
+		paddingRight: "400px",
 	},
 	"&.cm-focused": {
 		outline: "none",
@@ -1257,17 +1288,12 @@ function languageExtensions(
 		const jsonLang = json();
 		const yamlLang = yaml();
 		return [
-			http(
-				(ct) =>
-					ct === "application/json"
-						? jsonLang.language
-						: ct === "text/yaml" ||
-								ct === "application/yaml" ||
-								ct === "application/x-yaml"
-							? yamlLang.language
-							: null,
-				getUrlSuggestions,
-			),
+			http((contentType) => {
+				const format = bodyFormat(contentType);
+				if (format === "json") return jsonLang.language;
+				if (format === "yaml") return yamlLang.language;
+				return null;
+			}, getUrlSuggestions),
 			syntaxHighlighting(customHighlightStyle),
 			jsonAutoExpandBraces(),
 			httpYamlEnterKeymap(),
@@ -1362,6 +1388,7 @@ type CodeEditorProps = {
 	isReadOnlyTheme?: boolean;
 	defaultValue?: string;
 	currentValue?: string;
+	placeholder?: string;
 	onChange?: (value: string) => void;
 	onUpdate?: (update: ViewUpdate) => void;
 	id?: string;
@@ -1374,6 +1401,8 @@ type CodeEditorProps = {
 	sql?: SqlConfig;
 	getStructureDefinitions?: GetStructureDefinitions;
 	resourceTypeHint?: string;
+	// Format of the edited resources; an HTTP request tells it by its path
+	resourceFormat?: ResourceFormat;
 	expandValueSet?: ExpandValueSet;
 	getUrlSuggestions?: GetUrlSuggestions;
 	vimMode?: boolean;
@@ -1382,8 +1411,11 @@ type CodeEditorProps = {
 export type CodeEditorView = EditorView;
 
 export type {
+	ExpandedCode,
 	ExpandValueSet,
 	GetStructureDefinitions,
+	ResourceFormat,
+	ValueSetExpansion,
 } from "./fhir-autocomplete";
 export type { GetUrlSuggestions } from "./http";
 export type {
@@ -1395,6 +1427,7 @@ export type {
 export function CodeEditor({
 	defaultValue,
 	currentValue,
+	placeholder: placeholderText,
 	onChange,
 	onUpdate,
 	viewCallback,
@@ -1409,6 +1442,7 @@ export function CodeEditor({
 	sql,
 	getStructureDefinitions,
 	resourceTypeHint,
+	resourceFormat,
 	expandValueSet,
 	getUrlSuggestions,
 	vimMode = false,
@@ -1438,6 +1472,7 @@ export function CodeEditor({
 	const sqlCompletionCompartment = React.useRef(new Compartment());
 	const fhirCompletionCompartment = React.useRef(new Compartment());
 	const vimCompartment = React.useRef(new Compartment());
+	const placeholderCompartment = React.useRef(new Compartment());
 	const [sqlFunctions, setSqlFunctions] = React.useState<
 		string[] | undefined
 	>();
@@ -1481,6 +1516,7 @@ export function CodeEditor({
 					dropCursor(),
 					EditorState.allowMultipleSelections.of(true),
 					indentOnInput(),
+					indentUnit.of("  "),
 					languageCompartment.current.of([]),
 					bracketMatching(),
 					closeBrackets(),
@@ -1488,6 +1524,7 @@ export function CodeEditor({
 						icons: false,
 						maxRenderedOptions: 1000,
 						defaultKeymap: false,
+						positionInfo: positionCompletionInfo,
 						addToOptions: [{ render: renderCompletionIcon, position: 20 }],
 						optionClass: (_completion) =>
 							"!px-2 !py-1 rounded-md aria-selected:!bg-bg-quaternary aria-selected:!text-text-primary hover:!bg-bg-secondary flex items-center gap-2",
@@ -1499,6 +1536,7 @@ export function CodeEditor({
 							return aIsProperty - bIsProperty;
 						},
 					}),
+					tooltips({ tooltipSpace: completionTooltipSpace }),
 					rectangularSelection(),
 					crosshairCursor(),
 					highlightSelectionMatches(),
@@ -1510,7 +1548,8 @@ export function CodeEditor({
 									if (completionStatus(v.state) === "active") {
 										return moveCompletionSelection(true)(v);
 									}
-									return false;
+									if (v.state.readOnly) return false;
+									return indentMore(v);
 								},
 							},
 							{
@@ -1519,7 +1558,8 @@ export function CodeEditor({
 									if (completionStatus(v.state) === "active") {
 										return moveCompletionSelection(false)(v);
 									}
-									return false;
+									if (v.state.readOnly) return false;
+									return smartIndentLess(v);
 								},
 							},
 							{
@@ -1553,6 +1593,7 @@ export function CodeEditor({
 					additionalExtensionsCompartment.current.of([]),
 					sqlCompletionCompartment.current.of([]),
 					fhirCompletionCompartment.current.of([]),
+					placeholderCompartment.current.of([]),
 				],
 			}),
 		});
@@ -1611,6 +1652,7 @@ export function CodeEditor({
 						getStructureDefinitions,
 						resourceTypeHint,
 						expandValueSet,
+						resourceFormat,
 					),
 				),
 			});
@@ -1623,6 +1665,7 @@ export function CodeEditor({
 		view,
 		getStructureDefinitions,
 		resourceTypeHint,
+		resourceFormat,
 		expandValueSet,
 		safeDispatch,
 	]);
@@ -1748,6 +1791,19 @@ export function CodeEditor({
 			return;
 		}
 		safeDispatch({
+			effects: [
+				placeholderCompartment.current.reconfigure(
+					placeholderText ? placeholder(placeholderText) : [],
+				),
+			],
+		});
+	}, [placeholderText, view, safeDispatch]);
+
+	React.useEffect(() => {
+		if (view === null) {
+			return;
+		}
+		safeDispatch({
 			effects: setIssueLinesEffect.of(issueLineNumbers ?? []),
 		});
 	}, [issueLineNumbers, view, safeDispatch]);
@@ -1807,11 +1863,13 @@ const editorInputTheme = EditorView.theme({
 	},
 });
 
-const KeywordIcon = () => <Terminal size={16} color="#717684" />;
-const OperatorIcon = () => <ChevronsRight size={16} color="#717684" />;
-const TableIcon = () => <Table2 size={16} color="#717684" />;
-const HeaderIcon = () => <Heading size={16} color="#717684" />;
-const ColumnIcon = () => <Columns2 size={16} color="#717684" />;
+const KeywordIcon = () => <Terminal size={16} className="text-fg-tertiary" />;
+const OperatorIcon = () => (
+	<ChevronsRight size={16} className="text-fg-tertiary" />
+);
+const TableIcon = () => <Table2 size={16} className="text-fg-tertiary" />;
+const HeaderIcon = () => <Heading size={16} className="text-fg-tertiary" />;
+const ColumnIcon = () => <Columns2 size={16} className="text-fg-tertiary" />;
 
 function getCompletionIcon(completion: Completion): React.FC | null {
 	if (completion.type === "function") return SquareFunctionIcon;

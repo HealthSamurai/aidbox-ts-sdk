@@ -47,6 +47,7 @@ export function PinIcon() {
 export function ResourceIcon() {
 	return (
 		<svg
+			className="text-fg-tertiary"
 			width="16"
 			height="17"
 			viewBox="0 0 16 17"
@@ -57,35 +58,35 @@ export function ResourceIcon() {
 		>
 			<path
 				d="M13.9974 11.167H11.3307C10.9625 11.167 10.6641 11.4655 10.6641 11.8337V14.5003C10.6641 14.8685 10.9625 15.167 11.3307 15.167H13.9974C14.3656 15.167 14.6641 14.8685 14.6641 14.5003V11.8337C14.6641 11.4655 14.3656 11.167 13.9974 11.167Z"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M4.66927 11.167H2.0026C1.63441 11.167 1.33594 11.4655 1.33594 11.8337V14.5003C1.33594 14.8685 1.63441 15.167 2.0026 15.167H4.66927C5.03746 15.167 5.33594 14.8685 5.33594 14.5003V11.8337C5.33594 11.4655 5.03746 11.167 4.66927 11.167Z"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M9.33333 1.83301H6.66667C6.29848 1.83301 6 2.13148 6 2.49967V5.16634C6 5.53453 6.29848 5.83301 6.66667 5.83301H9.33333C9.70152 5.83301 10 5.53453 10 5.16634V2.49967C10 2.13148 9.70152 1.83301 9.33333 1.83301Z"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M3.33594 11.1667V9.16667C3.33594 8.98986 3.40618 8.82029 3.5312 8.69526C3.65622 8.57024 3.82579 8.5 4.0026 8.5H12.0026C12.1794 8.5 12.349 8.57024 12.474 8.69526C12.599 8.82029 12.6693 8.98986 12.6693 9.16667V11.1667"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M8 8.49967V5.83301"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -97,6 +98,7 @@ export function ResourceIcon() {
 export function BackboneElementIcon() {
 	return (
 		<svg
+			className="text-fg-tertiary"
 			width="16"
 			height="17"
 			viewBox="0 0 16 17"
@@ -107,7 +109,7 @@ export function BackboneElementIcon() {
 		>
 			<path
 				d="M4.0026 9.83333L4.96927 7.9C5.08058 7.6791 5.25114 7.49353 5.46189 7.36402C5.67263 7.23451 5.91525 7.16618 6.1626 7.16667H13.3359M13.3359 7.16667C13.5396 7.16631 13.7407 7.21262 13.9237 7.30206C14.1067 7.39149 14.2668 7.52166 14.3917 7.68258C14.5165 7.8435 14.6029 8.03089 14.6441 8.23037C14.6853 8.42985 14.6802 8.63611 14.6293 8.83333L13.5959 12.8333C13.5219 13.1199 13.3547 13.3738 13.1205 13.5548C12.8864 13.7359 12.5986 13.8339 12.3026 13.8333H2.66927C2.31565 13.8333 1.97651 13.6929 1.72646 13.4428C1.47641 13.1928 1.33594 12.8536 1.33594 12.5V3.83333C1.33594 3.1 1.93594 2.5 2.66927 2.5H5.28927C5.50888 2.50114 5.72481 2.5565 5.91787 2.66117C6.11094 2.76585 6.27515 2.91659 6.39594 3.1L6.9426 3.9C7.06339 4.08341 7.22761 4.23415 7.42067 4.33883C7.61373 4.4435 7.82966 4.49886 8.04927 4.5H12.0026C12.3562 4.5 12.6954 4.64048 12.9454 4.89052C13.1955 5.14057 13.3359 5.47971 13.3359 5.83333V7.16667Z"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -119,11 +121,12 @@ export function BackboneElementIcon() {
 export function SquareFunctionIcon() {
 	return (
 		<svg
+			className="text-fg-tertiary"
 			width="16"
 			height="16"
 			viewBox="0 0 24 24"
 			fill="none"
-			stroke="#717684"
+			stroke="currentColor"
 			strokeWidth="2"
 			strokeLinecap="round"
 			strokeLinejoin="round"
@@ -141,6 +144,7 @@ export function SquareFunctionIcon() {
 export function TypCodeIcon() {
 	return (
 		<svg
+			className="text-fg-tertiary"
 			width="16"
 			height="17"
 			viewBox="0 0 16 17"
@@ -151,35 +155,35 @@ export function TypCodeIcon() {
 		>
 			<path
 				d="M3.33594 2.74969H4.0026C4.53304 2.74969 5.04175 2.96041 5.41682 3.33548C5.79189 3.71055 6.0026 4.21926 6.0026 4.74969C6.0026 4.21926 6.21332 3.71055 6.58839 3.33548C6.96346 2.96041 7.47217 2.74969 8.0026 2.74969H8.66927"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M8.66927 13.4163H8.0026C7.47217 13.4163 6.96346 13.2056 6.58839 12.8305C6.21332 12.4555 6.0026 11.9468 6.0026 11.4163C6.0026 11.9468 5.79189 12.4555 5.41682 12.8305C5.04175 13.2056 4.53304 13.4163 4.0026 13.4163H3.33594"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M3.33594 10.7497H2.66927C2.31565 10.7497 1.97651 10.6092 1.72646 10.3591C1.47641 10.1091 1.33594 9.76994 1.33594 9.41632V6.74965C1.33594 6.39603 1.47641 6.05689 1.72646 5.80685C1.97651 5.5568 2.31565 5.41632 2.66927 5.41632H3.33594"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M8.66406 5.41632H13.3307C13.6844 5.41632 14.0235 5.5568 14.2735 5.80685C14.5236 6.05689 14.6641 6.39603 14.6641 6.74965V9.41632C14.6641 9.76994 14.5236 10.1091 14.2735 10.3591C14.0235 10.6092 13.6844 10.7497 13.3307 10.7497H8.66406"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 			<path
 				d="M6 4.74969V11.4164"
-				stroke="#717684"
+				stroke="currentColor"
 				strokeWidth="1.25"
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -227,6 +231,7 @@ export function ReferenceIcon() {
 export function ComplexTypeIcon() {
 	return (
 		<svg
+			className="text-fg-tertiary"
 			width="16"
 			height="17"
 			viewBox="0 0 16 17"
@@ -238,21 +243,21 @@ export function ComplexTypeIcon() {
 			<g clipPath="url(#clip0_858_18924)">
 				<path
 					d="M3.91406 5.77679L8.00281 8.08304L12.0793 5.77691"
-					stroke="#717684"
+					stroke="currentColor"
 					strokeWidth="1.25"
 					strokeLinecap="round"
 					strokeLinejoin="round"
 				/>
 				<path
 					d="M8 12.6996V8.08301"
-					stroke="#717684"
+					stroke="currentColor"
 					strokeWidth="1.25"
 					strokeLinecap="round"
 					strokeLinejoin="round"
 				/>
 				<path
 					d="M14 5.41636C13.9998 5.18254 13.938 4.9529 13.821 4.75047C13.704 4.54803 13.5358 4.37993 13.3333 4.26302L8.66667 1.59636C8.46397 1.47933 8.23405 1.41772 8 1.41772C7.76595 1.41772 7.53603 1.47933 7.33333 1.59636L2.66667 4.26302C2.46418 4.37993 2.29599 4.54803 2.17897 4.75047C2.06196 4.9529 2.00024 5.18254 2 5.41636V10.7497C2.00024 10.9835 2.06196 11.2132 2.17897 11.4156C2.29599 11.618 2.46418 11.7861 2.66667 11.903L7.33333 14.5697C7.53603 14.6867 7.76595 14.7483 8 14.7483C8.23405 14.7483 8.46397 14.6867 8.66667 14.5697L13.3333 11.903C13.5358 11.7861 13.704 11.618 13.821 11.4156C13.938 11.2132 13.9998 10.9835 14 10.7497V5.41636Z"
-					stroke="#717684"
+					stroke="currentColor"
 					strokeWidth="1.25"
 					strokeLinecap="round"
 					strokeLinejoin="round"

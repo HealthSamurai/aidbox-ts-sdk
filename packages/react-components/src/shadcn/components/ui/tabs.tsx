@@ -196,6 +196,15 @@ export function TabsAddButton(props: React.ComponentProps<typeof Button>) {
 }
 
 function horizontalScroll(event: React.WheelEvent) {
+	// Trackpads and touchscreens emit horizontal swipes via deltaX, sometimes
+	// with small deltaY noise (often negative). The browser already scrolls the
+	// overflow-x container natively in that case. Translating noise deltaY into
+	// scrollTo() fights the native scroll and yanks it back. Only translate
+	// pure vertical mouse-wheel input into horizontal scroll.
+	if (event.deltaX !== 0 || Math.abs(event.deltaY) < 5) {
+		return;
+	}
+
 	const mode = event.deltaMode;
 	let deltaPx = 0;
 
@@ -585,6 +594,12 @@ function TabsBrowserList({
 	const [canScrollLeft, setCanScrollLeft] = React.useState(false);
 	const [canScrollRight, setCanScrollRight] = React.useState(false);
 
+	const scrollActiveIntoView = () => {
+		tabsListRef.current
+			?.querySelector<HTMLButtonElement>('button[data-state="active"]')
+			?.scrollIntoView({ block: "nearest", inline: "nearest" });
+	};
+
 	const {
 		drag,
 		itemsRef,
@@ -643,19 +658,12 @@ function TabsBrowserList({
 						setShowScrollButtons(false);
 					}
 				}}
-				onResize={() => {
-					tabsListRef.current
-						?.querySelector<HTMLButtonElement>('button[data-state="active"]')
-						?.scrollIntoView();
-				}}
 				onTabChange={(entries) => {
 					if (
 						entries.filter((entry) => entry.addedNodes.length !== 0).length !==
 						0
 					) {
-						tabsListRef.current
-							?.querySelector<HTMLButtonElement>('button[data-state="active"]')
-							?.scrollIntoView();
+						scrollActiveIntoView();
 					}
 				}}
 				data-slot="tabs-list"
@@ -690,7 +698,10 @@ export function TabsListDropdown({
 	return (
 		<Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="link" className="bg-bg-secondary h-full border-b pr-6">
+				<Button
+					variant="link"
+					className="bg-bg-secondary h-full border-b border-l pr-6 rounded-none"
+				>
 					<ChevronDownIcon className="size-4" />
 				</Button>
 			</PopoverTrigger>

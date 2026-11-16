@@ -1,5 +1,5 @@
-import { BasicAuthProvider } from "src/auth-providers";
-import { describe, expect, it, vi } from "vitest";
+import { BasicAuthProvider, BrowserAuthProvider } from "src/auth-providers";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // Helper to encode credentials the same way as BasicAuthProvider (RFC 7617: UTF-8)
 function encodeBasicAuth(username: string, password: string): string {
@@ -161,5 +161,98 @@ describe("BasicAuthProvider", () => {
 	it("revokeSession should be a no-op", async () => {
 		const provider = new BasicAuthProvider(baseUrl, "admin", "secret");
 		await expect(provider.revokeSession()).resolves.toBeUndefined();
+	});
+});
+
+describe("BrowserAuthProvider", () => {
+	const baseUrl = "http://localhost:8080";
+
+	function stubWindow(): { location: { href: string } } {
+		const win = { location: { href: `${baseUrl}/u/rest` } };
+		vi.stubGlobal("window", win);
+		return win;
+	}
+
+	function mockResponse(url: string, redirected: boolean): Response {
+		return {
+			status: 200,
+			url,
+			redirected,
+			headers: new Headers(),
+		} as Response;
+	}
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("navigates to the login page on 401", async () => {
+		const win = stubWindow();
+		// The request itself, then the /auth/userinfo session check.
+		globalThis.fetch = vi.fn().mockResolvedValue({ status: 401 });
+
+		const provider = new BrowserAuthProvider(baseUrl);
+		await expect(provider.fetch(`${baseUrl}/fhir/Patient`)).rejects.toThrow(
+			"unauthorized",
+		);
+
+		expect(win.location.href).toContain(`${baseUrl}/auth/login?redirect_to=`);
+	});
+
+	it("navigates to the gate page when a request is redirected to the instance root", async () => {
+		const win = stubWindow();
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(mockResponse(`${baseUrl}/`, true));
+
+		const provider = new BrowserAuthProvider(baseUrl);
+		await expect(provider.fetch(`${baseUrl}/fhir/Patient`)).rejects.toThrow(
+			"unauthorized",
+		);
+
+		expect(win.location.href).toBe(`${baseUrl}/`);
+	});
+
+	it("navigates to the gate page when a request is redirected under /auth/", async () => {
+		const win = stubWindow();
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(mockResponse(`${baseUrl}/auth/login`, true));
+
+		const provider = new BrowserAuthProvider(baseUrl);
+		await expect(provider.fetch(`${baseUrl}/fhir/Patient`)).rejects.toThrow(
+			"unauthorized",
+		);
+
+		expect(win.location.href).toBe(`${baseUrl}/auth/login`);
+	});
+
+	it("recognizes the gate page behind a base path", async () => {
+		const win = stubWindow();
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(mockResponse("http://localhost:8080/tenant-1/", true));
+
+		const provider = new BrowserAuthProvider(`${baseUrl}/tenant-1`);
+		await expect(
+			provider.fetch(`${baseUrl}/tenant-1/fhir/Patient`),
+		).rejects.toThrow("unauthorized");
+
+		expect(win.location.href).toBe("http://localhost:8080/tenant-1/");
+	});
+
+	it("leaves a request with an explicit Authorization header alone", async () => {
+		const win = stubWindow();
+		globalThis.fetch = vi
+			.fn()
+			.mockResolvedValue(mockResponse(`${baseUrl}/auth/login`, true));
+
+		const provider = new BrowserAuthProvider(baseUrl);
+		const response = await provider.fetch(`${baseUrl}/fhir/Patient`, {
+			headers: { Authorization: "Bearer token" },
+		});
+
+		expect(response.status).toBe(200);
+		expect(win.location.href).toBe(`${baseUrl}/u/rest`);
 	});
 });

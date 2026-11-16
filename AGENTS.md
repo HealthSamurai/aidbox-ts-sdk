@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Aidbox TS SDK is a pnpm monorepo of TypeScript libraries for building FHIR healthcare interfaces. Published under the `@health-samurai` npm scope.
+Aidbox TS SDK is a pnpm monorepo of TypeScript libraries and tooling for building FHIR healthcare interfaces. Published under the `@health-samurai` npm scope.
 
 ### Packages
 
@@ -11,6 +11,7 @@ Aidbox TS SDK is a pnpm monorepo of TypeScript libraries for building FHIR healt
 | `@health-samurai/aidbox-client` | `packages/aidbox-client` | FHIR client library with Result monad error handling |
 | `@health-samurai/react-components` | `packages/react-components` | React design system (shadcn/ui + custom components) |
 | `@health-samurai/aidbox-fhirpath-lsp` | `packages/aidbox-fhirpath-lsp` | FHIRPath language server for CodeMirror |
+| `@health-samurai/create-react-app` | `packages/create-react-app` | CLI scaffolder for React apps on the design system (no build/lint scripts — skipped by `pnpm -r run`) |
 
 ### Dependency Graph
 
@@ -21,14 +22,14 @@ aidbox-fhirpath-lsp → aidbox-client
 
 ## Tech Stack
 
-- **Runtime**: Node.js 24, ES modules, TypeScript 5.8 (strict)
+- **Runtime**: Node.js 24, ES modules, TypeScript 5.9 (strict)
 - **Package manager**: pnpm 10.21 (workspaces)
 - **Compilation**: SWC (transpilation) + tsc (declarations only)
-- **Bundling**: Vite 7 (dev/build), Tailwind CSS 4 (styles)
+- **Bundling**: Vite 8 (dev/build), Tailwind CSS 4 (styles)
 - **UI**: React 19, Radix UI, shadcn/ui, CodeMirror 6, TanStack Table
-- **Testing**: Vitest 3.2
-- **Linting/Formatting**: Biome 2.1
-- **Docs**: Storybook 9 (components), TypeDoc (API)
+- **Testing**: Vitest 4.1
+- **Linting/Formatting**: Biome 2.4
+- **Docs**: Storybook 10 (components), TypeDoc (API)
 
 ## Commands
 
@@ -57,13 +58,13 @@ pnpm storybook      # Dev server on :6006 (react-components only)
 
 ## Code Style
 
-Enforced by Biome 2.1.3 — no ESLint or Prettier.
+Enforced by Biome 2.4.6 — no ESLint or Prettier.
 
 - **Indentation**: Tabs
 - **Quotes**: Double quotes
 - **Imports**: Auto-organized alphabetically
-- **Lint rules**: `recommended` + `react` + `test` domains
-- **FHIR types are excluded from linting** (`!src/fhir-types/**`)
+- **Lint rules**: `rules.recommended` plus the `project`, `react`, and `test` domains
+- **FHIR types are excluded from linting** (`!src/fhir-types`)
 
 ## Architecture
 
@@ -101,7 +102,7 @@ pnpm test           # Run once
 pnpm test:watch     # Watch mode
 ```
 
-React components use Storybook stories as visual tests (61 `.stories.tsx` files).
+React components use Storybook stories as visual tests (`.stories.tsx` files).
 
 ## Pre-commit Hook
 
@@ -116,10 +117,10 @@ pnpm -r run tsc:check
 
 GitHub Actions workflows in `.github/workflows/`:
 
-- **common.yaml**: Lint + typecheck on every push
-- **aidbox-client.yaml**: Client-specific checks
+- **common.yaml**: Lint, `pnpm audit --audit-level=high`, and build + typecheck — on pushes to `master` and on every PR
+- **aidbox-client.yaml**: Integration tests for `aidbox-client` against Aidbox in Docker — on pushes to `master` and on PRs
 - **pages.yaml**: Deploy Storybook + TypeDoc to GitHub Pages (master only)
-- **release.yaml**: NPM publishing
+- **release.yaml**: NPM publishing (manual, `workflow_dispatch`)
 
 ## Guidelines for AI Agents
 
@@ -131,4 +132,4 @@ GitHub Actions workflows in `.github/workflows/`:
 6. **Design tokens over hardcoded values** — use CSS variables from `tokens.css` for colors, spacing, and typography.
 7. **Add Storybook stories** for new or modified React components.
 8. **Import path**: all react-components are exported from the single `src/index.tsx` entry point.
-9. **Use the `/ui` skill** (Claude Code) when generating UI components to reference the full design system.
+9. **Design system reference**: browse components in Storybook (`pnpm storybook` in `react-components`). The `hs-react-components` Claude Code skill in `packages/create-react-app/template/.claude/skills/` documents the published component API, but is scoped to scaffolded apps rather than this monorepo.

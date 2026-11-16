@@ -137,6 +137,34 @@ export const Demo: Story = {
 			</div>
 
 			<div>
+				<h3 className="typo-h4 mb-2">Long diagnostics</h3>
+				<OperationOutcomeView
+					className="max-w-xl"
+					resource={{
+						resourceType: "OperationOutcome",
+						issue: [
+							{
+								code: "invalid",
+								severity: "error",
+								diagnostics:
+									"Reference target Coverage/cov-8003 does not conform to any of the target profiles: http://example.org/StructureDefinition/vcov|1.0.0. The resource is missing the required element Coverage.beneficiary, and Coverage.status has the value 'draft', which is not in the bound value set.",
+								expression: ["ServiceRequest.insurance[0]"],
+								details: {
+									coding: [
+										{
+											system:
+												"http://aidbox.app/CodeSystem/operation-outcome-type",
+											code: "invalid-target-profile",
+										},
+									],
+								},
+							},
+						],
+					}}
+				/>
+			</div>
+
+			<div>
 				<h3 className="typo-h4 mb-2">With multiple expressions</h3>
 				<OperationOutcomeView
 					resource={{
