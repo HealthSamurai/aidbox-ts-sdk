@@ -7,7 +7,7 @@ settings:
 overrides:
   '@babel/core@<=7.29.0': 7.29.7
   '@vitest/mocker@>=4.0.0 <4.1.11': ^4.1.11
-  '@xhmikosr/decompress@<10.2.1': 10.2.1
+  '@xhmikosr/decompress@<10.2.2': ^10.2.2
   '@xhmikosr/decompress@>=11.0.0 <11.1.4': ^11.1.4
   brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
   brace-expansion@>=3.0.0 <5.0.12: ^5.0.12
@@ -338,8 +338,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       zod:
-        specifier: ^4.3.6
-        version: 4.3.6
+        specifier: ^4.6.6
+        version: 4.6.7
     devDependencies:
       '@health-samurai/aidbox-client':
         specifier: workspace:*
@@ -3056,8 +3056,8 @@ packages:
     resolution: {integrity: sha512-oqTYAcObqTlg8owulxFTqiaJkfv2SHsxxxz9Wg4krJAHVzGWlZsU8tAB30R6ow+aHrfv4Kub6WQ8u04NWVPUpA==}
     engines: {node: '>=18'}
 
-  '@xhmikosr/decompress@10.2.1':
-    resolution: {integrity: sha512-ceGT3K2JR73Usj5o+HM2RRZw0XPUes4rhb7uVTY9PefUQQMpuj8x+V29XVG09JnS7EOj9SIBhHn3K4bFNNb7hA==}
+  '@xhmikosr/decompress@10.2.2':
+    resolution: {integrity: sha512-naYc2D/KCUDBx5VkohXp++TQB0IxLlUh8lbPX8DBTXB3HsDOsrp4pWP4V0cxBNEIhXEeN+Xma1hr9nuEGGW4TQ==}
     engines: {node: '>=18'}
 
   '@xhmikosr/downloader@15.2.0':
@@ -4914,8 +4914,8 @@ packages:
     resolution: {integrity: sha512-k1isifdbpNSFEHFJ1ZY4YDewv0IH9FR61lDetaRMD3j2ae3bIXGV+7c+LHCqtQGofSd8PIyV4X6+dHMAnSr60A==}
     engines: {node: '>=12'}
 
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
 
@@ -7368,7 +7368,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@xhmikosr/decompress@10.2.1':
+  '@xhmikosr/decompress@10.2.2':
     dependencies:
       '@xhmikosr/decompress-tar': 8.1.0
       '@xhmikosr/decompress-tarbz2': 8.1.0
@@ -7385,7 +7385,7 @@ snapshots:
   '@xhmikosr/downloader@15.2.0':
     dependencies:
       '@xhmikosr/archive-type': 7.1.0
-      '@xhmikosr/decompress': 10.2.1
+      '@xhmikosr/decompress': 10.2.2
       content-disposition: 0.5.4
       defaults: 2.0.2
       ext-name: 5.0.0
@@ -9121,4 +9121,4 @@ snapshots:
       buffer-crc32: 0.2.13
       pend: 1.2.0
 
-  zod@4.3.6: {}
+  zod@4.6.7: {}
